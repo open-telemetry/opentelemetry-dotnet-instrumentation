@@ -56,10 +56,13 @@ jobs:
       - name: Install zip
         uses: montudor/action-zip@0852c26906e00f8a315c704958823928d8018b28 # v1.0.0
 
-      - name: Create ZIP artifacts
+      - name: Create ZIP artifacts and prepare SBOM source
         shell: bash
         run: |
           set -euo pipefail
+          sbom_source="${RUNNER_TEMP}/sbom-source"
+          mkdir -p "${sbom_source}"
+
           packages=(
             "alpine-x64 linux-musl-x64"
             "alpine-arm64 linux-musl-arm64"
@@ -73,8 +76,18 @@ jobs:
           for package in "${packages[@]}"; do
             read -r dir archive <<< "${package}"
             src="./bin-${dir}"
-            (cd "${src}" && zip -qq -r "../opentelemetry-dotnet-instrumentation-${archive}.zip" ./* && cd ..)
+            archive_file="opentelemetry-dotnet-instrumentation-${archive}.zip"
+            (cd "${src}" && zip -qq -r "../${archive_file}" ./* && cd ..)
+            unzip -q "${archive_file}" -d "${sbom_source}/${archive}"
           done
+
+      - name: Generate SBOM from release ZIPs
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          output-file: ./sbom.spdx.json
+          path: ${{ runner.temp }}/sbom-source
+          upload-artifact: false
+          upload-release-assets: false
 
       - name: Collect install scripts
         shell: bash
@@ -102,6 +115,7 @@ jobs:
             "opentelemetry-dotnet-instrumentation-macos.zip"
             "opentelemetry-dotnet-instrumentation-nuget-packages.zip"
             "opentelemetry-dotnet-instrumentation-windows.zip"
+            "sbom.spdx.json"
             "otel-dotnet-auto-install.sh"
             "OpenTelemetry.DotNet.Auto.psm1"
           )
@@ -123,6 +137,7 @@ jobs:
             ./otel-dotnet-auto-install.sh
             ./OpenTelemetry.DotNet.Auto.psm1
             ./checksums.txt
+            ./sbom.spdx.json
 
       - name: Attest bin-alpine-x64
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
@@ -168,3 +183,4 @@ jobs:
           ./otel-dotnet-auto-install.sh
           ./OpenTelemetry.DotNet.Auto.psm1
           ./checksums.txt
+          ./sbom.spdx.json
