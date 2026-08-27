@@ -97,7 +97,7 @@ public static partial class LibraryVersion
 #else
                 "7.5.0",
                 "8.0.2",
-                "8.8.4",
+                "8.8.5",
 #endif
             ];
             return theoryData;
@@ -147,7 +147,7 @@ public static partial class LibraryVersion
                 "5.0.0",
                 "5.3.4",
                 "6.0.0",
-                "6.1.4",
+                "6.2.0",
 #endif
             ];
             return theoryData;
