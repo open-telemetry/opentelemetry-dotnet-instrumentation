@@ -19,6 +19,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
   [`1.17.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.17.0).
 - Following packages updated
+  - `Google.Protobuf` updated from `3.35.0` to `3.36.0`,
   - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.16.0-beta.1` to `1.17.0-beta.1`,
   - `OpenTelemetry.Instrumentation.Http` from `1.16.0` to `1.17.0`,
   - `OpenTelemetry.Instrumentation.Process` from `1.16.0-beta.1` to `1.17.0-rc.1`,
