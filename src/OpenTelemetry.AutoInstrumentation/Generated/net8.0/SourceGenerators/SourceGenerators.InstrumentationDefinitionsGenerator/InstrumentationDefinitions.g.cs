@@ -17,7 +17,7 @@ internal static partial class InstrumentationDefinitions
 {
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(59);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(67);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
@@ -114,6 +114,19 @@ internal static partial class InstrumentationDefinitions
                 nativeCallTargetDefinitions.Add(new("System.ServiceModel.Primitives", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", ["System.Void", "System.String", "System.ServiceModel.EndpointAddress"], 6, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration"));
                 nativeCallTargetDefinitions.Add(new("System.ServiceModel.Primitives", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", ["System.Void", "System.ServiceModel.Description.ServiceEndpoint"], 6, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration"));
                 nativeCallTargetDefinitions.Add(new("System.ServiceModel.Primitives", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", ["System.Void", "System.ServiceModel.Channels.Binding", "System.ServiceModel.EndpointAddress"], 6, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration"));
+            }
+
+            // Xms
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.Xms))
+            {
+                nativeCallTargetDefinitions.Add(new("amqmxmsstd", "IBM.XMS.Client.Impl.XmsMessageConsumerImpl", "Receive", ["IBM.XMS.IMessage"], 9, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Xms.Integrations.ConsumerReceiveIntegration"));
+                nativeCallTargetDefinitions.Add(new("amqmxmsstd", "IBM.XMS.Client.Impl.XmsMessageConsumerImpl", "ReceiveNoWait", ["IBM.XMS.IMessage"], 9, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Xms.Integrations.ConsumerReceiveNoWaitIntegration"));
+                nativeCallTargetDefinitions.Add(new("amqmxmsstd", "IBM.XMS.Client.Impl.XmsMessageConsumerImpl", "Receive", ["IBM.XMS.IMessage", "System.Int64"], 9, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Xms.Integrations.ConsumerReceiveWithTimeoutIntegration"));
+                nativeCallTargetDefinitions.Add(new("amqmxmsstd", "IBM.XMS.Client.Impl.XmsProviderMessageListener", "OnMessage", ["System.Void", "IBM.XMS.Provider.ProviderMessage"], 9, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Xms.Integrations.MessageListenerOnMessageIntegration"));
+                nativeCallTargetDefinitions.Add(new("amqmxmsstd", "IBM.XMS.Client.Impl.XmsMessageProducerImpl", "Send", ["System.Void", "IBM.XMS.IDestination", "IBM.XMS.IMessage"], 9, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Xms.Integrations.ProducerSendDestinationMessageIntegration"));
+                nativeCallTargetDefinitions.Add(new("amqmxmsstd", "IBM.XMS.Client.Impl.XmsMessageProducerImpl", "Send", ["System.Void", "IBM.XMS.IDestination", "IBM.XMS.IMessage", "IBM.XMS.DeliveryMode", "System.Int32", "System.Int64"], 9, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Xms.Integrations.ProducerSendDestinationMessageWithOptionsIntegration"));
+                nativeCallTargetDefinitions.Add(new("amqmxmsstd", "IBM.XMS.Client.Impl.XmsMessageProducerImpl", "Send", ["System.Void", "IBM.XMS.IMessage"], 9, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Xms.Integrations.ProducerSendMessageIntegration"));
+                nativeCallTargetDefinitions.Add(new("amqmxmsstd", "IBM.XMS.Client.Impl.XmsMessageProducerImpl", "Send", ["System.Void", "IBM.XMS.IMessage", "IBM.XMS.DeliveryMode", "System.Int32", "System.Int64"], 9, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Xms.Integrations.ProducerSendMessageWithOptionsIntegration"));
             }
         }
 

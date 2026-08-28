@@ -546,6 +546,8 @@ internal static class Instrumentation
                     break;
                 case TracerInstrumentation.Sqlite:
                     break;
+                case TracerInstrumentation.Xms:
+                    break;
                 default:
                     Logger.Warning($"Configured trace instrumentation type is not supported: {instrumentation}");
                     if (FailFastSettings.Value.FailFast)

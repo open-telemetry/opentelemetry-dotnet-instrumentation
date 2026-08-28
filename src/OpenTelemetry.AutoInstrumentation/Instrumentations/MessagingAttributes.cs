@@ -36,6 +36,7 @@ internal static class MessagingAttributes
     internal static class Values
     {
         public const string KafkaMessagingSystemName = "kafka";
+        public const string IbmMqMessagingSystemName = "ibmmq";
         public const string PublishOperationName = "publish";
         public const string ReceiveOperationName = "receive";
         public const string DeliverOperationName = "deliver";
