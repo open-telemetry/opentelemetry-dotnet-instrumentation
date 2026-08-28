@@ -461,6 +461,21 @@ public static partial class LibraryVersion
             return theoryData;
         }
     }
+    public static TheoryData<string> Xms
+    {
+        get
+        {
+            TheoryData<string> theoryData =
+            [
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+                string.Empty,
+#else
+                "9.4.3",
+#endif
+            ];
+            return theoryData;
+        }
+    }
     public static TheoryData<string> AssemblyRedirection
     {
         get
@@ -536,6 +551,7 @@ public static partial class LibraryVersion
        { "StackExchangeRedis", StackExchangeRedis },
        { "WCFCoreClient", WCFCoreClient },
        { "Kafka", Kafka },
+       { "Xms", Xms },
        { "AssemblyRedirection", AssemblyRedirection },
        { "WCFCoreServer", WCFCoreServer },
     };

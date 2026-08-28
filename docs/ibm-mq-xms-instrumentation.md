@@ -97,8 +97,8 @@ instrumentation for a signal
 * Transacted session semantics are not modeled by this instrumentation:
   `IBM.XMS.Client.Impl.XmsSessionImpl.Commit()` and `.Rollback()` are not
   instrumented, nor is XA resource enlistment.
-* .NET Framework (`netfx`) output is untested by this project; the profiler
-  and managed assemblies for `netfx` are not built on macOS.
+* .NET Framework (`netfx`) is untested.
+* The integration test requires the IBM MQ container image (`icr.io/ibm-messaging/mq`), which is unavailable for arm64, so tests skip on arm64 runners.
 
 ## Verified compatibility
 
