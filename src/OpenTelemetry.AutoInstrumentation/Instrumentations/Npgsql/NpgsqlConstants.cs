@@ -15,8 +15,16 @@ internal static class NpgsqlConstants
     public const string TraceCommandEnrichMethodName = "TraceCommandEnrich";
     public const string EndUserActionMethodName = "EndUserAction";
     public const string MinVersion = "6.0.0";
-    public const string TraceCommandStartMaxVersion = "6.*.*";
-    public const string TraceCommandEnrichMinVersion = "7.0.0";
+    public const string TraceCommandStart6MaxVersion = "6.0.11";
+    public const string TraceCommandEnrich6MinVersion = "6.0.12";
+    public const string TraceCommandEnrich6MaxVersion = "6.*.*";
+    public const string TraceCommandStart7MinVersion = "7.0.0";
+    public const string TraceCommandStart7MaxVersion = "7.0.7";
+    public const string TraceCommandEnrich7MinVersion = "7.0.8";
+    public const string TraceCommandEnrich7MaxVersion = "7.*.*";
+    public const string TraceCommandStart8MinVersion = "8.0.0";
+    public const string TraceCommandStart8MaxVersion = "8.0.3";
+    public const string TraceCommandEnrich8MinVersion = "8.0.4";
 #if NETFRAMEWORK
     // Npgsql 9 and later do not support .NET Framework.
     public const string MaxVersion = "8.*.*";

@@ -15,7 +15,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations
     returnTypeName: ClrNames.Void,
     parameterTypeNames: [NpgsqlConstants.ConnectorTypeName],
     minimumVersion: NpgsqlConstants.MinVersion,
-    maximumVersion: NpgsqlConstants.TraceCommandStartMaxVersion,
+    maximumVersion: NpgsqlConstants.TraceCommandStart6MaxVersion,
     integrationName: NpgsqlConstants.IntegrationName,
     type: InstrumentationType.Trace)]
 [InstrumentMethod(
@@ -24,7 +24,47 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations
     methodName: NpgsqlConstants.TraceCommandEnrichMethodName,
     returnTypeName: ClrNames.Void,
     parameterTypeNames: [NpgsqlConstants.ConnectorTypeName],
-    minimumVersion: NpgsqlConstants.TraceCommandEnrichMinVersion,
+    minimumVersion: NpgsqlConstants.TraceCommandEnrich6MinVersion,
+    maximumVersion: NpgsqlConstants.TraceCommandEnrich6MaxVersion,
+    integrationName: NpgsqlConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: NpgsqlConstants.AssemblyName,
+    typeName: NpgsqlConstants.CommandTypeName,
+    methodName: NpgsqlConstants.TraceCommandStartMethodName,
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: [NpgsqlConstants.ConnectorTypeName],
+    minimumVersion: NpgsqlConstants.TraceCommandStart7MinVersion,
+    maximumVersion: NpgsqlConstants.TraceCommandStart7MaxVersion,
+    integrationName: NpgsqlConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: NpgsqlConstants.AssemblyName,
+    typeName: NpgsqlConstants.CommandTypeName,
+    methodName: NpgsqlConstants.TraceCommandEnrichMethodName,
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: [NpgsqlConstants.ConnectorTypeName],
+    minimumVersion: NpgsqlConstants.TraceCommandEnrich7MinVersion,
+    maximumVersion: NpgsqlConstants.TraceCommandEnrich7MaxVersion,
+    integrationName: NpgsqlConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: NpgsqlConstants.AssemblyName,
+    typeName: NpgsqlConstants.CommandTypeName,
+    methodName: NpgsqlConstants.TraceCommandStartMethodName,
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: [NpgsqlConstants.ConnectorTypeName],
+    minimumVersion: NpgsqlConstants.TraceCommandStart8MinVersion,
+    maximumVersion: NpgsqlConstants.TraceCommandStart8MaxVersion,
+    integrationName: NpgsqlConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: NpgsqlConstants.AssemblyName,
+    typeName: NpgsqlConstants.CommandTypeName,
+    methodName: NpgsqlConstants.TraceCommandEnrichMethodName,
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: [NpgsqlConstants.ConnectorTypeName],
+    minimumVersion: NpgsqlConstants.TraceCommandEnrich8MinVersion,
     maximumVersion: NpgsqlConstants.MaxVersion,
     integrationName: NpgsqlConstants.IntegrationName,
     type: InstrumentationType.Trace)]

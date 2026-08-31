@@ -17,7 +17,7 @@ internal static partial class InstrumentationDefinitions
 {
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(63);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(67);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
@@ -77,8 +77,12 @@ internal static partial class InstrumentationDefinitions
             // Npgsql
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.Npgsql))
             {
-                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.NpgsqlCommand", "TraceCommandStart", ["System.Void", "Npgsql.Internal.NpgsqlConnector"], 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"));
-                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.NpgsqlCommand", "TraceCommandEnrich", ["System.Void", "Npgsql.Internal.NpgsqlConnector"], 7, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"));
+                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.NpgsqlCommand", "TraceCommandStart", ["System.Void", "Npgsql.Internal.NpgsqlConnector"], 6, 0, 0, 6, 0, 11, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"));
+                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.NpgsqlCommand", "TraceCommandEnrich", ["System.Void", "Npgsql.Internal.NpgsqlConnector"], 6, 0, 12, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"));
+                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.NpgsqlCommand", "TraceCommandStart", ["System.Void", "Npgsql.Internal.NpgsqlConnector"], 7, 0, 0, 7, 0, 7, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"));
+                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.NpgsqlCommand", "TraceCommandEnrich", ["System.Void", "Npgsql.Internal.NpgsqlConnector"], 7, 0, 8, 7, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"));
+                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.NpgsqlCommand", "TraceCommandStart", ["System.Void", "Npgsql.Internal.NpgsqlConnector"], 8, 0, 0, 8, 0, 3, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"));
+                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.NpgsqlCommand", "TraceCommandEnrich", ["System.Void", "Npgsql.Internal.NpgsqlConnector"], 8, 0, 4, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"));
                 nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.Internal.NpgsqlConnector", "EndUserAction", ["System.Void"], 6, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlConnectorEndUserActionTraceContextPropagationIntegration"));
                 nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.Internal.NpgsqlConnector", "TraceCopyStart", ["System.Diagnostics.Activity", "System.String", "System.String"], 10, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCopyTraceContextPropagationIntegration"));
             }
