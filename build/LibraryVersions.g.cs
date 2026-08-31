@@ -36,7 +36,7 @@ public static partial class LibraryVersion
                 new("8.0.23"),
                 new("9.0.12"),
                 new("10.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("10.0.10", supportedFrameworks: [ "net10.0" ]),
+                new("10.0.11", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -53,7 +53,7 @@ public static partial class LibraryVersion
             [
                 new("7.5.0", additionalMetaData: new() { { "GraphQLMicrosoftDI", "7.5.0" }, { "GraphQLServerTransportsAspNetCore", "7.5.0" }, { "GraphQLServerUIGraphiQL", "7.5.0" } }),
                 new("8.0.2", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.0.2" }, { "GraphQLServerTransportsAspNetCore", "8.0.2" }, { "GraphQLServerUIGraphiQL", "8.0.2" } }),
-                new("8.8.4", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.8.4" }, { "GraphQLServerTransportsAspNetCore", "8.3.3" }, { "GraphQLServerUIGraphiQL", "8.3.3" } }),
+                new("8.8.5", additionalMetaData: new() { { "GraphQLMicrosoftDI", "8.8.5" }, { "GraphQLServerTransportsAspNetCore", "8.3.3" }, { "GraphQLServerUIGraphiQL", "8.3.3" } }),
             ]
         },
         {
@@ -67,7 +67,7 @@ public static partial class LibraryVersion
             "TestApplication.Log4NetBridge",
             [
                 new("3.3.0"),
-                new("3.3.2"),
+                new("3.4.0"),
             ]
         },
         {
@@ -76,7 +76,7 @@ public static partial class LibraryVersion
                 new("5.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "5.0.0" } }),
                 new("5.3.4", additionalMetaData: new() { { "NLogExtensionsLogging", "5.3.15" } }),
                 new("6.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "6.0.0" } }),
-                new("6.1.4", additionalMetaData: new() { { "NLogExtensionsLogging", "6.1.4" } }),
+                new("6.2.0", additionalMetaData: new() { { "NLogExtensionsLogging", "6.2.0" } }),
             ]
         },
         {
@@ -109,14 +109,14 @@ public static partial class LibraryVersion
                 new("3.0.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
                 new("3.5.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
                 new("3.7.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
-                new("3.10.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.11.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
             ]
         },
         {
             "TestApplication.MySqlConnector",
             [
                 new("2.0.0"),
-                new("2.6.1"),
+                new("2.6.2"),
             ]
         },
         {
@@ -161,7 +161,7 @@ public static partial class LibraryVersion
             "TestApplication.Quartz",
             [
                 new("3.6.0"),
-                new("3.19.1"),
+                new("3.20.0"),
             ]
         },
         {
@@ -179,7 +179,7 @@ public static partial class LibraryVersion
                 new("8.0.0"),
                 new("9.0.0"),
                 new("10.0.0"),
-                new("10.0.10"),
+                new("10.0.11"),
             ]
         },
         {
@@ -189,7 +189,7 @@ public static partial class LibraryVersion
                 new("2.12.14"),
                 new("3.0.25", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("3.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("3.1.13", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("3.1.31", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
@@ -216,7 +216,7 @@ public static partial class LibraryVersion
                 new("9.0.0", supportedFrameworks: [ "net9.0" ]),
                 new("6.0.0", supportedFrameworks: [ "net462" ]),
                 new("10.0.0", supportedFrameworks: [ "net8.0", "net9.0" ]),
-                new("10.0.10", supportedFrameworks: [ "net462", "net10.0" ]),
+                new("10.0.11", supportedFrameworks: [ "net462", "net10.0" ]),
             ]
         },
         {

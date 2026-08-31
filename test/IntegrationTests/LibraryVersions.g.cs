@@ -61,7 +61,7 @@ public static partial class LibraryVersion
                 "10.0.0",
 #endif
 #if NET10_0
-                "10.0.10",
+                "10.0.11",
 #endif
 #endif
             ];
@@ -97,7 +97,7 @@ public static partial class LibraryVersion
 #else
                 "7.5.0",
                 "8.0.2",
-                "8.8.4",
+                "8.8.5",
 #endif
             ];
             return theoryData;
@@ -129,7 +129,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "3.3.0",
-                "3.3.2",
+                "3.4.0",
 #endif
             ];
             return theoryData;
@@ -147,7 +147,7 @@ public static partial class LibraryVersion
                 "5.0.0",
                 "5.3.4",
                 "6.0.0",
-                "6.1.4",
+                "6.2.0",
 #endif
             ];
             return theoryData;
@@ -227,7 +227,7 @@ public static partial class LibraryVersion
                 "3.7.0",
 #endif
 #if NET10_0 || NET9_0 || NET8_0 || NET462
-                "3.10.0",
+                "3.11.0",
 #endif
 #endif
             ];
@@ -244,7 +244,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "2.0.0",
-                "2.6.1",
+                "2.6.2",
 #endif
             ];
             return theoryData;
@@ -357,7 +357,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "3.6.0",
-                "3.19.1",
+                "3.20.0",
 #endif
             ];
             return theoryData;
@@ -393,7 +393,7 @@ public static partial class LibraryVersion
                 "8.0.0",
                 "9.0.0",
                 "10.0.0",
-                "10.0.10",
+                "10.0.11",
 #endif
             ];
             return theoryData;
@@ -417,7 +417,7 @@ public static partial class LibraryVersion
                 "3.1.0",
 #endif
 #if NET10_0 || NET9_0 || NET8_0
-                "3.1.13",
+                "3.1.31",
 #endif
 #endif
             ];
@@ -483,7 +483,7 @@ public static partial class LibraryVersion
                 "10.0.0",
 #endif
 #if NET462 || NET10_0
-                "10.0.10",
+                "10.0.11",
 #endif
 #endif
             ];

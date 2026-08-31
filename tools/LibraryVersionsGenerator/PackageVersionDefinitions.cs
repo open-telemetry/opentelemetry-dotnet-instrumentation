@@ -347,10 +347,10 @@ internal static class PackageVersionDefinitions
                 // Use case 2: Equal to instrumentation tool version
                 // net8.0: 10.0.0 (equal to instrumentation 10.0.0)
                 // net9.0: 10.0.0 (equal to instrumentation 10.0.0)
-                // net462: 10.0.10 (equal to instrumentation 10.0.10)
-                // net10.0: 10.0.10 (framework override to 10.0.0, validates build parameter was respected)
+                // net462: 10.0.11 (equal to instrumentation 10.0.11)
+                // net10.0: 10.0.11 (framework override to 10.0.0, validates build parameter was respected)
                 new("10.0.0", supportedTargetFrameworks: ["net8.0", "net9.0"], supportedExecutionFrameworks: ["net8.0", "net9.0"]),
-                new("10.0.10", supportedTargetFrameworks: ["net462", "net10.0"], supportedExecutionFrameworks: ["net462", "net10.0"]),
+                new("10.0.11", supportedTargetFrameworks: ["net462", "net10.0"], supportedExecutionFrameworks: ["net462", "net10.0"]),
             ]
         },
         new()
