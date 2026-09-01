@@ -7,7 +7,7 @@
 
 #define ASSEMBLY_REDIRECTION_NETFX \
     { 462, { \
-        { _W("Google.Protobuf"), {3, 36, 0, 0} }, \
+        { _W("Google.Protobuf"), {3, 36, 1, 0} }, \
         { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 11} }, \
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 11} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 11} }, \
@@ -156,7 +156,7 @@
         { _W("System.Xml.XPath.XDocument"), {4, 1, 0, 0} }, \
     }}, \
     { 470, { \
-        { _W("Google.Protobuf"), {3, 36, 0, 0} }, \
+        { _W("Google.Protobuf"), {3, 36, 1, 0} }, \
         { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 11} }, \
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 11} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 11} }, \
@@ -305,7 +305,7 @@
         { _W("System.Xml.XPath.XDocument"), {4, 1, 0, 0} }, \
     }}, \
     { 471, { \
-        { _W("Google.Protobuf"), {3, 36, 0, 0} }, \
+        { _W("Google.Protobuf"), {3, 36, 1, 0} }, \
         { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 11} }, \
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 11} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 11} }, \
@@ -371,7 +371,7 @@
         { _W("System.Xml.XPath.XDocument"), {4, 1, 0, 0} }, \
     }}, \
     { 472, { \
-        { _W("Google.Protobuf"), {3, 36, 0, 0} }, \
+        { _W("Google.Protobuf"), {3, 36, 1, 0} }, \
         { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 11} }, \
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 11} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 11} }, \

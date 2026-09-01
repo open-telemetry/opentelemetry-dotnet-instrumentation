@@ -7,7 +7,7 @@
     <PackageVersion Include="CoreWCF.NetTcp" Version="1.9.1" />
     <PackageVersion Include="CoreWCF.Primitives" Version="1.9.1" />
     <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="9.5.0" />
-    <PackageVersion Include="Google.Protobuf" Version="3.36.0" />
+    <PackageVersion Include="Google.Protobuf" Version="3.36.1" />
     <PackageVersion Include="GraphQL" Version="8.8.5" />
     <PackageVersion Include="GraphQL.MicrosoftDI" Version="8.8.5" />
     <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="8.3.3" />
