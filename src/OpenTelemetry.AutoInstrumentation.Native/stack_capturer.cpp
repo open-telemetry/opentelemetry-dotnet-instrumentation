@@ -85,6 +85,11 @@ public:
             {
                 HRESULT frameHr = runtime_->CaptureStack(managedThreadId, callbackContext);
 
+                if (callbackContext->cancellationRequested)
+                {
+                    return S_FALSE;
+                }
+
                 // S_FALSE (e.g. canary skip on NetFx) is not a failure.
                 if (FAILED(frameHr) && SUCCEEDED(captureResult))
                 {
@@ -173,6 +178,17 @@ std::unique_ptr<IStackCapturer> CreateStackCapturer(ICorProfilerInfo2*          
             return nullptr;
     }
 
+    if (runtime == nullptr)
+    {
+        return nullptr;
+    }
+
+    return CreateStackCapturer(std::move(profilerApi), std::move(runtime));
+}
+
+std::unique_ptr<IStackCapturer> CreateStackCapturer(std::unique_ptr<IProfilerApi>    profilerApi,
+                                                    std::unique_ptr<IRuntimeCapture> runtime)
+{
     if (runtime == nullptr)
     {
         return nullptr;

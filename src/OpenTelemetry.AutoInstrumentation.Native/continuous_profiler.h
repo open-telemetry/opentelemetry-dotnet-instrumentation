@@ -8,9 +8,12 @@
 
 #include "continuous_profiler_clr_helpers.h"
 #include "stack_walker.h"
+#include <atomic>
+#include <condition_variable>
 #include <mutex>
 #include <cinttypes>
 #include <future>
+#include <memory>
 #include <vector>
 #include <list>
 #include <optional>
@@ -28,6 +31,9 @@
 extern "C"
 {
     EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf);
+    EXPORTTHIS int32_t STDAPICALLTYPE ContinuousProfilerReadThreadSamplesV2(int32_t        len,
+                                                                            unsigned char* buf,
+                                                                            uint32_t*      samplingInterval);
     EXPORTTHIS int32_t ContinuousProfilerReadAllocationSamples(int32_t len, unsigned char* buf);
     EXPORTTHIS int32_t SelectiveSamplerReadThreadSamples(int32_t len, unsigned char* buf);
     // ReSharper disable CppInconsistentNaming
@@ -238,9 +244,13 @@ public:
     void EndSample() const;
     void EndBatch() const;
     void WriteFinalStats(const SamplingStatistics& stats) const;
+    bool IsOverflowed() const noexcept;
     void AllocationSample(uint64_t allocSize, const WCHAR* allocType, size_t allocTypeCharLen, ThreadID id, const ThreadState* state, const thread_span_context& span_context) const;
 
 private:
+    bool CanWrite(size_t byteCount) const noexcept;
+
+    mutable bool overflowed_{false};
     void WriteCurrentTimeMillis() const;
     void WriteCodedFrameString(const FunctionIdentifier& fid, const trace::WSTRING& str);
     void WriteShort(int16_t val) const;
@@ -314,18 +324,19 @@ class AllocationSubSampler
 {
 public:
     AllocationSubSampler(uint32_t targetPerCycle, uint32_t secondsPerCycle);
+    void     SetTargetPerCycle(uint32_t target) noexcept;
+    uint32_t TargetPerCycle() const noexcept;
     bool ShouldSample();
     // internal implementation detail that is public for unit testing purposes
     void AdvanceCycle(std::chrono::milliseconds now);
 
 private:
-    uint32_t targetPerCycle;
+    std::atomic<uint32_t>                 targetPerCycle;
     uint32_t secondsPerCycle;
     uint32_t seenThisCycle;
     uint32_t sampledThisCycle;
     uint32_t seenLastCycle;
     uint32_t                   startupCyclesRemaining;
-    std::chrono::milliseconds  startupMinSampleSpacingMillis;
     std::chrono::steady_clock::time_point startupNextSampleAllowedAt;
     std::chrono::milliseconds nextCycleStartMillis;
     std::mutex sampleLock;
@@ -334,51 +345,120 @@ private:
 
 enum class SamplingType : int32_t { Continuous = 1, SelectedThreads = 2 };
 
+struct ThreadSamplingConfiguration
+{
+    unsigned int cpuSamplingIntervalMilliseconds       = 0;
+    unsigned int selectiveSamplingIntervalMilliseconds = 0;
+    uint64_t     version                               = 0;
+
+    bool CpuEnabled() const noexcept
+    {
+        return cpuSamplingIntervalMilliseconds != 0;
+    }
+
+    bool SelectiveEnabled() const noexcept
+    {
+        return selectiveSamplingIntervalMilliseconds != 0;
+    }
+
+    bool IsEnabled() const noexcept
+    {
+        return CpuEnabled() || SelectiveEnabled();
+    }
+
+    bool BothEnabled() const noexcept
+    {
+        return CpuEnabled() && SelectiveEnabled();
+    }
+
+    unsigned int SchedulingIntervalMilliseconds() const noexcept
+    {
+        return SelectiveEnabled() ? selectiveSamplingIntervalMilliseconds : cpuSamplingIntervalMilliseconds;
+    }
+};
+
+class IAllocationSamplingSessionProvider
+{
+public:
+    virtual ~IAllocationSamplingSessionProvider() = default;
+
+    virtual HRESULT StartAllocationSamplingSession(EVENTPIPE_SESSION* session) noexcept = 0;
+    virtual HRESULT StopAllocationSamplingSession(EVENTPIPE_SESSION session) noexcept   = 0;
+};
+
+class ClrAllocationSamplingSessionProvider final : public IAllocationSamplingSessionProvider
+{
+public:
+    explicit ClrAllocationSamplingSessionProvider(ICorProfilerInfo12* profilerInfo) noexcept;
+
+    HRESULT StartAllocationSamplingSession(EVENTPIPE_SESSION* session) noexcept override;
+    HRESULT StopAllocationSamplingSession(EVENTPIPE_SESSION session) noexcept override;
+
+private:
+    ICorProfilerInfo12* profilerInfo_;
+};
+
 class ContinuousProfiler
 {
 public:
-    std::optional<unsigned int> threadSamplingInterval;
-    std::optional<unsigned int> selectedThreadsSamplingInterval;
-    std::chrono::time_point<std::chrono::steady_clock> nextOutdatedEntriesScan;
-    void                        StartThreadSampling();
+    explicit ContinuousProfiler(IAllocationSamplingSessionProvider& allocationSamplingSessionProvider) noexcept;
+    std::chrono::time_point<std::chrono::steady_clock> nextOutdatedEntriesScan_;
+    void                        StageThreadSamplingConfiguration(unsigned int cpuSamplingIntervalMilliseconds,
+                                                                 unsigned int selectiveSamplingIntervalMilliseconds);
+    ThreadSamplingConfiguration PullThreadSamplingConfiguration() const;
+    bool                        WaitForNextThreadSamplingCycle(ThreadSamplingConfiguration& configuration);
+    bool                        StartThreadSampling() noexcept;
     void                        Shutdown();
     bool                        IsShutdownRequested() const;
-    static void                 InitSelectiveSamplingBuffer();
-    unsigned int                maxMemorySamplesPerMinute;
-    void                        StartAllocationSampling(unsigned int maxMemorySamplesPerMinute);
-    void                        StopAllocationSampling();
+    static void                 PrepareSelectiveSamplingBuffers();
+    bool                        StartAllocationSampling() noexcept;
+    void                        UpdateAllocationSamplingTarget(unsigned int maxMemorySamplesPerMinute) noexcept;
+    bool                        StopAllocationSampling() noexcept;
     void                        AllocationTick(ULONG dataLen, LPCBYTE data);
-    ICorProfilerInfo12*         info12 = nullptr;
     ICorProfilerInfo7*          info7 = nullptr;
     static void                 ThreadCreated(ThreadID thread_id);
     void                        ThreadDestroyed(ThreadID thread_id);
     void                        ThreadNameChanged(ThreadID thread_id, ULONG cch_name, WCHAR name[]);
 
-    void SetGlobalInfo12(ICorProfilerInfo12* info12);
-    void SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7);
-    void                   SetStackWalker(IStackWalker* walker);
+    void          SetGlobalInfo12(ICorProfilerInfo12* info12);
+    void          SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7);
+    void          SetStackWalker(IStackWalker* walker);
     IStackWalker* GetStackWalker() const;
-    ThreadState* GetCurrentThreadState(ThreadID tid);
+    ThreadState*  GetCurrentThreadState(ThreadID tid);
 
     std::unordered_map<ThreadID, ThreadState*> managed_tid_to_state_;
-    std::mutex thread_state_lock_;
-    NamingHelper helper;
-    std::unique_ptr<AllocationSubSampler> allocationSubSampler = nullptr;
+    std::mutex                                 thread_state_lock_;
+    NamingHelper                               helper;
+    std::unique_ptr<AllocationSubSampler>      allocationSubSampler = nullptr;
 
     // These cycle every sample and/or are owned externally
     ThreadSamplesBuffer* cur_cpu_writer_ = nullptr;
-    SamplingStatistics stats_;
-    void AllocateBuffer();
-    void PublishBuffer();
-    mutable std::mutex      shutdown_mutex_;
-    std::condition_variable shutdown_cv_;
+    SamplingStatistics   stats_;
+    void                 AllocateBuffer();
+    void                 PublishBuffer(uint32_t samplingInterval);
 
 private:
-    std::atomic_bool             shutdown_requested_{ false };
-    std::unique_ptr<std::thread> thread_sampling_thread_;
-    EVENTPIPE_SESSION            session_ = 0;
-    IStackWalker*                stackWalker_ = nullptr;
+    std::atomic_bool                    shutdown_requested_{false};
+    mutable std::mutex                  thread_sampling_configuration_mutex_;
+    std::condition_variable             thread_sampling_configuration_cv_;
+    ThreadSamplingConfiguration         desired_thread_sampling_configuration_;
+    std::unique_ptr<std::thread>        thread_sampling_thread_;
+    EVENTPIPE_SESSION                   session_ = 0;
+    IAllocationSamplingSessionProvider& allocationSamplingSessionProvider_;
+    IStackWalker*                       stackWalker_ = nullptr;
 };
+
+// Captures one complete set of thread stacks for the current sampling cohort.
+bool CaptureFunctionIdentifiersForThreads(
+    ContinuousProfiler*                                            profiler,
+    ICorProfilerInfo7*                                             info7,
+    const std::unordered_set<ThreadID>&                            selectedThreads,
+    std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer);
+
+// Normalizes allocation stack-capture completion and discards aborted work.
+bool FinalizeAllocationStackCapture(ContinuousProfiler*              profiler,
+                                    const HRESULT                    captureResult,
+                                    std::vector<FunctionIdentifier>& threadStack);
 
 // Internal selective-sampling state operations, public for unit testing.
 bool TryAddSelectiveSamplingTrace(const trace_context&                             context,
@@ -393,9 +473,9 @@ bool TryPrepareSelectedThreadSampling(ContinuousProfiler*                       
 void AllocationSamplingAppendToBuffer(int32_t appendLen, unsigned char* appendBuf);
 
 bool ThreadSamplingShouldProduceThreadSample();
-void ThreadSamplingRecordProducedThreadSample(std::vector<unsigned char>* buf);
+void ThreadSamplingRecordProducedThreadSample(std::vector<unsigned char>* buf, uint32_t samplingInterval);
 // Can return 0 if none are pending
-int32_t ThreadSamplingConsumeOneThreadSample(int32_t len, unsigned char* buf);
+int32_t ThreadSamplingConsumeOneThreadSample(int32_t len, unsigned char* buf, uint32_t* samplingInterval);
 
 bool SelectiveSamplingShouldProduceThreadSample();
 void SelectiveSamplingRecordProducedThreadSample(int32_t appendLen, unsigned char* appendBuf);

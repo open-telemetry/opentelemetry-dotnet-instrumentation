@@ -16,6 +16,48 @@ events:
 
 You can export stack traces to any observability back end that supports profiling.
 
+## Native runtime configuration lifecycle
+
+The native sampler is process-wide. Startup configuration is a **Seed**: the
+first valid, successfully committed Seed wins, so repeated .NET Framework `AppDomain` startup cannot
+overwrite process-wide state. A complete **ControlPlane** configuration has
+higher authority and permanently supersedes Seed configuration for that
+process. Ordering and stale-document rejection belong to the managed OpAMP
+coordinator; native code validates and atomically commits each complete snapshot
+without patching or merging it.
+
+The V1 apply request carries its authority explicitly. The existing
+`ConfigureContinuousProfiler` export is retained as an ABI-compatible Seed
+adapter and delegates to that same apply operation; it owns no separate
+configuration or lifecycle state. Repeated Seeds report that process startup
+was already committed, while a Seed arriving after ControlPlane authority is
+ignored as lower authority.
+
+Zero disables the corresponding CPU, selective-thread, or allocation sampling
+feature. No sampling machinery is created until a committed configuration first
+enables a feature. After that point, disabling thread sampling parks the existing
+worker and later re-enabling it reuses the same worker. Disabling allocation
+sampling closes its atomic admission gate before stopping the EventPipe session.
+An identical ControlPlane snapshot returns `NoChange` without retrying producer
+lifecycle work.
+
+This yields three deliberate service states. A **dormant** service has accepted
+only an all-disabled configuration and has no sampling infrastructure. An
+**active** service has at least one enabled feature. A **quiescent** service was
+previously active but is currently all-disabled; it retains the parked thread
+worker, stack walker, and CLR thread/stack-snapshot capabilities so that
+re-enablement does not reconstruct thread state or create another worker. The
+stack-snapshot capability is passive until capture is requested. Thread lifecycle
+callbacks remain enabled so thread metadata and .NET Framework canary state stay
+coherent. Allocation EventPipe is stopped because it is an active producer with
+material runtime cost.
+
+Configuration changes are eventually consistent at capture boundaries. An
+ordinary disable allows an already admitted complete capture to finish and be
+published. CLR shutdown is terminal: the next stack-frame callback aborts the
+capture, unpublished partial data is discarded, EventPipe is stopped, and owned
+threads are joined.
+
 ## Thread sampling
 
 You can enable thread sampling using the custom plugin, which

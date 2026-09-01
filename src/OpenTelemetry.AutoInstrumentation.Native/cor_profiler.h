@@ -21,26 +21,17 @@
 #include "pal.h"
 #include "rejit_preprocessor.h"
 #include "rejit_handler.h"
+#include "runtime_sampler_configuration.h"
 #include <unordered_set>
 #include "clr_helpers.h"
-#include "stack_walker_impl.h"
 // Forward declaration
 namespace continuous_profiler
 {
-class ContinuousProfiler;
+class RuntimeSamplerService;
 }
 
 namespace trace
 {
-struct ContinuousProfilerParams
-{
-    bool         threadSamplingEnabled;
-    unsigned int threadSamplingInterval;
-    bool         allocationSamplingEnabled;
-    unsigned int maxMemorySamplesPerMinute;
-    unsigned int selectedThreadsSamplingInterval;
-};
-
 class CorProfiler : public CorProfilerBase
 {
 private:
@@ -65,9 +56,11 @@ private:
     bool in_azure_app_services = false;
     bool is_desktop_iis = false;
 
-    continuous_profiler::ContinuousProfiler* continuousProfiler;
-    std::unique_ptr<continuous_profiler::StackWalkerImpl>       stack_walker_impl_;
-    std::once_flag sampling_init_flag_;
+    mutable std::mutex                                          runtime_sampler_service_mutex_;
+    std::once_flag                                              runtime_sampler_service_creation_flag_;
+    std::unique_ptr<continuous_profiler::RuntimeSamplerService> runtime_sampler_service_owner_;
+    continuous_profiler::RuntimeSamplerService*                 runtime_sampler_service_ = nullptr;
+    std::atomic_bool                                            runtime_sampler_shutdown_requested_{false};
     HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override;
 
 
@@ -143,11 +136,11 @@ private:
     // Initialization methods
     //
     void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
-    bool InitThreadSampler();
-    void ConfigureContinuousProfilerInternal(const ContinuousProfilerParams& params);
+    continuous_profiler::RuntimeSamplerService* EnsureRuntimeSamplerServiceCreated() noexcept;
 
 public:
-    CorProfiler() = default;
+    CorProfiler();
+    ~CorProfiler() override;
 
     bool IsAttached() const;
 
@@ -247,8 +240,17 @@ public:
     //
     // Continuous Profiler methods
     //
-    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute, 
-        unsigned int selectedThreadsSamplingInterval);
+    void ConfigureContinuousProfiler(bool         threadSamplingEnabled,
+                                     unsigned int threadSamplingInterval,
+                                     bool         allocationSamplingEnabled,
+                                     unsigned int maxMemorySamplesPerMinute,
+                                     unsigned int selectedThreadsSamplingInterval);
+    continuous_profiler::RuntimeSamplerApplyResult ApplyContinuousProfilerConfigurationV1(
+        const continuous_profiler::RuntimeSamplerConfigurationV1* request,
+        continuous_profiler::RuntimeSamplerAuthority              authority,
+        continuous_profiler::RuntimeSamplerStateV1*               actualState);
+    continuous_profiler::RuntimeSamplerStateQueryResult GetContinuousProfilerStateV1(
+        continuous_profiler::RuntimeSamplerStateV1* actualState) const;
 
     //
     // IL Rewriting methods

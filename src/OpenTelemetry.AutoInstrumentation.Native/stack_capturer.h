@@ -16,6 +16,8 @@
 namespace ProfilerStackCapture
 {
 
+class IRuntimeCapture;
+
 /// <summary>
 /// Platform-agnostic interface for capturing thread stacks.
 /// Uses declarative guards and runtime abstraction for clarity and maintainability.
@@ -69,6 +71,10 @@ public:
 std::unique_ptr<IStackCapturer> CreateStackCapturer(
     ICorProfilerInfo2*  profilerInfo,
     continuous_profiler::RuntimeType runtimeType);
+
+// Creates a capturer from runtime-specific dependencies.
+std::unique_ptr<IStackCapturer> CreateStackCapturer(std::unique_ptr<IProfilerApi>    profilerApi,
+                                                    std::unique_ptr<IRuntimeCapture> runtime);
 
 } // namespace ProfilerStackCapture
 

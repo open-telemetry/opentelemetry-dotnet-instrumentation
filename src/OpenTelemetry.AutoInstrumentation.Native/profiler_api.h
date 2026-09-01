@@ -22,6 +22,17 @@ struct StackSnapshotCallbackContext
 {
     StackFrameCallback                   callback;
     continuous_profiler::CapturedFrame   frame;
+    bool                                 cancellationRequested = false;
+
+    HRESULT InvokeCallback()
+    {
+        const auto result = callback(this);
+        if (result == S_FALSE)
+        {
+            cancellationRequested = true;
+        }
+        return result;
+    }
 };
 
 inline HRESULT __stdcall StackSnapshotCallbackDefault(
@@ -36,7 +47,7 @@ inline HRESULT __stdcall StackSnapshotCallbackDefault(
     callbackData->frame.isUnmanagedFrame =
         (funcId == 0 && ip != 0);
 
-    return callbackData->callback(callbackData);
+    return callbackData->InvokeCallback();
 }
 
 class IProfilerApi

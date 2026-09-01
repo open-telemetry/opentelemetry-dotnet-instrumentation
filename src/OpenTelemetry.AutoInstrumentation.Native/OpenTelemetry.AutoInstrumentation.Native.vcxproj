@@ -225,6 +225,8 @@
     <ClInclude Include="rejit_preprocessor.h" />
     <ClInclude Include="rejit_work_offloader.h" />
     <ClInclude Include="runtime_capture.h" />
+    <ClInclude Include="runtime_sampler_configuration.h" />
+    <ClInclude Include="runtime_sampler_service.h" />
     <ClInclude Include="safe_native_walk_service.h" />
     <ClInclude Include="signature_builder.h" />
     <ClInclude Include="stack_capturer.h" />
@@ -267,6 +269,8 @@
     <ClCompile Include="rejit_handler.cpp" />
     <ClCompile Include="rejit_preprocessor.cpp" />
     <ClCompile Include="rejit_work_offloader.cpp" />
+    <ClCompile Include="runtime_sampler_configuration.cpp" />
+    <ClCompile Include="runtime_sampler_service.cpp" />
     <ClCompile Include="safe_native_walk_service.cpp" />
     <ClCompile Include="stack_capturer.cpp" />
     <ClCompile Include="stack_walk_guard.cpp" />

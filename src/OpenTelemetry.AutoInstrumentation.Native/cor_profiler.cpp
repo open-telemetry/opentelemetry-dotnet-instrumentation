@@ -32,8 +32,9 @@
 #include "stats.h"
 #include "util.h"
 #include "version.h"
-#include "continuous_profiler.h"
 #include "member_resolver.h"
+#include "runtime_sampler_configuration.h"
+#include "runtime_sampler_service.h"
 
 #ifdef MACOS
 #include <mach-o/dyld.h>
@@ -58,13 +59,15 @@ namespace trace
 
 CorProfiler* profiler = nullptr;
 
+CorProfiler::CorProfiler()  = default;
+CorProfiler::~CorProfiler() = default;
+
 //
 // ICorProfilerCallback methods
 //
 HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown)
 {
-    auto _                   = trace::Stats::Instance()->InitializeMeasure();
-    this->continuousProfiler = nullptr;
+    auto _ = trace::Stats::Instance()->InitializeMeasure();
 
     CorProfilerBase::Initialize(cor_profiler_info_unknown);
 
@@ -918,9 +921,16 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
 
 HRESULT STDMETHODCALLTYPE CorProfiler::Shutdown()
 {
-    if (continuousProfiler != nullptr)
+    runtime_sampler_shutdown_requested_.store(true, std::memory_order_release);
+
+    continuous_profiler::RuntimeSamplerService* service = nullptr;
     {
-        continuousProfiler->Shutdown();
+        std::lock_guard<std::mutex> lock(runtime_sampler_service_mutex_);
+        service = runtime_sampler_service_;
+    }
+    if (service != nullptr)
+    {
+        service->Shutdown();
     }
 
     is_attached_.store(false);
@@ -1178,52 +1188,36 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
     }
 }
 
-bool CorProfiler::InitThreadSampler()
+continuous_profiler::RuntimeSamplerService* CorProfiler::EnsureRuntimeSamplerServiceCreated() noexcept
 {
-#if defined(_WIN32)
-    // for net fx, the native thread ID is needed by stack capture
-    // the profiler callback, ThreadAssignedToOSThread is not invoked for main thread
-    // for the following machinery to work,
-    // 1 The thread needs to have executed managed code first
-    // 2. InitThreadSampler must must be executing in context of main thread
-    // InitThreadSampler is called from managed code
-    // And more importantly, the main thread calls InitThreadSampler
-    ThreadID mainThreadId = 0;
-    if (auto hr = info_->GetCurrentThreadID(&mainThreadId); SUCCEEDED(hr))
+    std::lock_guard<std::mutex> lock(runtime_sampler_service_mutex_);
+    if (runtime_sampler_shutdown_requested_.load(std::memory_order_acquire))
     {
-        ThreadAssignedToOSThread(mainThreadId, ::GetCurrentThreadId());
-    }
-#endif
-
-    DWORD pdvEventsLow;
-    DWORD pdvEventsHigh;
-    auto  hr = this->info_->GetEventMask2(&pdvEventsLow, &pdvEventsHigh);
-    if (FAILED(hr))
-    {
-        Logger::Warn("ConfigureContinuousProfiler: Failed to take event masks for continuous profiler.");
-        return false;
+        return nullptr;
     }
 
-    pdvEventsLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
-
-    hr = this->info_->SetEventMask2(pdvEventsLow, pdvEventsHigh);
-    if (FAILED(hr))
+    try
     {
-        Logger::Warn("ConfigureContinuousProfiler: Failed to set event masks for continuous profiler.");
-        return false;
+        std::call_once(runtime_sampler_service_creation_flag_,
+                       [this]()
+                       {
+                           using continuous_profiler::RuntimeType;
+                           const auto runtime = runtime_information_.is_desktop() ? RuntimeType::DotNetFramework
+                                                : runtime_information_.is_core()  ? RuntimeType::DotNetCore
+                                                                                  : RuntimeType::Unknown;
+
+                           auto service =
+                               std::make_unique<continuous_profiler::RuntimeSamplerService>(info_, info12_, runtime);
+                           runtime_sampler_service_owner_ = std::move(service);
+                           runtime_sampler_service_       = runtime_sampler_service_owner_.get();
+                       });
+    }
+    catch (...)
+    {
+        return nullptr;
     }
 
-    this->continuousProfiler = new continuous_profiler::ContinuousProfiler();
-    this->continuousProfiler->SetGlobalInfo12(this->info12_);
-    this->continuousProfiler->SetGlobalInfo7(this->info_);
-    using continuous_profiler::RuntimeType;
-    RuntimeType runtime = runtime_information_.is_desktop() ? RuntimeType::DotNetFramework
-                          : runtime_information_.is_core()  ? RuntimeType::DotNetCore
-                                                            : RuntimeType::Unknown;
-    stack_walker_impl_  = std::make_unique<continuous_profiler::StackWalkerImpl>(this->info_, runtime);
-    this->continuousProfiler->SetStackWalker(stack_walker_impl_.get());
-    Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
-    return true;
+    return runtime_sampler_service_;
 }
 
 void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled,
@@ -1232,57 +1226,104 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
                                               unsigned int maxMemorySamplesPerMinute,
                                               unsigned int selectedThreadsSamplingInterval)
 {
-    ContinuousProfilerParams params{threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled,
-                                    maxMemorySamplesPerMinute, selectedThreadsSamplingInterval};
-    // Guard against multiple initialization: In .NET Framework, this method may be called
-    // once per AppDomain, but the continuous profiler is a process-level singleton.
-    // std::call_once ensures thread-safe one-time initialization across all AppDomains.
-    std::call_once(sampling_init_flag_, [this, &params]() { ConfigureContinuousProfilerInternal(params); });
+    const continuous_profiler::RuntimeSamplerConfigurationV1
+                                               request{sizeof(continuous_profiler::RuntimeSamplerConfigurationV1),
+                threadSamplingEnabled ? threadSamplingInterval : 0, selectedThreadsSamplingInterval,
+                allocationSamplingEnabled ? maxMemorySamplesPerMinute : 0};
+    continuous_profiler::RuntimeSamplerStateV1 actualState{sizeof(continuous_profiler::RuntimeSamplerStateV1)};
+    const auto                                 result =
+        ApplyContinuousProfilerConfigurationV1(&request, continuous_profiler::RuntimeSamplerAuthority::Seed,
+                                               &actualState);
+    if (result != continuous_profiler::RuntimeSamplerApplyResult::Applied &&
+        result != continuous_profiler::RuntimeSamplerApplyResult::NoChange &&
+        result != continuous_profiler::RuntimeSamplerApplyResult::IgnoredSeedAlreadyCommitted &&
+        result != continuous_profiler::RuntimeSamplerApplyResult::IgnoredLowerAuthority)
+    {
+        Logger::Warn("ConfigureContinuousProfiler: seed configuration was not applied. Result: ",
+                     static_cast<int32_t>(result));
+    }
 }
 
-void CorProfiler::ConfigureContinuousProfilerInternal(const ContinuousProfilerParams& params)
+continuous_profiler::RuntimeSamplerApplyResult CorProfiler::ApplyContinuousProfilerConfigurationV1(
+    const continuous_profiler::RuntimeSamplerConfigurationV1* request,
+    const continuous_profiler::RuntimeSamplerAuthority        authority,
+    continuous_profiler::RuntimeSamplerStateV1*               actualState)
 {
-    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", params.threadSamplingEnabled,
-                 ", thread sampling interval: ", params.threadSamplingInterval,
-                 ", allocationSamplingEnabled: ", params.allocationSamplingEnabled,
-                 ", max memory samples per minute: ", params.maxMemorySamplesPerMinute,
-                 ", selected threads sampling interval: ", params.selectedThreadsSamplingInterval);
-
-    const bool selectiveSamplingConfigured = params.selectedThreadsSamplingInterval != 0;
-
-    if (!params.threadSamplingEnabled && !params.allocationSamplingEnabled && !selectiveSamplingConfigured)
+    if (actualState == nullptr)
     {
-        Logger::Debug("ConfigureContinuousProfiler: no sampling type configured.");
-        return;
+        return continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidArgument;
+    }
+    if (actualState->structureSize != sizeof(continuous_profiler::RuntimeSamplerStateV1))
+    {
+        return continuous_profiler::RuntimeSamplerApplyResult::RejectedUnsupportedLayout;
     }
 
-    if (!InitThreadSampler())
+    if (request == nullptr)
     {
-        Logger::Warn("ContinuousProfiler: unable to init sampler.");
-        return;
+        GetContinuousProfilerStateV1(actualState);
+        return continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidArgument;
+    }
+    if (request->structureSize != sizeof(continuous_profiler::RuntimeSamplerConfigurationV1))
+    {
+        GetContinuousProfilerStateV1(actualState);
+        return continuous_profiler::RuntimeSamplerApplyResult::RejectedUnsupportedLayout;
     }
 
-    if (params.threadSamplingEnabled)
+    if (authority != continuous_profiler::RuntimeSamplerAuthority::Seed &&
+        authority != continuous_profiler::RuntimeSamplerAuthority::ControlPlane)
     {
-        this->continuousProfiler->threadSamplingInterval = params.threadSamplingInterval;
+        GetContinuousProfilerStateV1(actualState);
+        return continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidArgument;
     }
-    if (selectiveSamplingConfigured)
+    if (!request->IsValid())
     {
-        this->continuousProfiler->selectedThreadsSamplingInterval = params.selectedThreadsSamplingInterval;
-        this->continuousProfiler->nextOutdatedEntriesScan         = std::chrono::steady_clock::now();
-        continuous_profiler::ContinuousProfiler::InitSelectiveSamplingBuffer();
+        Logger::Warn("ApplyContinuousProfilerConfigurationV1: invalid configuration was rejected.");
+        GetContinuousProfilerStateV1(actualState);
+        return continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidConfiguration;
+    }
+    auto configuration = *request;
+    if (configuration.AllocationEnabled() && info12_ == nullptr)
+    {
+        if (authority == continuous_profiler::RuntimeSamplerAuthority::Seed)
+        {
+            Logger::Warn(
+                "ApplyContinuousProfilerConfigurationV1: allocation sampling is not supported by this runtime and "
+                "will be disabled for the Seed configuration.");
+            configuration.maxAllocationSamplesPerMinute = 0;
+        }
+        else
+        {
+            Logger::Warn(
+                "ApplyContinuousProfilerConfigurationV1: allocation sampling is not supported by this runtime.");
+            GetContinuousProfilerStateV1(actualState);
+            return continuous_profiler::RuntimeSamplerApplyResult::RejectedUnsupportedRuntime;
+        }
     }
 
-    if (params.threadSamplingEnabled || selectiveSamplingConfigured)
+    auto* service = EnsureRuntimeSamplerServiceCreated();
+    if (service == nullptr)
     {
-        Logger::Info("ContinuousProfiler::StartThreadSampling");
-        this->continuousProfiler->StartThreadSampling();
+        GetContinuousProfilerStateV1(actualState);
+        return runtime_sampler_shutdown_requested_.load(std::memory_order_acquire)
+                   ? continuous_profiler::RuntimeSamplerApplyResult::ShuttingDown
+                   : continuous_profiler::RuntimeSamplerApplyResult::ActivationFailed;
     }
 
-    if (params.allocationSamplingEnabled)
+    const auto outcome = service->ApplyConfigurationV1(authority, configuration);
+    continuous_profiler::EncodeRuntimeSamplerStateV1(outcome.state, actualState);
+    return outcome.result;
+}
+
+continuous_profiler::RuntimeSamplerStateQueryResult CorProfiler::GetContinuousProfilerStateV1(
+    continuous_profiler::RuntimeSamplerStateV1* actualState) const
+{
+    std::lock_guard<std::mutex> lock(runtime_sampler_service_mutex_);
+    if (runtime_sampler_service_ != nullptr)
     {
-        this->continuousProfiler->StartAllocationSampling(params.maxMemorySamplesPerMinute);
+        return continuous_profiler::EncodeRuntimeSamplerStateV1(runtime_sampler_service_->GetState(), actualState);
     }
+
+    return continuous_profiler::EncodeRuntimeSamplerStateV1({}, actualState);
 }
 
 void CorProfiler::InitializeTraceMethods(WCHAR* id,
@@ -3796,50 +3837,35 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCachedFunctionSearchStarted(FunctionID
 
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadCreated(ThreadID threadId)
 {
-    if (continuousProfiler != nullptr)
+    if (runtime_sampler_service_ != nullptr)
     {
-        continuousProfiler->ThreadCreated(threadId);
-    }
-
-    if (stack_walker_impl_)
-    {
-        stack_walker_impl_->OnThreadCreated(threadId);
+        runtime_sampler_service_->OnThreadCreated(threadId);
     }
     return S_OK;
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
 {
-    if (continuousProfiler != nullptr)
+    if (runtime_sampler_service_ != nullptr)
     {
-        continuousProfiler->ThreadDestroyed(threadId);
-    }
-
-    if (stack_walker_impl_)
-    {
-        stack_walker_impl_->OnThreadDestroyed(threadId);
+        runtime_sampler_service_->OnThreadDestroyed(threadId);
     }
 
     return S_OK;
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[])
 {
-    if (continuousProfiler != nullptr)
+    if (runtime_sampler_service_ != nullptr)
     {
-        continuousProfiler->ThreadNameChanged(threadId, cchName, name);
-    }
-
-    if (stack_walker_impl_)
-    {
-        stack_walker_impl_->OnThreadNameChanged(threadId, cchName, name);
+        runtime_sampler_service_->OnThreadNameChanged(threadId, cchName, name);
     }
 
     return S_OK;
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId)
 {
-    if (stack_walker_impl_)
+    if (runtime_sampler_service_ != nullptr)
     {
-        stack_walker_impl_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
+        runtime_sampler_service_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
     }
     return S_OK;
 }
@@ -3857,9 +3883,12 @@ HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDE
                                                                ULONG              numStackFrames,
                                                                UINT_PTR           stackFrames[])
 {
-    if (continuousProfiler != nullptr && eventId == 10 && eventVersion == 4)
+    if (eventId == 10 && eventVersion == 4)
     {
-        continuousProfiler->AllocationTick(cbEventData, eventData);
+        if (runtime_sampler_service_ != nullptr)
+        {
+            runtime_sampler_service_->OnAllocationTick(cbEventData, eventData);
+        }
     }
     return S_OK;
 }

@@ -144,6 +144,21 @@ TEST_F(SelectiveSamplingBufferTest, SuccessfulAppendKeepsSamplingAdmissible)
     ASSERT_TRUE(std::equal(sample.begin(), sample.end(), output.begin()));
 }
 
+TEST_F(SelectiveSamplingBufferTest, RepeatedPreparationPreservesBufferedSamples)
+{
+    std::vector<unsigned char> sample = {0x11, 0x22};
+    SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(sample.size()), sample.data());
+
+    continuous_profiler::ContinuousProfiler::PrepareSelectiveSamplingBuffers();
+    continuous_profiler::ContinuousProfiler::PrepareSelectiveSamplingBuffers();
+
+    auto       output   = CreateReadBuffer();
+    const auto readSize = Drain(output);
+
+    ASSERT_EQ(sample.size(), static_cast<size_t>(readSize));
+    ASSERT_TRUE(std::equal(sample.begin(), sample.end(), output.begin()));
+}
+
 TEST_F(SelectiveSamplingBufferTest, ExactFitIsAcceptedAndBlocksSamplingUntilRead)
 {
     std::vector<unsigned char> acceptedSample = {0x11, 0x22};
@@ -217,9 +232,10 @@ TEST_F(SelectiveSamplingPreparationTest, SaturationDoesNotPreventOutdatedTraceCl
                                                 overflowingSample.data());
     ASSERT_FALSE(SelectiveSamplingShouldProduceThreadSample());
 
-    continuous_profiler::ContinuousProfiler profiler{};
-    const auto                              now = std::chrono::steady_clock::now();
-    profiler.nextOutdatedEntriesScan            = now;
+    continuous_profiler::ClrAllocationSamplingSessionProvider allocationSessions(nullptr);
+    continuous_profiler::ContinuousProfiler                   profiler(allocationSessions);
+    const auto                                                now = std::chrono::steady_clock::now();
+    profiler.nextOutdatedEntriesScan_                             = now;
     ASSERT_TRUE(continuous_profiler::TryAddSelectiveSamplingTrace({kTestTraceIdHigh, kTestTraceIdLow}, now));
 
     ASSERT_FALSE(continuous_profiler::TryPrepareSelectedThreadSampling(&profiler, now + std::chrono::minutes(16)));
@@ -232,9 +248,10 @@ TEST_F(SelectiveSamplingPreparationTest, SaturationDoesNotPreventOutdatedTraceCl
 
 TEST_F(SelectiveSamplingPreparationTest, EmptyTraceSetPreventsSelectedThreadSampling)
 {
-    continuous_profiler::ContinuousProfiler profiler{};
-    const auto                              now = std::chrono::steady_clock::now();
-    profiler.nextOutdatedEntriesScan            = now + std::chrono::minutes(1);
+    continuous_profiler::ClrAllocationSamplingSessionProvider allocationSessions(nullptr);
+    continuous_profiler::ContinuousProfiler                   profiler(allocationSessions);
+    const auto                                                now = std::chrono::steady_clock::now();
+    profiler.nextOutdatedEntriesScan_                             = now + std::chrono::minutes(1);
 
     ASSERT_TRUE(SelectiveSamplingShouldProduceThreadSample());
     ASSERT_FALSE(continuous_profiler::TryPrepareSelectedThreadSampling(&profiler, now));
@@ -259,7 +276,8 @@ namespace
 // (the preprocessor would otherwise treat them as macro-argument separators).
 [[noreturn]] void RunAllocationTickWithShortPayload()
 {
-    continuous_profiler::ContinuousProfiler profiler;
+    continuous_profiler::ClrAllocationSamplingSessionProvider allocationSessions(nullptr);
+    continuous_profiler::ContinuousProfiler                   profiler(allocationSessions);
     // Force the sub-sampler to accept this event so AllocationTick reaches the parse
     // (target-per-cycle >= 1 makes the first ShouldSample() return true).
     profiler.allocationSubSampler = std::make_unique<continuous_profiler::AllocationSubSampler>(1000u, 60u);
