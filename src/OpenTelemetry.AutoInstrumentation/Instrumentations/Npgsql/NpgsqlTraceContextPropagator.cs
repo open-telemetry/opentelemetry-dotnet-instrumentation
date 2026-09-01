@@ -72,6 +72,11 @@ internal static class NpgsqlTraceContextPropagator
 
             lock (state)
             {
+                if (state.IsExecutingInternalCommand)
+                {
+                    return;
+                }
+
                 ResetApplicationName(connector, state);
             }
         }
@@ -112,7 +117,7 @@ internal static class NpgsqlTraceContextPropagator
 
             if (traceParent is not null && IsW3CTraceParent(traceParent))
             {
-                ExecuteApplicationNameCommand(npgsqlConnector, $"SET application_name = '{traceParent}'");
+                ExecuteApplicationNameCommand(npgsqlConnector, state, $"SET application_name = '{traceParent}'");
                 state.HasPropagatedContext = true;
                 return;
             }
@@ -137,16 +142,24 @@ internal static class NpgsqlTraceContextPropagator
             return;
         }
 
-        ExecuteApplicationNameCommand(connector, "RESET application_name");
+        ExecuteApplicationNameCommand(connector, state, "RESET application_name");
         state.HasPropagatedContext = false;
     }
 
-    private static void ExecuteApplicationNameCommand(INpgsqlConnector connector, string command)
+    private static void ExecuteApplicationNameCommand(INpgsqlConnector connector, ConnectorContextState state, string command)
     {
         // Complete propagation before Npgsql writes the application request, or cleanup while Npgsql
         // still owns the connector at the end of the user action. This deliberately adds a separate
         // round trip.
-        connector.ExecuteInternalCommand(command);
+        state.IsExecutingInternalCommand = true;
+        try
+        {
+            connector.ExecuteInternalCommand(command);
+        }
+        finally
+        {
+            state.IsExecutingInternalCommand = false;
+        }
     }
 
     private static object? GetCurrentActivity(object command)
@@ -226,5 +239,7 @@ internal static class NpgsqlTraceContextPropagator
     private sealed class ConnectorContextState
     {
         public bool HasPropagatedContext { get; set; }
+
+        public bool IsExecutingInternalCommand { get; set; }
     }
 }
