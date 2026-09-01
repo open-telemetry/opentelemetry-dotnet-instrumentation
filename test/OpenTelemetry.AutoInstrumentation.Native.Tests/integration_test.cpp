@@ -104,6 +104,20 @@ TEST(IntegrationTest, TraceMethodParsingExcludesInvalidEntries)
     EXPECT_EQ(integrationDefinitions.size(), 0);
 }
 
+TEST(IntegrationTest, MatchesSecretsPatternRecognizesOtlpHeaders)
+{
+    const std::string
+        environment_variables[]{"OTEL_EXPORTER_OTLP_HEADERS=authorization=Bearer%20super-secret-token",
+                                "OTEL_EXPORTER_OTLP_TRACES_HEADERS=authorization=Bearer%20super-secret-token",
+                                "OTEL_EXPORTER_OTLP_METRICS_HEADERS=authorization=Bearer%20super-secret-token",
+                                "OTEL_EXPORTER_OTLP_LOGS_HEADERS=authorization=Bearer%20super-secret-token"};
+
+    for (const auto& environment_variable : environment_variables)
+    {
+        EXPECT_TRUE(MatchesSecretsPattern(environment_variable)) << environment_variable;
+    }
+}
+
 #ifdef _WIN32
 // Memory-safety regression test for ExtractPublicKeyToken: the copy loop must bound itself to
 // the matched 8-byte token, not to the caller-supplied length. The 8-byte destination is placed
