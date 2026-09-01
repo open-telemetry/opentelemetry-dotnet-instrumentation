@@ -8,6 +8,7 @@ namespace IntegrationTests;
 [Collection(PostgresCollectionFixture.Name)]
 public class NpqsqlTests : TestHelper
 {
+    private const string ContextPropagationApplicationName = "otel-context-probe";
 #if NET
     private const string StaleContextApplicationName = "otel-stale-probe";
 #endif
@@ -76,6 +77,8 @@ public class NpqsqlTests : TestHelper
 
         var expectedCount = NpgsqlTraceContextPropagationTestHelper.SupportsCopyTracing(packageVersion) ? 7 : 6;
         var applicationNames = NpgsqlTraceContextPropagationTestHelper.ExtractApplicationNames(standardOutput, expectedCount);
+        var postOperationApplicationNames = NpgsqlTraceContextPropagationTestHelper.ExtractValues(standardOutput, "ContextPostOperationApplicationName=");
+        Assert.Equal([ContextPropagationApplicationName], postOperationApplicationNames);
         foreach (var applicationName in applicationNames)
         {
             collector.Expect(

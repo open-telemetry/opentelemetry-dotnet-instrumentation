@@ -9,6 +9,7 @@ namespace TestApplication.Npgsql;
 
 internal static class Program
 {
+    private const string ContextPropagationApplicationName = "otel-context-probe";
     private const string StaleContextApplicationName = "otel-stale-probe";
     private const string MultiplexingApplicationName = "otel-multiplexing-probe";
     private const string UntracedMarker = "/* untraced */";
@@ -33,10 +34,16 @@ internal static class Program
             return;
         }
 
+        var contextPropagationScenario = ArgumentHelper.HasArgument(args, "--context-propagation-scenario");
+        if (contextPropagationScenario)
+        {
+            connString += $";Application Name={ContextPropagationApplicationName}";
+        }
+
         using var conn = new NpgsqlConnection(connString);
         await conn.OpenAsync().ConfigureAwait(false);
 
-        if (ArgumentHelper.HasArgument(args, "--context-propagation-scenario"))
+        if (contextPropagationScenario)
         {
             RunSynchronousCommand(conn);
             await RunParameterizedReaderAsync(conn).ConfigureAwait(false);
@@ -48,6 +55,10 @@ internal static class Program
             {
                 await RunCopyExportAsync(conn, "COPY (SELECT current_setting('application_name')) TO STDOUT", WriteApplicationName).ConfigureAwait(false);
             }
+
+            WriteValue(
+                "ContextPostOperationApplicationName",
+                await ReadApplicationNameForBackendAsync(connString, conn.ProcessID).ConfigureAwait(false));
 
             return;
         }
