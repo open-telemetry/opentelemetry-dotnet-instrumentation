@@ -267,12 +267,12 @@ internal static class Program
     private static async Task RunMultiplexingContextScenarioAsync(string connectionString)
     {
         const int commandCount = 20;
-        using var dataSource = NpgsqlDataSource.Create(
-            $"{connectionString};Multiplexing=true;Maximum Pool Size=1;Application Name={MultiplexingApplicationName}");
+        var multiplexingConnectionString =
+            $"{connectionString};Multiplexing=true;Maximum Pool Size=1;Application Name={MultiplexingApplicationName}";
 
         var commands = Enumerable.Range(0, commandCount).Select(async _ =>
         {
-            using var connection = dataSource.CreateConnection();
+            using var connection = new NpgsqlConnection(multiplexingConnectionString);
             await connection.OpenAsync().ConfigureAwait(false);
             using var command = new NpgsqlCommand("SELECT current_setting('application_name')", connection);
             return await command.ExecuteScalarAsync().ConfigureAwait(false);
