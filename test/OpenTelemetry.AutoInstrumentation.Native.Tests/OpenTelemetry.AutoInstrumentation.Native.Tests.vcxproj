@@ -71,6 +71,8 @@
     <ClCompile Include="integration_test.cpp" />
     <ClCompile Include="clr_helper_test.cpp" />
     <ClCompile Include="metadata_builder_test.cpp" />
+    <ClCompile Include="continuous_profiler_batch_test.cpp" />
+    <ClCompile Include="continuous_profiler_lifecycle_test.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -79,6 +81,9 @@
     </ClCompile>
     <ClCompile Include="startup_hook_test.cpp" />
     <ClCompile Include="thread_span_context_test.cpp" />
+    <ClCompile Include="runtime_sampler_configuration_test.cpp" />
+    <ClCompile Include="runtime_sampler_controller_test.cpp" />
+    <ClCompile Include="stack_walk_guard_test.cpp" />
     <ClCompile Include="util_test.cpp" />
     <ClCompile Include="version_struct_test.cpp" />
   </ItemGroup>

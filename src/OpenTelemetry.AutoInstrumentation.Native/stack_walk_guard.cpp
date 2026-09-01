@@ -74,19 +74,51 @@ StackWalkGuard::StackWalkGuard(IProfilerApi*             profilerApi,
                                std::chrono::milliseconds probe_timeout)
     : api_(profilerApi), park_timeout_(park_timeout), probe_timeout_(probe_timeout)
 {
-    worker_ = std::make_unique<std::thread>([this]() { WorkerLoop(); });
 }
 
 StackWalkGuard::~StackWalkGuard()
 {
+    Stop();
+}
+
+void StackWalkGuard::Stop() noexcept
+{
+    std::unique_ptr<std::thread> worker;
     {
         std::lock_guard<std::mutex> lk(mutex_);
-        state_ = State::Stopping;
+        abandon_ = true;
+        state_   = State::Stopping;
+        worker   = std::move(worker_);
     }
     cv_.notify_all();
-    if (worker_ && worker_->joinable())
-        worker_->join();
-    worker_.reset();
+    if (worker != nullptr && worker->joinable())
+    {
+        worker->join();
+    }
+}
+
+bool StackWalkGuard::Start() noexcept
+{
+    std::lock_guard<std::mutex> lk(mutex_);
+    if (state_ == State::Stopping)
+    {
+        return false;
+    }
+
+    if (worker_ != nullptr)
+    {
+        return true;
+    }
+
+    try
+    {
+        worker_ = std::make_unique<std::thread>([this]() { WorkerLoop(); });
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
 }
 
 bool StackWalkGuard::IsIdle() const noexcept
@@ -95,9 +127,23 @@ bool StackWalkGuard::IsIdle() const noexcept
     return state_ == State::Idle;
 }
 
+bool StackWalkGuard::IsStarted() const noexcept
+{
+    std::lock_guard<std::mutex> lk(mutex_);
+    return worker_ != nullptr;
+}
+
 bool StackWalkGuard::Schedule(const ProbeRequest& req)
 {
     std::unique_lock<std::mutex> lk(mutex_);
+
+    // Starting a thread here is unsafe: callers schedule probes only after
+    // suspending the runtime or an application thread. The worker must have
+    // been prepared before sampling begins.
+    if (worker_ == nullptr)
+    {
+        return false;
+    }
 
     // Wait for the worker to be Idle. Idle covers both "fresh" and
     // "previous verdict published but not yet consumed" - either way the
@@ -236,6 +282,10 @@ void StackWalkGuard::WorkerLoop()
         {
             {
                 std::lock_guard<std::mutex> lk(mutex_);
+                if (state_ == State::Stopping)
+                {
+                    break;
+                }
                 result_ = ProbeResult::Failed;
                 state_  = State::Idle;
                 SetStage(ProbeStage::None);

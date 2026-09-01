@@ -193,6 +193,8 @@
     <ClInclude Include="configuration.h" />
     <ClInclude Include="continuous_profiler_clr_helpers.h" />
     <ClInclude Include="continuous_profiler.h" />
+    <ClInclude Include="runtime_sampler_configuration.h" />
+    <ClInclude Include="runtime_sampler_controller.h" />
     <ClInclude Include="cor_profiler.h" />
     <ClInclude Include="cor_profiler_base.h" />
     <ClInclude Include="deployment_detection.h" />
@@ -250,6 +252,8 @@
     <ClCompile Include="configuration.cpp" />
     <ClCompile Include="continuous_profiler_clr_helpers.cpp" />
     <ClCompile Include="continuous_profiler.cpp" />
+    <ClCompile Include="runtime_sampler_configuration.cpp" />
+    <ClCompile Include="runtime_sampler_controller.cpp" />
     <ClCompile Include="cor_profiler_base.cpp" />
     <ClCompile Include="cor_profiler.cpp" />
     <ClCompile Include="environment_variables_util.cpp" />

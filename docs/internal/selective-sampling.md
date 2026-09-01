@@ -3,8 +3,10 @@
 > [!IMPORTANT]
 > Selective sampling is an experimental feature.
 
-This feature builds on top of the continuous profiling capabilities.
-See [Continuous profiling](./continuous-profiler.md) for more details.
+This feature builds on top of the continuous profiling capabilities and shares
+the native thread-sampling worker. See the
+[continuous profiler shared service definition](./continuous-profiler.md#shared-service-definition)
+for the common lifecycle and configuration semantics.
 
 Selective sampling API allows you to enable span-based sampling.
 After span is selected for frequent sampling, any thread associated with

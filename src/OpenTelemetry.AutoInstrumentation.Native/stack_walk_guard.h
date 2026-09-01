@@ -107,6 +107,15 @@ public:
     StackWalkGuard(const StackWalkGuard&)            = delete;
     StackWalkGuard& operator=(const StackWalkGuard&) = delete;
 
+    // Starts the safety worker before any sampled thread or runtime is
+    // suspended. Construction is intentionally dormant so an all-disabled
+    // profiler does not create a helper thread.
+    bool Start() noexcept;
+
+    // Stops and joins the safety worker. Call from outside the safety worker.
+    // Idempotent and terminal: Start() rejects attempts to restart afterwards.
+    void Stop() noexcept;
+
     // CanaryDss: STL gate + (if canary != 0) DSS on a coast-clear thread.
     // canary == 0 reduces to STL-only.
     // Available on all Windows architectures.
@@ -119,6 +128,9 @@ public:
 
     // True if the worker is Idle (diagnostic).
     bool IsIdle() const noexcept;
+
+    // True after the safety worker has been started (diagnostic).
+    bool IsStarted() const noexcept;
 
 #if defined(_M_AMD64)
     // RtlFrame0 probe (x64 only).
@@ -206,8 +218,8 @@ private:
     bool Schedule(const ProbeRequest& req);
 
     void WorkerLoop();
-    bool RunChecks(ProbeRequest& req) noexcept;          // dispatch on req.kind; may stage outputs
-    bool RunCanaryChecks(ThreadID canary) noexcept;      // heap envelope + optional canary DSS
+    bool RunChecks(ProbeRequest& req) noexcept;     // dispatch on req.kind; may stage outputs
+    bool RunCanaryChecks(ThreadID canary) noexcept; // heap envelope + optional canary DSS
 #if defined(_M_AMD64)
     bool RunRtlFrame0Checks(ProbeRequest& req) noexcept; // cooperative RTL frame-0 (x64 only)
 #endif

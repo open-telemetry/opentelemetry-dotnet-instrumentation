@@ -28,6 +28,12 @@ public:
     virtual ~IRuntimeCapture() = default;
 
     /// <summary>
+    /// Starts any helper needed for safe stack walking. This must run before
+    /// SuspendRuntime or per-thread suspension begins.
+    /// </summary>
+    virtual HRESULT PrepareForStackWalking() noexcept = 0;
+
+    /// <summary>
     /// Bring the runtime to a state where one or more stacks can be walked.
     /// ClrRuntimeCapture: profiler-API SuspendRuntime (seedless DSS is safe
     ///   under runtime suspension; probes only run in the native-walk fallback).
@@ -46,8 +52,7 @@ public:
     /// thread resolution, per-thread suspension, safety checks, and the
     /// DSS (or future native-walk fallback) internally.
     /// </summary>
-    virtual HRESULT CaptureStack(ThreadID                       managedThreadId,
-                                 StackSnapshotCallbackContext*  clientData) = 0;
+    virtual HRESULT CaptureStack(ThreadID managedThreadId, StackSnapshotCallbackContext* clientData) = 0;
 
     // Lifecycle notifications routed from ICorProfilerCallback.
     // Default no-op; NetFxRuntimeCapture overrides for canary tracking.
@@ -59,7 +64,7 @@ public:
     /// <summary>
     /// Shutdown signal (release waiters, e.g. canary wait).  Default no-op.
     /// </summary>
-    virtual void Stop() {}
+    virtual void Stop() noexcept {}
 };
 
 } // namespace ProfilerStackCapture

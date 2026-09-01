@@ -20,16 +20,28 @@ namespace continuous_profiler
 class StackWalkerImpl : public IStackWalker, public IThreadLifecycleListener
 {
 public:
-    explicit StackWalkerImpl(ICorProfilerInfo2* profilerInfo,
-                             RuntimeType        runtimeType)
+    explicit StackWalkerImpl(ICorProfilerInfo2* profilerInfo, RuntimeType runtimeType)
         : capturer_(ProfilerStackCapture::CreateStackCapturer(profilerInfo, runtimeType))
-        
+
     {
     }
 
     // -- IStackWalker (consumed by ContinuousProfiler) --
-    HRESULT CaptureStacks(const std::unordered_set<ThreadID>& threads,
-                          StackCaptureRequest*                request) override
+    HRESULT PrepareForStackWalking() noexcept override
+    {
+        return capturer_ != nullptr ? capturer_->PrepareForStackWalking() : E_FAIL;
+    }
+
+    /// @brief Stops helper threads while retaining this callback-visible facade.
+    void Stop() noexcept
+    {
+        if (capturer_ != nullptr)
+        {
+            capturer_->Stop();
+        }
+    }
+
+    HRESULT CaptureStacks(const std::unordered_set<ThreadID>& threads, StackCaptureRequest* request) override
     {
         if (capturer_ == nullptr)
         {
@@ -41,18 +53,14 @@ public:
         }
 
         // Zero-copy bridge: forward the embedded CapturedFrame to the consumer.
-        auto bridgeCallback =
-            [request](ProfilerStackCapture::StackSnapshotCallbackContext* ctx) -> HRESULT
-        {
-            return request->onFrame(&ctx->frame);
-        };
+        auto bridgeCallback = [request](ProfilerStackCapture::StackSnapshotCallbackContext* ctx) -> HRESULT
+        { return request->onFrame(&ctx->frame); };
 
         ProfilerStackCapture::StackSnapshotCallbackContext context{bridgeCallback};
         return capturer_->CaptureStacks(threads, &context);
     }
 
-    HRESULT ResolveNativeSymbolName(UINT_PTR        instructionPointer,
-                                    trace::WSTRING& outName) override
+    HRESULT ResolveNativeSymbolName(UINT_PTR instructionPointer, trace::WSTRING& outName) override
     {
         return capturer_ ? capturer_->ResolveNativeSymbolName(instructionPointer, outName) : E_FAIL;
     }

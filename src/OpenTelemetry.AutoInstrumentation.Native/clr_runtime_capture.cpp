@@ -22,6 +22,25 @@ ClrRuntimeCapture::ClrRuntimeCapture(IProfilerApi* profilerApi, std::chrono::mil
 #endif
 }
 
+HRESULT ClrRuntimeCapture::PrepareForStackWalking() noexcept
+{
+#if defined(_WIN32) && defined(_M_AMD64)
+    return stackWalkGuard_ != nullptr && stackWalkGuard_->Start() ? S_OK : E_FAIL;
+#else
+    return S_OK;
+#endif
+}
+
+void ClrRuntimeCapture::Stop() noexcept
+{
+#if defined(_WIN32) && defined(_M_AMD64)
+    if (stackWalkGuard_ != nullptr)
+    {
+        stackWalkGuard_->Stop();
+    }
+#endif
+}
+
 HRESULT ClrRuntimeCapture::SuspendRuntime()
 {
     if (profilerApi_ == nullptr)
