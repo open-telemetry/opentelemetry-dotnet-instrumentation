@@ -275,8 +275,6 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "6.0.13",
-                "7.0.10",
                 "8.0.9",
 #if NET10_0 || NET9_0 || NET8_0
                 "9.0.4",

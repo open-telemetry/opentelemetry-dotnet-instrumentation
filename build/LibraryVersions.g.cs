@@ -129,8 +129,6 @@ public static partial class LibraryVersion
         {
             "TestApplication.Npgsql",
             [
-                new("6.0.13"),
-                new("7.0.10"),
                 new("8.0.9"),
                 new("9.0.4", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("10.0.3", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
