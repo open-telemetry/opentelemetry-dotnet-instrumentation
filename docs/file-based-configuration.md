@@ -569,7 +569,7 @@ instrumentation/development:
       npgsql:
         # Whether the Npgsql instrumentation propagates the W3C traceparent through PostgreSQL application_name for non-multiplexed commands and Npgsql 10 COPY operations.
         # This adds one database round trip per traced operation. Multiplexed connectors are safely skipped because application_name is physical-session state.
-        # The configured application_name is restored before the next untraced operation on the same physical connection.
+        # Cleanup resets application_name to the session default configured when the connection was opened; a value assigned later with SET is not preserved.
         # Default is false
         context_propagation: false
       oraclemda: 

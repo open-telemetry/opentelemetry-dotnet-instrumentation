@@ -306,8 +306,12 @@ database round trip per traced operation. It does not alter, prefix, or combine
 the application's SQL. As Npgsql ends the user action, while it still owns the
 connector, the instrumentation executes `RESET application_name` through the
 same path. This adds one cleanup round trip per propagated operation and
-restores the configured value before control returns to the caller or the
-connector can be used for another operation. See Npgsql's
+resets the value to the session default configured when the connection was
+opened before control returns to the caller or the connector can be used for
+another operation. PostgreSQL [`RESET`](https://www.postgresql.org/docs/18/sql-reset.html)
+does not restore a value assigned later with `SET`; enabling this option can
+therefore overwrite changes made by application code to `application_name` at
+runtime. See Npgsql's
 [`EndUserAction` lifecycle](https://github.com/npgsql/npgsql/blob/d3768398c17877b3a916c3c4d87e8e11698991fc/src/Npgsql/Internal/NpgsqlConnector.cs#L2687-L2724).
 These internal commands use PostgreSQL's Simple Query flow, which discards the
 previous unnamed statement and portal; Npgsql's explicitly prepared and
