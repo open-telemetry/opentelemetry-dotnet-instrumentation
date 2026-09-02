@@ -216,6 +216,12 @@ internal partial class ConfigurationKeys
             /// </summary>
             public const string SqlClientNetFxExperimentalContextPropagation = "OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_CONTEXT_PROPAGATION";
 #endif
+
+            /// <summary>
+            /// Configuration key for the IBM MQ (XMS) instrumentation to enable experimental span attributes,
+            /// including <c>messaging.ibmmq.queue_manager.id</c>.
+            /// </summary>
+            public const string XmsExperimentalSpanAttributes = "OTEL_DOTNET_AUTO_XMS_EXPERIMENTAL_SPAN_ATTRIBUTES";
         }
     }
 

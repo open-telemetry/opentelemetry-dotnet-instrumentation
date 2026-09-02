@@ -1,11 +1,13 @@
 appender
 appenders
 CNCF
+ibmmq
 opentelemetry
 OTEL
 OTLP
 parentbased
 tracecontext
+tracestate
 traceidratio
 triager
 Zipkin
