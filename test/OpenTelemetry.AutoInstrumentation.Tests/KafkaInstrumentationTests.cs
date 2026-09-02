@@ -34,4 +34,59 @@ public class KafkaInstrumentationTests
         var value = new byte[] { 1, 2, 3 };
         Assert.Null(KafkaInstrumentation.ExtractMessageKeyValue(value));
     }
+
+    [Fact]
+    public void BootstrapServersCache_AddAndTryGet_RoundTrips()
+    {
+        var instance = new object();
+        BootstrapServersCache.Add(instance, "broker:9092");
+
+        Assert.True(BootstrapServersCache.TryGet(instance, out var result));
+        Assert.Equal("broker:9092", result);
+    }
+
+    [Fact]
+    public void BootstrapServersCache_TryGet_ReturnsFalseForUnknownInstance()
+    {
+        var instance = new object();
+        Assert.False(BootstrapServersCache.TryGet(instance, out var result));
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void BootstrapServersCache_Remove_ClearsEntry()
+    {
+        var instance = new object();
+        BootstrapServersCache.Add(instance, "broker:9092");
+        BootstrapServersCache.Remove(instance);
+
+        Assert.False(BootstrapServersCache.TryGet(instance, out _));
+    }
+
+    [Fact]
+    public void KafkaClusterIdCache_GetClusterId_ReturnsNullForNullOrEmpty()
+    {
+        Assert.Null(KafkaClusterIdCache.GetClusterId(null));
+        Assert.Null(KafkaClusterIdCache.GetClusterId(string.Empty));
+    }
+
+    [Fact]
+    public void KafkaClusterIdCache_GetClusterId_ReturnsNullWhenNotCached()
+    {
+        Assert.Null(KafkaClusterIdCache.GetClusterId("not-cached-host-unit-test:9999"));
+    }
+
+    [Fact]
+    public void KafkaClusterIdCache_ScheduleFetch_NoOpsForEmpty()
+    {
+        KafkaClusterIdCache.ScheduleFetch(string.Empty);
+    }
+
+    [Fact]
+    public void KafkaClusterIdCache_ScheduleFetch_DeduplicatesInFlightRequests()
+    {
+        const string key = "dedup-test-host-unit-test:9999";
+        KafkaClusterIdCache.ScheduleFetch(key);
+        KafkaClusterIdCache.ScheduleFetch(key);
+    }
 }

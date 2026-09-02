@@ -23,6 +23,7 @@ public static class ConsumerCloseIntegration
     internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception? exception, in CallTargetState state)
     {
         ConsumerCache.Remove(instance!);
+        BootstrapServersCache.Remove(instance!);
         return CallTargetReturn.GetDefault();
     }
 }
