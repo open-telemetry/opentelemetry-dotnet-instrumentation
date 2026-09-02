@@ -228,7 +228,7 @@ internal static class NpgsqlTraceContextPropagator
 
             var character = value[i];
 #if NET
-            if(!char.IsAsciiHexDigitLower(character))
+            if (!char.IsAsciiHexDigitLower(character))
 #else
             if (character is not (>= '0' and <= '9') and not (>= 'a' and <= 'f'))
 #endif
