@@ -137,6 +137,7 @@ public class ParserInstrumentationTests
 #endif
             "grpcnetclient",
             "httpclient",
+            "npgsql",
             "oraclemda",
             "sqlclient",
         ];
@@ -153,6 +154,7 @@ public class ParserInstrumentationTests
         Assert.NotNull(logs);
         Assert.NotNull(logs.Log4Net);
 
+        Assert.True(traces.Npgsql!.ContextPropagation);
         Assert.True(traces.OracleMda!.SetDbStatementForText);
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.HttpClient!.CaptureRequestHeaders);
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.HttpClient!.CaptureResponseHeaders);
