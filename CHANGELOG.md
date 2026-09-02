@@ -11,6 +11,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
   traces instrumentation for versions `3.1.x`+ for .NET only.
+- Support for [IBMXMSDotnetClient](https://www.nuget.org/packages/IBMXMSDotnetClient)
+  traces instrumentation for versions `9.0.0`+.
 
 ### Changed
 

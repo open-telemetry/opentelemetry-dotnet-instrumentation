@@ -331,6 +331,16 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "Xms",
+            NugetPackageName = "IBMXMSDotnetClient",
+            TestApplicationName = "TestApplication.Xms",
+            Versions =
+            [
+                new("9.4.3")
+            ]
+        },
+        new()
+        {
             IntegrationName = "AssemblyRedirection",
             NugetPackageName = "System.Diagnostics.DiagnosticSource",
             TestApplicationName = "TestApplication.AssemblyRedirection",

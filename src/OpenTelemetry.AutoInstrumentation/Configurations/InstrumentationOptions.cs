@@ -31,6 +31,7 @@ internal class InstrumentationOptions
         HttpInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
         OracleMdaDatabaseOpenTelemetryTracing = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaDatabaseOpenTelemetryTracing) ?? true;
         OracleMdaSetDbStatementForText = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText) ?? false;
+        XmsExperimentalSpanAttributes = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.XmsExperimentalSpanAttributes) ?? false;
     }
 
     internal InstrumentationOptions(DotNetTraces? instrumentationConfiguration, bool failFast)
@@ -153,6 +154,12 @@ internal class InstrumentationOptions
     /// Gets a value indicating whether text query in Oracle Client can be passed as a db.statement tag.
     /// </summary>
     public bool OracleMdaSetDbStatementForText { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the IBM MQ (XMS) instrumentation should set experimental span
+    /// attributes, including <c>messaging.ibmmq.queue_manager.id</c>.
+    /// </summary>
+    public bool XmsExperimentalSpanAttributes { get; }
 
 #if NETFRAMEWORK
     private static bool GetSqlClientNetFxExperimentalContextPropagation(Configuration configuration)

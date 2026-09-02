@@ -210,6 +210,12 @@ public static partial class LibraryVersion
             ]
         },
         {
+            "TestApplication.Xms",
+            [
+                new("9.4.3"),
+            ]
+        },
+        {
             "TestApplication.AssemblyRedirection",
             [
                 new("8.0.0", supportedFrameworks: [ "net8.0" ]),
