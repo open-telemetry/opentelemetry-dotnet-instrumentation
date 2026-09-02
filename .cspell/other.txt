@@ -68,6 +68,7 @@ sqlserver
 srcs
 STACKEXCHANGEREDIS
 TMPDIR
+traceparent
 tracesexporter
 unencrypted
 UNENCRYPTEDSUPPORT
