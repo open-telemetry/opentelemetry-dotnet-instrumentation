@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite"  VersionOverride="$(LibraryVersion)" />
-    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Condition=" '$(LibraryVersion)' != '' and $([MSBuild]::VersionLessThan('$(LibraryVersion)', '10.0.11')) " />
   </ItemGroup>
 </Project>
