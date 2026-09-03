@@ -51,14 +51,18 @@ public class FilebasedInstrumentationSettingsTests
                     CaptureRequestMetadata = "x-request-id",
                     CaptureResponseMetadata = "x-response-id"
                 },
-                OracleMda = new SetDbStatementForTextConfuguration
-                {
-                    SetDbStatementForText = true
-                },
                 HttpClient = new CaptureHeadersConfiguration
                 {
                     CaptureRequestHeaders = "x-request-id",
                     CaptureResponseHeaders = "x-response-id"
+                },
+                Npgsql = new NpgsqlConfiguration
+                {
+                    ContextPropagation = true
+                },
+                OracleMda = new SetDbStatementForTextConfuguration
+                {
+                    SetDbStatementForText = true
                 }
             }
         };
@@ -77,9 +81,11 @@ public class FilebasedInstrumentationSettingsTests
 
         Assert.NotNull(settings.EnabledInstrumentations);
         Assert.Contains(TracerInstrumentation.GrpcNetClient, settings.EnabledInstrumentations);
+        Assert.Contains(TracerInstrumentation.Npgsql, settings.EnabledInstrumentations);
         Assert.Contains(TracerInstrumentation.OracleMda, settings.EnabledInstrumentations);
         Assert.Contains(TracerInstrumentation.HttpClient, settings.EnabledInstrumentations);
 
+        Assert.True(settings.InstrumentationOptions.NpgsqlContextPropagation);
         Assert.True(settings.InstrumentationOptions.OracleMdaSetDbStatementForText);
         Assert.Contains(AdditionalTag.CreateGrpcRequestCache("x-request-id"), settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureRequestMetadata);
         Assert.Contains(AdditionalTag.CreateGrpcResponseCache("x-response-id"), settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata);

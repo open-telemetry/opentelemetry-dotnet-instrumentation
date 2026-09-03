@@ -70,6 +70,7 @@ public sealed class SettingsTests
         Assert.Empty(settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata);
         Assert.Empty(settings.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders);
         Assert.Empty(settings.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders);
+        Assert.False(settings.InstrumentationOptions.NpgsqlContextPropagation);
         Assert.False(settings.InstrumentationOptions.OracleMdaSetDbStatementForText);
 
         Assert.NotNull(settings.OtlpSettings);

@@ -41,7 +41,7 @@
 #include <mach-o/getsect.h>
 #endif
 
-#define FailProfiler(LEVEL, MESSAGE)                                                                                   \
+#define StopProfiler(LEVEL, MESSAGE, RESULT)                                                                           \
     Logger::LEVEL(MESSAGE);                                                                                            \
     if (IsFailFastEnabled())                                                                                           \
     {                                                                                                                  \
@@ -49,8 +49,11 @@
     }                                                                                                                  \
     else                                                                                                               \
     {                                                                                                                  \
-        return E_FAIL;                                                                                                 \
+        return RESULT;                                                                                                 \
     }
+
+#define FailProfiler(LEVEL, MESSAGE) StopProfiler(LEVEL, MESSAGE, E_FAIL)
+#define CancelProfiler(LEVEL, MESSAGE) StopProfiler(LEVEL, MESSAGE, CORPROF_E_PROFILER_CANCEL_ACTIVATION)
 
 using namespace std::chrono_literals;
 
@@ -161,7 +164,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     if (!exclude_process_names.empty() && Contains(exclude_process_names, process_name))
     {
         Logger::Info("Profiler disabled: ", process_name, " found in ", environment::exclude_process_names, ".");
-        FailProfiler(Info, "Profiler disabled - excluded process")
+        CancelProfiler(Info, "Profiler disabled - excluded process")
     }
 
     if (runtime_information_.is_core())
@@ -190,7 +193,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         {
             Logger::Info("Profiler disabled: ", environment::azure_app_services_app_pool_id, " ", app_pool_id_value,
                          " is recognized as an Azure App Services infrastructure process.");
-            FailProfiler(Info, "Profiler disabled - Azure App Services infrastructure process.")
+            CancelProfiler(Info, "Profiler disabled - Azure App Services infrastructure process.")
         }
 
         const auto& cli_telemetry_profile_value =
@@ -200,7 +203,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         {
             Logger::Info("Profiler disabled: ", app_pool_id_value,
                          " is recognized as Kudu, an Azure App Services reserved process.");
-            FailProfiler(Info, "Profiler disabled: - Kudu, an Azure App Services reserved process.")
+            CancelProfiler(Info, "Profiler disabled: - Kudu, an Azure App Services reserved process.")
         }
     }
 
@@ -609,6 +612,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         return S_OK;
     }
 
+    return TryRejitModule(module_id);
+}
+
+HRESULT CorProfiler::TryRejitModule(ModuleID module_id)
+{
     const auto& module_info = GetModuleInfo(this->info_, module_id);
     if (!module_info.IsValid())
     {
@@ -1350,9 +1358,9 @@ void CorProfiler::InitializeTraceMethods(WCHAR* id,
         WSTRING integration_type_name     = WSTRING(integration_type_name_ptr);
         WSTRING configuration_string      = WSTRING(configuration_string_ptr);
 
+        const auto integration_type = TypeReference(integration_assembly_name, integration_type_name, {}, {});
         std::vector<IntegrationDefinition> integrationDefinitions =
-            GetIntegrationsFromTraceMethodsConfiguration(integration_assembly_name, integration_type_name,
-                                                         configuration_string);
+            GetIntegrationsFromTraceMethodsConfiguration(integration_type, configuration_string);
         std::scoped_lock<std::mutex> moduleLock(module_ids_lock_);
 
         Logger::Info("InitializeTraceMethods: Total number of modules to analyze: ", module_ids_.size());

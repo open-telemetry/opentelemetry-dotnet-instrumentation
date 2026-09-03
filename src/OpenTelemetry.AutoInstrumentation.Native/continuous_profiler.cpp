@@ -235,7 +235,7 @@ void AllocationSamplingAppendToBuffer(int32_t appendLen, unsigned char* appendBu
         trace::Logger::Warn("Discarding captured allocation sample. Allocation buffer is full.");
         return;
     }
-    allocation_buffer->insert(allocation_buffer->end(), appendBuf, &appendBuf[appendLen]);
+    allocation_buffer->insert(allocation_buffer->end(), appendBuf, appendBuf + appendLen);
 }
 
 // Can return 0
