@@ -19,8 +19,8 @@ partial class Build
             CMake.Value(
                 arguments: $"../ -DCMAKE_BUILD_TYPE=Release -DOTEL_AUTO_VERSION={VersionHelper.GetVersionWithoutSuffixes()} -DOTEL_AUTO_VERSION_MAJOR={major} -DOTEL_AUTO_VERSION_MINOR={minor} -DOTEL_AUTO_VERSION_PATCH={patch}",
                 workingDirectory: buildDirectory);
-            Make.Value(
-                arguments: $"",
+            CMake.Value(
+                arguments: "--build . --parallel",
                 workingDirectory: buildDirectory);
         });
 
@@ -34,8 +34,8 @@ partial class Build
             CMake.Value(
                 arguments: "-S .",
                 workingDirectory: buildDirectory);
-            Make.Value(
-                arguments: $"",
+            CMake.Value(
+                arguments: "--build . --parallel",
                 workingDirectory: buildDirectory);
         });
 
