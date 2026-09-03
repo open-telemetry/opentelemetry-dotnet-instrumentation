@@ -58,7 +58,9 @@ fi
 test -z "$OTEL_DOTNET_AUTO_HOME" && OTEL_DOTNET_AUTO_HOME="$HOME/.otel-dotnet-auto"
 test -z "$VERSION" && VERSION="v{{VERSION}}"
 
-DOWNLOAD_DIR="${DOWNLOAD_DIR:=${TMPDIR:=$(mktemp -d)}}"
+if [ -z "${DOWNLOAD_DIR:-}" ]; then
+  DOWNLOAD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/otel-dotnet-auto.XXXXXX")"
+fi
 
 RELEASES_URL="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases"
 ARCHIVE="opentelemetry-dotnet-instrumentation-$OS_TYPE.zip"

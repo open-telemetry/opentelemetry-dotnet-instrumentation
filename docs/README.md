@@ -228,10 +228,13 @@ uses environment variables as parameters:
 | `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                                     | No       | `$HOME/.otel-dotnet-auto`   |
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`                | No       | *Calculated*                |
 | `ARCHITECTURE`          | Possible values for Linux: `x64`, `arm64`                                       | No       | *Calculated*                |
-| `TMPDIR`                | (deprecated) prefer `DOWNLOAD_DIR`                                              | No       | `$(mktemp -d)`              |
-| `DOWNLOAD_DIR`          | Folder to download the archive to. Will use local archive if it already exists  | No       | `$TMPDIR` or `$(mktemp -d)` |
+| `TMPDIR`                | (deprecated) parent directory for temporary downloads; prefer `DOWNLOAD_DIR`    | No       | *Not set*                   |
+| `DOWNLOAD_DIR`          | Folder to download the archive to. Will use local archive if it already exists  | No       | *Calculated*                |
 | `LOCAL_PATH`            | Full path the archive to use for installation. (ideal for air-gapped scenarios) | No       | *Calculated*                |
 | `VERSION`               | Version to download                                                             | No       | `1.16.0`                    |
+
+When `DOWNLOAD_DIR` is not set, the installer creates a unique
+`otel-dotnet-auto.XXXXXX` directory under `${TMPDIR:-/tmp}`.
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
