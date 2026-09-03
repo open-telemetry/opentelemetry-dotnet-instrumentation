@@ -72,6 +72,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Prevent the shell installer from using a predictable path for temporary
+  downloads.
 - Use the standard `service.namespace` resource attribute instead of `service.namespace.name`
   when identifying an application through OpAMP.
 
