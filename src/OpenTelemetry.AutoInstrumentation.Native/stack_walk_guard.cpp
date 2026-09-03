@@ -100,7 +100,7 @@ void StackWalkGuard::RequestShutdown() noexcept
         }
 
         abandon_ = true;
-        state_ = State::Stopping;
+        state_   = State::Stopping;
     }
     cv_.notify_all();
 }
@@ -220,8 +220,8 @@ void StackWalkGuard::WorkerLoop()
 
             // Consume the scheduled request exactly once. Schedule() owns
             // abandon_ initialization for each new round.
-            req      = req_; // POD copy under lock; no allocation
-            state_   = State::Running;
+            req    = req_; // POD copy under lock; no allocation
+            state_ = State::Running;
         }
 
         // COMPULSORY STL gate runs HERE, in WorkerLoop, NOT inside the

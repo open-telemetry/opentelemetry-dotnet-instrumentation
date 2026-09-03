@@ -57,9 +57,9 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
     if (configuration == committedConfiguration_)
     {
         if (source == authority_)
-    {
-        return outcome(RuntimeSamplerApplyResult::NoChange);
-    }
+        {
+            return outcome(RuntimeSamplerApplyResult::NoChange);
+        }
 
         authority_ = source;
         return outcome(RuntimeSamplerApplyResult::Applied);
@@ -73,7 +73,7 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
         // observe complete, stable targets.
         sampler = EnsureSamplerCreated();
         if (sampler == nullptr || !EnsureRequiredClrEventsEnabled())
-    {
+        {
             return outcome(RuntimeSamplerApplyResult::ActivationFailed);
         }
 
@@ -87,11 +87,11 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
         {
             trace::Logger::Warn("RuntimeSamplerService: failed to start the thread-sampling worker.");
             return outcome(RuntimeSamplerApplyResult::ActivationFailed);
-    }
+        }
 
         if (configuration.AllocationEnabled() && !committedConfiguration_.AllocationEnabled() &&
             !sampler->StartAllocationSamplingSession())
-    {
+        {
             trace::Logger::Warn("RuntimeSamplerService: failed to start the allocation-sampling EventPipe session.");
             return outcome(RuntimeSamplerApplyResult::ActivationFailed);
         }
@@ -117,7 +117,7 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
             // Cleanup is best effort. A failed stop retains the session handle with admission closed; any later
             // non-identical committed configuration retries the stop, while an identical snapshot remains NoChange.
             (void)sampler->StopAllocationSamplingSession();
-    }
+        }
     }
 
     trace::Logger::Info("RuntimeSamplerService: configuration applied. CPU sampling enabled: ",
@@ -163,22 +163,22 @@ ContinuousProfiler* RuntimeSamplerService::EnsureSamplerCreated() noexcept
     {
         // Build dependencies before their consumer: the walker's guard worker must be ready before the periodic
         // sampler can be started. These process-lifetime objects are published before CLR callbacks are enabled.
-            auto allocationSamplingSessionProvider = std::make_unique<ClrAllocationSamplingSessionProvider>(info12_);
+        auto allocationSamplingSessionProvider = std::make_unique<ClrAllocationSamplingSessionProvider>(info12_);
         auto stackWalker                       = std::make_unique<StackWalkerImpl>(info7_, runtime_);
-            auto sampler = std::make_unique<ContinuousProfiler>(*allocationSamplingSessionProvider);
-            if (info12_ != nullptr)
-            {
-                sampler->SetGlobalInfo12(info12_);
-            }
-            else
-            {
-                sampler->SetGlobalInfo7(info7_);
-            }
+        auto sampler = std::make_unique<ContinuousProfiler>(*allocationSamplingSessionProvider);
+        if (info12_ != nullptr)
+        {
+            sampler->SetGlobalInfo12(info12_);
+        }
+        else
+        {
+            sampler->SetGlobalInfo7(info7_);
+        }
         sampler->SetStackWalker(stackWalker.get());
 
-            allocationSamplingSessionProvider_ = std::move(allocationSamplingSessionProvider);
+        allocationSamplingSessionProvider_ = std::move(allocationSamplingSessionProvider);
         stackWalker_                       = std::move(stackWalker);
-            sampler_                           = std::move(sampler);
+        sampler_                           = std::move(sampler);
 
 #if defined(_WIN32)
         // .NET Framework may not report ThreadAssignedToOSThread for the managed thread that performs startup.

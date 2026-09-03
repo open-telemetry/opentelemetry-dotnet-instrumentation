@@ -114,7 +114,7 @@ public:
 
     void WaitForShutdown() noexcept override {}
 
-    int deliveredFrames = 0;
+    int  deliveredFrames = 0;
     bool stopped         = false;
 
 private:
@@ -156,8 +156,8 @@ public:
     }
 
     std::function<void()> onCapture;
-    int  captureCalls = 0;
-    bool resumed      = false;
+    int                   captureCalls      = 0;
+    bool                  resumed           = false;
     bool                  stopped           = false;
     bool                  waitedForShutdown = false;
 };
