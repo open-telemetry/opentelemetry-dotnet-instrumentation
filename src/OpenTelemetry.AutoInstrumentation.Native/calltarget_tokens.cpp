@@ -751,7 +751,7 @@ mdToken CallTargetTokens::GetCurrentTypeRef(const TypeInfo* currentType, bool& i
     if (currentType->parent_type != nullptr)
     {
         bool      hasGenericParentType = false;
-        TypeInfo* parentType = const_cast<TypeInfo*>(currentType->parent_type.get());
+        TypeInfo* parentType           = const_cast<TypeInfo*>(currentType->parent_type.get());
         while (true)
         {
             if (parentType->isGeneric)
