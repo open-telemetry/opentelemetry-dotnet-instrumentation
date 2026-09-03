@@ -411,9 +411,9 @@ public:
     void                        Shutdown();
     bool                        IsShutdownRequested() const;
     static void                 PrepareSelectiveSamplingBuffers();
-    bool                        StartAllocationSampling() noexcept;
+    bool                        StartAllocationSamplingSession() noexcept;
     void                        UpdateAllocationSamplingTarget(unsigned int maxMemorySamplesPerMinute) noexcept;
-    bool                        StopAllocationSampling() noexcept;
+    bool                        StopAllocationSamplingSession() noexcept;
     void                        AllocationTick(ULONG dataLen, LPCBYTE data);
     ICorProfilerInfo7*          info7 = nullptr;
     static void                 ThreadCreated(ThreadID thread_id);
@@ -439,6 +439,9 @@ public:
 
 private:
     std::atomic_bool                    shutdown_requested_{false};
+    // Latest-value mailbox: commits overwrite desired state and increment its
+    // version. The worker pulls a private snapshot at the next cohort boundary,
+    // so intermediate updates may coalesce without losing the latest state.
     mutable std::mutex                  thread_sampling_configuration_mutex_;
     std::condition_variable             thread_sampling_configuration_cv_;
     ThreadSamplingConfiguration         desired_thread_sampling_configuration_;

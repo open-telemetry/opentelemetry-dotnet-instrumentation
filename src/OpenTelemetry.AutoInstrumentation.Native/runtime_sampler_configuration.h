@@ -68,6 +68,8 @@ struct RuntimeSamplerConfigurationV1
 
 struct RuntimeSamplerStateV1
 {
+    // Committed controller state. Asynchronous workers may still be converging to this
+    // configuration, and disabled infrastructure may remain allocated or await cleanup.
     uint32_t                      structureSize;
     uint32_t                      authority;
     RuntimeSamplerConfigurationV1 committedConfiguration;

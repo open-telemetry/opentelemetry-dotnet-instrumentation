@@ -45,6 +45,17 @@ public:
     virtual HRESULT CaptureStacks(const std::unordered_set<ThreadID>& threads, void* clientData) = 0;
 
     /// <summary>
+    /// Requests terminal shutdown, stops runtime-specific capture admission, and releases capture waits.
+    /// Must be idempotent and non-blocking.
+    /// </summary>
+    virtual void RequestShutdown() noexcept = 0;
+
+    /// <summary>
+    /// Waits for runtime-specific capture workers to finish after RequestShutdown.
+    /// </summary>
+    virtual void WaitForShutdown() noexcept = 0;
+
+    /// <summary>
     /// Resolve native symbol name (deferred to native walk phase).
     /// </summary>
     virtual HRESULT ResolveNativeSymbolName(UINT_PTR instructionPointer, trace::WSTRING& outName)
@@ -68,8 +79,7 @@ public:
 /// <param name="profilerInfo">CLR profiler API</param>
 /// <param name="runtimeType">Runtime being profiled (.NET Core or .NET Framework)</param>
 /// <returns>Heap-allocated capturer (caller owns), or nullptr on error</returns>
-std::unique_ptr<IStackCapturer> CreateStackCapturer(
-    ICorProfilerInfo2*  profilerInfo,
+std::unique_ptr<IStackCapturer> CreateStackCapturer(ICorProfilerInfo2*               profilerInfo,
     continuous_profiler::RuntimeType runtimeType);
 
 // Creates a capturer from runtime-specific dependencies.

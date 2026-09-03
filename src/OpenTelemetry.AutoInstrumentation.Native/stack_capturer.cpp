@@ -7,6 +7,8 @@
 #include "runtime_capture.h"
 #include "suspension_guards.h"
 
+#include <atomic>
+
 #if defined(_WIN32)
 #include "netfx_runtime_capture.h"
 #endif
@@ -25,9 +27,10 @@ namespace ProfilerStackCapture
 /// All probe and walk machinery is owned by each IRuntimeCapture instance;
 /// this class only orchestrates the batch lifecycle and dispatch.
 ///
-/// Shutdown: implicit via member destruction order. runtime_ is declared
-/// after profilerApi_ so it is destroyed first - joining its StackWalkGuard
-/// worker thread before the IProfilerApi it references is destroyed.
+/// Shutdown normally propagates RequestShutdown followed by WaitForShutdown. Destruction
+/// provides the same ordering as a fallback: runtime_ is declared after
+/// profilerApi_ so it is destroyed first, joining its StackWalkGuard worker
+/// before the IProfilerApi it references is destroyed.
 ///
 /// Destructor chain:
 ///
@@ -56,6 +59,11 @@ public:
 
     HRESULT CaptureStacks(const std::unordered_set<ThreadID>& threads, void* clientData) override
     {
+        if (stopping_.load(std::memory_order_acquire))
+        {
+            return S_FALSE;
+        }
+
         if (threads.empty())
         {
             return S_OK;
@@ -79,13 +87,23 @@ public:
                 return E_FAIL;
             }
 
+            if (stopping_.load(std::memory_order_acquire))
+            {
+                return S_FALSE;
+            }
+
             // Phase 2: per-thread capture, delegated wholesale to the runtime.
             HRESULT captureResult = S_OK;
             for (ThreadID managedThreadId : threads)
             {
+                if (stopping_.load(std::memory_order_acquire))
+                {
+                    return S_FALSE;
+                }
+
                 HRESULT frameHr = runtime_->CaptureStack(managedThreadId, callbackContext);
 
-                if (callbackContext->cancellationRequested)
+                if (stopping_.load(std::memory_order_acquire) || callbackContext->cancellationRequested)
                 {
                     return S_FALSE;
                 }
@@ -104,6 +122,19 @@ public:
             trace::Logger::Error("[StackCaptureImpl] Exception during CaptureStacks: ", ex.what());
             return E_FAIL;
         }
+    }
+
+    void RequestShutdown() noexcept override
+    {
+        if (!stopping_.exchange(true, std::memory_order_acq_rel))
+        {
+            runtime_->RequestShutdown();
+        }
+    }
+
+    void WaitForShutdown() noexcept override
+    {
+        runtime_->WaitForShutdown();
     }
 
     HRESULT ResolveNativeSymbolName(UINT_PTR instructionPointer, trace::WSTRING& outName) override
@@ -144,6 +175,7 @@ private:
     // destroyed.
     std::unique_ptr<IProfilerApi>    profilerApi_;
     std::unique_ptr<IRuntimeCapture> runtime_;
+    std::atomic_bool                 stopping_{false};
 };
 
 // ============================================================================

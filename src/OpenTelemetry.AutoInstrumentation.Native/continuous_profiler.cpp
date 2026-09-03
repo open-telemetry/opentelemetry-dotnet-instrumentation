@@ -1317,6 +1317,8 @@ static void SamplingThreadMain(ContinuousProfiler* prof)
         {
             return;
         }
+        // Timeout completion admits one cohort under this private snapshot.
+        // Later configuration changes apply at the next cohort boundary.
         if (configuration.version != previousConfigurationVersion)
         {
             iteration = 0;
@@ -1423,6 +1425,8 @@ ThreadSamplingConfiguration ContinuousProfiler::PullThreadSamplingConfiguration(
 bool ContinuousProfiler::WaitForNextThreadSamplingCycle(ThreadSamplingConfiguration& configuration)
 {
     std::unique_lock<std::mutex> lock(thread_sampling_configuration_mutex_);
+    const auto                   shouldWake = [this, &configuration]
+    { return IsShutdownRequested() || configuration.version != desired_thread_sampling_configuration_.version; };
 
     while (!IsShutdownRequested())
     {
@@ -1438,23 +1442,14 @@ bool ContinuousProfiler::WaitForNextThreadSamplingCycle(ThreadSamplingConfigurat
 
         if (!configuration.IsEnabled())
         {
-            thread_sampling_configuration_cv_.wait(lock,
-                                                   [this, &configuration] {
-                                                       return IsShutdownRequested() ||
-                                                              configuration.version !=
-                                                                  desired_thread_sampling_configuration_.version;
-                                                   });
+            thread_sampling_configuration_cv_.wait(lock, shouldWake);
             continue;
         }
 
+        // IsEnabled() guarantees that the selected scheduling interval is nonzero.
         const auto samplingInterval = configuration.SchedulingIntervalMilliseconds();
         const bool interrupted =
-            thread_sampling_configuration_cv_.wait_for(lock, std::chrono::milliseconds(samplingInterval),
-                                                       [this, &configuration] {
-                                                           return IsShutdownRequested() ||
-                                                                  configuration.version !=
-                                                                      desired_thread_sampling_configuration_.version;
-                                                       });
+            thread_sampling_configuration_cv_.wait_for(lock, std::chrono::milliseconds(samplingInterval), shouldWake);
         if (!interrupted)
         {
             return true;
@@ -1489,15 +1484,32 @@ void ContinuousProfiler::Shutdown()
         return;
     }
 
+    // Phase 1: close admission and broadcast terminal cancellation to every producer branch.
     UpdateAllocationSamplingTarget(0);
+    if (stackWalker_ != nullptr)
+    {
+        // If the sampler is waiting for a guard probe, this wakes the await first so its suspension guard can resume
+        // the target. Resuming the target may in turn release the probe worker. This request neither joins nor
+        // destroys the walker.
+        stackWalker_->RequestShutdown();
+    }
     thread_sampling_configuration_cv_.notify_all();
-    StopAllocationSampling();
+
+    // Phase 2a: drain the independent allocation branch before joining the periodic-sampling dependency chain.
+    StopAllocationSamplingSession();
 
     if (thread_sampling_thread_ != nullptr && thread_sampling_thread_->joinable())
     {
         thread_sampling_thread_->join();
         thread_sampling_thread_.reset();
         trace::Logger::Info("ContinuousProfiler sampling thread stopped.");
+    }
+
+    if (stackWalker_ != nullptr)
+    {
+        // Phase 2b: join dependents before dependencies. The periodic worker has released the walker, so its guard
+        // worker can now be joined. Shutdown returns only after no owned thread can make another profiler API call.
+        stackWalker_->WaitForShutdown();
     }
 }
 
@@ -1668,6 +1680,14 @@ bool AllocationSubSampler::ShouldSample()
 
 void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
 {
+    // The admission cap is authoritative. If EventPipe cleanup failed after
+    // disablement, residual callbacks pay only this relaxed atomic read.
+    auto* const allocationSampler = allocationSubSampler.get();
+    if (IsShutdownRequested() || allocationSampler == nullptr || allocationSampler->TargetPerCycle() == 0)
+    {
+        return;
+    }
+
     // try to acquire shared lock without blocking
     // and return early if attempt was unsuccessful -
     // CaptureSamples acquired exclusive lock
@@ -1680,12 +1700,9 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
         return;
     }
 
-    if (IsShutdownRequested())
-    {
-        return;
-    }
-
-    if (this->allocationSubSampler == nullptr || !this->allocationSubSampler->ShouldSample())
+    // Recheck through ShouldSample() after taking the profiling lock. A disable
+    // racing the fast gate must still close admission before stack capture.
+    if (IsShutdownRequested() || !allocationSampler->ShouldSample())
     {
         return;
     }
@@ -1764,7 +1781,7 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
     AllocationSamplingAppendToBuffer(static_cast<int32_t>(localBytes.size()), localBytes.data());
 }
 
-bool ContinuousProfiler::StartAllocationSampling() noexcept
+bool ContinuousProfiler::StartAllocationSamplingSession() noexcept
 {
     if (allocationSubSampler == nullptr)
     {
@@ -1804,20 +1821,24 @@ void ContinuousProfiler::UpdateAllocationSamplingTarget(const unsigned int maxMe
     }
 }
 
-bool ContinuousProfiler::StopAllocationSampling() noexcept
+bool ContinuousProfiler::StopAllocationSamplingSession() noexcept
 {
-    UpdateAllocationSamplingTarget(0);
-
     if (session_ == 0)
     {
         return true;
     }
 
+    // Profiler EventPipe sessions deliver callbacks synchronously. Stopping the session prevents new callbacks and
+    // waits for an in-flight EventPipeEventDelivered callback to return. Admission (and, for terminal teardown, the
+    // shutdown flag) must therefore be closed before this call so a current-thread DSS can abort promptly. Never call
+    // this method from EventPipeEventDelivered itself: waiting for the current callback would self-deadlock.
     const HRESULT hr = allocationSamplingSessionProvider_.StopAllocationSamplingSession(session_);
     if (FAILED(hr))
     {
-        trace::Logger::Error("Could not disable allocation sampling: session pipe error. HRESULT=0x", std::setfill('0'),
-                             std::setw(8), std::hex, hr);
+        trace::Logger::Warn(
+            "Allocation sampling admission is closed, but its EventPipe session could not be stopped; residual "
+            "EventPipe overhead may remain. HRESULT=0x",
+            std::setfill('0'), std::setw(8), std::hex, hr);
         return false;
     }
     session_ = 0;

@@ -53,10 +53,9 @@ public:
     void OnAllocationTick(ULONG dataLength, LPCBYTE data) noexcept;
 
 private:
-    bool EnsureSamplingInfrastructurePrepared() noexcept;
+    ContinuousProfiler* EnsureSamplerCreated() noexcept;
+    bool                EnsureRequiredClrEventsEnabled() noexcept;
     bool EnsureSelectiveSamplingBuffersPrepared() noexcept;
-    bool EnsureThreadSamplingStarted() noexcept;
-    bool EnsureAllocationSamplingStarted() noexcept;
     void PublishCommittedConfiguration(const RuntimeSamplerConfigurationV1& previousConfiguration,
                                        const RuntimeSamplerConfigurationV1& configuration) noexcept;
 
@@ -70,8 +69,7 @@ private:
     RuntimeSamplerAuthority                               authority_ = RuntimeSamplerAuthority::None;
     RuntimeSamplerConfigurationV1 committedConfiguration_{sizeof(RuntimeSamplerConfigurationV1), 0, 0, 0};
     std::atomic_bool              shutdownRequested_{false};
-    bool                          threadSamplingStarted_            = false;
-    bool                          samplingInfrastructurePrepared_   = false;
+    bool                          requiredClrEventsEnabled_         = false;
     bool                          selectiveSamplingBuffersPrepared_ = false;
 };
 

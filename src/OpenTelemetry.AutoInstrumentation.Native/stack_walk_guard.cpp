@@ -79,14 +79,30 @@ StackWalkGuard::StackWalkGuard(IProfilerApi*             profilerApi,
 
 StackWalkGuard::~StackWalkGuard()
 {
-    {
-        std::lock_guard<std::mutex> lk(mutex_);
-        state_ = State::Stopping;
-    }
-    cv_.notify_all();
+    RequestShutdown();
+    WaitForShutdown();
+}
+
+void StackWalkGuard::WaitForShutdown() noexcept
+{
     if (worker_ && worker_->joinable())
         worker_->join();
     worker_.reset();
+}
+
+void StackWalkGuard::RequestShutdown() noexcept
+{
+    {
+        std::lock_guard<std::mutex> lk(mutex_);
+        if (state_ == State::Stopping)
+        {
+            return;
+        }
+
+        abandon_ = true;
+        state_ = State::Stopping;
+    }
+    cv_.notify_all();
 }
 
 bool StackWalkGuard::IsIdle() const noexcept
@@ -144,10 +160,10 @@ bool StackWalkGuard::ScheduleRtlFrame0Probe(CONTEXT* ctx, continuous_profiler::C
     req.kind      = ProbeKind::RtlFrame0;
     req.ctx_inout = ctx;
     req.frame_out = frame;
-    // staged_ctx is populated by the worker from *ctx_inout once it starts
-    // running; the caller is blocked in Await throughout, so we don't need
-    // to copy *ctx here. Keeping the copy on the worker side also avoids
-    // a redundant ~1.2 KB memcpy on the (suspending) scheduling thread.
+    // Snapshot input before handing the request to the worker. Await may return
+    // early on timeout or shutdown, so the worker must never read caller-owned
+    // storage after Schedule returns. The pointers remain commit-only outputs.
+    req.staged_ctx = *ctx;
     return Schedule(req);
 }
 
@@ -185,7 +201,6 @@ StackWalkGuard::ProbeResult StackWalkGuard::AwaitProbeResult()
     }
 
     const ProbeResult verdict = result_;
-    cv_.notify_all();
     return verdict;
 }
 
@@ -203,8 +218,9 @@ void StackWalkGuard::WorkerLoop()
             if (state_ == State::Stopping)
                 break;
 
+            // Consume the scheduled request exactly once. Schedule() owns
+            // abandon_ initialization for each new round.
             req      = req_; // POD copy under lock; no allocation
-            abandon_ = false;
             state_   = State::Running;
         }
 
@@ -236,6 +252,10 @@ void StackWalkGuard::WorkerLoop()
         {
             {
                 std::lock_guard<std::mutex> lk(mutex_);
+                // Stop is terminal; exception recovery must never republish Idle.
+                if (state_ == State::Stopping)
+                    break;
+
                 result_ = ProbeResult::Failed;
                 state_  = State::Idle;
                 SetStage(ProbeStage::None);
@@ -429,7 +449,7 @@ bool StackWalkGuard::RunCanaryChecks(ThreadID canary) noexcept
 //
 // The staging area (ProbeRequest::staged_ctx / staged_frame) exists precisely
 // because the probe produces real outputs that must survive the mutex-guarded
-// commit step. The orchestrator publishes staged outputs to caller memory
+// commit step. The worker publication step commits staged outputs to caller memory
 // under lock, only on success and only when not abandoned.
 // ---------------------------------------------------------------------------
 bool StackWalkGuard::RunRtlFrame0Checks(ProbeRequest& req) noexcept
@@ -453,13 +473,6 @@ bool StackWalkGuard::RunRtlFrame0Checks(ProbeRequest& req) noexcept
 
     if (req.ctx_inout == nullptr || req.frame_out == nullptr)
         return false;
-
-    // Snapshot the caller's CONTEXT once into staging. From here on we
-    // operate exclusively on req.staged_ctx; RtlVirtualUnwind mutates in
-    // place, and the result is committed to *req.ctx_inout by the
-    // orchestrator under lock only if we succeed and the round is not
-    // abandoned.
-    req.staged_ctx = *req.ctx_inout;
 
     const DWORD64 frame0Rip = req.staged_ctx.Rip;
     if (frame0Rip == 0)
@@ -647,8 +660,8 @@ bool StackWalkGuard::RunRtlFrame0Checks(ProbeRequest& req) noexcept
             return false;
     }
 
-    // Final cooperative checkpoint before the orchestrator commits the
-    // staged outputs under lock.
+    // Final cooperative checkpoint before the worker publication step commits
+    // the staged outputs under lock.
     if (abandoned())
         return false;
 

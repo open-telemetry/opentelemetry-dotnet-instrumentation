@@ -1226,6 +1226,8 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
                                               unsigned int maxMemorySamplesPerMinute,
                                               unsigned int selectedThreadsSamplingInterval)
 {
+    // Compatibility adapter for the existing managed startup path. Runtime updates use the
+    // versioned entry point directly; this adapter always submits Seed authority.
     const continuous_profiler::RuntimeSamplerConfigurationV1
                                                request{sizeof(continuous_profiler::RuntimeSamplerConfigurationV1),
                 threadSamplingEnabled ? threadSamplingInterval : 0, selectedThreadsSamplingInterval,

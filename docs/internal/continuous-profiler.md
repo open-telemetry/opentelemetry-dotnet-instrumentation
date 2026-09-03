@@ -33,15 +33,33 @@ configuration or lifecycle state. Repeated Seeds report that process startup
 was already committed, while a Seed arriving after ControlPlane authority is
 ignored as lower authority.
 
-Zero disables the corresponding CPU, selective-thread, or allocation sampling
-feature. No sampling machinery is created until a committed configuration first
-enables a feature. After that point, disabling thread sampling parks the existing
-worker and later re-enabling it reuses the same worker. Disabling allocation
-sampling closes its atomic admission gate before stopping the EventPipe session.
-An identical ControlPlane snapshot returns `NoChange` without retrying producer
-lifecycle work.
+Interop callers must initialize
+`RuntimeSamplerConfigurationV1.structureSize` to
+`sizeof(RuntimeSamplerConfigurationV1)` (16 bytes) and
+`RuntimeSamplerStateV1.structureSize` to `sizeof(RuntimeSamplerStateV1)` (24
+bytes). Each apply call makes one synchronous activation attempt. Native code
+does not schedule retries, impose a retry budget, or permanently disable a
+failed feature; retry cadence and stale-request suppression remain managed
+control-plane responsibilities. A failed attempt returns `ActivationFailed`,
+preserves the last committed state, and can be retried by a later explicit
+apply.
 
-This yields three deliberate service states. A **dormant** service has accepted
+Zero disables the corresponding CPU, selective-thread, or allocation sampling
+feature. An all-disabled initial configuration creates no sampling machinery.
+The first enabling attempt creates and publishes stable sampler objects before
+enabling CLR callbacks, but does not commit the candidate until all fallible
+activation steps succeed. If a later activation step fails, those objects remain
+inert and are reused by the next explicit attempt. After successful activation,
+disabling thread sampling parks the existing worker and later re-enabling it
+reuses the same worker. Disabling allocation sampling closes its atomic admission
+gate, commits the disabled state, and then stops the EventPipe session. If that
+cleanup fails, the retained session remains unable to admit samples and cleanup
+is retried by the next non-identical committed configuration or terminal
+shutdown. An identical ControlPlane snapshot returns `NoChange` without retrying
+producer lifecycle work.
+
+The successfully committed configuration yields three deliberate logical service
+states. A **dormant** service has accepted
 only an all-disabled configuration and has no sampling infrastructure. An
 **active** service has at least one enabled feature. A **quiescent** service was
 previously active but is currently all-disabled; it retains the parked thread

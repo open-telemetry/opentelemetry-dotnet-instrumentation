@@ -54,58 +54,78 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
         return outcome(RuntimeSamplerApplyResult::IgnoredLowerAuthority);
     }
 
-    if (source == authority_ && configuration == committedConfiguration_)
+    if (configuration == committedConfiguration_)
+    {
+        if (source == authority_)
     {
         return outcome(RuntimeSamplerApplyResult::NoChange);
     }
 
-    const bool authorityOnlyChange =
-        authority_ != RuntimeSamplerAuthority::None && configuration == committedConfiguration_;
-    if (!authorityOnlyChange && configuration.AnyFeatureEnabled())
-    {
-        const auto cpuSamplingInterval       = configuration.CpuSamplingInterval();
-        const auto selectiveSamplingInterval = configuration.SelectiveThreadSamplingInterval();
-        trace::Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", configuration.CpuEnabled(),
-                            ", thread sampling interval: ", cpuSamplingInterval.count(),
-                            ", allocationSamplingEnabled: ", configuration.AllocationEnabled(),
-                            ", max memory samples per minute: ", configuration.MaxAllocationSamplesPerMinute(),
-                            ", selected threads sampling interval: ", selectiveSamplingInterval.count());
+        authority_ = source;
+        return outcome(RuntimeSamplerApplyResult::Applied);
+    }
 
-        // Bootstrap the sampler machinery before publishing configuration. The sampling thread starts with the
-        // default disabled configuration and therefore remains quiescent until PublishCommittedConfiguration()
-        // stages the committed intervals and notifies it below.
-        if (!EnsureSamplingInfrastructurePrepared() ||
-            (configuration.SelectiveEnabled() && !EnsureSelectiveSamplingBuffersPrepared()) ||
-            (configuration.ThreadSamplingEnabled() && !EnsureThreadSamplingStarted()) ||
-            (configuration.AllocationEnabled() && !committedConfiguration_.AllocationEnabled() &&
-             !EnsureAllocationSamplingStarted()))
+    auto* sampler = sampler_.get();
+    if (configuration.AnyFeatureEnabled())
+    {
+        // Bootstrap creates the sampler in a disabled state. Configuration is published only after every required
+        // fallible activation step succeeds. Objects are created before CLR events are enabled so callbacks can only
+        // observe complete, stable targets.
+        sampler = EnsureSamplerCreated();
+        if (sampler == nullptr || !EnsureRequiredClrEventsEnabled())
+    {
+            return outcome(RuntimeSamplerApplyResult::ActivationFailed);
+        }
+
+        if (configuration.SelectiveEnabled() && !EnsureSelectiveSamplingBuffersPrepared())
         {
+            trace::Logger::Warn("RuntimeSamplerService: failed to prepare selective-sampling buffers.");
+            return outcome(RuntimeSamplerApplyResult::ActivationFailed);
+        }
+
+        if (configuration.ThreadSamplingEnabled() && !sampler->StartThreadSampling())
+        {
+            trace::Logger::Warn("RuntimeSamplerService: failed to start the thread-sampling worker.");
+            return outcome(RuntimeSamplerApplyResult::ActivationFailed);
+    }
+
+        if (configuration.AllocationEnabled() && !committedConfiguration_.AllocationEnabled() &&
+            !sampler->StartAllocationSamplingSession())
+    {
+            trace::Logger::Warn("RuntimeSamplerService: failed to start the allocation-sampling EventPipe session.");
             return outcome(RuntimeSamplerApplyResult::ActivationFailed);
         }
     }
 
-    if (shutdownRequested_.load(std::memory_order_acquire))
-    {
-        return outcome(RuntimeSamplerApplyResult::ShuttingDown);
-    }
-
     const auto previousConfiguration = committedConfiguration_;
-    // A successful bootstrap guarantees a sampler. A null sampler is valid only when this commit has no sampler state
-    // to publish, such as the initial all-disabled configuration or an authority-only change.
-    const bool publishToSampler = !authorityOnlyChange && sampler_ != nullptr;
-    if (publishToSampler && previousConfiguration.AllocationEnabled() && !configuration.AllocationEnabled())
+    if (sampler != nullptr && !configuration.AllocationEnabled())
     {
-        sampler_->UpdateAllocationSamplingTarget(0);
+        // Close admission before publishing the disabled controller state. EventPipe cleanup follows the commit.
+        sampler->UpdateAllocationSamplingTarget(0);
     }
 
     authority_              = source;
     committedConfiguration_ = configuration;
 
-    if (publishToSampler)
+    if (sampler != nullptr)
     {
         // Publication is the activation boundary: the sampler observes only committed controller state.
         PublishCommittedConfiguration(previousConfiguration, configuration);
+
+        if (!configuration.AllocationEnabled())
+        {
+            // Cleanup is best effort. A failed stop retains the session handle with admission closed; any later
+            // non-identical committed configuration retries the stop, while an identical snapshot remains NoChange.
+            (void)sampler->StopAllocationSamplingSession();
     }
+    }
+
+    trace::Logger::Info("RuntimeSamplerService: configuration applied. CPU sampling enabled: ",
+                        configuration.CpuEnabled(), ", CPU interval: ", configuration.CpuSamplingInterval().count(),
+                        " ms, selective sampling enabled: ", configuration.SelectiveEnabled(),
+                        ", selective interval: ", configuration.SelectiveThreadSamplingInterval().count(),
+                        " ms, allocation sampling enabled: ", configuration.AllocationEnabled(),
+                        ", maximum allocation samples per minute: ", configuration.MaxAllocationSamplesPerMinute());
     return outcome(RuntimeSamplerApplyResult::Applied);
 }
 
@@ -126,25 +146,25 @@ RuntimeSamplerService::~RuntimeSamplerService()
     Shutdown();
 }
 
-bool RuntimeSamplerService::EnsureSamplingInfrastructurePrepared() noexcept
+ContinuousProfiler* RuntimeSamplerService::EnsureSamplerCreated() noexcept
 {
-    if (samplingInfrastructurePrepared_)
+    if (sampler_ != nullptr)
     {
-        return true;
+        return sampler_.get();
     }
 
     if (info7_ == nullptr)
     {
-        return false;
+        trace::Logger::Warn("RuntimeSamplerService: ICorProfilerInfo7 is unavailable; sampler creation failed.");
+        return nullptr;
     }
 
     try
     {
-        // These process-lifetime objects are callback targets. Publish them before enabling CLR callbacks so every
-        // eligible callback observes a complete and stable sampling infrastructure.
-        if (sampler_ == nullptr)
-        {
+        // Build dependencies before their consumer: the walker's guard worker must be ready before the periodic
+        // sampler can be started. These process-lifetime objects are published before CLR callbacks are enabled.
             auto allocationSamplingSessionProvider = std::make_unique<ClrAllocationSamplingSessionProvider>(info12_);
+        auto stackWalker                       = std::make_unique<StackWalkerImpl>(info7_, runtime_);
             auto sampler = std::make_unique<ContinuousProfiler>(*allocationSamplingSessionProvider);
             if (info12_ != nullptr)
             {
@@ -154,15 +174,11 @@ bool RuntimeSamplerService::EnsureSamplingInfrastructurePrepared() noexcept
             {
                 sampler->SetGlobalInfo7(info7_);
             }
-            allocationSamplingSessionProvider_ = std::move(allocationSamplingSessionProvider);
-            sampler_                           = std::move(sampler);
-        }
+        sampler->SetStackWalker(stackWalker.get());
 
-        if (stackWalker_ == nullptr)
-        {
-            stackWalker_ = std::make_unique<StackWalkerImpl>(info7_, runtime_);
-            sampler_->SetStackWalker(stackWalker_.get());
-        }
+            allocationSamplingSessionProvider_ = std::move(allocationSamplingSessionProvider);
+        stackWalker_                       = std::move(stackWalker);
+            sampler_                           = std::move(sampler);
 
 #if defined(_WIN32)
         // .NET Framework may not report ThreadAssignedToOSThread for the managed thread that performs startup.
@@ -173,12 +189,36 @@ bool RuntimeSamplerService::EnsureSamplingInfrastructurePrepared() noexcept
         }
 #endif
 
+        return sampler_.get();
+    }
+    catch (const std::exception& ex)
+    {
+        trace::Logger::Warn("RuntimeSamplerService: sampler creation failed: ", ex.what());
+        return nullptr;
+    }
+    catch (...)
+    {
+        trace::Logger::Warn("RuntimeSamplerService: sampler creation failed with an unknown exception.");
+        return nullptr;
+    }
+}
+
+bool RuntimeSamplerService::EnsureRequiredClrEventsEnabled() noexcept
+{
+    if (requiredClrEventsEnabled_)
+    {
+        return true;
+    }
+
+    try
+    {
         DWORD eventsLow;
         DWORD eventsHigh;
         auto  hr = info7_->GetEventMask2(&eventsLow, &eventsHigh);
         if (FAILED(hr))
         {
-            trace::Logger::Warn("RuntimeSamplerService: Failed to read CLR event masks for continuous profiler.");
+            trace::Logger::Warn("RuntimeSamplerService: failed to read CLR event masks. HRESULT=",
+                                trace::HResultStr(hr));
             return false;
         }
 
@@ -188,16 +228,24 @@ bool RuntimeSamplerService::EnsureSamplingInfrastructurePrepared() noexcept
         hr = info7_->SetEventMask2(eventsLow, eventsHigh);
         if (FAILED(hr))
         {
-            trace::Logger::Warn("RuntimeSamplerService: Failed to enable CLR event masks for continuous profiler.");
+            trace::Logger::Warn("RuntimeSamplerService: failed to enable CLR thread-monitoring and stack-snapshot "
+                                "events. HRESULT=",
+                                trace::HResultStr(hr));
             return false;
         }
 
-        samplingInfrastructurePrepared_ = true;
+        requiredClrEventsEnabled_ = true;
         trace::Logger::Info("RuntimeSamplerService: CLR event masks configured for continuous profiler.");
         return true;
     }
+    catch (const std::exception& ex)
+    {
+        trace::Logger::Warn("RuntimeSamplerService: enabling required CLR events failed: ", ex.what());
+        return false;
+    }
     catch (...)
     {
+        trace::Logger::Warn("RuntimeSamplerService: enabling required CLR events failed with an unknown exception.");
         return false;
     }
 }
@@ -221,31 +269,10 @@ bool RuntimeSamplerService::EnsureSelectiveSamplingBuffersPrepared() noexcept
     }
 }
 
-bool RuntimeSamplerService::EnsureThreadSamplingStarted() noexcept
-{
-    if (threadSamplingStarted_)
-    {
-        return true;
-    }
-
-    trace::Logger::Info("ContinuousProfiler::StartThreadSampling");
-    if (!sampler_->StartThreadSampling())
-    {
-        return false;
-    }
-
-    threadSamplingStarted_ = true;
-    return true;
-}
-
-bool RuntimeSamplerService::EnsureAllocationSamplingStarted() noexcept
-{
-    return sampler_->StartAllocationSampling();
-}
-
 void RuntimeSamplerService::PublishCommittedConfiguration(const RuntimeSamplerConfigurationV1& previousConfiguration,
                                                           const RuntimeSamplerConfigurationV1& configuration) noexcept
 {
+    // Post-commit publication only: no CLR calls, resource transitions, or blocking work belong here.
     const bool threadConfigurationChanged =
         previousConfiguration.cpuSamplingIntervalMilliseconds != configuration.cpuSamplingIntervalMilliseconds ||
         previousConfiguration.selectiveThreadSamplingIntervalMilliseconds !=
@@ -261,10 +288,6 @@ void RuntimeSamplerService::PublishCommittedConfiguration(const RuntimeSamplerCo
     if (configuration.AllocationEnabled())
     {
         sampler_->UpdateAllocationSamplingTarget(configuration.MaxAllocationSamplesPerMinute());
-    }
-    else if (previousConfiguration.AllocationEnabled())
-    {
-        sampler_->StopAllocationSampling();
     }
 }
 
@@ -282,6 +305,8 @@ void RuntimeSamplerService::Shutdown() noexcept
 
     if (sampler != nullptr)
     {
+        // Shutdown may synchronously stop EventPipe and join the sampling thread.
+        // Keep the controller lock scoped to the terminal state transition above.
         sampler->Shutdown();
     }
 }

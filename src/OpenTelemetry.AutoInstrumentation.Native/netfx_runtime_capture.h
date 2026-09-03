@@ -77,23 +77,25 @@ struct NetFxCaptureOptions
 class NetFxRuntimeCapture final : public IRuntimeCapture
 {
 public:
-    explicit NetFxRuntimeCapture(IProfilerApi*              profilerApi,
-                                 const NetFxCaptureOptions& options = {});
+    explicit NetFxRuntimeCapture(IProfilerApi* profilerApi, const NetFxCaptureOptions& options = {});
     ~NetFxRuntimeCapture() = default;
 
     NetFxRuntimeCapture(const NetFxRuntimeCapture&)            = delete;
     NetFxRuntimeCapture& operator=(const NetFxRuntimeCapture&) = delete;
 
-    HRESULT SuspendRuntime() override { return S_OK; }
+    HRESULT SuspendRuntime() override
+    {
+        return S_OK;
+    }
     void    ResumeRuntime() noexcept override {}
 
-    HRESULT CaptureStack(ThreadID                      managedThreadId,
-                         StackSnapshotCallbackContext* clientData) override;
+    HRESULT CaptureStack(ThreadID managedThreadId, StackSnapshotCallbackContext* clientData) override;
 
     void OnThreadDestroyed(ThreadID threadId) override;
     void OnThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[]) override;
     void OnThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override;
-
+    void RequestShutdown() noexcept override;
+    void WaitForShutdown() noexcept override;
 
 private:
     CanarySnapshot SnapshotCanary() const;

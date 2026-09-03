@@ -56,6 +56,8 @@ private:
     bool in_azure_app_services = false;
     bool is_desktop_iis = false;
 
+    // Process-lifetime owner and callback target. Once published, the raw pointer is never reset;
+    // terminal shutdown closes admission but retains stable callback storage until process exit.
     mutable std::mutex                                          runtime_sampler_service_mutex_;
     std::once_flag                                              runtime_sampler_service_creation_flag_;
     std::unique_ptr<continuous_profiler::RuntimeSamplerService> runtime_sampler_service_owner_;
