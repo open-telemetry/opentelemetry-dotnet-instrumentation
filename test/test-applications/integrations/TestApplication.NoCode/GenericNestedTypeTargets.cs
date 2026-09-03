@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Runtime.CompilerServices;
+
 namespace TestApplication.NoCode;
 
 internal static class GenericNestedTypeTargets<T>
@@ -16,6 +18,7 @@ internal static class GenericNestedTypeTargets<T>
     {
         private int _invocationCount;
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public void Target()
         {
             _invocationCount++;
@@ -26,6 +29,7 @@ internal static class GenericNestedTypeTargets<T>
     {
         private int _invocationCount;
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public void Target()
         {
             _invocationCount++;
