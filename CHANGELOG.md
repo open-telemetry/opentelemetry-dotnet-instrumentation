@@ -73,6 +73,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   downloads.
 - Use the standard `service.namespace` resource attribute instead of `service.namespace.name`
   when identifying an application through OpAMP.
+- Fixed CallTarget bytecode instrumentation for methods declared on nested types,
+  including nested types inside generic parents.
 
 ## [v1.16.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.16.0)
 
