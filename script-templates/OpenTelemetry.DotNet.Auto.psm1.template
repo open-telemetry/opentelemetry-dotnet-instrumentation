@@ -299,6 +299,16 @@ function Test-AssemblyNotForGAC([string] $Name) {
     return $false 
 }
 
+function Get-AssemblyDllFileVersion($AssemblyDll) {
+    $installDir = Get-OpenTelemetryInstallDirectory
+
+    if ($installDir) {
+        $mainDllPath = [IO.Path]::Combine($installDir, 'net', $AssemblyDll)
+
+        return "v" + ([System.Diagnostics.FileVersionInfo]::GetVersionInfo($mainDllPath).ProductVersion).split('+', 2)[0]
+    }
+}
+
 function Is-Greater-Version($v1, $v2) {
     # Helper convert version main part to version object
     function ToVersion($version) {
@@ -760,13 +770,7 @@ function Get-OpenTelemetryInstallDirectory() {
     Gets OpenTelemetry .NET Automatic Instrumentation install version. 
 #>
 function Get-OpenTelemetryInstallVersion() {
-    $installDir = Get-OpenTelemetryInstallDirectory
-
-    if ($installDir) {
-        $mainDllPath = [IO.Path]::Combine($installDir, 'net', 'OpenTelemetry.AutoInstrumentation.dll')
-
-        return "v" + ([System.Diagnostics.FileVersionInfo]::GetVersionInfo($mainDllPath).ProductVersion).split('+', 2)[0]
-    }
+    return Get-AssemblyDllFileVersion 'OpenTelemetry.AutoInstrumentation.dll'
 }
 
 <#
