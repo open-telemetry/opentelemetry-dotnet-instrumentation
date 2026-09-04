@@ -75,7 +75,6 @@ protected:
     ModuleMetadata* GetMetadata();
     HRESULT         EnsureBaseCalltargetTokens();
     mdTypeSpec      GetTargetReturnValueTypeRef(TypeSignature* returnArgument);
-    mdToken         GetCurrentTypeRef(const TypeInfo* currentType, bool& isValueType);
 
     virtual const WSTRING& GetCallTargetType()              = 0;
     virtual const WSTRING& GetCallTargetStateType()         = 0;
@@ -90,6 +89,7 @@ public:
     mdTypeRef GetRuntimeTypeHandleTypeRef();
     mdTypeRef GetRuntimeMethodHandleTypeRef();
     mdAssemblyRef GetCorLibAssemblyRef();
+    mdToken GetCurrentTypeRef(const TypeInfo* currentType, bool& isValueType);
 
     HRESULT ModifyLocalSigAndInitialize(void* rewriterWrapperPtr, FunctionInfo* functionInfo,
                                         ULONG* callTargetStateIndex, ULONG* exceptionIndex,
