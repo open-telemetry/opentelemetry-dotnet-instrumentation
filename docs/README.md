@@ -257,21 +257,73 @@ which is the one installed by default on Windows.
 
 Example usage (run as administrator):
 
+> [!NOTE]
+> The downloaded module should be verified before it is imported because a module
+> cannot establish trust in its own code. By default, installation requires the
+> [GitHub CLI](https://cli.github.com/) and verifies both the immutable release
+> and the artifact attestation. To explicitly opt out, set
+> `$skip_release_verification` to `$true`; this also passes
+> `-SkipReleaseVerification` to `Install-OpenTelemetryCore` for the Windows
+> archive.
+
 ```powershell
 # PowerShell 5.1 is required
 #Requires -PSEdition Desktop
 
-# Download the module
-$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.16.0/OpenTelemetry.DotNet.Auto.psm1"
-$download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
-Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
+$version = "v1.16.0"
+$repository = "open-telemetry/opentelemetry-dotnet-instrumentation"
+$release_workflow = "$repository/.github/workflows/release.yml"
+$skip_release_verification = $false
 
-# Import the module to use its functions
-Import-Module $download_path
+# Use a unique directory protected by the Program Files access controls.
+$program_files = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::ProgramFiles)
+$download_dir = Join-Path $program_files "OpenTelemetry .NET AutoInstrumentation Download $([System.Guid]::NewGuid().ToString("N"))"
+$download_path = Join-Path $download_dir "OpenTelemetry.DotNet.Auto.psm1"
+$module_url = "https://github.com/$repository/releases/download/$version/OpenTelemetry.DotNet.Auto.psm1"
 
-# Install core files (online vs offline method)
-Install-OpenTelemetryCore
-Install-OpenTelemetryCore -LocalPath "C:\Path\To\OpenTelemetry.zip" 
+New-Item -ItemType Directory -Path $download_dir -ErrorAction Stop | Out-Null
+
+try {
+    Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
+
+    if ($skip_release_verification) {
+        Write-Warning "Release verification is skipped. Downloaded PowerShell code and binaries will not be authenticated."
+    }
+    else {
+        $github_cli = Get-Command gh.exe -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+        if (-not $github_cli) {
+            throw "GitHub CLI ('gh') is required. Install it or explicitly set `$skip_release_verification to `$true."
+        }
+
+        & $github_cli.Source release verify-asset $version $download_path --repo $repository
+        if ($LASTEXITCODE -ne 0) {
+            throw "GitHub release verification failed for the PowerShell module."
+        }
+
+        & $github_cli.Source attestation verify $download_path `
+            --repo $repository `
+            --signer-workflow $release_workflow `
+            --source-ref "refs/tags/$version"
+        if ($LASTEXITCODE -ne 0) {
+            throw "GitHub artifact attestation verification failed for the PowerShell module."
+        }
+    }
+
+    # Import the module only after successful verification.
+    Import-Module $download_path
+
+    # To install from a previously downloaded Windows archive, add:
+    # -LocalPath "C:\Path\To\OpenTelemetry.zip"
+    Install-OpenTelemetryCore -SkipReleaseVerification:$skip_release_verification -ErrorAction Stop
+
+    # Cache the verified module for updates and uninstallation.
+    Copy-Item -LiteralPath $download_path -Destination (Get-OpenTelemetryInstallDirectory) -Force
+}
+finally {
+    if (Test-Path -LiteralPath $download_dir) {
+        Remove-Item -LiteralPath $download_dir -Force -Recurse
+    }
+}
 
 # Set up the instrumentation for the current PowerShell session
 Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
@@ -291,6 +343,15 @@ Get-Help Install-OpenTelemetryCore -Detailed
 ```
 
 Updating OpenTelemetry installation:
+
+> [!NOTE]
+> By default, `Update-OpenTelemetryCore` uses the
+> [GitHub CLI](https://cli.github.com/) to verify that the downloaded PowerShell
+> module and Windows archive belong to the selected immutable GitHub release and
+> have valid artifact attestations from this repository's release workflow. The
+> existing installation is not removed if verification fails. To update without
+> GitHub CLI, use `-SkipReleaseVerification`. Skipping verification is not
+> recommended.
 
 ```powershell
 # Import the previously downloaded module. After an update the module is found in the default install directory.
