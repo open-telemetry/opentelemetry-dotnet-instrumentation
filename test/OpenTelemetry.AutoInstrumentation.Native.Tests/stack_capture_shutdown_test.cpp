@@ -320,7 +320,19 @@ TEST(ContinuousProfilerCaptureTest, RuntimeAbortResultDiscardsThePartialAllocati
     ContinuousProfiler                   profiler(allocationSessions);
     std::vector<FunctionIdentifier>      stack{FunctionIdentifier::Native(1)};
 
-    EXPECT_FALSE(FinalizeAllocationStackCapture(&profiler, CORPROF_E_STACKSNAPSHOT_ABORTED, stack));
+    EXPECT_FALSE(FinalizeAllocationStackCapture(profiler.GetShutdownToken(), CORPROF_E_STACKSNAPSHOT_ABORTED, stack));
+    EXPECT_TRUE(stack.empty());
+}
+
+TEST(ContinuousProfilerCaptureTest, ShutdownTokenDiscardsAnAllocationStackCapturedDuringShutdown)
+{
+    ClrAllocationSamplingSessionProvider allocationSessions(nullptr);
+    ContinuousProfiler                   profiler(allocationSessions);
+    std::vector<FunctionIdentifier>      stack{FunctionIdentifier::Native(1)};
+
+    profiler.Shutdown();
+
+    EXPECT_FALSE(FinalizeAllocationStackCapture(profiler.GetShutdownToken(), S_OK, stack));
     EXPECT_TRUE(stack.empty());
 }
 

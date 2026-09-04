@@ -264,6 +264,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         is_desktop_iis = runtime_information_.is_desktop();
     }
 
+    InitializeRuntimeSamplerService();
+
     // writing opcodes vector for the IL dumper
     if (IsDumpILRewriteEnabled())
     {
@@ -929,16 +931,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
 
 HRESULT STDMETHODCALLTYPE CorProfiler::Shutdown()
 {
-    runtime_sampler_shutdown_requested_.store(true, std::memory_order_release);
-
-    continuous_profiler::RuntimeSamplerService* service = nullptr;
+    // CorProfiler holds no lock while the service closes admission, broadcasts cancellation, drains callbacks, and
+    // joins its workers.
+    if (runtime_sampler_service_ != nullptr)
     {
-        std::lock_guard<std::mutex> lock(runtime_sampler_service_mutex_);
-        service = runtime_sampler_service_;
-    }
-    if (service != nullptr)
-    {
-        service->Shutdown();
+        runtime_sampler_service_->Shutdown();
     }
 
     is_attached_.store(false);
@@ -1196,36 +1193,21 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
     }
 }
 
-continuous_profiler::RuntimeSamplerService* CorProfiler::EnsureRuntimeSamplerServiceCreated() noexcept
+void CorProfiler::InitializeRuntimeSamplerService() noexcept
 {
-    std::lock_guard<std::mutex> lock(runtime_sampler_service_mutex_);
-    if (runtime_sampler_shutdown_requested_.load(std::memory_order_acquire))
-    {
-        return nullptr;
-    }
-
     try
     {
-        std::call_once(runtime_sampler_service_creation_flag_,
-                       [this]()
-                       {
-                           using continuous_profiler::RuntimeType;
-                           const auto runtime = runtime_information_.is_desktop() ? RuntimeType::DotNetFramework
-                                                : runtime_information_.is_core()  ? RuntimeType::DotNetCore
-                                                                                  : RuntimeType::Unknown;
-
-                           auto service =
-                               std::make_unique<continuous_profiler::RuntimeSamplerService>(info_, info12_, runtime);
-                           runtime_sampler_service_owner_ = std::move(service);
-                           runtime_sampler_service_       = runtime_sampler_service_owner_.get();
-                       });
+        using continuous_profiler::RuntimeType;
+        const auto runtime = runtime_information_.is_desktop() ? RuntimeType::DotNetFramework
+                             : runtime_information_.is_core()  ? RuntimeType::DotNetCore
+                                                               : RuntimeType::Unknown;
+        runtime_sampler_service_ =
+            std::make_unique<continuous_profiler::RuntimeSamplerService>(info_, info12_, runtime);
     }
     catch (...)
     {
-        return nullptr;
+        Logger::Warn("Runtime sampler service facade could not be created. Runtime sampling will be unavailable.");
     }
-
-    return runtime_sampler_service_;
 }
 
 void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled,
@@ -1310,16 +1292,15 @@ continuous_profiler::RuntimeSamplerApplyResult CorProfiler::ApplyContinuousProfi
         }
     }
 
-    auto* service = EnsureRuntimeSamplerServiceCreated();
-    if (service == nullptr)
+    if (runtime_sampler_service_ == nullptr)
     {
-        GetContinuousProfilerStateV1(actualState);
-        return runtime_sampler_shutdown_requested_.load(std::memory_order_acquire)
-                   ? continuous_profiler::RuntimeSamplerApplyResult::ShuttingDown
-                   : continuous_profiler::RuntimeSamplerApplyResult::ActivationFailed;
+        continuous_profiler::EncodeRuntimeSamplerStateV1({}, actualState);
+        return continuous_profiler::RuntimeSamplerApplyResult::ActivationFailed;
     }
 
-    const auto outcome = service->ApplyConfigurationV1(authority, configuration);
+    // RuntimeSamplerService owns the sole configuration/lifecycle gate. An admitted apply completes before terminal
+    // teardown; an apply ordered after shutdown observes the service's terminal state and is rejected.
+    const auto outcome = runtime_sampler_service_->ApplyConfigurationV1(authority, configuration);
     continuous_profiler::EncodeRuntimeSamplerStateV1(outcome.state, actualState);
     return outcome.result;
 }
@@ -1327,7 +1308,6 @@ continuous_profiler::RuntimeSamplerApplyResult CorProfiler::ApplyContinuousProfi
 continuous_profiler::RuntimeSamplerStateQueryResult CorProfiler::GetContinuousProfilerStateV1(
     continuous_profiler::RuntimeSamplerStateV1* actualState) const
 {
-    std::lock_guard<std::mutex> lock(runtime_sampler_service_mutex_);
     if (runtime_sampler_service_ != nullptr)
     {
         return continuous_profiler::EncodeRuntimeSamplerStateV1(runtime_sampler_service_->GetState(), actualState);

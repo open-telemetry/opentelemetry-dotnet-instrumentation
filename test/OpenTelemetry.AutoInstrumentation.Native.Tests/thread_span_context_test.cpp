@@ -283,7 +283,7 @@ namespace
     profiler.allocationSubSampler = std::make_unique<continuous_profiler::AllocationSubSampler>(1000u, 60u);
 
     const unsigned char data[4] = {0, 0, 0, 0};
-    profiler.AllocationTick(4u, data);
+    profiler.AllocationTick(profiler.GetShutdownToken(), 4u, data);
 
     std::exit(0);
 }

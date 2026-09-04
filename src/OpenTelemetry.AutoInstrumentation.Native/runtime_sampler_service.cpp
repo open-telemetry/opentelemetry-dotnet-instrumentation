@@ -10,6 +10,22 @@
 #include "runtime_sampler_configuration.h"
 #include "stack_walker_impl.h"
 
+namespace
+{
+
+void LogCallbackFailure(const char* callbackName) noexcept
+{
+    try
+    {
+        trace::Logger::Warn("RuntimeSamplerService: ", callbackName, " callback failed with an unknown exception.");
+    }
+    catch (...)
+    {
+    }
+}
+
+} // namespace
+
 namespace continuous_profiler
 {
 
@@ -29,7 +45,7 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
         return RuntimeSamplerApplyOutcome{result, {authority_, committedConfiguration_}};
     };
 
-    if (shutdownRequested_.load(std::memory_order_acquire))
+    if (shutdownStarted_)
     {
         return outcome(RuntimeSamplerApplyResult::ShuttingDown);
     }
@@ -272,7 +288,8 @@ bool RuntimeSamplerService::EnsureSelectiveSamplingBuffersPrepared() noexcept
 void RuntimeSamplerService::PublishCommittedConfiguration(const RuntimeSamplerConfigurationV1& previousConfiguration,
                                                           const RuntimeSamplerConfigurationV1& configuration) noexcept
 {
-    // Post-commit publication only: no CLR calls, resource transitions, or blocking work belong here.
+    // Post-commit publication only: no CLR calls, resource transitions, or unbounded waits belong here. The short
+    // mailbox and allocation-pacing locks are private producer-state publication boundaries.
     const bool threadConfigurationChanged =
         previousConfiguration.cpuSamplingIntervalMilliseconds != configuration.cpuSamplingIntervalMilliseconds ||
         previousConfiguration.selectiveThreadSamplingIntervalMilliseconds !=
@@ -296,77 +313,123 @@ void RuntimeSamplerService::Shutdown() noexcept
     ContinuousProfiler* sampler = nullptr;
     {
         std::lock_guard<std::mutex> lock(configurationMutex_);
-        if (shutdownRequested_.exchange(true, std::memory_order_acq_rel))
+        if (shutdownStarted_)
         {
             return;
         }
-        sampler = sampler_.get();
+        shutdownStarted_ = true;
+        sampler          = sampler_.get();
     }
 
     if (sampler != nullptr)
     {
-        // Shutdown may synchronously stop EventPipe and join the sampling thread.
-        // Keep the controller lock scoped to the terminal state transition above.
+        // The blocking phase runs without the configuration lock. ContinuousProfiler first broadcasts terminal
+        // cancellation to allocation DSS, periodic sampling, and the walk guard, then drains them in dependency order.
         sampler->Shutdown();
     }
 }
 
 void RuntimeSamplerService::OnThreadCreated(const ThreadID threadId) noexcept
 {
-    if (shutdownRequested_.load(std::memory_order_acquire) || sampler_ == nullptr)
+    try
     {
-        return;
+        if (sampler_ == nullptr || sampler_->IsShutdownRequested())
+        {
+            return;
+        }
+        sampler_->ThreadCreated(threadId);
+        if (stackWalker_ != nullptr)
+        {
+            stackWalker_->OnThreadCreated(threadId);
+        }
     }
-    sampler_->ThreadCreated(threadId);
-    if (stackWalker_ != nullptr)
+    catch (...)
     {
-        stackWalker_->OnThreadCreated(threadId);
+        LogCallbackFailure("ThreadCreated");
     }
 }
 
 void RuntimeSamplerService::OnThreadDestroyed(const ThreadID threadId) noexcept
 {
-    if (shutdownRequested_.load(std::memory_order_acquire) || sampler_ == nullptr)
+    try
     {
-        return;
+        if (sampler_ == nullptr || sampler_->IsShutdownRequested())
+        {
+            return;
+        }
+        sampler_->ThreadDestroyed(threadId);
+        if (stackWalker_ != nullptr)
+        {
+            stackWalker_->OnThreadDestroyed(threadId);
+        }
     }
-    sampler_->ThreadDestroyed(threadId);
-    if (stackWalker_ != nullptr)
+    catch (...)
     {
-        stackWalker_->OnThreadDestroyed(threadId);
+        LogCallbackFailure("ThreadDestroyed");
     }
 }
 
 void RuntimeSamplerService::OnThreadNameChanged(const ThreadID threadId, const ULONG cchName, WCHAR name[]) noexcept
 {
-    if (shutdownRequested_.load(std::memory_order_acquire) || sampler_ == nullptr)
+    try
     {
-        return;
+        if (sampler_ == nullptr || sampler_->IsShutdownRequested())
+        {
+            return;
+        }
+        sampler_->ThreadNameChanged(threadId, cchName, name);
+        if (stackWalker_ != nullptr)
+        {
+            stackWalker_->OnThreadNameChanged(threadId, cchName, name);
+        }
     }
-    sampler_->ThreadNameChanged(threadId, cchName, name);
-    if (stackWalker_ != nullptr)
+    catch (...)
     {
-        stackWalker_->OnThreadNameChanged(threadId, cchName, name);
+        LogCallbackFailure("ThreadNameChanged");
     }
 }
 
 void RuntimeSamplerService::OnThreadAssignedToOSThread(const ThreadID managedThreadId, const DWORD osThreadId) noexcept
 {
-    if (shutdownRequested_.load(std::memory_order_acquire) || sampler_ == nullptr)
+    try
     {
-        return;
+        if (sampler_ == nullptr || sampler_->IsShutdownRequested())
+        {
+            return;
+        }
+        if (stackWalker_ != nullptr)
+        {
+            stackWalker_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
+        }
     }
-    if (stackWalker_ != nullptr)
+    catch (...)
     {
-        stackWalker_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
+        LogCallbackFailure("ThreadAssignedToOSThread");
     }
 }
 
 void RuntimeSamplerService::OnAllocationTick(const ULONG dataLength, const LPCBYTE data) noexcept
 {
-    if (!shutdownRequested_.load(std::memory_order_acquire) && sampler_ != nullptr)
+    try
     {
-        sampler_->AllocationTick(dataLength, data);
+        auto* const sampler = sampler_.get();
+        if (sampler == nullptr)
+        {
+            return;
+        }
+
+        const auto shutdownToken = sampler->GetShutdownToken();
+        if (shutdownToken.IsCancellationRequested())
+        {
+            return;
+        }
+
+        // Direct call by design: DoStackSnapshot(0, ...) must capture this EventPipe callback thread.
+        sampler->AllocationTick(shutdownToken, dataLength, data);
+    }
+    catch (...)
+    {
+        LogCallbackFailure("EventPipeEventDelivered");
     }
 }
 

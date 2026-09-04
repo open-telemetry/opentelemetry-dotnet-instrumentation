@@ -6,7 +6,6 @@
 #ifndef OTEL_CLR_PROFILER_RUNTIME_SAMPLER_SERVICE_H_
 #define OTEL_CLR_PROFILER_RUNTIME_SAMPLER_SERVICE_H_
 
-#include <atomic>
 #include <memory>
 #include <mutex>
 
@@ -68,7 +67,7 @@ private:
     mutable std::mutex                                    configurationMutex_;
     RuntimeSamplerAuthority                               authority_ = RuntimeSamplerAuthority::None;
     RuntimeSamplerConfigurationV1 committedConfiguration_{sizeof(RuntimeSamplerConfigurationV1), 0, 0, 0};
-    std::atomic_bool              shutdownRequested_{false};
+    bool                          shutdownStarted_                  = false;
     bool                          requiredClrEventsEnabled_         = false;
     bool                          selectiveSamplingBuffersPrepared_ = false;
 };

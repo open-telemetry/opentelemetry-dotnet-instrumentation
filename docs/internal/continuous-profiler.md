@@ -45,11 +45,18 @@ preserves the last committed state, and can be retried by a later explicit
 apply.
 
 Zero disables the corresponding CPU, selective-thread, or allocation sampling
-feature. An all-disabled initial configuration creates no sampling machinery.
+feature. The profiler owns one lightweight `RuntimeSamplerService` controller
+facade from initialization so configuration and terminal shutdown share one
+synchronization boundary. An all-disabled initial configuration creates no
+sampling machinery: no stack walker, worker thread, allocation controller,
+EventPipe session, or additional CLR event capability.
 The first enabling attempt creates and publishes stable sampler objects before
 enabling CLR callbacks, but does not commit the candidate until all fallible
-activation steps succeed. If a later activation step fails, those objects remain
-inert and are reused by the next explicit attempt. After successful activation,
+activation steps succeed. Thread activation includes an explicit startup
+handshake: native Apply does not report success until the sampling worker has
+successfully called `InitializeCurrentThread`. If a later activation step fails,
+already prepared objects retain closed producer admission and are reused by the
+next explicit attempt. After successful activation,
 disabling thread sampling parks the existing worker and later re-enabling it
 reuses the same worker. Disabling allocation sampling closes its atomic admission
 gate, commits the disabled state, and then stops the EventPipe session. If that
@@ -73,8 +80,10 @@ material runtime cost.
 Configuration changes are eventually consistent at capture boundaries. An
 ordinary disable allows an already admitted complete capture to finish and be
 published. CLR shutdown is terminal: the next stack-frame callback aborts the
-capture, unpublished partial data is discarded, EventPipe is stopped, and owned
-threads are joined.
+capture, unpublished partial data is discarded, EventPipe shutdown is attempted
+synchronously after allocation admission closes, and owned threads are joined.
+If EventPipe shutdown fails, the retained session remains unable to admit
+samples and is left for CLR process teardown.
 
 ## Thread sampling
 

@@ -208,12 +208,41 @@ TEST(RuntimeSamplerServiceTest, SamplerPullsTheMostRecentlyStagedThreadConfigura
     EXPECT_EQ(20u, configuration.selectiveSamplingIntervalMilliseconds);
 }
 
+TEST(RuntimeSamplerServiceTest, ThreadSamplingStartWaitsForWorkerInitialization)
+{
+    FakeAllocationSamplingSessionProvider sessions;
+    ContinuousProfiler                    profiler(sessions);
+
+    EXPECT_FALSE(profiler.StartThreadSampling());
+}
+
 TEST(RuntimeSamplerServiceTest, AllocationSamplerObservesAZeroTargetPublishedAtRuntime)
 {
     AllocationSubSampler sampler(1000, 60);
 
     sampler.SetTargetPerCycle(0);
 
+    EXPECT_FALSE(sampler.ShouldSample());
+}
+
+TEST(RuntimeSamplerServiceTest, AllocationSamplerHigherTargetDoesNotInheritOldSpacing)
+{
+    AllocationSubSampler sampler(1, 60);
+
+    ASSERT_TRUE(sampler.ShouldSample());
+    sampler.SetTargetPerCycle(600);
+
+    EXPECT_TRUE(sampler.ShouldSample());
+}
+
+TEST(RuntimeSamplerServiceTest, AllocationSamplerLowerTargetUsesNewSpacingWithoutBursting)
+{
+    AllocationSubSampler sampler(600, 60);
+
+    ASSERT_TRUE(sampler.ShouldSample());
+    sampler.SetTargetPerCycle(10);
+
+    ASSERT_TRUE(sampler.ShouldSample());
     EXPECT_FALSE(sampler.ShouldSample());
 }
 

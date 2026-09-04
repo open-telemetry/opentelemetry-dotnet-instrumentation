@@ -856,7 +856,11 @@ struct DoStackSnapshotParams
 {
     ContinuousProfiler*              prof;
     std::vector<FunctionIdentifier>* buffer;
-    DoStackSnapshotParams(ContinuousProfiler* p, std::vector<FunctionIdentifier>* b) : prof(p), buffer(b) {}
+    ShutdownToken                    shutdownToken;
+    DoStackSnapshotParams(ContinuousProfiler* p, std::vector<FunctionIdentifier>* b, ShutdownToken token)
+        : prof(p), buffer(b), shutdownToken(token)
+    {
+    }
 };
 
 static HRESULT __stdcall HandleStackFrame(_In_ FunctionID         func_id,
@@ -867,7 +871,7 @@ static HRESULT __stdcall HandleStackFrame(_In_ FunctionID         func_id,
                                           _In_ void*              client_data)
 {
     const auto params = static_cast<DoStackSnapshotParams*>(client_data);
-    if (params->prof->IsShutdownRequested())
+    if (params->shutdownToken.IsCancellationRequested())
     {
         return S_FALSE;
     }
@@ -913,9 +917,10 @@ bool CaptureFunctionIdentifiersForThreads(
     const std::unordered_set<ThreadID>&                            selectedThreads,
     std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
 {
+    const auto shutdownToken = prof->GetShutdownToken();
     prof->helper.ClearFunctionIdentifierCache();
 
-    if (prof->IsShutdownRequested())
+    if (shutdownToken.IsCancellationRequested())
     {
         threadStacksBuffer.clear();
         return false;
@@ -923,22 +928,23 @@ bool CaptureFunctionIdentifiersForThreads(
 
     if (auto stackWalker = prof->GetStackWalker())
     {
-        auto frameProcessor = [&threadStacksBuffer, prof](continuous_profiler::CapturedFrame* frame) -> HRESULT
+        auto frameProcessor = [&threadStacksBuffer, prof,
+                               shutdownToken](continuous_profiler::CapturedFrame* frame) -> HRESULT
         {
-            if (prof->IsShutdownRequested())
+            if (shutdownToken.IsCancellationRequested())
             {
                 return S_FALSE;
             }
 
             auto                  thread = frame->threadId;
-            DoStackSnapshotParams doStackSnapshotParams{prof, &threadStacksBuffer[thread]};
+            DoStackSnapshotParams doStackSnapshotParams{prof, &threadStacksBuffer[thread], shutdownToken};
 
             if (frame->isUnmanagedFrame && frame->functionId == 0 && frame->instructionPointer != 0)
             {
                 // Record IP for symbol resolution
                 doStackSnapshotParams.prof->stats_.total_frames++;
                 doStackSnapshotParams.buffer->push_back(FunctionIdentifier::Native(frame->instructionPointer));
-                return prof->IsShutdownRequested() ? S_FALSE : S_OK;
+                return shutdownToken.IsCancellationRequested() ? S_FALSE : S_OK;
             }
 
             return HandleStackFrame(frame->functionId, frame->instructionPointer, frame->frameInfo, frame->contextSize,
@@ -947,7 +953,7 @@ bool CaptureFunctionIdentifiersForThreads(
 
         continuous_profiler::StackCaptureRequest request{frameProcessor};
         const auto                               captureResult = stackWalker->CaptureStacks(selectedThreads, &request);
-        if (captureResult == S_FALSE || prof->IsShutdownRequested())
+        if (captureResult == S_FALSE || shutdownToken.IsCancellationRequested())
         {
             threadStacksBuffer.clear();
             return false;
@@ -1296,11 +1302,30 @@ static bool ShouldTrackIterations(const ThreadSamplingConfiguration& configurati
     return configuration.BothEnabled();
 }
 
-static void SamplingThreadMain(ContinuousProfiler* prof)
+static void SamplingThreadMain(ContinuousProfiler*   prof,
+                               ShutdownToken         shutdownToken,
+                               std::promise<HRESULT> initializationResult)
 {
     ICorProfilerInfo7* info7 = prof->info7;
 
-    info7->InitializeCurrentThread();
+    HRESULT initializeCurrentThreadResult;
+    if (shutdownToken.IsCancellationRequested())
+    {
+        initializeCurrentThreadResult = E_ABORT;
+    }
+    else if (info7 == nullptr)
+    {
+        initializeCurrentThreadResult = E_NOINTERFACE;
+    }
+    else
+    {
+        initializeCurrentThreadResult = info7->InitializeCurrentThread();
+    }
+    initializationResult.set_value(initializeCurrentThreadResult);
+    if (FAILED(initializeCurrentThreadResult))
+    {
+        return;
+    }
 
     std::unordered_map<ThreadID, std::vector<FunctionIdentifier>> threadStacksBuffer;
     unsigned int                                                  iteration = 0;
@@ -1310,7 +1335,7 @@ static void SamplingThreadMain(ContinuousProfiler* prof)
     const auto startTime    = std::chrono::steady_clock::now();
     auto       next_refresh = GetNextRefreshTime(startTime);
 
-    while (!prof->IsShutdownRequested())
+    while (!shutdownToken.IsCancellationRequested())
     {
         const auto previousConfigurationVersion = configuration.version;
         if (!prof->WaitForNextThreadSamplingCycle(configuration))
@@ -1343,7 +1368,7 @@ static void SamplingThreadMain(ContinuousProfiler* prof)
         CaptureSamples(prof, info7, samplingType, threadStacksBuffer, configuration.SelectiveEnabled(),
                        configuration.cpuSamplingIntervalMilliseconds);
 
-        if (prof->IsShutdownRequested())
+        if (shutdownToken.IsCancellationRequested())
         {
             return;
         }
@@ -1461,6 +1486,11 @@ bool ContinuousProfiler::WaitForNextThreadSamplingCycle(ThreadSamplingConfigurat
 
 bool ContinuousProfiler::StartThreadSampling() noexcept
 {
+    if (IsShutdownRequested())
+    {
+        return false;
+    }
+
     if (thread_sampling_thread_ != nullptr)
     {
         return true;
@@ -1468,11 +1498,32 @@ bool ContinuousProfiler::StartThreadSampling() noexcept
 
     try
     {
-        thread_sampling_thread_ = std::make_unique<std::thread>(SamplingThreadMain, this);
+        // Apply must not report activation until the CLR has accepted this native worker. Start the thread in the
+        // quiescent state, wait for InitializeCurrentThread, and publish configuration only after this handshake
+        // succeeds. A failed handshake leaves no running worker and allows a later Apply to retry activation.
+        std::promise<HRESULT> initializationResult;
+        auto                  initialized = initializationResult.get_future();
+        thread_sampling_thread_           = std::make_unique<std::thread>(SamplingThreadMain, this, GetShutdownToken(),
+                                                                std::move(initializationResult));
+
+        const auto result = initialized.get();
+        if (FAILED(result))
+        {
+            thread_sampling_thread_->join();
+            thread_sampling_thread_.reset();
+            trace::Logger::Warn("ContinuousProfiler: InitializeCurrentThread failed for the sampling worker. HRESULT=",
+                                trace::HResultStr(result));
+            return false;
+        }
         return true;
     }
     catch (...)
     {
+        if (thread_sampling_thread_ != nullptr && thread_sampling_thread_->joinable())
+        {
+            thread_sampling_thread_->join();
+        }
+        thread_sampling_thread_.reset();
         return false;
     }
 }
@@ -1484,7 +1535,8 @@ void ContinuousProfiler::Shutdown()
         return;
     }
 
-    // Phase 1: close admission and broadcast terminal cancellation to every producer branch.
+    // Phase 1 (non-blocking): close admission and broadcast terminal cancellation to every producer branch. The
+    // shared shutdown token makes in-flight allocation and periodic DSS frame callbacks return S_FALSE.
     UpdateAllocationSamplingTarget(0);
     if (stackWalker_ != nullptr)
     {
@@ -1495,7 +1547,8 @@ void ContinuousProfiler::Shutdown()
     }
     thread_sampling_configuration_cv_.notify_all();
 
-    // Phase 2a: drain the independent allocation branch before joining the periodic-sampling dependency chain.
+    // Phase 2 (blocking, no lifecycle/configuration locks held): drain the independent allocation branch before
+    // joining the periodic-sampling dependency chain.
     StopAllocationSamplingSession();
 
     if (thread_sampling_thread_ != nullptr && thread_sampling_thread_->joinable())
@@ -1513,9 +1566,14 @@ void ContinuousProfiler::Shutdown()
     }
 }
 
-bool ContinuousProfiler::IsShutdownRequested() const
+bool ContinuousProfiler::IsShutdownRequested() const noexcept
 {
-    return shutdown_requested_.load(std::memory_order_acquire);
+    return GetShutdownToken().IsCancellationRequested();
+}
+
+ShutdownToken ContinuousProfiler::GetShutdownToken() const noexcept
+{
+    return ShutdownToken(shutdown_requested_);
 }
 
 static thread_span_context GetCurrentSpanContext(ThreadID tid)
@@ -1553,13 +1611,14 @@ constexpr auto EtwPointerSize                         = sizeof(void*);
 constexpr auto AllocationTickV4TypeNameStartByteIndex = 4 + 4 + 2 + 8 + EtwPointerSize;
 constexpr auto AllocationTickV4SizeWithoutTypeName    = 4 + 4 + 2 + 8 + EtwPointerSize + 4 + EtwPointerSize + 8;
 
-bool FinalizeAllocationStackCapture(ContinuousProfiler*              prof,
+bool FinalizeAllocationStackCapture(const ShutdownToken&             shutdownToken,
                                     const HRESULT                    captureResult,
                                     std::vector<FunctionIdentifier>& threadStack)
 {
     // CoreCLR translates any non-S_OK frame callback result into
     // CORPROF_E_STACKSNAPSHOT_ABORTED when DoStackSnapshot returns.
-    if (captureResult == S_FALSE || captureResult == CORPROF_E_STACKSNAPSHOT_ABORTED || prof->IsShutdownRequested())
+    if (captureResult == S_FALSE || captureResult == CORPROF_E_STACKSNAPSHOT_ABORTED ||
+        shutdownToken.IsCancellationRequested())
     {
         threadStack.clear();
         return false;
@@ -1574,12 +1633,14 @@ bool FinalizeAllocationStackCapture(ContinuousProfiler*              prof,
     return true;
 }
 
-static bool CaptureAllocationStack(ContinuousProfiler* prof, std::vector<FunctionIdentifier>& threadStack)
+static bool CaptureAllocationStack(ContinuousProfiler*              prof,
+                                   const ShutdownToken&             shutdownToken,
+                                   std::vector<FunctionIdentifier>& threadStack)
 {
-    DoStackSnapshotParams doStackSnapshotParams(prof, &threadStack);
+    DoStackSnapshotParams doStackSnapshotParams(prof, &threadStack, shutdownToken);
     const HRESULT         hr = prof->info7->DoStackSnapshot((ThreadID)NULL, &HandleStackFrame, COR_PRF_SNAPSHOT_DEFAULT,
                                                             &doStackSnapshotParams, nullptr, 0);
-    return FinalizeAllocationStackCapture(prof, hr, threadStack);
+    return FinalizeAllocationStackCapture(shutdownToken, hr, threadStack);
 }
 
 AllocationSubSampler::AllocationSubSampler(uint32_t targetPerCycle_, uint32_t secondsPerCycle_)
@@ -1599,6 +1660,25 @@ AllocationSubSampler::AllocationSubSampler(uint32_t targetPerCycle_, uint32_t se
 
 void AllocationSubSampler::SetTargetPerCycle(const uint32_t target) noexcept
 {
+    std::lock_guard<std::mutex> guard(sampleLock);
+    if (targetPerCycle.load(std::memory_order_relaxed) == target)
+    {
+        return;
+    }
+
+    // A changed nonzero target begins a new pacing epoch. Reset the state while callbacks are excluded, then publish
+    // the target last so a callback that observes it also observes the matching pacing state through sampleLock.
+    if (target != 0)
+    {
+        seenThisCycle              = 0;
+        sampledThisCycle           = 0;
+        seenLastCycle              = 0;
+        startupCyclesRemaining     = kStartupAllocationPacedCycles;
+        startupNextSampleAllowedAt = std::chrono::steady_clock::now();
+        nextCycleStartMillis =
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) +
+            std::chrono::seconds(secondsPerCycle);
+    }
     targetPerCycle.store(target, std::memory_order_relaxed);
 }
 
@@ -1643,6 +1723,7 @@ bool AllocationSubSampler::ShouldSample()
     auto now =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     auto steadyNow = std::chrono::steady_clock::now();
+
     if (now > nextCycleStartMillis)
     {
         AdvanceCycle(now);
@@ -1678,12 +1759,13 @@ bool AllocationSubSampler::ShouldSample()
     return sample;
 }
 
-void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
+void ContinuousProfiler::AllocationTick(const ShutdownToken& shutdownToken, ULONG dataLen, LPCBYTE data)
 {
     // The admission cap is authoritative. If EventPipe cleanup failed after
     // disablement, residual callbacks pay only this relaxed atomic read.
     auto* const allocationSampler = allocationSubSampler.get();
-    if (IsShutdownRequested() || allocationSampler == nullptr || allocationSampler->TargetPerCycle() == 0)
+    if (shutdownToken.IsCancellationRequested() || allocationSampler == nullptr ||
+        allocationSampler->TargetPerCycle() == 0)
     {
         return;
     }
@@ -1702,7 +1784,7 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
 
     // Recheck through ShouldSample() after taking the profiling lock. A disable
     // racing the fast gate must still close admission before stack capture.
-    if (IsShutdownRequested() || !allocationSampler->ShouldSample())
+    if (shutdownToken.IsCancellationRequested() || !allocationSampler->ShouldSample())
     {
         return;
     }
@@ -1761,14 +1843,14 @@ void ContinuousProfiler::AllocationTick(ULONG dataLen, LPCBYTE data)
         std::lock_guard<std::mutex> guard(name_cache_lock);
         this->helper.ClearFunctionIdentifierCache();
 
-        if (!CaptureAllocationStack(this, threadStack))
+        if (!CaptureAllocationStack(this, shutdownToken, threadStack))
         {
             return;
         }
         ResolveFrames(this, threadStack, localBuf);
     }
 
-    if (IsShutdownRequested())
+    if (shutdownToken.IsCancellationRequested())
     {
         return;
     }

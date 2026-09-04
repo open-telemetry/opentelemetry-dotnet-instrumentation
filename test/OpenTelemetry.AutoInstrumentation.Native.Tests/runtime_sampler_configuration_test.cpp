@@ -50,6 +50,7 @@ public:
     {
         info_   = nullptr;
         info12_ = nullptr;
+        InitializeRuntimeSamplerService();
     }
 };
 

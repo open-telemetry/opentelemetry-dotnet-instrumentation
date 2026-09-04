@@ -23,6 +23,7 @@ enum class RuntimeSamplerAuthority : uint32_t
 
 enum class RuntimeSamplerApplyResult : int32_t
 {
+    // The controller snapshot is committed; asynchronous workers may still be converging to it.
     Applied                      = 0,
     NoChange                     = 1,
     IgnoredSeedAlreadyCommitted  = 2,

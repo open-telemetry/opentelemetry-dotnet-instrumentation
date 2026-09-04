@@ -56,15 +56,9 @@ private:
     bool in_azure_app_services = false;
     bool is_desktop_iis = false;
 
-    // Process-lifetime owner and callback target. Once published, the raw pointer is never reset;
-    // terminal shutdown closes admission but retains stable callback storage until process exit.
-    mutable std::mutex                                          runtime_sampler_service_mutex_;
-    std::once_flag                                              runtime_sampler_service_creation_flag_;
-    std::unique_ptr<continuous_profiler::RuntimeSamplerService> runtime_sampler_service_owner_;
-    continuous_profiler::RuntimeSamplerService*                 runtime_sampler_service_ = nullptr;
-    std::atomic_bool                                            runtime_sampler_shutdown_requested_{false};
+    // Stable process-lifetime facade. Its sampling infrastructure remains lazy until the first enabling configuration.
+    std::unique_ptr<continuous_profiler::RuntimeSamplerService> runtime_sampler_service_;
     HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override;
-
 
     //
     // CallTarget Members
@@ -139,7 +133,9 @@ private:
     // Initialization methods
     //
     void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
-    continuous_profiler::RuntimeSamplerService* EnsureRuntimeSamplerServiceCreated() noexcept;
+
+protected:
+    void InitializeRuntimeSamplerService() noexcept;
 
 public:
     CorProfiler();
