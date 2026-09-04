@@ -14,6 +14,9 @@ permissions:
 jobs:
   powershell-script:
     name: Run PowerShell script on ${{ matrix.machine }}
+    permissions:
+      attestations: read
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -34,6 +37,7 @@ jobs:
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
         env:
+          GH_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY_NAME: ${{ github.repository }}
           RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
@@ -46,8 +50,15 @@ jobs:
           $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
           $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\*"
           Invoke-WebRequest -Uri $module_url -OutFile $dl_path
+          gh release verify-asset $env:RELEASE_TAG_NAME $dl_path --repo $env:GITHUB_REPOSITORY_NAME
+          if ($LASTEXITCODE -ne 0) { throw "GitHub release verification failed for the PowerShell module." }
+          gh attestation verify $dl_path `
+            --repo $env:GITHUB_REPOSITORY_NAME `
+            --signer-workflow "$env:GITHUB_REPOSITORY_NAME/.github/workflows/release.yml" `
+            --source-ref "refs/tags/$env:RELEASE_TAG_NAME"
+          if ($LASTEXITCODE -ne 0) { throw "GitHub artifact attestation verification failed for the PowerShell module." }
           Import-Module $dl_path
-          Install-OpenTelemetryCore
+          Install-OpenTelemetryCore -ErrorAction Stop
           $install_dir = Get-OpenTelemetryInstallDirectory
           Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
           ./bin/Release/net10.0/publish/testapp
