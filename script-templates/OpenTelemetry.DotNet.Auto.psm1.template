@@ -17,6 +17,8 @@
 #Requires -RunAsAdministrator
 
 $ServiceLocatorVariable = "OTEL_DOTNET_AUTO_INSTALL_DIR"
+$ReleaseRepository = "open-telemetry/opentelemetry-dotnet-instrumentation"
+$ReleaseWorkflow = "$ReleaseRepository/.github/workflows/release.yml"
 
 function Get-Current-InstallDir() {
     return [System.Environment]::GetEnvironmentVariable($ServiceLocatorVariable, [System.EnvironmentVariableTarget]::Machine)
@@ -45,14 +47,59 @@ function Get-CLIInstallDir-From-InstallDir([string]$InstallDir) {
     throw "Invalid install directory provided '$InstallDir'"
 }
 
-function Get-Temp-Directory() {
-    $temp = $env:TEMP
-
-    if (-not (Test-Path $temp)) {
-        New-Item -ItemType Directory -Force -Path $temp | Out-Null
+function New-Release-Download-Directory() {
+    $programFiles = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::ProgramFiles)
+    if (-not $programFiles) {
+        throw "Could not resolve the Program Files directory."
     }
 
-    return $temp
+    $directoryName = "OpenTelemetry .NET AutoInstrumentation Download $([System.Guid]::NewGuid().ToString("N"))"
+    $downloadDir = Join-Path $programFiles $directoryName
+
+    New-Item -ItemType Directory -Path $downloadDir -ErrorAction Stop | Out-Null
+
+    return $downloadDir
+}
+
+function Assert-Release-Version([string]$Version) {
+    $semanticVersionPattern = '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$'
+    if ($Version -notmatch $semanticVersionPattern) {
+        throw "Invalid release version '$Version'."
+    }
+}
+
+function Assert-OpenTelemetry-Release-Asset([string]$GitHubCLIPath, [string]$Version, [string]$Path) {
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        throw "Could not find release asset '$Path'."
+    }
+
+    $assetName = Split-Path -Leaf $Path
+
+    # Bind the downloaded file to the exact immutable GitHub release.
+    & $GitHubCLIPath release verify-asset $Version $Path --repo $ReleaseRepository
+    $releaseVerificationExitCode = $LASTEXITCODE
+    if ($releaseVerificationExitCode -ne 0) {
+        throw "GitHub release verification failed for '$assetName'."
+    }
+
+    # Verify that the expected workflow produced the file from the release tag.
+    & $GitHubCLIPath attestation verify $Path `
+        --repo $ReleaseRepository `
+        --signer-workflow $ReleaseWorkflow `
+        --source-ref "refs/tags/$Version"
+    $attestationVerificationExitCode = $LASTEXITCODE
+    if ($attestationVerificationExitCode -ne 0) {
+        throw "GitHub artifact attestation verification failed for '$assetName'."
+    }
+}
+
+function Get-GitHub-CLI-Path() {
+    $githubCLI = Get-Command gh.exe -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $githubCLI) {
+        throw "GitHub CLI ('gh') is required to verify release assets. Install GitHub CLI or use -SkipReleaseVerification to explicitly skip verification."
+    }
+
+    return $githubCLI.Source
 }
 
 function Prepare-Install-Directory([string]$InstallDir) {
@@ -229,17 +276,19 @@ function Filter-Env-List([string[]]$EnvValues, [string[]]$Filters) {
     return $remaining
 }
 
-function Get-OpenTelemetry-Archive([string] $Version, [string] $LocalPath) {
+function Get-OpenTelemetry-Archive([string]$Version, [string]$LocalPath, [string]$DownloadDirectory) {
     if ($LocalPath) {
-        if (Test-Path $LocalPath) {
-            return $LocalPath
+        if (Test-Path -LiteralPath $LocalPath -PathType Leaf) {
+            $archivePath = Join-Path $DownloadDirectory "opentelemetry-dotnet-instrumentation-windows.zip"
+            Copy-Item -LiteralPath $LocalPath -Destination $archivePath -ErrorAction Stop
+
+            return $archivePath
         }
 
         throw "Could not find archive '$LocalPath'"
     }
 
-    $tempDir = Get-Temp-Directory
-    return Download-OpenTelemetry $Version $tempDir
+    return Download-OpenTelemetry $Version $DownloadDirectory
 }
 
 function Test-AssemblyNotForGAC([string] $Name) {
@@ -352,6 +401,10 @@ function Register-AssembliesInGAC() {
     Default: <auto> - the default path is Program Files dir.
     Install path of the OpenTelemetry .NET Automatic Instrumentation
     Possible values: <auto>, (Custom path)
+    .PARAMETER LocalPath
+    Path to a previously downloaded Windows archive.
+    .PARAMETER SkipReleaseVerification
+    Skips GitHub release and artifact attestation verification. This is not recommended.
 #>
 function Install-OpenTelemetryCore() {
     param(
@@ -360,42 +413,57 @@ function Install-OpenTelemetryCore() {
         [Parameter(Mandatory = $false)]
         [string]$LocalPath,
         [Parameter(Mandatory = $false)]
-        [bool]$RegisterAssembliesInGAC = $true
+        [bool]$RegisterAssembliesInGAC = $true,
+        [Parameter(Mandatory = $false)]
+        [switch]$SkipReleaseVerification
     )
 
     $version = "v{{VERSION}}"
     $installDir = Get-CLIInstallDir-From-InstallDir $InstallDir
+    $downloadDir = $null
     $archivePath = $null
-    $deleteArchive = $true
+    $githubCLIPath = $null
+
+    Assert-Release-Version $version
+
+    if ($SkipReleaseVerification) {
+        Write-Warning "GitHub release and artifact attestation verification is skipped. The Windows archive will not be authenticated."
+    }
+    else {
+        $githubCLIPath = Get-GitHub-CLI-Path
+    }
 
     try {
-        if ($LocalPath) {
-            # Keep the archive if it's user downloaded
-            $deleteArchive = $false
+        # Work only on a protected copy so the archive cannot be replaced between
+        # verification and extraction, including when LocalPath was supplied.
+        $downloadDir = New-Release-Download-Directory
+        $archivePath = Get-OpenTelemetry-Archive $version $LocalPath $downloadDir
+
+        if (-not $SkipReleaseVerification) {
+            Assert-OpenTelemetry-Release-Asset $githubCLIPath $version $archivePath
         }
 
-        $archivePath = Get-OpenTelemetry-Archive $version $LocalPath
+        try {
+            Prepare-Install-Directory $installDir
 
-        Prepare-Install-Directory $installDir
+            # Extract files from zip
+            Expand-Archive $archivePath $installDir -Force
 
-        # Extract files from zip
-        Expand-Archive $archivePath $installDir -Force
+            # OpenTelemetry service locator
+            [System.Environment]::SetEnvironmentVariable($ServiceLocatorVariable, $installDir, [System.EnvironmentVariableTarget]::Machine)
 
-        # OpenTelemetry service locator
-        [System.Environment]::SetEnvironmentVariable($ServiceLocatorVariable, $installDir, [System.EnvironmentVariableTarget]::Machine)
-
-        if ($RegisterAssembliesInGAC){
-            Register-AssembliesInGAC $installDir
+            if ($RegisterAssembliesInGAC){
+                Register-AssembliesInGAC $installDir
+            }
         }
-    } 
-    catch {
-        $message = $_
-        Write-Error "Could not setup OpenTelemetry .NET Automatic Instrumentation. $message"
-    } 
+        catch {
+            $message = $_
+            Write-Error "Could not setup OpenTelemetry .NET Automatic Instrumentation. $message"
+        }
+    }
     finally {
-        if ($archivePath -and $deleteArchive) {
-            # Cleanup
-            Remove-Item $archivePath
+        if ($downloadDir -and (Test-Path -LiteralPath $downloadDir)) {
+            Remove-Item -LiteralPath $downloadDir -Force -Recurse
         }
     }
 }
@@ -440,13 +508,17 @@ function Uninstall-OpenTelemetryCore() {
     Update OpenTelemetry .NET Automatic Instrumentation.
     .PARAMETER RegisterIIS
     Registers IIS 
+    .PARAMETER SkipReleaseVerification
+    Skips GitHub release and artifact attestation verification. This is not recommended.
 #>
 function Update-OpenTelemetryCore() {
     param(
         [Parameter(Mandatory = $false)]
         [bool]$RegisterIIS = $false,
         [Parameter(Mandatory = $false)]
-        [bool]$RegisterAssembliesInGAC = $true
+        [bool]$RegisterAssembliesInGAC = $true,
+        [Parameter(Mandatory = $false)]
+        [switch]$SkipReleaseVerification
     )
 
     $currentInstallVersion = Get-OpenTelemetryInstallVersion
@@ -455,6 +527,7 @@ function Update-OpenTelemetryCore() {
     }
 
     $newestInstallVersion = Get-Newest-InstallVersion
+    Assert-Release-Version $newestInstallVersion
     if (-not(Is-Greater-Version $newestInstallVersion $currentInstallVersion)) {
         Write-Warning "Newest version of OpenTelemetry .NET Automatic Instrumentation is already installed."
 
@@ -464,28 +537,50 @@ function Update-OpenTelemetryCore() {
     Write-Information -MessageData "Updating OpenTelemetry .NET Automatic Instrumentation from $($currentInstallVersion) to $($newestInstallVersion)." -InformationAction Continue
 
     $installDir = Get-Current-InstallDir
+    $updateDir = $null
+    $githubCLIPath = $null
 
-    Uninstall-OpenTelemetryCore
-    if ($RegisterIIS) {
-        Unregister-OpenTelemetryForIIS -NoReset
+    if ($SkipReleaseVerification) {
+        Write-Warning "GitHub release and artifact attestation verification is skipped. Downloaded PowerShell code and binaries will not be authenticated."
+    }
+    else {
+        $githubCLIPath = Get-GitHub-CLI-Path
     }
 
-    $tempDir = Get-Temp-Directory
-    $modulePath = Download-OpenTelemetry-Install-Module $newestInstallVersion $tempDir
+    try {
+        $updateDir = New-Release-Download-Directory
+        $modulePath = Download-OpenTelemetry-Install-Module $newestInstallVersion $updateDir
+        $archivePath = Download-OpenTelemetry $newestInstallVersion $updateDir
 
-    Remove-Module OpenTelemetry.Dotnet.Auto
-    Import-Module $modulePath
+        if (-not $SkipReleaseVerification) {
+            Assert-OpenTelemetry-Release-Asset $githubCLIPath $newestInstallVersion $modulePath
+            Assert-OpenTelemetry-Release-Asset $githubCLIPath $newestInstallVersion $archivePath
+        }
 
-    Install-OpenTelemetryCore -InstallDir $installDir -RegisterAssembliesInGAC $RegisterAssembliesInGAC
-    if ($RegisterIIS) {
-        Register-OpenTelemetryForIIS
+        Uninstall-OpenTelemetryCore
+        if ($RegisterIIS) {
+            Unregister-OpenTelemetryForIIS -NoReset
+        }
+
+        Remove-Module OpenTelemetry.Dotnet.Auto
+        Import-Module $modulePath
+
+        Install-OpenTelemetryCore -InstallDir $installDir -LocalPath $archivePath -RegisterAssembliesInGAC $RegisterAssembliesInGAC -SkipReleaseVerification:$SkipReleaseVerification -ErrorAction Stop
+        if ($RegisterIIS) {
+            Register-OpenTelemetryForIIS
+        }
+
+        # Release module
+        Remove-Module OpenTelemetry.Dotnet.Auto
+
+        # Cache install module
+        Move-Item -LiteralPath $modulePath -Destination $installDir
     }
-
-    # Release module
-    Remove-Module OpenTelemetry.Dotnet.Auto
-    
-    # Cache install module
-    Move-Item -Path $modulePath -Destination $installDir
+    finally {
+        if ($updateDir -and (Test-Path -LiteralPath $updateDir)) {
+            Remove-Item -LiteralPath $updateDir -Force -Recurse
+        }
+    }
 }
 
 <#
