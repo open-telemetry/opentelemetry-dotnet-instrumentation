@@ -107,8 +107,9 @@ static std::mutex name_cache_lock = std::mutex();
 
 static std::shared_mutex profiling_lock = std::shared_mutex();
 
-static ICorProfilerInfo7* profiler_info; // After feature sets settle down, perhaps this should be refactored and have
-                                         // a single static instance of ThreadSampler
+static std::atomic<ICorProfilerInfo7*> profiler_info{nullptr}; // After feature sets settle down, perhaps this should
+                                                               // be refactored and have a single static instance of
+                                                               // ThreadSampler
 
 // Dirt-simple back pressure system to save overhead if managed code is not reading fast enough
 bool ThreadSamplingShouldProduceThreadSample()
@@ -1396,7 +1397,7 @@ void ContinuousProfiler::SetGlobalInfo7(ICorProfilerInfo7* cor_profiler_info7)
 {
     info7               = cor_profiler_info7;
     this->helper.info7_ = cor_profiler_info7;
-    profiler_info       = cor_profiler_info7;
+    profiler_info.store(cor_profiler_info7, std::memory_order_release);
 }
 
 void ContinuousProfiler::SetGlobalInfo12(ICorProfilerInfo12* cor_profiler_info12)
@@ -1534,6 +1535,8 @@ void ContinuousProfiler::Shutdown()
     {
         return;
     }
+
+    profiler_info.store(nullptr, std::memory_order_release);
 
     // Phase 1 (non-blocking): close admission and broadcast terminal cancellation to every producer branch. The
     // shared shutdown token makes in-flight allocation and periodic DSS frame callbacks return S_FALSE.
@@ -1869,6 +1872,8 @@ bool ContinuousProfiler::StartAllocationSamplingSession() noexcept
     {
         try
         {
+            // Construct allocation admission closed. Starting the EventPipe session publishes this stable target
+            // before allocation callbacks can be delivered; the committed configuration opens admission afterward.
             allocationSubSampler = std::make_unique<AllocationSubSampler>(0, 60);
         }
         catch (...)
@@ -2066,14 +2071,15 @@ extern "C"
         // This method is called anytime thread-span association changes, e.g. when activity is started/stopped or
         // when suspension/resumption occurs.
 
-        if (profiler_info == nullptr)
+        auto* const info = profiler_info.load(std::memory_order_acquire);
+        if (info == nullptr)
         {
             trace::Logger::Debug("ContinuousProfilerSetNativeContext skipped: profiler_info is null.");
             return;
         }
 
         ThreadID      threadId;
-        const HRESULT hr = profiler_info->GetCurrentThreadID(&threadId);
+        const HRESULT hr = info->GetCurrentThreadID(&threadId);
         if (FAILED(hr))
         {
             trace::Logger::Debug("GetCurrentThreadID failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex,
@@ -2087,7 +2093,7 @@ extern "C"
     }
     EXPORTTHIS void SelectiveSamplingStart(uint64_t traceIdHigh, uint64_t traceIdLow)
     {
-        if (profiler_info == nullptr)
+        if (profiler_info.load(std::memory_order_acquire) == nullptr)
         {
             return;
         }
@@ -2111,7 +2117,7 @@ extern "C"
 
     EXPORTTHIS void SelectiveSamplingStop(uint64_t traceIdHigh, uint64_t traceIdLow)
     {
-        if (profiler_info == nullptr)
+        if (profiler_info.load(std::memory_order_acquire) == nullptr)
         {
             return;
         }

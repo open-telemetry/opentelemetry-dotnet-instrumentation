@@ -88,7 +88,7 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
         // fallible activation step succeeds. Objects are created before CLR events are enabled so callbacks can only
         // observe complete, stable targets.
         sampler = EnsureSamplerCreated();
-        if (sampler == nullptr || !EnsureRequiredClrEventsEnabled())
+        if (sampler == nullptr)
         {
             return outcome(RuntimeSamplerApplyResult::ActivationFailed);
         }
@@ -99,9 +99,16 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
             return outcome(RuntimeSamplerApplyResult::ActivationFailed);
         }
 
+        // Start the periodic worker while it is still quiescent. Its InitializeCurrentThread handshake and every
+        // callback target must be ready before SetEventMask2 opens the CLR callback gates.
         if (configuration.ThreadSamplingEnabled() && !sampler->StartThreadSampling())
         {
             trace::Logger::Warn("RuntimeSamplerService: failed to start the thread-sampling worker.");
+            return outcome(RuntimeSamplerApplyResult::ActivationFailed);
+        }
+
+        if (!EnsureRequiredClrEventsEnabled())
+        {
             return outcome(RuntimeSamplerApplyResult::ActivationFailed);
         }
 
@@ -178,7 +185,7 @@ ContinuousProfiler* RuntimeSamplerService::EnsureSamplerCreated() noexcept
     try
     {
         // Build dependencies before their consumer: the walker's guard worker must be ready before the periodic
-        // sampler can be started. These process-lifetime objects are published before CLR callbacks are enabled.
+        // sampler can be started. The member declaration order also preserves this DAG during reverse destruction.
         auto allocationSamplingSessionProvider = std::make_unique<ClrAllocationSamplingSessionProvider>(info12_);
         auto stackWalker                       = std::make_unique<StackWalkerImpl>(info7_, runtime_);
         auto sampler = std::make_unique<ContinuousProfiler>(*allocationSamplingSessionProvider);
@@ -192,19 +199,25 @@ ContinuousProfiler* RuntimeSamplerService::EnsureSamplerCreated() noexcept
         }
         sampler->SetStackWalker(stackWalker.get());
 
-        allocationSamplingSessionProvider_ = std::move(allocationSamplingSessionProvider);
-        stackWalker_                       = std::move(stackWalker);
-        sampler_                           = std::move(sampler);
-
 #if defined(_WIN32)
         // .NET Framework may not report ThreadAssignedToOSThread for the managed thread that performs startup.
         ThreadID currentThreadId = 0;
         if (const auto hr = info7_->GetCurrentThreadID(&currentThreadId); SUCCEEDED(hr))
         {
-            OnThreadAssignedToOSThread(currentThreadId, ::GetCurrentThreadId());
+            try
+            {
+                stackWalker->OnThreadAssignedToOSThread(currentThreadId, ::GetCurrentThreadId());
+            }
+            catch (...)
+            {
+                LogCallbackFailure("startup ThreadAssignedToOSThread");
+            }
         }
 #endif
 
+        allocationSamplingSessionProvider_ = std::move(allocationSamplingSessionProvider);
+        stackWalker_                       = std::move(stackWalker);
+        sampler_                           = std::move(sampler);
         return sampler_.get();
     }
     catch (const std::exception& ex)
@@ -238,6 +251,8 @@ bool RuntimeSamplerService::EnsureRequiredClrEventsEnabled() noexcept
             return false;
         }
 
+        // sampler_ and stackWalker_ are fully initialized and remain stable through CLR shutdown. Publishing the
+        // event mask opens the callback gates, so callback paths require no separate atomic target pointer.
         // Keep both capabilities latched after first enablement. Stack snapshots are passive until requested, while
         // thread callbacks keep thread metadata and .NET Framework canary state coherent across quiescent periods.
         eventsLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
@@ -333,15 +348,13 @@ void RuntimeSamplerService::OnThreadCreated(const ThreadID threadId) noexcept
 {
     try
     {
-        if (sampler_ == nullptr || sampler_->IsShutdownRequested())
+        auto* const sampler = sampler_.get();
+        if (sampler == nullptr || sampler->IsShutdownRequested())
         {
             return;
         }
-        sampler_->ThreadCreated(threadId);
-        if (stackWalker_ != nullptr)
-        {
-            stackWalker_->OnThreadCreated(threadId);
-        }
+        sampler->ThreadCreated(threadId);
+        stackWalker_->OnThreadCreated(threadId);
     }
     catch (...)
     {
@@ -353,15 +366,13 @@ void RuntimeSamplerService::OnThreadDestroyed(const ThreadID threadId) noexcept
 {
     try
     {
-        if (sampler_ == nullptr || sampler_->IsShutdownRequested())
+        auto* const sampler = sampler_.get();
+        if (sampler == nullptr || sampler->IsShutdownRequested())
         {
             return;
         }
-        sampler_->ThreadDestroyed(threadId);
-        if (stackWalker_ != nullptr)
-        {
-            stackWalker_->OnThreadDestroyed(threadId);
-        }
+        sampler->ThreadDestroyed(threadId);
+        stackWalker_->OnThreadDestroyed(threadId);
     }
     catch (...)
     {
@@ -373,15 +384,13 @@ void RuntimeSamplerService::OnThreadNameChanged(const ThreadID threadId, const U
 {
     try
     {
-        if (sampler_ == nullptr || sampler_->IsShutdownRequested())
+        auto* const sampler = sampler_.get();
+        if (sampler == nullptr || sampler->IsShutdownRequested())
         {
             return;
         }
-        sampler_->ThreadNameChanged(threadId, cchName, name);
-        if (stackWalker_ != nullptr)
-        {
-            stackWalker_->OnThreadNameChanged(threadId, cchName, name);
-        }
+        sampler->ThreadNameChanged(threadId, cchName, name);
+        stackWalker_->OnThreadNameChanged(threadId, cchName, name);
     }
     catch (...)
     {
@@ -393,14 +402,12 @@ void RuntimeSamplerService::OnThreadAssignedToOSThread(const ThreadID managedThr
 {
     try
     {
-        if (sampler_ == nullptr || sampler_->IsShutdownRequested())
+        auto* const sampler = sampler_.get();
+        if (sampler == nullptr || sampler->IsShutdownRequested())
         {
             return;
         }
-        if (stackWalker_ != nullptr)
-        {
-            stackWalker_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
-        }
+        stackWalker_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
     }
     catch (...)
     {

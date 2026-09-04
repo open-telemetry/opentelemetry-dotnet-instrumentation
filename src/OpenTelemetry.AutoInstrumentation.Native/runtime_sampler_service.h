@@ -61,9 +61,11 @@ private:
     ICorProfilerInfo7*                                    info7_   = nullptr;
     ICorProfilerInfo12*                                   info12_  = nullptr;
     RuntimeType                                           runtime_ = RuntimeType::Unknown;
+    // Dependencies are declared before their consumer so reverse member destruction follows the service DAG:
+    // sampler -> stack walker -> allocation-session provider.
     std::unique_ptr<ClrAllocationSamplingSessionProvider> allocationSamplingSessionProvider_;
-    std::unique_ptr<ContinuousProfiler>                   sampler_;
     std::unique_ptr<StackWalkerImpl>                      stackWalker_;
+    std::unique_ptr<ContinuousProfiler>                   sampler_;
     mutable std::mutex                                    configurationMutex_;
     RuntimeSamplerAuthority                               authority_ = RuntimeSamplerAuthority::None;
     RuntimeSamplerConfigurationV1 committedConfiguration_{sizeof(RuntimeSamplerConfigurationV1), 0, 0, 0};
