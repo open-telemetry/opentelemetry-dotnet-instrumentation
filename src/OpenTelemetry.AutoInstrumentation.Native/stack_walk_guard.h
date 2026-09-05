@@ -75,11 +75,13 @@ namespace ProfilerStackCapture
 //                  RtlVirtualUnwind, checkpointing abandon_ at each
 //                  loader/RTL/CLR CS boundary. On success the worker
 //                  stages the decoded frame and the unwound (frame-1)
-//                  CONTEXT in ProbeRequest; the orchestrator publishes
-//                  them under mutex_ to the caller's *ctx_inout and
-//                  *frame_out iff !abandon_.
+//                  CONTEXT in ProbeRequest; the worker publication step
+//                  commits them under mutex_ to the caller's *ctx_inout
+//                  and *frame_out iff !abandon_.
 class StackWalkGuard
 {
+    friend class StackWalkGuardTestPeer;
+
 public:
     enum class ProbeResult : uint8_t
     {
@@ -107,6 +109,15 @@ public:
     StackWalkGuard(const StackWalkGuard&)            = delete;
     StackWalkGuard& operator=(const StackWalkGuard&) = delete;
 
+    // Closes probe admission and wakes Schedule/Await callers. A probe already inside CLR/RTL code is abandoned and
+    // allowed to finish independently until WaitForShutdown joins the worker.
+    void RequestShutdown() noexcept;
+
+    // Waits for the worker to leave CLR/RTL code and terminate. Call RequestShutdown first.
+    void WaitForShutdown() noexcept;
+
+    // Schedule/Await is a single-flight protocol: callers pair each successful
+    // Schedule with one Await before scheduling another request.
     // CanaryDss: STL gate + (if canary != 0) DSS on a coast-clear thread.
     // canary == 0 reduces to STL-only.
     // Available on all Windows architectures.
@@ -168,20 +179,20 @@ private:
 
 #if defined(_M_AMD64)
         // RtlFrame0 payload (x64 only, borrowed, non-owning).
-        // The worker READS *ctx_inout exactly once at the start of the
-        // probe (caller is blocked in Await throughout, so the read is
-        // race-free). The worker NEVER writes through these pointers.
-        // The orchestrator's publish step writes through them under
-        // mutex_, ONLY when the probe succeeds AND !abandon_, copying
-        // from the staged_* fields below.
+        // Commit-only borrowed outputs. The scheduling thread snapshots
+        // input into staged_ctx before publishing the request, so the worker
+        // never reads caller-owned storage. The worker publication step writes
+        // through these pointers under mutex_, ONLY when the probe succeeds AND
+        // !abandon_, copying from the staged_* fields below.
         CONTEXT*                            ctx_inout = nullptr;
         continuous_profiler::CapturedFrame* frame_out = nullptr;
 
-        // RtlFrame0 worker-owned staging area (x64 only). The worker
-        // copies *ctx_inout into staged_ctx at probe start and operates
-        // on staged_ctx exclusively (RtlVirtualUnwind mutates in place).
+        // RtlFrame0 worker-owned staging area (x64 only). The scheduling
+        // thread copies *ctx_inout into staged_ctx before
+        // publishing the request. The worker operates on staged_ctx
+        // exclusively (RtlVirtualUnwind mutates in place).
         // The staged_* fields are committed to *ctx_inout / *frame_out
-        // by the orchestrator under mutex_ iff the probe succeeds.
+        // by the worker publication step under mutex_ iff the probe succeeds.
         CONTEXT                            staged_ctx   = {};
         continuous_profiler::CapturedFrame staged_frame = {};
 #endif // defined(_M_AMD64)

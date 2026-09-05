@@ -135,6 +135,16 @@ HRESULT NetFxRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapsho
     }
 }
 
+void NetFxRuntimeCapture::RequestShutdown() noexcept
+{
+    stackWalkGuard_->RequestShutdown();
+}
+
+void NetFxRuntimeCapture::WaitForShutdown() noexcept
+{
+    stackWalkGuard_->WaitForShutdown();
+}
+
 // ---------------------------------------------------------------------------
 // Canary bookkeeping
 // ---------------------------------------------------------------------------

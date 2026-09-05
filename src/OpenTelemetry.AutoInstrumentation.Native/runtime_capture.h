@@ -8,10 +8,11 @@
 // capture orchestrator.  Replaces ISuspensionPolicy.
 //
 // Each implementation owns its own per-thread story end-to-end; the
-// orchestrator only sees three verbs:
+// orchestrator sees four lifecycle/capture verbs:
 //   * SuspendRuntime / ResumeRuntime  (driven by RuntimeGuard)
 //   * CaptureStack(managedTid, ctx)   (CLR or NetFx decides internally)
 //   * OnThreadXxx                     (lifecycle hooks, default no-op)
+//   * RequestShutdown / WaitForShutdown (terminal cancellation and join)
 
 #include <memory>
 #include <corhlpr.h>
@@ -46,8 +47,7 @@ public:
     /// thread resolution, per-thread suspension, safety checks, and the
     /// DSS (or future native-walk fallback) internally.
     /// </summary>
-    virtual HRESULT CaptureStack(ThreadID                       managedThreadId,
-                                 StackSnapshotCallbackContext*  clientData) = 0;
+    virtual HRESULT CaptureStack(ThreadID managedThreadId, StackSnapshotCallbackContext* clientData) = 0;
 
     // Lifecycle notifications routed from ICorProfilerCallback.
     // Default no-op; NetFxRuntimeCapture overrides for canary tracking.
@@ -57,9 +57,15 @@ public:
     virtual void OnThreadAssignedToOSThread(ThreadID /*managedThreadId*/, DWORD /*osThreadId*/) {}
 
     /// <summary>
-    /// Shutdown signal (release waiters, e.g. canary wait).  Default no-op.
+    /// Terminal shutdown request. Implementations must close runtime-specific
+    /// capture admission and release waiters without blocking.
     /// </summary>
-    virtual void Stop() {}
+    virtual void RequestShutdown() noexcept = 0;
+
+    /// <summary>
+    /// Waits for runtime-specific capture workers to finish after RequestShutdown.
+    /// </summary>
+    virtual void WaitForShutdown() noexcept = 0;
 };
 
 } // namespace ProfilerStackCapture

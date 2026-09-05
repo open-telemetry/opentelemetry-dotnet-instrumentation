@@ -219,6 +219,8 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         rejit_handler.cpp
         rejit_preprocessor.cpp
         rejit_work_offloader.cpp
+        runtime_sampler_configuration.cpp
+        runtime_sampler_service.cpp
         environment_variables_util.cpp
         stack_capturer.cpp
         stub_generator.cpp

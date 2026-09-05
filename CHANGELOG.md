@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Added a native continuous-profiler runtime configuration contract with
+  process-wide startup precedence and lazy CPU, selective-thread, and allocation
+  sampler lifecycle management.
 - Experimental Npgsql trace context propagation to PostgreSQL through
   `application_name`, enabled with `OTEL_DOTNET_AUTO_NPGSQL_CONTEXT_PROPAGATION`.
 - Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)

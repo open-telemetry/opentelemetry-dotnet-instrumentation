@@ -51,6 +51,26 @@ void ClrRuntimeCapture::ResumeRuntime() noexcept
     }
 }
 
+void ClrRuntimeCapture::RequestShutdown() noexcept
+{
+#if defined(_WIN32) && defined(_M_AMD64)
+    if (stackWalkGuard_ != nullptr)
+    {
+        stackWalkGuard_->RequestShutdown();
+    }
+#endif
+}
+
+void ClrRuntimeCapture::WaitForShutdown() noexcept
+{
+#if defined(_WIN32) && defined(_M_AMD64)
+    if (stackWalkGuard_ != nullptr)
+    {
+        stackWalkGuard_->WaitForShutdown();
+    }
+#endif
+}
+
 HRESULT ClrRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapshotCallbackContext* clientData)
 {
     if (clientData == nullptr)
