@@ -161,7 +161,8 @@ public static partial class LibraryVersion
             "TestApplication.Quartz",
             [
                 new("3.6.0"),
-                new("3.20.0"),
+                new("3.20.1"),
+                new("4.0.0", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {

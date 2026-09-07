@@ -357,7 +357,10 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "3.6.0",
-                "3.20.0",
+                "3.20.1",
+#if NET10_0
+                "4.0.0",
+#endif
 #endif
             ];
             return theoryData;
