@@ -13,6 +13,10 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'net10.0' " >
     <PackageReference Include="Quartz" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
+  <ItemGroup Condition=" '$(LibraryVersion)' != '' and $([MSBuild]::VersionLessThan('$(LibraryVersion)', '4.0.0')) and '$(TargetFramework)' == 'net10.0' ">
+    <PackageReference Include="Quartz.Extensions.DependencyInjection" VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="Quartz.Extensions.Hosting" VersionOverride="$(LibraryVersion)" />
+  </ItemGroup>
   <ItemGroup Condition=" '$(LibraryVersion)' != '' and ( '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == 'net472' ) ">
     <PackageReference Include="Quartz" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="Quartz.Extensions.DependencyInjection" VersionOverride="$(LibraryVersion)" />
