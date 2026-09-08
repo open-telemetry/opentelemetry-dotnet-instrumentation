@@ -287,12 +287,12 @@ try {
     Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
 
     if ($skip_release_verification) {
-        Write-Warning "Release verification is skipped. Downloaded PowerShell code and binaries will not be authenticated."
+        Write-Warning "Release verification is skipped. Downloaded PowerShell code and binaries will not be verified."
     }
     else {
         $github_cli = Get-Command gh.exe -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
         if (-not $github_cli) {
-            throw "GitHub CLI ('gh') is required. Install it or explicitly set `$skip_release_verification to `$true."
+            throw "The GitHub CLI ('gh') is required. Install it from https://cli.github.com/ or explicitly set `$skip_release_verification to `$true."
         }
 
         & $github_cli.Source release verify-asset $version $download_path --repo $repository
@@ -350,8 +350,8 @@ Updating OpenTelemetry installation:
 > module and Windows archive belong to the selected immutable GitHub release and
 > have valid artifact attestations from this repository's release workflow. The
 > existing installation is not removed if verification fails. To update without
-> GitHub CLI, use `-SkipReleaseVerification`. Skipping verification is not
-> recommended.
+> installing the GitHub CLI, use `-SkipReleaseVerification`. Skipping
+> verification is not recommended.
 
 ```powershell
 # Import the previously downloaded module. After an update the module is found in the default install directory.

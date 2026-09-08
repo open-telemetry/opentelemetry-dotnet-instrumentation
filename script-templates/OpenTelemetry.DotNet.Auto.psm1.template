@@ -96,7 +96,7 @@ function Assert-OpenTelemetry-Release-Asset([string]$GitHubCLIPath, [string]$Ver
 function Get-GitHub-CLI-Path() {
     $githubCLI = Get-Command gh.exe -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
     if (-not $githubCLI) {
-        throw "GitHub CLI ('gh') is required to verify release assets. Install GitHub CLI or use -SkipReleaseVerification to explicitly skip verification."
+        throw "The GitHub CLI ('gh') is required to verify release assets. Install it from https://cli.github.com/ or use -SkipReleaseVerification to explicitly skip verification."
     }
 
     return $githubCLI.Source
@@ -437,7 +437,7 @@ function Install-OpenTelemetryCore() {
     Assert-Release-Version $version
 
     if ($SkipReleaseVerification) {
-        Write-Warning "GitHub release and artifact attestation verification is skipped. The Windows archive will not be authenticated."
+        Write-Warning "GitHub release and artifact attestation verification is skipped. The Windows ZIP archive will not be verified."
     }
     else {
         $githubCLIPath = Get-GitHub-CLI-Path
@@ -551,7 +551,7 @@ function Update-OpenTelemetryCore() {
     $githubCLIPath = $null
 
     if ($SkipReleaseVerification) {
-        Write-Warning "GitHub release and artifact attestation verification is skipped. Downloaded PowerShell code and binaries will not be authenticated."
+        Write-Warning "GitHub release and artifact attestation verification is skipped. Downloaded PowerShell code and binaries will not be verified."
     }
     else {
         $githubCLIPath = Get-GitHub-CLI-Path
