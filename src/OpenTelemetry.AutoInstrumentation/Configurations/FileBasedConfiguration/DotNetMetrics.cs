@@ -60,11 +60,13 @@ internal class DotNetMetrics
     [YamlMember(Alias = "process")]
     public object? Process { get; set; }
 
+#if NET
     /// <summary>
     /// Gets or sets the Quartz metrics instrumentation configuration.
     /// </summary>
     [YamlMember(Alias = "quartz")]
     public object? Quartz { get; set; }
+#endif
 
     /// <summary>
     /// Gets or sets the SqlClient metrics instrumentation configuration.
