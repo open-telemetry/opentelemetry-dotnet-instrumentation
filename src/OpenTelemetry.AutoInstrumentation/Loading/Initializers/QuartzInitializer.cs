@@ -21,7 +21,7 @@ internal class QuartzInitializer : InstrumentationInitializer
 
         var quartzAssemblyVersion = quartzIJob?.Assembly.GetName().Version;
 
-        if (quartzAssemblyVersion is { Major: >= 4 })
+        if (IsQuartz4OrGreater(quartzAssemblyVersion))
         {
             return;
         }
@@ -35,5 +35,10 @@ internal class QuartzInitializer : InstrumentationInitializer
         var instrumentation = Activator.CreateInstance(instrumentationType, options)!;
 
         lifespanManager.Track(instrumentation);
+    }
+
+    private static bool IsQuartz4OrGreater(Version? quartzAssemblyVersion)
+    {
+        return quartzAssemblyVersion is { Major: >= 4 };
     }
 }
