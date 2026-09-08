@@ -518,6 +518,18 @@ plugins/development:
   # Alternatively, configure via a colon-separated list (same format as OTEL_DOTNET_AUTO_PLUGINS).
   plugins_list: ${OTEL_DOTNET_AUTO_PLUGINS}
 
+# OpAMP Configuration
+opamp/development:
+  # Configure the server endpoint.
+  # If omitted or null, https://localhost:4320/v1/opamp is used.
+  server_url: https://localhost:4320/v1/opamp
+  # Configure the maximum number of custom messages that may wait to be sent.
+  # The value must be positive. If omitted or null, 2048 is used.
+  max_pending_custom_messages: 2048
+  # Configure the maximum aggregate size, in bytes, of pending custom message payloads.
+  # The value must be positive. If omitted or null, 67108864 (64 MiB) is used.
+  max_pending_custom_message_bytes: 67108864
+
 # Propagators Configuration
 # If no propagators are specified, none will be added automatically.
 propagator:
