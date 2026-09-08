@@ -15,8 +15,8 @@ jobs:
   powershell-script:
     name: Run PowerShell script on ${{ matrix.machine }}
     permissions:
-      attestations: read
-      contents: read
+      attestations: read # for gh attestation verify
+      contents: read # for actions/checkout and gh release verify-asset
     strategy:
       fail-fast: false
       matrix:
