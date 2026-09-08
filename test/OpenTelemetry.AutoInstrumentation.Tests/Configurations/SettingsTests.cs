@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Globalization;
+#if NETFRAMEWORK
 using System.Net.Http;
+#endif
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
@@ -385,9 +387,12 @@ public sealed class SettingsTests
     [InlineData("ASPNETCORE", MetricInstrumentation.AspNetCore)]
 #endif
     [InlineData("SQLCLIENT", MetricInstrumentation.SqlClient)]
+#if NET
+    [InlineData("QUARTZ", MetricInstrumentation.Quartz)]
+#endif
     internal void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
     {
-        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
         {
             { ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, "false" },
             { string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, meterInstrumentation), "true" }
@@ -404,7 +409,7 @@ public sealed class SettingsTests
     [InlineData("NLOG", LogInstrumentation.NLog)]
     internal void LogSettings_Instrumentations_SupportedValues(string logInstrumentation, LogInstrumentation expectedLogInstrumentation)
     {
-        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
         {
             { ConfigurationKeys.Logs.LogsInstrumentationEnabled, "false" },
             { string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation), "true" }
@@ -420,7 +425,7 @@ public sealed class SettingsTests
     [InlineData("false", false)]
     internal void IncludeFormattedMessage_DependsOnCorrespondingEnvVariable(string includeFormattedMessage, bool expectedValue)
     {
-        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
         {
             { ConfigurationKeys.Logs.IncludeFormattedMessage, includeFormattedMessage }
         });
@@ -442,7 +447,7 @@ public sealed class SettingsTests
     [InlineData("nonExistingProtocol", OtlpExportProtocol.HttpProtobuf)]
     internal void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string? otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)
     {
-        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
         {
             { AutoOtlpDefinitions.DefaultProtocolEnvVarName, otlpProtocol }
         });
@@ -463,7 +468,7 @@ public sealed class SettingsTests
 #endif
     internal void OtlpSettings_CopyTo_OverridesHttpClientFactoryForHttpProtobufOnly(string otlpProtocol, bool expectHttpClientFactoryOverride)
     {
-        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
         {
             { AutoOtlpDefinitions.DefaultProtocolEnvVarName, otlpProtocol }
         });

@@ -13,6 +13,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   `application_name`, enabled with `OTEL_DOTNET_AUTO_NPGSQL_CONTEXT_PROPAGATION`.
 - Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
   traces instrumentation for versions `3.1.x`+ for .NET only.
+- Added support for [Quartz](https://www.nuget.org/packages/Quartz)
+  traces and metrics instrumentation for version `4`+ for .NET 10 only.
 
 ### Changed
 
@@ -64,6 +66,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `System.Text.Json` from `10.0.9` to `10.0.11`.
 
 ### Deprecated
+
+- Deprecate support for [Quartz](https://www.nuget.org/packages/Quartz)
+  traces instrumentation for version `3.x.x`.
 
 ### Removed
 
