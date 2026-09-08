@@ -11,10 +11,16 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Experimental Npgsql trace context propagation to PostgreSQL through
   `application_name`, enabled with `OTEL_DOTNET_AUTO_NPGSQL_CONTEXT_PROPAGATION`.
+- Configuration for the maximum number and aggregate payload size of pending
+  OpAMP custom messages.
 - Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
   traces instrumentation for versions `3.1.x`+ for .NET only.
 
 ### Changed
+
+- [BREAKING] `OpenTelemetry.OpAmp.Client` now queues outgoing messages. Its
+  `Send*Async` methods were replaced by corresponding `Send*` methods. OpAMP
+  plugins can call `FlushAsync` to wait until the queue is empty.
 
 #### Dependency updates
 
@@ -30,6 +36,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.SqlClient` from `1.16.0` to `1.18.0`,
   - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.16.0-beta.1` to `1.18.0-beta.1`,
   - `OpenTelemetry.Instrumentation.Wcf` from `1.16.0-beta.1` to `1.18.0-beta.1`,
+  - `OpenTelemetry.OpAmp.Client` from `0.6.0-alpha.1` to `0.7.0-alpha.1`,
   - `OpenTelemetry.Resources.Azure` from `1.15.1-beta.1` to `1.18.0-beta.1`,
   - `OpenTelemetry.Resources.Container` from `1.15.1-beta.1` to `1.18.0-beta.1`,
   - `OpenTelemetry.Resources.Host` from `1.15.1-beta.1` to `1.18.0-beta.1`,

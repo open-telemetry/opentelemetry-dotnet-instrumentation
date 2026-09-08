@@ -646,6 +646,12 @@ opamp/development:
   # Configure the server endpoint. If not explicitly set, a default
   # URL is used: https://localhost:4320/v1/opamp.
   server_url: https://localhost:4320/v1/opamp
+  # Maximum number of custom messages that may wait to be sent.
+  # If omitted, 2048 is used. The value must be positive.
+  max_pending_custom_messages: 2048
+  # Maximum aggregate size, in bytes, of pending custom message payloads.
+  # If omitted, 67108864 (64 MiB) is used. The value must be positive.
+  max_pending_custom_message_bytes: 67108864
 ```
 
 ### Configuration based instrumentation

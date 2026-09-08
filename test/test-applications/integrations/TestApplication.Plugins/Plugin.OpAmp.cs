@@ -17,7 +17,10 @@ public partial class Plugin : IPlugin, IOpAmpPlugin
 {
     public void ConfigureOpAmpOptions(OpAmpClientSettings settings)
     {
+        ThrowIfMissing(settings);
         Console.WriteLine($"{nameof(Plugin)}.{nameof(ConfigureOpAmpOptions)}() invoked.");
+        Console.WriteLine($"{nameof(settings.MaxPendingCustomMessages)}: {settings.MaxPendingCustomMessages}");
+        Console.WriteLine($"{nameof(settings.MaxPendingCustomMessageBytes)}: {settings.MaxPendingCustomMessageBytes}");
     }
 
     public void AfterOpAmpClientStarted(OpAmpClient client)

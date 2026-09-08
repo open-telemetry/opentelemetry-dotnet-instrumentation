@@ -94,17 +94,38 @@ public class PluginsTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void OpAmpInitialized()
+    public void OpAmpInitializedWithEnvironmentVariables()
     {
+        AssertOpAmpInitialized(() =>
+        {
+            SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+            SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_ENABLED", "true");
+            SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGES", "123");
+            SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGE_BYTES", "456");
+        });
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void OpAmpInitializedWithFileBasedConfiguration()
+    {
+        AssertOpAmpInitialized(() => EnableFileBasedConfig());
+    }
+
+    private void AssertOpAmpInitialized(Action configureOpAmp)
+    {
+        const int maxPendingCustomMessages = 123;
+        const int maxPendingCustomMessageBytes = 456;
         using var server = new MockOpAmpServer(Output);
 
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_ENABLED", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_SERVER_URL", $"http://localhost:{server.Port}/v1/opamp");
+        configureOpAmp();
 
         var (standardOutput, _, _) = RunTestApplication();
 
         Assert.Contains("Plugin.ConfigureOpAmpOptions() invoked.", standardOutput, StringComparison.Ordinal);
+        Assert.Contains($"MaxPendingCustomMessages: {maxPendingCustomMessages}", standardOutput, StringComparison.Ordinal);
+        Assert.Contains($"MaxPendingCustomMessageBytes: {maxPendingCustomMessageBytes}", standardOutput, StringComparison.Ordinal);
         Assert.Contains("Plugin.AfterOpAmpClientStarted() invoked.", standardOutput, StringComparison.Ordinal);
         Assert.Contains("Plugin.BeforeOpAmpClientStopped() invoked.", standardOutput, StringComparison.Ordinal);
     }
