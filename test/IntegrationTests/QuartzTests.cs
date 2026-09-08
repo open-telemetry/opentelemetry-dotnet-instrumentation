@@ -39,10 +39,13 @@ public class QuartzTests : TestHelper
     [MemberData(nameof(LibraryVersion.Quartz), MemberType = typeof(LibraryVersion))]
     public void SubmitsMetrics(string packageVersion)
     {
-        SkipIfMLegacyQuartz(packageVersion);
+        SkipIfLegacyQuartz(packageVersion);
 
         using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED", "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_QUARTZ_INSTRUMENTATION_ENABLED", "true");
 
         collector.Expect("Quartz");
 
@@ -54,7 +57,7 @@ public class QuartzTests : TestHelper
         collector.AssertExpectations();
     }
 
-    private static void SkipIfMLegacyQuartz(string packageVersion)
+    private static void SkipIfLegacyQuartz(string packageVersion)
     {
         if (!Quartz4Plus(packageVersion))
         {
