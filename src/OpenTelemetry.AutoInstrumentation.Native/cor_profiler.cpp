@@ -291,6 +291,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
 HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_id, HRESULT hr_status)
 {
+    if (!is_attached_)
+    {
+        return S_OK;
+    }
+
     auto _ = trace::Stats::Instance()->AssemblyLoadFinishedMeasure();
 
     if (FAILED(hr_status))
@@ -305,12 +310,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
     if (Logger::IsDebugEnabled())
     {
         Logger::Debug("AssemblyLoadFinished: ", assembly_id, " ", hr_status);
-    }
-
-    // double check if is_attached_ has changed to avoid possible race condition with shutdown function
-    if (!is_attached_)
-    {
-        return S_OK;
     }
 
     const auto& assembly_info = GetAssemblyInfo(this->info_, assembly_id);
@@ -584,6 +583,11 @@ void CorProfiler::RewritingPInvokeMaps(const ModuleMetadata& module_metadata, co
 
 HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HRESULT hr_status)
 {
+    if (!is_attached_)
+    {
+        return S_OK;
+    }
+
     auto _ = trace::Stats::Instance()->ModuleLoadFinishedMeasure();
 
     if (FAILED(hr_status))
@@ -591,11 +595,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         // if module failed to load, skip it entirely,
         // otherwise we can crash the process if module is not valid
         CorProfilerBase::ModuleLoadFinished(module_id, hr_status);
-        return S_OK;
-    }
-
-    if (!is_attached_)
-    {
         return S_OK;
     }
 
@@ -875,12 +874,13 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id)
 
 HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
 {
-    auto _ = trace::Stats::Instance()->ModuleUnloadStartedMeasure();
-
     if (!is_attached_)
     {
         return S_OK;
     }
+
+    auto _ = trace::Stats::Instance()->ModuleUnloadStartedMeasure();
+
     // take this lock so we block until the
     // module metadata is not longer being used
     std::lock_guard<std::mutex> guard(module_ids_lock_);
@@ -985,11 +985,16 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ProfilerDetachSucceeded()
 // into the application.
 HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(FunctionID function_id, BOOL is_safe_to_block)
 {
+    if (!is_attached_)
+    {
+        return S_OK;
+    }
+
     auto _ = trace::Stats::Instance()->JITCompilationStartedMeasure();
 
     // The flag for this callback is only set if runtime_information_.is_desktop() is true.
     // So there is no need to check it again here.
-    if (is_attached_ && is_safe_to_block)
+    if (is_safe_to_block)
     {
         // The JIT compilation only needs to be tracked on the .NET Framework so the Loader
         // can be injected. For .NET the DOTNET_STARTUP_HOOK takes care of injecting the
@@ -1028,9 +1033,14 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AppDomainShutdownFinished(AppDomainID app
 
 HRESULT STDMETHODCALLTYPE CorProfiler::JITInlining(FunctionID callerId, FunctionID calleeId, BOOL* pfShouldInline)
 {
+    if (!is_attached_)
+    {
+        return S_OK;
+    }
+
     auto _ = trace::Stats::Instance()->JITInliningMeasure();
 
-    if (!is_attached_ || rejit_handler == nullptr)
+    if (rejit_handler == nullptr)
     {
         return S_OK;
     }
@@ -3746,8 +3756,13 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ReJITError(ModuleID    moduleId,
 
 HRESULT STDMETHODCALLTYPE CorProfiler::JITCachedFunctionSearchStarted(FunctionID functionId, BOOL* pbUseCachedFunction)
 {
+    if (!is_attached_)
+    {
+        return S_OK;
+    }
+
     auto _ = trace::Stats::Instance()->JITCachedFunctionSearchStartedMeasure();
-    if (!is_attached_ || !pbUseCachedFunction)
+    if (!pbUseCachedFunction)
     {
         return S_OK;
     }
