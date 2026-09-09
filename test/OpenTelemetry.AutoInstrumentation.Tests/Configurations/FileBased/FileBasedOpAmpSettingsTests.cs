@@ -35,7 +35,7 @@ public class FileBasedOpAmpSettingsTests
     }
 
     [Fact]
-    public void LoadFile_CustomMessageLimitsAreUnsetByDefault()
+    public void LoadFile_EmptyOpAmpConfiguration_ShouldEnableOpAmpWithDefaultSettings()
     {
         var conf = new YamlConfiguration
         {
@@ -45,6 +45,8 @@ public class FileBasedOpAmpSettingsTests
 
         settings.LoadFile(conf);
 
+        Assert.True(settings.OpAmpClientEnabled);
+        Assert.Null(settings.ServerUrl);
         Assert.Null(settings.MaxPendingCustomMessages);
         Assert.Null(settings.MaxPendingCustomMessageBytes);
     }
