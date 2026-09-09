@@ -186,15 +186,36 @@ and instrument your .NET application using the provided Shell scripts.
 
 > [!NOTE]
 > On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
+>
+> The downloaded installer should be verified before it is executed because a
+> script cannot establish trust in its own code. By default, the installer also
+> requires the [GitHub CLI](https://cli.github.com/) and verifies both the
+> immutable release and artifact attestation for the downloaded ZIP archive. To
+> explicitly opt out of archive verification, set
+> `SKIP_RELEASE_VERIFICATION=true`. Skipping verification is not recommended.
 
 Example usage:
 
 ```sh
-# Download the bash script
-curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.13.0/otel-dotnet-auto-install.sh -O
+# Download the installer into a private directory
+version="v1.16.0"
+repository="open-telemetry/opentelemetry-dotnet-instrumentation"
+release_workflow="$repository/.github/workflows/release.yml"
+download_dir="$(mktemp -d "${TMPDIR:-/tmp}/otel-dotnet-auto-installer.XXXXXX")"
+installer="$download_dir/otel-dotnet-auto-install.sh"
+trap 'rm -rf "$download_dir"' 0
 
-# Install core files
-sh ./otel-dotnet-auto-install.sh
+curl -sSfL "https://github.com/$repository/releases/download/$version/otel-dotnet-auto-install.sh" -o "$installer"
+
+# Verify the installer before executing it
+gh release verify-asset "$version" "$installer" --repo "$repository"
+gh attestation verify "$installer" \
+  --repo "$repository" \
+  --signer-workflow "$release_workflow" \
+  --source-ref "refs/tags/$version"
+
+# Install core files; the installer verifies the downloaded ZIP archive
+VERSION="$version" sh "$installer"
 
 # Enable execution for the instrumentation script
 chmod +x $HOME/.otel-dotnet-auto/instrument.sh
@@ -206,35 +227,38 @@ chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=staging,service.version=1.0.0 ./MyNetApp
 ```
 
-NOTE: for air-gapped environments you can provide either the installation
-file directly with:
+For air-gapped environments, verify the archive before transferring it and
+explicitly skip the installer's online verification. You can provide either the
+installation file directly with:
 
 ```sh
-LOCAL_PATH=<PATH_TO_INSTALLER> sh ./otel-dotnet-auto-install.sh
+SKIP_RELEASE_VERIFICATION=true LOCAL_PATH=<PATH_TO_INSTALLER> sh ./otel-dotnet-auto-install.sh
 ```
 
 or the folder with the files, this has the added benefit that the install
 script will determine the correct file to choose.
 
 ```sh
-DOWNLOAD_DIR=<PATH_TO_FOLDER_WITH_FILES> sh ./otel-dotnet-auto-install.sh
+SKIP_RELEASE_VERIFICATION=true DOWNLOAD_DIR=<PATH_TO_FOLDER_WITH_FILES> sh ./otel-dotnet-auto-install.sh
 ```
 
 `otel-dotnet-auto-install.sh` script
 uses environment variables as parameters:
 
-| Parameter               | Description                                                                     | Required | Default value               |
-|-------------------------|---------------------------------------------------------------------------------|----------|-----------------------------|
-| `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                                     | No       | `$HOME/.otel-dotnet-auto`   |
-| `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`                | No       | *Calculated*                |
-| `ARCHITECTURE`          | Possible values for Linux: `x64`, `arm64`                                       | No       | *Calculated*                |
-| `TMPDIR`                | (deprecated) parent directory for temporary downloads; prefer `DOWNLOAD_DIR`    | No       | *Not set*                   |
-| `DOWNLOAD_DIR`          | Folder to download the archive to. Will use local archive if it already exists  | No       | *Calculated*                |
-| `LOCAL_PATH`            | Full path the archive to use for installation. (ideal for air-gapped scenarios) | No       | *Calculated*                |
-| `VERSION`               | Version to download                                                             | No       | `1.16.0`                    |
+| Parameter                   | Description                                                                     | Required | Default value               |
+|-----------------------------|---------------------------------------------------------------------------------|----------|-----------------------------|
+| `OTEL_DOTNET_AUTO_HOME`     | Location where binaries are to be installed                                     | No       | `$HOME/.otel-dotnet-auto`   |
+| `OS_TYPE`                   | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`                | No       | *Calculated*                |
+| `ARCHITECTURE`              | Possible values for Linux: `x64`, `arm64`                                       | No       | *Calculated*                |
+| `TMPDIR`                    | (deprecated) parent directory for temporary downloads; prefer `DOWNLOAD_DIR`    | No       | *Not set*                   |
+| `DOWNLOAD_DIR`              | Folder to download the archive to. Will use local archive if it already exists  | No       | *Calculated*                |
+| `LOCAL_PATH`                | Full path the archive to use for installation. (ideal for air-gapped scenarios) | No       | *Calculated*                |
+| `SKIP_RELEASE_VERIFICATION` | Set to `true` to skip GitHub release and artifact attestation verification      | No       | `false`                     |
+| `VERSION`                   | Version to download                                                             | No       | `1.16.0`                    |
 
-When `DOWNLOAD_DIR` is not set, the installer creates a unique
-`otel-dotnet-auto.XXXXXX` directory under `${TMPDIR:-/tmp}`.
+The installer copies the archive into a unique `otel-dotnet-auto.XXXXXX`
+directory under `${TMPDIR:-/tmp}` before verification and extraction. When
+`DOWNLOAD_DIR` is not set, this directory is also used for the download.
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -483,7 +507,12 @@ To verify the attestation of a file from a GitHub release use the [GitHub CLI](h
 For example:
 
 ```bash
-gh attestation verify --owner open-telemetry ./otel-dotnet-auto-install.sh
+RELEASE_TAG="v1.14.0"
+REPOSITORY="open-telemetry/opentelemetry-dotnet-instrumentation"
+gh attestation verify ./otel-dotnet-auto-install.sh \
+  --repo "${REPOSITORY}" \
+  --signer-workflow "${REPOSITORY}/.github/workflows/release.yml" \
+  --source-ref "refs/tags/${RELEASE_TAG}"
 ```
 
 > [!NOTE]
