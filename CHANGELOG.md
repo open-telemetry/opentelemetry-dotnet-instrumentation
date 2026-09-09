@@ -22,6 +22,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- [BREAKING] PowerShell installation and updates now require the
+  [GitHub CLI](https://cli.github.com/) by default.
 - [BREAKING] `OpenTelemetry.OpAmp.Client` now queues outgoing messages. Its
   `Send*Async` methods were replaced by corresponding `Send*` methods. OpAMP
   plugins can call `FlushAsync` to wait until the queue is empty.
