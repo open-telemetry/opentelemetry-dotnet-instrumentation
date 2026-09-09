@@ -24,22 +24,7 @@ const WSTRING skip_assembly_prefixes[]{
     WStr("Microsoft.ApplicationInsights"),
     WStr("Microsoft.Build"),
     WStr("Microsoft.CSharp"),
-    WStr("Microsoft.Extensions.Caching"),
-    WStr("Microsoft.Extensions.Configuration"),
-    WStr("Microsoft.Extensions.DependencyInjection"),
-    WStr("Microsoft.Extensions.DependencyModel"),
-    WStr("Microsoft.Extensions.Diagnostics"),
-    WStr("Microsoft.Extensions.FileProviders"),
-    WStr("Microsoft.Extensions.FileSystemGlobbing"),
-    WStr("Microsoft.Extensions.Hosting"),
-    WStr("Microsoft.Extensions.Http"),
-    WStr("Microsoft.Extensions.Identity"),
-    WStr("Microsoft.Extensions.Localization"),
-    WStr("Microsoft.Extensions.ObjectPool"),
-    WStr("Microsoft.Extensions.Options"),
-    WStr("Microsoft.Extensions.PlatformAbstractions"),
-    WStr("Microsoft.Extensions.Primitives"),
-    WStr("Microsoft.Extensions.WebEncoders"),
+    WStr("Microsoft.Extensions"),
     WStr("Microsoft.Web.Compilation.Snapshots"),
     WStr("System.Core"),
     WStr("System.Console"),
@@ -53,6 +38,11 @@ const WSTRING skip_assembly_prefixes[]{
     WStr("System.Text"),
     WStr("System.Threading"),
     WStr("System.Xml"),
+};
+
+const WSTRING include_assemblies[]{
+    WStr("Microsoft.Extensions.Logging"),
+    WStr("Microsoft.Extensions.Logging.Abstractions"),
 };
 
 const WSTRING skip_assemblies[]{WStr("mscorlib"),
