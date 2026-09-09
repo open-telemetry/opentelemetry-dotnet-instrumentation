@@ -37,6 +37,20 @@ public class ParserOpAmpTests
         Assert.Null(config.OpAmp);
     }
 
+    [Theory]
+    [InlineData("file_format: \"1.0\"\nopamp/development:\n")]
+    [InlineData("file_format: \"1.0\"\nopamp/development: {}\n")]
+    public void Parse_EmptyOpAmpConfigYaml_ShouldCreateOpAmpConfigurationWithDefaultSettings(string yaml)
+    {
+        var config = YamlParser.ParseYamlContent<YamlConfiguration>(yaml);
+
+        Assert.NotNull(config);
+        Assert.NotNull(config.OpAmp);
+        Assert.Null(config.OpAmp.ServerUrl);
+        Assert.Null(config.OpAmp.MaxPendingCustomMessages);
+        Assert.Null(config.OpAmp.MaxPendingCustomMessageBytes);
+    }
+
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {

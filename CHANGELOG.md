@@ -82,6 +82,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Allow an empty `opamp/development` section in file-based configuration to
+  enable the OpAMP client with default settings.
 - Prevent the shell installer from using a predictable path for temporary
   downloads.
 - Use the standard `service.namespace` resource attribute instead of `service.namespace.name`
