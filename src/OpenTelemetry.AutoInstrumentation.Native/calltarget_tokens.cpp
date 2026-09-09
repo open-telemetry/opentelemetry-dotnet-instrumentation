@@ -279,7 +279,7 @@ mdMemberRef CallTargetTokens::GetCallTargetReturnValueDefaultMemberRef(mdTypeSpe
     return callTargetReturnTypeGetDefault;
 }
 
-mdMethodSpec CallTargetTokens::GetCallTargetDefaultValueMethodSpec(TypeSignature* methodArgument)
+mdMethodSpec CallTargetTokens::GetCallTargetDefaultValueMethodSpec(const TypeSignature* methodArgument)
 {
     auto hr = EnsureBaseCalltargetTokens();
     if (FAILED(hr))
@@ -826,7 +826,7 @@ mdAssemblyRef CallTargetTokens::GetCorLibAssemblyRef()
 }
 
 HRESULT CallTargetTokens::ModifyLocalSigAndInitialize(void*         rewriterWrapperPtr,
-                                                      FunctionInfo* functionInfo,
+                                                      TypeSignature* methodReturnType,
                                                       ULONG*        callTargetStateIndex,
                                                       ULONG*        exceptionIndex,
                                                       ULONG*        callTargetReturnIndex,
@@ -839,9 +839,7 @@ HRESULT CallTargetTokens::ModifyLocalSigAndInitialize(void*         rewriterWrap
     ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*)rewriterWrapperPtr;
 
     // Modify the Local Var Signature of the method
-    auto returnFunctionMethod = functionInfo->method_signature.GetReturnValue();
-
-    auto hr = ModifyLocalSig(rewriterWrapper->GetILRewriter(), &returnFunctionMethod, callTargetStateIndex,
+    auto hr = ModifyLocalSig(rewriterWrapper->GetILRewriter(), methodReturnType, callTargetStateIndex,
                              exceptionIndex, callTargetReturnIndex, returnValueIndex, callTargetStateToken,
                              exceptionToken, callTargetReturnToken);
 
@@ -854,7 +852,7 @@ HRESULT CallTargetTokens::ModifyLocalSigAndInitialize(void*         rewriterWrap
     // Init locals
     if (*returnValueIndex != static_cast<ULONG>(ULONG_MAX))
     {
-        const mdMethodSpec defaultValueMethodSpec = GetCallTargetDefaultValueMethodSpec(&returnFunctionMethod);
+        const mdMethodSpec defaultValueMethodSpec = GetCallTargetDefaultValueMethodSpec(methodReturnType);
         if (defaultValueMethodSpec == mdMethodSpecNil)
         {
             // The signature was too large to build safely; abort instrumentation rather than

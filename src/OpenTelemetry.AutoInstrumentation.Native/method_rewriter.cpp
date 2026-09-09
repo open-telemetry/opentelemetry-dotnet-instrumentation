@@ -186,9 +186,11 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     mdToken  exceptionToken        = mdTokenNil;
     mdToken  callTargetReturnToken = mdTokenNil;
     ILInstr* firstInstruction      = nullptr;
-    hr = tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, caller, &callTargetStateIndex, &exceptionIndex,
-                                                   &callTargetReturnIndex, &returnValueIndex, &callTargetStateToken,
-                                                   &exceptionToken, &callTargetReturnToken, &firstInstruction);
+    auto returnType = caller->method_signature.GetReturnValue();
+    hr = tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, &returnType, &callTargetStateIndex,
+                                                   &exceptionIndex, &callTargetReturnIndex, &returnValueIndex,
+                                                   &callTargetStateToken, &exceptionToken, &callTargetReturnToken,
+                                                   &firstInstruction);
     if (FAILED(hr))
     {
         // Signature/local modification failed (e.g. the method's signature is too large to

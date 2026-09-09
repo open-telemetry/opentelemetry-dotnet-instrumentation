@@ -51,7 +51,7 @@ private:
     mdMemberRef GetCallTargetStateDefaultMemberRef();
     mdMemberRef GetCallTargetReturnVoidDefaultMemberRef();
     mdMemberRef GetCallTargetReturnValueDefaultMemberRef(mdTypeSpec callTargetReturnTypeSpec);
-    mdMethodSpec GetCallTargetDefaultValueMethodSpec(TypeSignature* methodArgument);
+    mdMethodSpec GetCallTargetDefaultValueMethodSpec(const TypeSignature* methodArgument);
 
     HRESULT ModifyLocalSig(ILRewriter* reWriter, TypeSignature* methodReturnValue, ULONG* callTargetStateIndex,
                            ULONG* exceptionIndex, ULONG* callTargetReturnIndex, ULONG* returnValueIndex,
@@ -91,7 +91,7 @@ public:
     mdAssemblyRef GetCorLibAssemblyRef();
     mdToken GetCurrentTypeRef(const TypeInfo* currentType, bool& isValueType);
 
-    HRESULT ModifyLocalSigAndInitialize(void* rewriterWrapperPtr, FunctionInfo* functionInfo,
+    HRESULT ModifyLocalSigAndInitialize(void* rewriterWrapperPtr, TypeSignature* methodReturnType,
                                         ULONG* callTargetStateIndex, ULONG* exceptionIndex,
                                         ULONG* callTargetReturnIndex, ULONG* returnValueIndex,
                                         mdToken* callTargetStateToken, mdToken* exceptionToken,
