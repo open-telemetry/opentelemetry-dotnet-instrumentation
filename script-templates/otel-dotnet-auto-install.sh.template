@@ -6,7 +6,7 @@ RELEASE_WORKFLOW="$RELEASE_REPOSITORY/.github/workflows/release.yml"
 
 assert_release_version() {
   if ! printf '%s\n' "$1" | grep -Eq '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$'; then
-    echo "Invalid release version '$1'." >&2
+    echo "Invalid release version '$1'. Expected vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-PRERELEASE (for example, v1.17.0-beta.1)." >&2
     return 1
   fi
 }
