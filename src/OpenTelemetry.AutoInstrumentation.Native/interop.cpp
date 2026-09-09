@@ -42,6 +42,11 @@ EXTERN_C VOID STDAPICALLTYPE AddDerivedInstrumentations(WCHAR* id, trace::CallTa
     return trace::profiler->AddDerivedInstrumentations(id, items, size);
 }
 
+EXTERN_C VOID STDAPICALLTYPE AddInterfaceInstrumentations(WCHAR* id, trace::CallTargetDefinition* items, int size)
+{
+    return trace::profiler->AddInterfaceInstrumentations(id, items, size);
+}
+
 EXTERN_C VOID STDAPICALLTYPE SetSqlClientNetFxILRewriteEnabled(bool enabled)
 {
     return trace::SetSqlClientNetFxILRewriteEnabled(enabled);

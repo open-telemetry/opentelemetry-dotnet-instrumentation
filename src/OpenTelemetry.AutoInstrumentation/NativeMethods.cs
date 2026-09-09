@@ -45,6 +45,23 @@ internal static class NativeMethods
         }
     }
 
+    public static void AddInterfaceInstrumentations(string id, NativeCallTargetDefinition[] methodArrays)
+    {
+        if (methodArrays is null || methodArrays.Length == 0)
+        {
+            return;
+        }
+
+        if (IsWindows)
+        {
+            Windows.AddInterfaceInstrumentations(id, methodArrays, methodArrays.Length);
+        }
+        else
+        {
+            NonWindows.AddInterfaceInstrumentations(id, methodArrays, methodArrays.Length);
+        }
+    }
+
 #if NETFRAMEWORK
     public static void SetSqlClientNetFxILRewriteEnabled(bool enabled)
     {
@@ -212,6 +229,10 @@ internal static class NativeMethods
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void AddDerivedInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
 
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern void AddInterfaceInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
+
 #if NETFRAMEWORK
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
@@ -263,6 +284,10 @@ internal static class NativeMethods
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void AddDerivedInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern void AddInterfaceInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
 
 #if NETFRAMEWORK
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]

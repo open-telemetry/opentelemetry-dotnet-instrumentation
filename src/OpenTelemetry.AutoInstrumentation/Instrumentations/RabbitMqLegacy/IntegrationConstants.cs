@@ -10,6 +10,8 @@ internal static class IntegrationConstants
     public const string ModelBaseTypeName = "RabbitMQ.Client.Impl.ModelBase";
     public const string DefaultBasicConsumerTypeName = "RabbitMQ.Client.DefaultBasicConsumer";
     public const string AsyncDefaultBasicConsumerTypeName = "RabbitMQ.Client.AsyncDefaultBasicConsumer";
+    public const string BasicConsumerInterfaceTypeName = "RabbitMQ.Client.IBasicConsumer";
+    public const string AsyncBasicConsumerInterfaceTypeName = "RabbitMQ.Client.IAsyncBasicConsumer";
     public const string ModelGeneratedTypeName = "RabbitMQ.Client.Framing.Impl.Model";
     public const string BasicGetResultTypeName = "RabbitMQ.Client.BasicGetResult";
     public const string BasicPropertiesInterfaceTypeName = "RabbitMQ.Client.IBasicProperties";

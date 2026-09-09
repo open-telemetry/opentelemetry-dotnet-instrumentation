@@ -1102,7 +1102,7 @@ void CorProfiler::AddInstrumentations(WCHAR* id, CallTargetDefinition* items, in
 
     if (size > 0)
     {
-        InternalAddInstrumentation(id, items, size, false);
+        InternalAddInstrumentation(id, items, size, false, false);
     }
 }
 
@@ -1115,11 +1115,25 @@ void CorProfiler::AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* it
 
     if (size > 0)
     {
-        InternalAddInstrumentation(id, items, size, true);
+        InternalAddInstrumentation(id, items, size, true, false);
     }
 }
 
-void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived)
+void CorProfiler::AddInterfaceInstrumentations(WCHAR* id, CallTargetDefinition* items, int size)
+{
+    auto    _             = trace::Stats::Instance()->InitializeProfilerMeasure();
+    WSTRING definitionsId = WSTRING(id);
+    Logger::Info("AddInterfaceInstrumentations: received id: ", definitionsId, " from managed side with ", size,
+                 " integrations.");
+
+    if (size > 0)
+    {
+        InternalAddInstrumentation(id, items, size, false, true);
+    }
+}
+
+void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived,
+                                             bool isInterface)
 {
     WSTRING                      definitionsId = WSTRING(id);
     std::scoped_lock<std::mutex> definitionsLock(definitions_ids_lock_);
@@ -1163,7 +1177,8 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
             const auto& integration =
                 IntegrationDefinition(MethodReference(targetAssembly, targetType, targetMethod, minVersion, maxVersion,
                                                       signatureTypes),
-                                      TypeReference(integrationAssembly, integrationType, {}, {}), isDerived, true);
+                                      TypeReference(integrationAssembly, integrationType, {}, {}), isDerived,
+                                      isInterface, true);
 
             if (Logger::IsDebugEnabled())
             {
