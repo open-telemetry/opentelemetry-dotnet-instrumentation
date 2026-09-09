@@ -1910,6 +1910,10 @@ std::string CorProfiler::GetILCodes(const std::string&              title,
             {
                 const auto memberInfo = GetFunctionInfo(metadata_import, (mdMemberRef)cInstr->m_Arg32);
                 orig_sstream << "  | ";
+                if (memberInfo.signature.IsInstanceMethod())
+                {
+                    orig_sstream << "instance ";
+                }
                 orig_sstream << ToString(memberInfo.type.name);
                 orig_sstream << ".";
                 orig_sstream << ToString(memberInfo.name);
