@@ -14,6 +14,8 @@
 
 #ifndef _WIN32
 #include <dlfcn.h>
+#undef EXTERN_C
+#define EXTERN_C extern "C" __attribute__((visibility("default")))
 #endif
 
 #ifdef _WIN32
