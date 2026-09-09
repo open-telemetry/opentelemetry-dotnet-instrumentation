@@ -74,6 +74,9 @@ jobs:
 
   shell-scripts:
     name: Run shell scripts on ${{ matrix.machine }}
+    permissions:
+      attestations: read # for gh attestation verify
+      contents: read # for actions/checkout and gh release verify-asset
     strategy:
       fail-fast: false
       matrix:
@@ -112,6 +115,7 @@ jobs:
       - name: Test the Shell scripts from README.md
         shell: bash
         env:
+          GH_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY_NAME: ${{ github.repository }}
           RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
           GITHUB_COMMIT_SHA: ${{ github.sha }}
@@ -124,6 +128,11 @@ jobs:
           dotnet new console
           dotnet publish -f net10.0 -c Release
           curl -sSfL "https://github.com/${GITHUB_REPOSITORY_NAME}/releases/download/${RELEASE_TAG_NAME}/otel-dotnet-auto-install.sh" -O
+          gh release verify-asset "${RELEASE_TAG_NAME}" ./otel-dotnet-auto-install.sh --repo "${GITHUB_REPOSITORY_NAME}"
+          gh attestation verify ./otel-dotnet-auto-install.sh \
+            --repo "${GITHUB_REPOSITORY_NAME}" \
+            --signer-workflow "${GITHUB_REPOSITORY_NAME}/.github/workflows/release.yml" \
+            --source-ref "refs/tags/${RELEASE_TAG_NAME}"
           sh ./otel-dotnet-auto-install.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
           curl -sSfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY_NAME}/${GITHUB_COMMIT_SHA}/instrument.sh" -O
@@ -133,6 +142,9 @@ jobs:
 
   shell-scripts-container:
     name: Run shell scripts in Docker container on ${{ matrix.machine }}
+    permissions:
+      attestations: read # for gh attestation verify
+      contents: read # for actions/checkout and gh release verify-asset
     strategy:
       fail-fast: false
       matrix:
@@ -156,18 +168,27 @@ jobs:
       - name: Test the Shell scripts from README.md in Docker container
         env:
           BASE_IMAGE: ${{ matrix.base-image }}
+          GH_TOKEN: ${{ github.token }}
           NET_VERSION: ${{ matrix.net-version }}
           GITHUB_REPOSITORY_NAME: ${{ github.repository }}
           RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
           GITHUB_COMMIT_SHA: ${{ github.sha }}
         run: |
           set -e
+          installer_path="${RUNNER_TEMP}/otel-dotnet-auto-install.sh"
+          curl -sSfL "https://github.com/${GITHUB_REPOSITORY_NAME}/releases/download/${RELEASE_TAG_NAME}/otel-dotnet-auto-install.sh" -o "${installer_path}"
+          gh release verify-asset "${RELEASE_TAG_NAME}" "${installer_path}" --repo "${GITHUB_REPOSITORY_NAME}"
+          gh attestation verify "${installer_path}" \
+            --repo "${GITHUB_REPOSITORY_NAME}" \
+            --signer-workflow "${GITHUB_REPOSITORY_NAME}/.github/workflows/release.yml" \
+            --source-ref "refs/tags/${RELEASE_TAG_NAME}"
           docker build -t mybuildimage -f "./docker/${BASE_IMAGE}.dockerfile" .
           docker run --rm \
             -e "NET_VERSION=${NET_VERSION}" \
             -e "GITHUB_REPOSITORY_NAME=${GITHUB_REPOSITORY_NAME}" \
             -e "RELEASE_TAG_NAME=${RELEASE_TAG_NAME}" \
             -e "GITHUB_COMMIT_SHA=${GITHUB_COMMIT_SHA}" \
+            -v "${installer_path}:/tmp/otel-dotnet-auto-install.sh:ro" \
             -i mybuildimage /bin/sh <<'EOF'
             set -e
             mkdir testapp
@@ -175,8 +196,9 @@ jobs:
             echo '<Project />' > Directory.Build.props
             dotnet new console
             dotnet publish -f "${NET_VERSION}" -c Release
-            curl -sSfL "https://github.com/${GITHUB_REPOSITORY_NAME}/releases/download/${RELEASE_TAG_NAME}/otel-dotnet-auto-install.sh" -O
-            sh ./otel-dotnet-auto-install.sh
+            cp /tmp/otel-dotnet-auto-install.sh ./otel-dotnet-auto-install.sh
+            # Archive verification is exercised by the hosted-runner job; the minimal test image does not include GitHub CLI.
+            SKIP_RELEASE_VERIFICATION=true sh ./otel-dotnet-auto-install.sh
               test "$(ls -A "$HOME/.otel-dotnet-auto")"
             curl -sSfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY_NAME}/${GITHUB_COMMIT_SHA}/instrument.sh" -O
             . ./instrument.sh
