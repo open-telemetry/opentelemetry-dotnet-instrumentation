@@ -620,7 +620,7 @@ again:
 
     unsigned codeSize = offset;
     unsigned totalSize;
-    LPBYTE   pBody = NULL;
+    LPBYTE   pBody = nullptr;
     if (m_fGenerateTinyHeader)
     {
         // Make sure we can fit in a tiny header

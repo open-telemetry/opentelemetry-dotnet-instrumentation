@@ -28,14 +28,14 @@ EXTERN_C HRESULT STDMETHODCALLTYPE DllGetClassObject(REFCLSID rclsid, REFIID rii
     // {918728DD-259F-4A6A-AC2B-B85E1B658318}
     const GUID CLSID_CorProfiler = {0x918728dd, 0x259f, 0x4a6a, {0xac, 0x2b, 0xb8, 0x5e, 0x1b, 0x65, 0x83, 0x18}};
 
-    if (ppv == NULL || rclsid != CLSID_CorProfiler)
+    if (ppv == nullptr || rclsid != CLSID_CorProfiler)
     {
         return E_FAIL;
     }
 
     auto factory = new (std::nothrow) ClassFactory;
 
-    if (factory == NULL)
+    if (factory == nullptr)
     {
         return E_OUTOFMEMORY;
     }
