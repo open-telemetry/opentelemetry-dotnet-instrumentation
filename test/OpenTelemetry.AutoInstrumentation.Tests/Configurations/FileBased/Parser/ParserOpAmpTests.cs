@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
@@ -35,6 +36,28 @@ public class ParserOpAmpTests
 
         // By default opamp is disabled
         Assert.Null(config.OpAmp);
+    }
+
+    [Theory]
+    [InlineData("file_format: \"1.0\"\nopamp/development:\n")]
+    [InlineData("file_format: \"1.0\"\nopamp/development: {}\n")]
+    public void Parse_EmptyOpAmpConfigYaml_ShouldEnableOpAmpWithDefaultSettings(string yaml)
+    {
+        var config = YamlParser.ParseYamlContent<YamlConfiguration>(yaml);
+
+        Assert.NotNull(config);
+        Assert.NotNull(config.OpAmp);
+        Assert.Null(config.OpAmp.ServerUrl);
+        Assert.Null(config.OpAmp.MaxPendingCustomMessages);
+        Assert.Null(config.OpAmp.MaxPendingCustomMessageBytes);
+
+        var settings = new OpAmpSettings();
+        settings.LoadFile(config);
+
+        Assert.True(settings.OpAmpClientEnabled);
+        Assert.Null(settings.ServerUrl);
+        Assert.Null(settings.MaxPendingCustomMessages);
+        Assert.Null(settings.MaxPendingCustomMessageBytes);
     }
 
     [Fact]
