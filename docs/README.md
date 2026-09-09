@@ -229,10 +229,10 @@ OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=sta
 
 For air-gapped environments, verify the archive before transferring it and
 explicitly skip the installer's online verification. You can provide either the
-installation file directly with:
+archive directly with:
 
 ```sh
-SKIP_RELEASE_VERIFICATION=true LOCAL_PATH=<PATH_TO_INSTALLER> sh ./otel-dotnet-auto-install.sh
+SKIP_RELEASE_VERIFICATION=true LOCAL_PATH=<PATH_TO_ARCHIVE> sh ./otel-dotnet-auto-install.sh
 ```
 
 or the folder with the files, this has the added benefit that the install
@@ -254,7 +254,7 @@ uses environment variables as parameters:
 | `DOWNLOAD_DIR`              | Folder to download the archive to. Will use local archive if it already exists  | No       | *Calculated*                |
 | `LOCAL_PATH`                | Full path the archive to use for installation. (ideal for air-gapped scenarios) | No       | *Calculated*                |
 | `SKIP_RELEASE_VERIFICATION` | Set to `true` to skip GitHub release and artifact attestation verification      | No       | `false`                     |
-| `VERSION`                   | Version to download                                                             | No       | `1.16.0`                    |
+| `VERSION`                   | Version to download                                                             | No       | `v1.16.0`                   |
 
 The installer copies the archive into a unique `otel-dotnet-auto.XXXXXX`
 directory under `${TMPDIR:-/tmp}` before verification and extraction. When
