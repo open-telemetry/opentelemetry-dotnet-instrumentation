@@ -120,6 +120,10 @@ ILRewriter::ILRewriter(ICorProfilerInfo*            pICorProfilerInfo,
     , m_pOffsetToInstr(nullptr)
     , m_pOutputBuffer(nullptr)
     , m_pIMethodMalloc(nullptr)
+    , m_maxStack(0)
+    , m_flags(CorILMethod_TinyFormat)
+    , m_nEH(0)
+    , m_CodeSize(0)
 {
     m_IL.m_pNext = &m_IL;
     m_IL.m_pPrev = &m_IL;
@@ -214,6 +218,11 @@ HRESULT ILRewriter::Import()
 
 HRESULT ILRewriter::ImportIL(LPCBYTE pIL)
 {
+    if (m_pOffsetToInstr != nullptr)
+    {
+        delete[] m_pOffsetToInstr;
+    }
+
     m_pOffsetToInstr = new (std::nothrow) ILInstr*[m_CodeSize + 1];
     IfNullRet(m_pOffsetToInstr);
 

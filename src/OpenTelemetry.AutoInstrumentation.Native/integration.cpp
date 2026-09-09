@@ -37,7 +37,7 @@ AssemblyReference* AssemblyReference::GetFromCache(const WSTRING& str)
     return aref;
 }
 
-std::vector<IntegrationDefinition> GetIntegrationsFromTraceMethodsConfiguration(const TypeReference integration_type,
+std::vector<IntegrationDefinition> GetIntegrationsFromTraceMethodsConfiguration(const TypeReference& integration_type,
                                                                                 const WSTRING& configuration_string)
 {
     std::vector<IntegrationDefinition> integrationDefinitions;
@@ -111,14 +111,14 @@ WSTRING GetNameFromAssemblyReferenceString(const WSTRING& wstr)
     auto pos = name.find(WStr(','));
     if (pos != WSTRING::npos)
     {
-        name = name.substr(0, pos);
+        name.resize(pos);
     }
 
     // strip spaces
     pos = name.rfind(WStr(' '));
     if (pos != WSTRING::npos)
     {
-        name = name.substr(0, pos);
+        name.resize(pos);
     }
 
     return name;

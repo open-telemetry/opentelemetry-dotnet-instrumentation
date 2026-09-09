@@ -15,12 +15,12 @@ namespace trace
 
 RejitHandlerModuleMethod::RejitHandlerModuleMethod(mdMethodDef         methodDef,
                                                    RejitHandlerModule* module,
-                                                   const FunctionInfo& functionInfo)
+                                                   const FunctionInfo& functionInfo) :
+    m_methodDef(methodDef),
+    m_module(module),
+    m_pFunctionControl(nullptr),
+    m_functionInfo(std::make_unique<FunctionInfo>(functionInfo))
 {
-    m_methodDef = methodDef;
-    SetFunctionInfo(functionInfo);
-    m_pFunctionControl = nullptr;
-    m_module           = module;
 }
 
 mdMethodDef RejitHandlerModuleMethod::GetMethodDef()
@@ -159,11 +159,11 @@ MethodRewriter* TracerRejitHandlerModuleMethod::GetMethodRewriter()
 // RejitHandlerModule
 //
 
-RejitHandlerModule::RejitHandlerModule(ModuleID moduleId, RejitHandler* handler)
+RejitHandlerModule::RejitHandlerModule(ModuleID moduleId, RejitHandler* handler) :
+    m_moduleId(moduleId),
+    m_handler(handler),
+    m_metadata(nullptr)
 {
-    m_moduleId = moduleId;
-    m_metadata = nullptr;
-    m_handler  = handler;
 }
 
 ModuleID RejitHandlerModule::GetModuleId()
@@ -304,18 +304,18 @@ void RejitHandler::RequestRejit(std::vector<ModuleID>& modulesVector, std::vecto
     }
 }
 
-RejitHandler::RejitHandler(ICorProfilerInfo7* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader)
+RejitHandler::RejitHandler(ICorProfilerInfo7* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader) :
+    m_profilerInfo(pInfo),
+    m_profilerInfo12(nullptr),
+    m_work_offloader(work_offloader)
 {
-    m_profilerInfo   = pInfo;
-    m_profilerInfo12 = nullptr;
-    m_work_offloader = work_offloader;
 }
 
-RejitHandler::RejitHandler(ICorProfilerInfo12* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader)
+RejitHandler::RejitHandler(ICorProfilerInfo12* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader) :
+    m_profilerInfo(pInfo),
+    m_profilerInfo12(pInfo),
+    m_work_offloader(work_offloader)
 {
-    m_profilerInfo   = pInfo;
-    m_profilerInfo12 = pInfo;
-    m_work_offloader = work_offloader;
 }
 
 RejitHandlerModule* RejitHandler::GetOrAddModule(ModuleID moduleId)

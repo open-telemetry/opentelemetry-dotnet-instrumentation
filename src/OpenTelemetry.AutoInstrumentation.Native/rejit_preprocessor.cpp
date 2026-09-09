@@ -175,8 +175,8 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         }
 
         RejitHandlerModuleMethodCreatorFunc creator =
-            [=, request = definition, functionInfo = functionInfo](const mdMethodDef method, RejitHandlerModule* module)
-        { return CreateMethod(method, module, functionInfo, request); };
+            [=, request = definition, fInfo = functionInfo](const mdMethodDef method, RejitHandlerModule* module)
+        { return CreateMethod(method, module, fInfo, request); };
 
         moduleHandler->CreateMethodIfNotExists(methodDef, creator);
 
@@ -540,15 +540,15 @@ void RejitPreprocessor<RejitRequestDefinition>::EnqueueRequestRejitForLoadedModu
     Logger::Debug("RejitHandler::EnqueueRequestRejitForLoadedModules");
 
     std::function<void()> action =
-        [=, modules = std::move(modulesVector), definitions = std::move(definitions), promise = promise]() mutable
+        [=, modules = std::move(modulesVector), definitions = std::move(definitions), localPromise = promise]() mutable
     {
         // Process modules for rejit
         const auto rejitCount = RequestRejitForLoadedModules(modules, definitions, true);
 
         // Resolve promise
-        if (promise != nullptr)
+        if (localPromise != nullptr)
         {
-            promise->set_value(rejitCount);
+            localPromise->set_value(rejitCount);
         }
     };
 
