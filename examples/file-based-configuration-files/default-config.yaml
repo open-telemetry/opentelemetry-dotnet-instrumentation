@@ -58,9 +58,6 @@ resource:
 
 # OpAMP is disabled by default. Uncomment this section to enable it.
 # opamp/development:
-#   server_url: https://localhost:4320/v1/opamp
-#   max_pending_custom_messages: 2048
-#   max_pending_custom_message_bytes: 67108864
 
 # Instrumentation Configuration
 instrumentation/development:

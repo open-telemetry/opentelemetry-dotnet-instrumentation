@@ -642,6 +642,7 @@ instrumentation/development:
 ### OpAMP
 
 ``` yaml
+# The presence of this section enables the OpAMP client. All fields are optional.
 opamp/development:
   # Configure the server endpoint. If not explicitly set, a default
   # URL is used: https://localhost:4320/v1/opamp.
