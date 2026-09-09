@@ -1,6 +1,52 @@
 #!/bin/sh
 set -e
 
+RELEASE_REPOSITORY="open-telemetry/opentelemetry-dotnet-instrumentation"
+RELEASE_WORKFLOW="$RELEASE_REPOSITORY/.github/workflows/release.yml"
+
+assert_release_version() {
+  if ! printf '%s\n' "$1" | grep -Eq '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$'; then
+    echo "Invalid release version '$1'." >&2
+    return 1
+  fi
+}
+
+get_github_cli_path() {
+  if ! command -v gh > /dev/null 2>&1; then
+    echo "The GitHub CLI ('gh') is required to verify release assets. Install it from https://cli.github.com/ or set SKIP_RELEASE_VERIFICATION=true to explicitly skip verification." >&2
+    return 1
+  fi
+
+  command -v gh
+}
+
+assert_release_asset() {
+  verify_github_cli_path="$1"
+  verify_version="$2"
+  verify_asset_path="$3"
+  verify_asset_name="${verify_asset_path##*/}"
+
+  if [ ! -f "$verify_asset_path" ]; then
+    echo "Could not find release asset '$verify_asset_path'." >&2
+    return 1
+  fi
+
+  # Bind the downloaded file to the exact immutable GitHub release.
+  if ! "$verify_github_cli_path" release verify-asset "$verify_version" "$verify_asset_path" --repo "$RELEASE_REPOSITORY"; then
+    echo "GitHub release verification failed for '$verify_asset_name'." >&2
+    return 1
+  fi
+
+  # Verify that the expected workflow produced the file from the release tag.
+  if ! "$verify_github_cli_path" attestation verify "$verify_asset_path" \
+    --repo "$RELEASE_REPOSITORY" \
+    --signer-workflow "$RELEASE_WORKFLOW" \
+    --source-ref "refs/tags/$verify_version"; then
+    echo "GitHub artifact attestation verification failed for '$verify_asset_name'." >&2
+    return 1
+  fi
+}
+
 # guess OS_TYPE if not provided
 if [ -z "$OS_TYPE" ]; then
   case "$(uname -s | tr '[:upper:]' '[:lower:]')" in
@@ -58,11 +104,26 @@ fi
 test -z "$OTEL_DOTNET_AUTO_HOME" && OTEL_DOTNET_AUTO_HOME="$HOME/.otel-dotnet-auto"
 test -z "$VERSION" && VERSION="v{{VERSION}}"
 
-if [ -z "${DOWNLOAD_DIR:-}" ]; then
-  DOWNLOAD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/otel-dotnet-auto.XXXXXX")"
+assert_release_version "$VERSION"
+
+GITHUB_CLI_PATH=""
+if [ "${SKIP_RELEASE_VERIFICATION:-false}" = "true" ]; then
+  echo "Warning: GitHub release and artifact attestation verification is skipped. The ZIP archive will not be verified." >&2
+else
+  GITHUB_CLI_PATH="$(get_github_cli_path)"
 fi
 
-RELEASES_URL="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases"
+RELEASE_DOWNLOAD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/otel-dotnet-auto.XXXXXX")"
+cleanup_release_download_dir() {
+  rm -rf "$RELEASE_DOWNLOAD_DIR"
+}
+trap cleanup_release_download_dir 0
+
+if [ -z "${DOWNLOAD_DIR:-}" ]; then
+  DOWNLOAD_DIR="$RELEASE_DOWNLOAD_DIR"
+fi
+
+RELEASES_URL="https://github.com/$RELEASE_REPOSITORY/releases"
 ARCHIVE="opentelemetry-dotnet-instrumentation-$OS_TYPE.zip"
 
 # In case of Linux, use architecture in the download path
@@ -81,5 +142,14 @@ else
   echo "Using local installation archive: $LOCAL_PATH"
 fi
 
+ARCHIVE_PATH="$RELEASE_DOWNLOAD_DIR/$ARCHIVE"
+if [ "$LOCAL_PATH" != "$ARCHIVE_PATH" ]; then
+  cp "$LOCAL_PATH" "$ARCHIVE_PATH"
+fi
+
+if [ "${SKIP_RELEASE_VERIFICATION:-false}" != "true" ]; then
+  assert_release_asset "$GITHUB_CLI_PATH" "$VERSION" "$ARCHIVE_PATH"
+fi
+
 rm -rf "$OTEL_DOTNET_AUTO_HOME"
-unzip -q "$LOCAL_PATH" -d "$OTEL_DOTNET_AUTO_HOME" 
+unzip -q "$ARCHIVE_PATH" -d "$OTEL_DOTNET_AUTO_HOME"
