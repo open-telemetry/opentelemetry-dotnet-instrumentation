@@ -3,6 +3,7 @@
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
+using Vendors.YamlDotNet.Core;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
@@ -39,8 +40,12 @@ public class ParserOpAmpTests
 
     [Theory]
     [InlineData("file_format: \"1.0\"\nopamp/development:\n")]
+    [InlineData("file_format: \"1.0\"\nopamp/development: null\n")]
+    [InlineData("file_format: \"1.0\"\nopamp/development: Null\n")]
+    [InlineData("file_format: \"1.0\"\nopamp/development: NULL\n")]
+    [InlineData("file_format: \"1.0\"\nopamp/development: ~\n")]
     [InlineData("file_format: \"1.0\"\nopamp/development: {}\n")]
-    public void Parse_EmptyOpAmpConfigYaml_ShouldCreateOpAmpConfigurationWithDefaultSettings(string yaml)
+    public void Parse_NullOrEmptyOpAmpConfigYaml_ShouldCreateOpAmpConfigurationWithDefaultSettings(string yaml)
     {
         var config = YamlParser.ParseYamlContent<YamlConfiguration>(yaml);
 
@@ -49,6 +54,14 @@ public class ParserOpAmpTests
         Assert.Null(config.OpAmp.ServerUrl);
         Assert.Null(config.OpAmp.MaxPendingCustomMessages);
         Assert.Null(config.OpAmp.MaxPendingCustomMessageBytes);
+    }
+
+    [Theory]
+    [InlineData("file_format: \"1.0\"\nopamp/development: \"\"\n")]
+    [InlineData("file_format: \"1.0\"\nopamp/development: ''\n")]
+    public void Parse_EmptyStringOpAmpConfigYaml_ShouldThrow(string yaml)
+    {
+        Assert.Throws<YamlException>(() => YamlParser.ParseYamlContent<YamlConfiguration>(yaml));
     }
 
     [Fact]
