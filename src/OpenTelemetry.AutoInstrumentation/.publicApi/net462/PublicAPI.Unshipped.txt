@@ -1,2 +1,7 @@
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetBubbleUpException
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetBubbleUpException.CallTargetBubbleUpException() -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetBubbleUpException.CallTargetBubbleUpException(string! message) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetBubbleUpException.CallTargetBubbleUpException(string! message, System.Exception! innerException) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetBubbleUpException.CallTargetBubbleUpException(System.Runtime.Serialization.SerializationInfo! info, System.Runtime.Serialization.StreamingContext context) -> void
 OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlConnectorEndUserActionTraceContextPropagationIntegration

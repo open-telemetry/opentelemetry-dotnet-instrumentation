@@ -81,6 +81,7 @@ private:
     bool enable_by_ref_instrumentation = true;
     bool enable_calltarget_state_by_ref = true;
     std::unique_ptr<TracerRejitPreprocessor> tracer_integration_preprocessor = nullptr;
+    bool call_target_bubble_up_exception_available = false;
 
     // Cor assembly properties
     AssemblyProperty corAssemblyProperty{};
@@ -139,6 +140,7 @@ private:
     bool GetIntegrationTypeRef(ModuleMetadata& module_metadata, ModuleID module_id,
                                const IntegrationDefinition& integration_definition, mdTypeRef& integration_type_ref);
     bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);
+    static bool EnsureCallTargetBubbleUpExceptionTypeAvailable(const ModuleMetadata& module_metadata);
 
     //
     // Initialization methods

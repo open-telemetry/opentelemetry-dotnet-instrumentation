@@ -850,6 +850,9 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id)
 #else
             RewritingPInvokeMaps(module_metadata, nonwindows_nativemethods_type);
 #endif // _WIN32
+
+            call_target_bubble_up_exception_available =
+                EnsureCallTargetBubbleUpExceptionTypeAvailable(module_metadata);
         }
 
         if (Logger::IsDebugEnabled())
@@ -1832,6 +1835,55 @@ std::string CorProfiler::GetILCodes(const std::string&              title,
                     }
                 }
             }
+            for (unsigned int i = 0; i < ehCount; i++)
+            {
+                const auto& currentEH = ehPtr[i];
+                if (currentEH.m_Flags == COR_ILEXCEPTION_CLAUSE_FILTER)
+                {
+                    if (currentEH.m_pTryBegin == cInstr)
+                    {
+                        if (indent > 0)
+                        {
+                            orig_sstream << indent_values[indent];
+                        }
+                        orig_sstream << ".try {" << std::endl;
+                        indent++;
+                    }
+                    if (currentEH.m_pTryEnd == cInstr)
+                    {
+                        indent--;
+                        if (indent > 0)
+                        {
+                            orig_sstream << indent_values[indent];
+                        }
+                        orig_sstream << "}" << std::endl;
+                    }
+                    if (currentEH.m_pFilter == cInstr)
+                    {
+                        if (indent > 0)
+                        {
+                            orig_sstream << indent_values[indent];
+                        }
+                        orig_sstream << ".filter {" << std::endl;
+                        indent++;
+                    }
+                    if (currentEH.m_pHandlerBegin == cInstr)
+                    {
+                        indent--;
+                        if (indent > 0)
+                        {
+                            orig_sstream << indent_values[indent];
+                        }
+                        orig_sstream << "}" << std::endl;
+                        if (indent > 0)
+                        {
+                            orig_sstream << indent_values[indent];
+                        }
+                        orig_sstream << ".catch {" << std::endl;
+                        indent++;
+                    }
+                }
+            }
         }
 
         if (indent > 0)
@@ -1875,7 +1927,7 @@ std::string CorProfiler::GetILCodes(const std::string&              title,
             }
             else if (cInstr->m_opcode == CEE_CASTCLASS || cInstr->m_opcode == CEE_BOX ||
                      cInstr->m_opcode == CEE_UNBOX_ANY || cInstr->m_opcode == CEE_NEWARR ||
-                     cInstr->m_opcode == CEE_INITOBJ)
+                     cInstr->m_opcode == CEE_INITOBJ || cInstr->m_opcode == CEE_ISINST)
             {
                 const auto typeInfo = GetTypeInfo(metadata_import, (mdTypeRef)cInstr->m_Arg32);
                 orig_sstream << "  | ";
@@ -1922,6 +1974,15 @@ std::string CorProfiler::GetILCodes(const std::string&              title,
         }
     }
     return orig_sstream.str();
+}
+
+bool CorProfiler::EnsureCallTargetBubbleUpExceptionTypeAvailable(const ModuleMetadata& module_metadata)
+{
+    mdTypeDef bubbleUpExceptionTypeDef;
+    const auto hr = module_metadata.metadata_import->FindTypeDefByName(
+        calltarget_bubble_up_exception_type_name.data(), mdTokenNil, &bubbleUpExceptionTypeDef);
+    Logger::Debug("CallTargetBubbleUpException type availability check returned: ", hr);
+    return SUCCEEDED(hr);
 }
 
 #ifdef _WIN32

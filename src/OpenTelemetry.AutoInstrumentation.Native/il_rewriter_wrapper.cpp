@@ -18,11 +18,12 @@ void ILRewriterWrapper::SetILPosition(ILInstr* pILInstr)
     m_ILInstr = pILInstr;
 }
 
-void ILRewriterWrapper::Pop() const
+ILInstr* ILRewriterWrapper::Pop() const
 {
     ILInstr* pNewInstr  = m_ILRewriter->NewILInstr();
     pNewInstr->m_opcode = CEE_POP;
     m_ILRewriter->InsertBefore(m_ILInstr, pNewInstr);
+    return pNewInstr;
 }
 
 ILInstr* ILRewriterWrapper::LoadNull() const

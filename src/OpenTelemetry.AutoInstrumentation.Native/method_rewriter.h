@@ -9,6 +9,9 @@
 #include "util.h"
 #include "cor.h"
 
+struct ILInstr;
+class ILRewriterWrapper;
+
 namespace trace
 {
     // forward declarations
@@ -28,6 +31,8 @@ class TracerMethodRewriter : public MethodRewriter, public Singleton<TracerMetho
     
 private:
     TracerMethodRewriter(){}
+    ILInstr* CreateFilterForException(ILRewriterWrapper* rewriter, mdTypeRef exceptionTypeRef,
+                                      mdTypeRef bubbleUpExceptionTypeRef, ULONG exceptionValueIndex) const;
 
 public:
     HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler) override;

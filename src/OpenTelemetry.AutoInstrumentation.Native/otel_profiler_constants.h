@@ -58,6 +58,8 @@ const WSTRING system_private_corelib_assemblyName = WStr("System.Private.CoreLib
 const WSTRING opentelemetry_autoinstrumentation_loader_assemblyName = WStr("OpenTelemetry.AutoInstrumentation.Loader");
 
 const WSTRING managed_profiler_name = WStr("OpenTelemetry.AutoInstrumentation");
+const WSTRING calltarget_bubble_up_exception_type_name =
+    WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetBubbleUpException");
 
 #ifdef _WIN32
 const WSTRING windows_nativemethods_type = WStr("OpenTelemetry.AutoInstrumentation.NativeMethods+Windows");
