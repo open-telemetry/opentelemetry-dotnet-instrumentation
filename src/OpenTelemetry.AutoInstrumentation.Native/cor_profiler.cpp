@@ -134,9 +134,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         }
     }
 
-    if (runtime_information_.is_core() && runtime_information_.major_version < 8)
+    if (runtime_information_.is_core() && runtime_information_.major_version < 10)
     {
-        FailProfiler(Warn, "Failed to attach profiler: Not supported .NET version (lower than 8.0).")
+        FailProfiler(Warn, "Failed to attach profiler: Not supported .NET version (lower than 10.0).")
     }
 
     if (runtime_information_.is_core())
