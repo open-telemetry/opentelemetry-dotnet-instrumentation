@@ -147,14 +147,14 @@ public static partial class LibraryVersion
             "TestApplication.OracleMda.NetFramework",
             [
                 new("23.5.1", supportedFrameworks: [ "net472" ]),
-                new("23.26.300", supportedFrameworks: [ "net472" ]),
+                new("23.26.301", supportedFrameworks: [ "net472" ]),
             ]
         },
         {
             "TestApplication.OracleMda.Core",
             [
                 new("23.5.1"),
-                new("23.26.300"),
+                new("23.26.301"),
             ]
         },
         {

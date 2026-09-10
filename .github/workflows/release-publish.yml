@@ -32,7 +32,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup .NET
-        uses: ./.github/actions/setup-dotnet
+        uses: $/.github/actions/setup-dotnet
 
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
@@ -100,7 +100,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup .NET
-        uses: ./.github/actions/setup-dotnet
+        uses: $/.github/actions/setup-dotnet
 
       - name: Install MacOS CoreUtils
         if: ${{ runner.os == 'macOS' }}

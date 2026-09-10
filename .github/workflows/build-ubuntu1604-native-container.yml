@@ -24,7 +24,7 @@ jobs:
 
       - name: Prepare build environment
         id: prepare-build-environment
-        uses: ./.github/actions/prepare-build-environment
+        uses: $/.github/actions/prepare-build-environment
         with:
           artifact-name: ubuntu1604-native
           environment-type: container
@@ -33,7 +33,7 @@ jobs:
       - name: Build native library in Docker container
         env:
           OS_TYPE: linux-glibc
-        uses: ./.github/actions/run-command-in-environment
+        uses: $/.github/actions/run-command-in-environment
         with:
           container-name: ${{ steps.prepare-build-environment.outputs.container-name }}
           container-publish-env: OS_TYPE
@@ -51,7 +51,7 @@ jobs:
 
       - name: Cleanup build environment
         if: ${{ always() }}
-        uses: ./.github/actions/cleanup-build-environment
+        uses: $/.github/actions/cleanup-build-environment
         with:
           environment-type: ${{ steps.prepare-build-environment.outputs.container-name != '' && 'container' || 'host' }}
           container-name: ${{ steps.prepare-build-environment.outputs.container-name }}
