@@ -73,7 +73,8 @@ WSTRING ToWSTRING(const std::string& str)
 #endif
 }
 
-// Taken from https://chromium.googlesource.com/chromium/src/base/+/refs/heads/main/strings/string_number_conversions_internal.h
+// Taken from
+// https://chromium.googlesource.com/chromium/src/base/+/refs/heads/main/strings/string_number_conversions_internal.h
 // static STR IntToStringT(INT value)
 // simplified for our case
 WSTRING ToWSTRING(const uint64_t value)

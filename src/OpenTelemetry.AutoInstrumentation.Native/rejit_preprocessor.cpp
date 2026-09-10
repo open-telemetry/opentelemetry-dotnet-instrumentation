@@ -52,7 +52,8 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         },
         [&metadataImport](HCORENUM ptr) -> void { metadataImport->CloseEnum(ptr); });
     auto enumExplicitInterfaceMethods = Enumerator<mdMethodDef>(
-        [&metadataImport, target_method, typeDef](HCORENUM* ptr, mdMethodDef arr[], ULONG max, ULONG* cnt) -> HRESULT {
+        [&metadataImport, target_method, typeDef](HCORENUM* ptr, mdMethodDef arr[], ULONG max, ULONG* cnt) -> HRESULT
+        {
             auto method_name = target_method.type.name + WStr(".") + target_method.method_name;
             return metadataImport->EnumMethodsWithName(ptr, typeDef, method_name.c_str(), arr, max, cnt);
         },
@@ -62,7 +63,7 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
     auto pCorAssemblyProperty = m_rejit_handler->GetCorAssemblyProperty();
 
     auto enumIterator = enumMethods.begin();
-    auto combinedEnd = iterate_explicit_interface_methods ? enumExplicitInterfaceMethods.end() : enumMethods.end();
+    auto combinedEnd  = iterate_explicit_interface_methods ? enumExplicitInterfaceMethods.end() : enumMethods.end();
     for (; enumIterator != combinedEnd; enumIterator = ++enumIterator)
     {
         // When interface methods are being iterated and we reach the end of the regular method search,
@@ -288,9 +289,9 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                 auto typeDefIterator = typeDefEnum.begin();
                 for (; typeDefIterator != typeDefEnum.end(); typeDefIterator = ++typeDefIterator)
                 {
-                    auto       typeDef          = *typeDefIterator;
-                    const auto typeInfo         = GetTypeInfo(metadataImport, typeDef);
-                    bool       rewriteType      = false;
+                    auto       typeDef     = *typeDefIterator;
+                    const auto typeInfo    = GetTypeInfo(metadataImport, typeDef);
+                    bool       rewriteType = false;
 
                     // Iterate through interfaces that this type directly implements and mark the type for
                     // instrumentation if the interface type matches and the assembly version constraints are met.
@@ -344,8 +345,8 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                                     DWORD   type_flags;
                                     mdToken type_extends = mdTokenNil;
                                     if (metadataImport->GetTypeDefProps(interfaceToken, type_name, kNameMaxSize,
-                                                                        &type_name_len, &type_flags, &type_extends) ==
-                                            S_OK &&
+                                                                        &type_name_len, &type_flags,
+                                                                        &type_extends) == S_OK &&
                                         type_name == target_method.type.name &&
                                         assemblyMetadata->name == target_method.type.assembly.name &&
                                         target_method.type.min_version <= assemblyMetadata->version &&
@@ -377,8 +378,8 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
 
                                     if (tokenType == mdtAssemblyRef)
                                     {
-                                        const auto& ancestorAssemblyMetadata = GetReferencedAssemblyMetadata(
-                                            assemblyImport, ancestorTypeInfo->scopeToken);
+                                        const auto& ancestorAssemblyMetadata =
+                                            GetReferencedAssemblyMetadata(assemblyImport, ancestorTypeInfo->scopeToken);
 
                                         // We check the assembly name and version
                                         if (ancestorAssemblyMetadata.name == target_method.type.assembly.name &&

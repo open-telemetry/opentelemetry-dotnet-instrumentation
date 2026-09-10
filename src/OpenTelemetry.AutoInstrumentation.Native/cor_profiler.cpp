@@ -851,8 +851,7 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id)
             RewritingPInvokeMaps(module_metadata, nonwindows_nativemethods_type);
 #endif // _WIN32
 
-            call_target_bubble_up_exception_available =
-                EnsureCallTargetBubbleUpExceptionTypeAvailable(module_metadata);
+            call_target_bubble_up_exception_available = EnsureCallTargetBubbleUpExceptionTypeAvailable(module_metadata);
         }
 
         if (Logger::IsDebugEnabled())
@@ -1127,8 +1126,8 @@ void CorProfiler::AddInterfaceInstrumentations(WCHAR* id, CallTargetDefinition* 
     }
 }
 
-void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived,
-                                             bool isInterface)
+void CorProfiler::InternalAddInstrumentation(
+    WCHAR* id, CallTargetDefinition* items, int size, bool isDerived, bool isInterface)
 {
     WSTRING                      definitionsId = WSTRING(id);
     std::scoped_lock<std::mutex> definitionsLock(definitions_ids_lock_);
@@ -1169,11 +1168,10 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
             const Version& maxVersion =
                 Version(current.targetMaximumMajor, current.targetMaximumMinor, current.targetMaximumPatch, 0);
 
-            const auto& integration =
-                IntegrationDefinition(MethodReference(targetAssembly, targetType, targetMethod, minVersion, maxVersion,
-                                                      signatureTypes),
-                                      TypeReference(integrationAssembly, integrationType, {}, {}), isDerived,
-                                      isInterface, true);
+            const auto& integration = IntegrationDefinition(MethodReference(targetAssembly, targetType, targetMethod,
+                                                                            minVersion, maxVersion, signatureTypes),
+                                                            TypeReference(integrationAssembly, integrationType, {}, {}),
+                                                            isDerived, isInterface, true);
 
             if (Logger::IsDebugEnabled())
             {
@@ -1589,7 +1587,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
     }
     else if (module_metadata->assemblyName == WStr("System") ||
              module_metadata->assemblyName == WStr("System.Net.Http") ||
-             module_metadata->assemblyName == WStr("System.Linq")) // Avoid instrumenting System.Linq which is used as part of the async state machine
+             module_metadata->assemblyName == WStr("System.Linq")) // Avoid instrumenting System.Linq which is used as
+                                                                   // part of the async state machine
     {
         valid_loader_callsite = false;
     }
@@ -1745,7 +1744,7 @@ std::string CorProfiler::GetILCodes(const std::string&              title,
 
     const auto ehCount = rewriter->GetEHCount();
     const auto ehPtr   = rewriter->GetEHPointer();
-    int         indent  = 1;
+    int        indent  = 1;
 
     PCCOR_SIGNATURE originalSignature     = nullptr;
     ULONG           originalSignatureSize = 0;
@@ -1983,9 +1982,9 @@ std::string CorProfiler::GetILCodes(const std::string&              title,
 
 bool CorProfiler::EnsureCallTargetBubbleUpExceptionTypeAvailable(const ModuleMetadata& module_metadata)
 {
-    mdTypeDef bubbleUpExceptionTypeDef;
-    const auto hr = module_metadata.metadata_import->FindTypeDefByName(
-        calltarget_bubble_up_exception_type_name.data(), mdTokenNil, &bubbleUpExceptionTypeDef);
+    mdTypeDef  bubbleUpExceptionTypeDef;
+    const auto hr = module_metadata.metadata_import->FindTypeDefByName(calltarget_bubble_up_exception_type_name.data(),
+                                                                       mdTokenNil, &bubbleUpExceptionTypeDef);
     Logger::Debug("CallTargetBubbleUpException type availability check returned: ", hr);
     return SUCCEEDED(hr);
 }

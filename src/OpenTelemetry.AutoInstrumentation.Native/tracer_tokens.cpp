@@ -168,8 +168,8 @@ HRESULT TracerTokens::EnsureBaseCalltargetTokens()
     {
         const ModuleMetadata* module_metadata = GetMetadata();
         module_metadata->metadata_emit->DefineTypeRefByName(profilerAssemblyRef,
-                                                             calltarget_bubble_up_exception_type_name.data(),
-                                                             &bubbleUpExceptionTypeRef);
+                                                            calltarget_bubble_up_exception_type_name.data(),
+                                                            &bubbleUpExceptionTypeRef);
     }
 
     return hr;
@@ -181,11 +181,12 @@ int TracerTokens::GetAdditionalLocalsCount()
     return 2;
 }
 
-void TracerTokens::AddAdditionalLocals(COR_SIGNATURE (&signatureBuffer)[500], ULONG& signatureOffset,
+void TracerTokens::AddAdditionalLocals(COR_SIGNATURE (&signatureBuffer)[500],
+                                       ULONG& signatureOffset,
                                        ULONG& signatureSize)
 {
-    unsigned exTypeRefBuffer;
-    const auto exTypeRefSize = CorSigCompressToken(exTypeRef, &exTypeRefBuffer);
+    unsigned   exTypeRefBuffer;
+    const auto exTypeRefSize           = CorSigCompressToken(exTypeRef, &exTypeRefBuffer);
     const auto additionalSignatureSize = 2 * (1 + exTypeRefSize);
     signatureSize += additionalSignatureSize;
 
