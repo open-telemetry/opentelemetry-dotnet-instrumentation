@@ -29,7 +29,7 @@ RUN curl -fsSL -o cmake.sh https://github.com/Kitware/CMake/releases/download/v3
 COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 11.0.100-preview.7.26381.103 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 11.0.100-rc.1.26425.128 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project
