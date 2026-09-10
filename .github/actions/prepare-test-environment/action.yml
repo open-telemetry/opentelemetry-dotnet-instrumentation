@@ -49,7 +49,7 @@ runs:
 
     - name: Create test directory in container
       if: inputs.environment-type == 'container'
-      uses: ./.github/actions/run-command-in-environment
+      uses: $/.github/actions/run-command-in-environment
       with:
         container-name: ${{ inputs.container-name }}
         container-user: "0"

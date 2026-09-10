@@ -78,7 +78,7 @@ jobs:
         queries: ${{ matrix.queries }}
 
     - name: Setup .NET
-      uses: ./.github/actions/setup-dotnet
+      uses: $/.github/actions/setup-dotnet
       if: matrix.language == 'csharp'
 
     # If the analyze step fails for one of the languages you are analyzing with
