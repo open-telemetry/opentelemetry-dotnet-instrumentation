@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build-windows:
-    uses: ./.github/workflows/_build.yml
+    uses: $/.github/workflows/_build.yml
     with:
       artifact-name: windows-2022
       runner: windows-2022

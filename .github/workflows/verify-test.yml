@@ -45,7 +45,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup .NET
-        uses: ./.github/actions/setup-dotnet
+        uses: $/.github/actions/setup-dotnet
 
       - name: Run BuildTracer and ManagedTests
         shell: bash

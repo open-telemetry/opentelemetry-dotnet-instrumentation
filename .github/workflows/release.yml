@@ -18,18 +18,18 @@ env:
 
 jobs:
   build-ubuntu1604-native:
-    uses: ./.github/workflows/build-ubuntu1604-native-container.yml
+    uses: $/.github/workflows/build-ubuntu1604-native-container.yml
 
   build-windows:
-    uses: ./.github/workflows/build-windows.yml
+    uses: $/.github/workflows/build-windows.yml
 
   build:
     needs: [ build-windows, build-ubuntu1604-native ]
-    uses: ./.github/workflows/build.yml
+    uses: $/.github/workflows/build.yml
 
   build-nuget-packages:
     needs: [ build-windows, build ]
-    uses: ./.github/workflows/build-nuget-packages.yml
+    uses: $/.github/workflows/build-nuget-packages.yml
 
   create-release:
     name: Create GitHub release
