@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:11.0.100-preview.7-alpine3.24@sha256:186cbf87f5b66f2e4ff937b6a3cd420b005356e940eacd5c420fc30308c49c46
+FROM mcr.microsoft.com/dotnet/sdk:11.0.100-rc.1-alpine3.24@sha256:5be53e6cab2dacc7d3024739857174f80828b6bbc867ec96c95faa57a9c20b08
 
 # renovate: datasource=repology depName=clang22
 ARG CLANG22_VERSION=22.1.3-r2
