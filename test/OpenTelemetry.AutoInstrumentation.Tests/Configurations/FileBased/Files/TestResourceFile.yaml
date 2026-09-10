@@ -60,6 +60,7 @@ resource:
   detection/development:
     detectors:
       azureappservice:
+      azurecontainerapps:
       container:
       host:
       operatingsystem:

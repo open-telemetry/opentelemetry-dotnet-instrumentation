@@ -33,6 +33,7 @@ internal static class ResourceConfigurator
                 ResourceDetector.Container => Wrappers.AddContainerResourceDetector(resourceBuilder),
 #endif
                 ResourceDetector.AzureAppService => Wrappers.AddAzureAppServiceResourceDetector(resourceBuilder),
+                ResourceDetector.AzureContainerApps => Wrappers.AddAzureContainerAppsResourceDetector(resourceBuilder),
                 ResourceDetector.ProcessRuntime => Wrappers.AddProcessRuntimeResourceDetector(resourceBuilder),
                 ResourceDetector.Process => Wrappers.AddProcessResourceDetector(resourceBuilder),
                 ResourceDetector.Host => Wrappers.AddHostResourceDetector(resourceBuilder),
@@ -77,6 +78,12 @@ internal static class ResourceConfigurator
         public static ResourceBuilder AddAzureAppServiceResourceDetector(ResourceBuilder resourceBuilder)
         {
             return resourceBuilder.AddAzureAppServiceDetector();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static ResourceBuilder AddAzureContainerAppsResourceDetector(ResourceBuilder resourceBuilder)
+        {
+            return resourceBuilder.AddAzureContainerAppsDetector();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
