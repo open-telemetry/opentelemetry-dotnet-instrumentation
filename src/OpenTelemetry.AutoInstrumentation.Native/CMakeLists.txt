@@ -201,6 +201,11 @@ add_compile_definitions(OTEL_AUTO_VERSION_PATCH=${OTEL_AUTO_VERSION_PATCH})
 
 # ASLR (Position Independent Executable) and additional security features
 if (ISLINUX)
+    # Keep symbols from statically linked C++ runtimes private to the profiler. Exported libstdc++ symbols can interpose
+    # on the runtime's dynamically linked copy and mix locale state between the two copies. Project-owned static library
+    # symbols must remain visible because some of them are consumed through P/Invoke.
+    add_link_options(-Wl,--exclude-libs,libstdc++.a:libgcc.a:libgcc_eh.a)
+
     # Enable RELRO (Relocation Read-Only)
     add_link_options(-Wl,-z,relro)
     # Enable full RELRO (bind now)
