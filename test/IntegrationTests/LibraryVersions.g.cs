@@ -324,7 +324,7 @@ public static partial class LibraryVersion
                 "23.5.1",
 #endif
 #if NET462
-                "23.26.300",
+                "23.26.301",
 #endif
 #endif
             ];
