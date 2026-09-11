@@ -39,15 +39,39 @@ RuntimeSamplerService::RuntimeSamplerService(ICorProfilerInfo7*  info7,
 RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
     const RuntimeSamplerAuthority source, const RuntimeSamplerConfigurationV1& configuration)
 {
-    std::lock_guard<std::mutex> lock(configurationMutex_);
+    std::unique_lock<std::mutex> lock(configurationMutex_);
 
     const auto outcome = [this](const RuntimeSamplerApplyResult result) {
         return RuntimeSamplerApplyOutcome{result, {authority_, committedConfiguration_}};
     };
 
+    const auto failActivation = [this, &lock, &outcome]()
+    {
+        activationFailed_         = true;
+        auto* const failedSampler = sampler_.get();
+        const auto  failedOutcome = outcome(RuntimeSamplerApplyResult::ActivationFailed);
+
+        // Shutdown may wait for worker dependencies and must not hold the
+        // configuration mutex while doing so. Keep the failed infrastructure
+        // object stable for callback readers, but make it terminal.
+        lock.unlock();
+        if (failedSampler != nullptr)
+        {
+            failedSampler->Shutdown();
+        }
+        return failedOutcome;
+    };
+
     if (shutdownStarted_)
     {
         return outcome(RuntimeSamplerApplyResult::ShuttingDown);
+    }
+
+    // Activation is monotonic for the lifetime of the service. Once a dependency in the activation DAG has
+    // failed, do not allow a later snapshot to alter logical state or attempt to reuse a partial dependency chain.
+    if (activationFailed_)
+    {
+        return outcome(RuntimeSamplerApplyResult::ActivationFailed);
     }
 
     if (source != RuntimeSamplerAuthority::Seed && source != RuntimeSamplerAuthority::ControlPlane)
@@ -90,13 +114,13 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
         sampler = EnsureSamplerCreated();
         if (sampler == nullptr)
         {
-            return outcome(RuntimeSamplerApplyResult::ActivationFailed);
+            return failActivation();
         }
 
         if (configuration.SelectiveEnabled() && !EnsureSelectiveSamplingBuffersPrepared())
         {
             trace::Logger::Warn("RuntimeSamplerService: failed to prepare selective-sampling buffers.");
-            return outcome(RuntimeSamplerApplyResult::ActivationFailed);
+            return failActivation();
         }
 
         // Start the periodic worker while it is still quiescent. Its InitializeCurrentThread handshake and every
@@ -104,19 +128,19 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
         if (configuration.ThreadSamplingEnabled() && !sampler->StartThreadSampling())
         {
             trace::Logger::Warn("RuntimeSamplerService: failed to start the thread-sampling worker.");
-            return outcome(RuntimeSamplerApplyResult::ActivationFailed);
+            return failActivation();
         }
 
         if (!EnsureRequiredClrEventsEnabled())
         {
-            return outcome(RuntimeSamplerApplyResult::ActivationFailed);
+            return failActivation();
         }
 
         if (configuration.AllocationEnabled() && !committedConfiguration_.AllocationEnabled() &&
             !sampler->StartAllocationSamplingSession())
         {
             trace::Logger::Warn("RuntimeSamplerService: failed to start the allocation-sampling EventPipe session.");
-            return outcome(RuntimeSamplerApplyResult::ActivationFailed);
+            return failActivation();
         }
     }
 

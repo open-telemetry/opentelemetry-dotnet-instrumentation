@@ -70,6 +70,7 @@ private:
     RuntimeSamplerAuthority                               authority_ = RuntimeSamplerAuthority::None;
     RuntimeSamplerConfigurationV1 committedConfiguration_{sizeof(RuntimeSamplerConfigurationV1), 0, 0, 0};
     bool                          shutdownStarted_                  = false;
+    bool                          activationFailed_                 = false;
     bool                          requiredClrEventsEnabled_         = false;
     bool                          selectiveSamplingBuffersPrepared_ = false;
 };

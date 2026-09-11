@@ -180,18 +180,20 @@ TEST(RuntimeSamplerServiceTest, InvalidControlPlaneConfigurationPreservesTheLast
     EXPECT_EQ(disabled, state.configuration);
 }
 
-TEST(RuntimeSamplerServiceTest, ActivationFailureDoesNotConsumeAuthority)
+TEST(RuntimeSamplerServiceTest, ActivationFailureDoesNotConsumeAuthorityAndIsLatched)
 {
     RuntimeSamplerService service(nullptr, nullptr, RuntimeType::Unknown);
 
     EXPECT_EQ(RuntimeSamplerApplyResult::ActivationFailed,
               Apply(service, RuntimeSamplerAuthority::Seed, Configuration(1000, 0, 0)));
+    EXPECT_EQ(RuntimeSamplerApplyResult::ActivationFailed,
+              Apply(service, RuntimeSamplerAuthority::ControlPlane, Configuration(2000, 0, 0)));
     EXPECT_EQ(RuntimeSamplerAuthority::None, service.GetState().authority);
     EXPECT_FALSE(service.HasSamplingInfrastructure());
 
-    EXPECT_EQ(RuntimeSamplerApplyResult::Applied,
+    EXPECT_EQ(RuntimeSamplerApplyResult::ActivationFailed,
               Apply(service, RuntimeSamplerAuthority::Seed, Configuration(0, 0, 0)));
-    EXPECT_EQ(RuntimeSamplerAuthority::Seed, service.GetState().authority);
+    EXPECT_EQ(RuntimeSamplerAuthority::None, service.GetState().authority);
 }
 
 TEST(RuntimeSamplerServiceTest, SamplerPullsTheMostRecentlyStagedThreadConfiguration)
