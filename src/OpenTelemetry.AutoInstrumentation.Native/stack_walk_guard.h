@@ -151,6 +151,7 @@ public:
 private:
     enum class State : uint8_t
     {
+        Starting,  // worker is initializing its profiler API context
         Idle,      // ready for a new request OR verdict published & not yet consumed
         Scheduled, // caller has staged a request; worker hasn't picked up yet
         Running,   // worker is executing probe checks
@@ -216,7 +217,8 @@ private:
     // scheduling (suspending) thread.
     bool Schedule(const ProbeRequest& req);
 
-    void WorkerLoop();
+    void WorkerLoop() noexcept;
+    void WorkerLoopCore();
     bool RunChecks(ProbeRequest& req) noexcept;          // dispatch on req.kind; may stage outputs
     bool RunCanaryChecks(ThreadID canary) noexcept;      // heap envelope + optional canary DSS
 #if defined(_M_AMD64)
@@ -241,7 +243,7 @@ private:
 
     mutable std::mutex      mutex_;
     std::condition_variable cv_;
-    State                   state_ = State::Idle;
+    State                   state_ = State::Starting;
 
     ProbeRequest req_;
 

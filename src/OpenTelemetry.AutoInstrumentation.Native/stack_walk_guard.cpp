@@ -74,7 +74,10 @@ StackWalkGuard::StackWalkGuard(IProfilerApi*             profilerApi,
                                std::chrono::milliseconds probe_timeout)
     : api_(profilerApi), park_timeout_(park_timeout), probe_timeout_(probe_timeout)
 {
-    worker_ = std::make_unique<std::thread>([this]() { WorkerLoop(); });
+    // A native thread entry point must not allow a C++ exception to escape: std::thread
+    // converts that into std::terminate. WorkerLoop owns that boundary and publishes
+    // a terminal failure if its core loop throws.
+    worker_ = std::make_unique<std::thread>([this]() noexcept { WorkerLoop(); });
 }
 
 StackWalkGuard::~StackWalkGuard()
@@ -204,8 +207,77 @@ StackWalkGuard::ProbeResult StackWalkGuard::AwaitProbeResult()
     return verdict;
 }
 
-void StackWalkGuard::WorkerLoop()
+void StackWalkGuard::WorkerLoop() noexcept
 {
+    try
+    {
+        WorkerLoopCore();
+    }
+    catch (...)
+    {
+        // Keep the failure path noexcept as well. In particular, a failure while trying to acquire the state mutex
+        // must not escape this thread entry point and turn into std::terminate.
+        try
+        {
+            std::lock_guard<std::mutex> lk(mutex_);
+            result_ = ProbeResult::Failed;
+            state_  = State::Stopping;
+            SetStage(ProbeStage::None);
+        }
+        catch (...)
+        {
+        }
+        cv_.notify_all();
+    }
+}
+
+void StackWalkGuard::WorkerLoopCore()
+{
+    HRESULT initializeResult = E_INVALIDARG;
+    {
+        std::lock_guard<std::mutex> lk(mutex_);
+        if (state_ == State::Stopping)
+        {
+            return;
+        }
+    }
+
+    if (api_ != nullptr)
+    {
+        try
+        {
+            initializeResult = api_->InitializeCurrentThread();
+        }
+        catch (...)
+        {
+            initializeResult = E_FAIL;
+        }
+    }
+
+    {
+        std::lock_guard<std::mutex> lk(mutex_);
+        if (state_ == State::Stopping)
+        {
+            return;
+        }
+
+        if (FAILED(initializeResult))
+        {
+            result_ = ProbeResult::Failed;
+            state_  = State::Stopping;
+        }
+        else
+        {
+            state_ = State::Idle;
+        }
+    }
+    cv_.notify_all();
+
+    if (FAILED(initializeResult))
+    {
+        return;
+    }
+
     for (;;)
     {
         ProbeRequest req;

@@ -13,6 +13,7 @@ namespace ProfilerStackCapture
 struct ProfilerApiAdapter::Impl
 {
     ICorProfilerInfo2*  profilerInfo;
+    ICorProfilerInfo4*  profilerInfo4 = nullptr;
     ICorProfilerInfo10* profilerInfo10 = nullptr;
 
     explicit Impl(ICorProfilerInfo2* info) : profilerInfo(info)
@@ -22,12 +23,18 @@ struct ProfilerApiAdapter::Impl
         // SuspendRuntime/ResumeRuntime will return E_NOTIMPL.
         if (profilerInfo)
         {
+            profilerInfo->QueryInterface(__uuidof(ICorProfilerInfo4), reinterpret_cast<void**>(&profilerInfo4));
             profilerInfo->QueryInterface(__uuidof(ICorProfilerInfo10), reinterpret_cast<void**>(&profilerInfo10));
         }
     }
 
     ~Impl()
     {
+        if (profilerInfo4)
+        {
+            profilerInfo4->Release();
+            profilerInfo4 = nullptr;
+        }
         if (profilerInfo10)
         {
             profilerInfo10->Release();
@@ -71,6 +78,13 @@ HRESULT ProfilerApiAdapter::GetFunctionFromIP(LPCBYTE ip, FunctionID* pFunctionI
     if (!pImpl_->profilerInfo || !ip || !pFunctionId)
         return E_INVALIDARG;
     return pImpl_->profilerInfo->GetFunctionFromIP(ip, pFunctionId);
+}
+
+HRESULT ProfilerApiAdapter::InitializeCurrentThread()
+{
+    if (!pImpl_->profilerInfo4)
+        return E_NOINTERFACE;
+    return pImpl_->profilerInfo4->InitializeCurrentThread();
 }
 
 HRESULT ProfilerApiAdapter::SuspendRuntime()

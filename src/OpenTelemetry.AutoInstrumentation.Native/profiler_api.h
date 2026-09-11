@@ -71,6 +71,7 @@ public:
 
     virtual HRESULT GetThreadInfo(ThreadID managedThreadId, DWORD* osThreadId) = 0;
     virtual HRESULT GetFunctionFromIP(LPCBYTE ip, FunctionID* pFunctionId)     = 0;
+    virtual HRESULT InitializeCurrentThread()                                 = 0;
     virtual HRESULT SuspendRuntime()  { return E_NOTIMPL; }
     virtual HRESULT ResumeRuntime()   { return E_NOTIMPL; }
 };
@@ -89,6 +90,7 @@ public:
                             BYTE* context, ULONG contextSize) override;
     HRESULT GetThreadInfo(ThreadID managedThreadId, DWORD* osThreadId) override;
     HRESULT GetFunctionFromIP(LPCBYTE ip, FunctionID* pFunctionId) override;
+    HRESULT InitializeCurrentThread() override;
     HRESULT SuspendRuntime() override;
     HRESULT ResumeRuntime() override;
 

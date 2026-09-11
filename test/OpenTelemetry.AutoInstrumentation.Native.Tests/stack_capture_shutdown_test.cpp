@@ -45,6 +45,14 @@ public:
 
         return guard.result_;
     }
+
+#if defined(_M_AMD64)
+    static DWORD64 StagedFrame0Rip(const StackWalkGuard& guard)
+    {
+        std::lock_guard<std::mutex> lock(guard.mutex_);
+        return guard.req_.staged_ctx.Rip;
+    }
+#endif
 };
 
 } // namespace ProfilerStackCapture
@@ -221,6 +229,12 @@ private:
 class BlockingProfilerApi final : public ProfilerStackCapture::IProfilerApi
 {
 public:
+    HRESULT InitializeCurrentThread() override
+    {
+        initializeCalls_++;
+        return S_OK;
+    }
+
     HRESULT DoStackSnapshot(ThreadID, StackSnapshotCallback, DWORD, void*, BYTE*, ULONG) override
     {
         std::unique_lock<std::mutex> lock(mutex_);
@@ -253,11 +267,17 @@ public:
         cv_.notify_all();
     }
 
+    int InitializeCalls() const
+    {
+        return initializeCalls_;
+    }
+
 private:
     std::mutex              mutex_;
     std::condition_variable cv_;
     bool                    probeStarted_ = false;
     bool                    released_     = false;
+    int                     initializeCalls_ = 0;
 };
 
 #endif
@@ -433,12 +453,41 @@ TEST(StackWalkGuardTest, WaitForShutdownJoinsAnInFlightProbe)
 
 TEST(StackWalkGuardTest, TimedOutScheduledRequestIsNotRevivedByWorker)
 {
-    ProfilerStackCapture::StackWalkGuard guard(nullptr, std::chrono::seconds(1), std::chrono::milliseconds(0));
+    BlockingProfilerApi                  profilerApi;
+    ProfilerStackCapture::StackWalkGuard guard(&profilerApi, std::chrono::seconds(1), std::chrono::milliseconds(0));
     ProfilerStackCapture::StackWalkGuardTestPeer::ParkWorker(guard);
 
     ASSERT_TRUE(guard.ScheduleDssProbe());
     EXPECT_EQ(ProfilerStackCapture::StackWalkGuard::ProbeResult::Failed, guard.AwaitProbeResult());
     EXPECT_EQ(ProfilerStackCapture::StackWalkGuard::ProbeResult::Failed,
               ProfilerStackCapture::StackWalkGuardTestPeer::RunWorkerUntilIdle(guard));
+}
+
+TEST(StackWalkGuardTest, SnapshotsRtlProbeContextBeforeScheduling)
+{
+    BlockingProfilerApi                  profilerApi;
+    ProfilerStackCapture::StackWalkGuard guard(&profilerApi, std::chrono::seconds(1), std::chrono::seconds(1));
+    ProfilerStackCapture::StackWalkGuardTestPeer::ParkWorker(guard);
+
+    CONTEXT context{};
+    context.Rip = 0x12345678;
+    continuous_profiler::CapturedFrame frame{};
+
+    ASSERT_TRUE(guard.ScheduleRtlFrame0Probe(&context, &frame));
+
+    // The worker is parked, so changing caller-owned storage cannot race the
+    // assertion. The request must already contain its own input snapshot.
+    context.Rip = 0;
+    EXPECT_EQ(0x12345678, ProfilerStackCapture::StackWalkGuardTestPeer::StagedFrame0Rip(guard));
+}
+
+TEST(StackWalkGuardTest, InitializesProfilerThreadBeforeAcceptingAProbe)
+{
+    BlockingProfilerApi                  profilerApi;
+    ProfilerStackCapture::StackWalkGuard guard(&profilerApi, std::chrono::seconds(1), std::chrono::seconds(1));
+
+    ASSERT_TRUE(guard.ScheduleDssProbe());
+    EXPECT_EQ(ProfilerStackCapture::StackWalkGuard::ProbeResult::Success, guard.AwaitProbeResult());
+    EXPECT_EQ(1, profilerApi.InitializeCalls());
 }
 #endif

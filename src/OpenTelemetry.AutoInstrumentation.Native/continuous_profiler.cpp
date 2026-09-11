@@ -5,10 +5,13 @@
 #define NOMINMAX
 #include "continuous_profiler.h"
 #include "stack_capture_types.h"
+#include "shutdown_admission.h"
 #include "logger.h"
 #include <chrono>
 #include <map>
 #include <algorithm>
+#include <cstdint>
+#include <mutex>
 #include <shared_mutex>
 #include <unordered_set>
 #ifndef _WIN32
@@ -643,7 +646,10 @@ void ContinuousProfiler::AllocateBuffer()
 
 void ContinuousProfiler::PublishBuffer(const uint32_t samplingInterval)
 {
-    if (IsShutdownRequested() || cur_cpu_writer_->IsOverflowed())
+    // This is the continuous-sampling publication boundary. Admission is the linearization point: shutdown may allow
+    // an already-admitted publication to finish, but no publication admitted after the terminal close can enter.
+    continuous_profiler::ShutdownAdmission admission;
+    if (!admission || IsShutdownRequested() || cur_cpu_writer_->IsOverflowed())
     {
         delete cur_cpu_writer_->buffer_;
     }
@@ -1080,6 +1086,13 @@ static void ResolveSymbolsAndPublishBufferForSelectedThreads(
         return;
     }
 
+    continuous_profiler::ShutdownAdmission admission;
+    if (!admission)
+    {
+        return;
+    }
+
+    // This is the selected-thread publication boundary.
     // TODO: write out stats
     SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(localBytes.size()), localBytes.data());
 }
@@ -1303,9 +1316,10 @@ static bool ShouldTrackIterations(const ThreadSamplingConfiguration& configurati
     return configuration.BothEnabled();
 }
 
-static void SamplingThreadMain(ContinuousProfiler*   prof,
-                               ShutdownToken         shutdownToken,
-                               std::promise<HRESULT> initializationResult)
+static void SamplingThreadMainCore(ContinuousProfiler*   prof,
+                                   ShutdownToken         shutdownToken,
+                                   std::promise<HRESULT>& initializationResult,
+                                   bool&                 initializationResultPublished)
 {
     ICorProfilerInfo7* info7 = prof->info7;
 
@@ -1323,6 +1337,7 @@ static void SamplingThreadMain(ContinuousProfiler*   prof,
         initializeCurrentThreadResult = info7->InitializeCurrentThread();
     }
     initializationResult.set_value(initializeCurrentThreadResult);
+    initializationResultPublished = true;
     if (FAILED(initializeCurrentThreadResult))
     {
         return;
@@ -1389,6 +1404,59 @@ static void SamplingThreadMain(ContinuousProfiler*   prof,
             {
                 threadBuffer.clear();
             }
+        }
+    }
+}
+
+static void SamplingThreadMain(ContinuousProfiler*   prof,
+                               ShutdownToken         shutdownToken,
+                               std::promise<HRESULT> initializationResult) noexcept
+{
+    bool initializationResultPublished = false;
+    try
+    {
+        SamplingThreadMainCore(prof, shutdownToken, initializationResult, initializationResultPublished);
+    }
+    catch (const std::exception& e)
+    {
+        if (!initializationResultPublished)
+        {
+            try
+            {
+                initializationResult.set_value(E_FAIL);
+            }
+            catch (...)
+            {
+            }
+        }
+
+        try
+        {
+            trace::Logger::Error("ContinuousProfiler sampling worker exited after an unexpected exception: ", e.what());
+        }
+        catch (...)
+        {
+        }
+    }
+    catch (...)
+    {
+        if (!initializationResultPublished)
+        {
+            try
+            {
+                initializationResult.set_value(E_FAIL);
+            }
+            catch (...)
+            {
+            }
+        }
+
+        try
+        {
+            trace::Logger::Error("ContinuousProfiler sampling worker exited after an unknown exception.");
+        }
+        catch (...)
+        {
         }
     }
 }
@@ -1536,6 +1604,22 @@ void ContinuousProfiler::Shutdown()
         return;
     }
 
+    // Shutdown wait-for DAG:
+    //
+    //   Shutdown -> SetNativeContext -> thread_span_context_lock -> sampling worker -> StackWalkGuard
+    //
+    // The sampling worker holds thread_span_context_lock while it captures stacks. Therefore every cancellation
+    // signal that can release the sampling worker must be issued before Shutdown waits for SetNativeContext. Otherwise
+    // the callback drain creates a deferred-release cycle back to this Shutdown call.
+    //
+    // Lock waits release their associated mutex while sleeping; joins wait for the owned thread to terminate. The
+    // required ordering is signal producers, drain EventPipe, join the sampling worker, drain managed callbacks, then
+    // join the StackWalkGuard dependency.
+
+    // Close callback and publication admission before invalidating the published pointer. An operation that already
+    // crossed the CAS gate remains counted and is drained below; a later operation cannot enter even if it observes
+    // the old pointer or an old producer configuration.
+    continuous_profiler::CloseShutdownAdmissions();
     profiler_info.store(nullptr, std::memory_order_release);
 
     // Phase 1 (non-blocking): close admission and broadcast terminal cancellation to every producer branch. The
@@ -1560,6 +1644,11 @@ void ContinuousProfiler::Shutdown()
         thread_sampling_thread_.reset();
         trace::Logger::Info("ContinuousProfiler sampling thread stopped.");
     }
+
+    // The sampling worker has now released thread_span_context_lock, so an admitted SetNativeContext callback can no
+    // longer be held behind the worker's stack-capture dependency chain. Drain those callbacks before allowing the
+    // profiler shutdown callback to return; this is the lifetime fence for the borrowed ICorProfilerInfo pointer.
+    continuous_profiler::WaitForShutdownAdmissions();
 
     if (stackWalker_ != nullptr)
     {
@@ -1863,6 +1952,14 @@ void ContinuousProfiler::AllocationTick(const ShutdownToken& shutdownToken, ULON
     {
         return;
     }
+
+    continuous_profiler::ShutdownAdmission admission;
+    if (!admission)
+    {
+        return;
+    }
+
+    // This is the allocation-sampling publication boundary.
     AllocationSamplingAppendToBuffer(static_cast<int32_t>(localBytes.size()), localBytes.data());
 }
 
@@ -2071,6 +2168,14 @@ extern "C"
         // This method is called anytime thread-span association changes, e.g. when activity is started/stopped or
         // when suspension/resumption occurs.
 
+        continuous_profiler::ShutdownAdmission admission;
+        if (!admission)
+        {
+            trace::Logger::Debug("ContinuousProfilerSetNativeContext skipped: profiler callback admission is closed.");
+            return;
+        }
+
+        ThreadID      threadId;
         auto* const info = profiler_info.load(std::memory_order_acquire);
         if (info == nullptr)
         {
@@ -2078,7 +2183,6 @@ extern "C"
             return;
         }
 
-        ThreadID      threadId;
         const HRESULT hr = info->GetCurrentThreadID(&threadId);
         if (FAILED(hr))
         {

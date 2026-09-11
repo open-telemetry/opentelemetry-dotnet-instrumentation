@@ -3,6 +3,10 @@
 
 #include <algorithm>
 #include <chrono>
+#include <condition_variable>
+#include <cstdlib>
+#include <future>
+#include <mutex>
 #include <vector>
 
 #ifdef _WIN32
@@ -302,6 +306,92 @@ TEST(ContinuousProfilerSafetyTest, AllocationTickRejectsShortPayloadWithoutReadi
 namespace
 {
 
+class BlockingProfilerInfo7 final
+{
+public:
+    BlockingProfilerInfo7() noexcept : vtable_(GetVtable()) {}
+
+    ICorProfilerInfo7* GetInterface() noexcept
+    {
+        // ICorProfilerInfo7 is a COM interface whose first member is its vtable pointer. This
+        // test only exercises GetCurrentThreadID, so the remaining entries are intentionally null.
+        return reinterpret_cast<ICorProfilerInfo7*>(this);
+    }
+
+    bool WaitUntilEntered()
+    {
+        std::unique_lock<std::mutex> lock(mutex_);
+        return cv_.wait_for(lock, std::chrono::seconds(1), [this] { return entered_; });
+    }
+
+    void Release()
+    {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            released_ = true;
+        }
+        cv_.notify_all();
+    }
+
+private:
+    static HRESULT STDMETHODCALLTYPE GetCurrentThreadID(ICorProfilerInfo7* info, ThreadID* threadId) noexcept
+    {
+        auto* self = reinterpret_cast<BlockingProfilerInfo7*>(info);
+        {
+            std::lock_guard<std::mutex> lock(self->mutex_);
+            self->entered_ = true;
+        }
+        self->cv_.notify_all();
+
+        std::unique_lock<std::mutex> lock(self->mutex_);
+        self->cv_.wait(lock, [self] { return self->released_; });
+        *threadId = 1;
+        return S_OK;
+    }
+
+    static void** GetVtable() noexcept
+    {
+        // GetCurrentThreadID is slot 13 after QueryInterface, AddRef, and Release in the
+        // ICorProfilerInfo base interface. The callback does not use any other slot.
+        static void* vtable[14] = {};
+        vtable[13]                         = reinterpret_cast<void*>(&GetCurrentThreadID);
+        return vtable;
+    }
+
+    void**                 vtable_;
+    std::mutex             mutex_;
+    std::condition_variable cv_;
+    bool                   entered_  = false;
+    bool                   released_ = false;
+};
+
+void RunSetNativeContextShutdownAdmissionTest()
+{
+    continuous_profiler::ClrAllocationSamplingSessionProvider allocationSessions(nullptr);
+    continuous_profiler::ContinuousProfiler                   profiler(allocationSessions);
+    BlockingProfilerInfo7               profilerInfo;
+    profiler.SetGlobalInfo7(profilerInfo.GetInterface());
+
+    auto setNativeContext = std::async(std::launch::async, [] { ContinuousProfilerSetNativeContext(1, 2, 3); });
+    if (!profilerInfo.WaitUntilEntered())
+    {
+        profilerInfo.Release();
+        setNativeContext.wait();
+        std::exit(EXIT_FAILURE);
+    }
+
+    auto shutdown = std::async(std::launch::async, [&profiler] { profiler.Shutdown(); });
+    const bool shutdownWaited = shutdown.wait_for(std::chrono::milliseconds(50)) == std::future_status::timeout;
+
+    profilerInfo.Release();
+    const bool callbackFinished = setNativeContext.wait_for(std::chrono::seconds(1)) == std::future_status::ready;
+    const bool shutdownFinished = shutdown.wait_for(std::chrono::seconds(1)) == std::future_status::ready;
+
+    setNativeContext.get();
+    shutdown.get();
+    std::exit(shutdownWaited && callbackFinished && shutdownFinished ? EXIT_SUCCESS : EXIT_FAILURE);
+}
+
 // SEH wrapper - must not own any C++ objects requiring unwinding.
 bool SetNativeContextFaults()
 {
@@ -323,5 +413,10 @@ TEST(ContinuousProfilerSafetyTest, SetNativeContextDoesNotDereferenceNullProfile
     const bool faulted = SetNativeContextFaults();
 
     ASSERT_FALSE(faulted) << "ContinuousProfilerSetNativeContext dereferenced a null profiler_info.";
+}
+
+TEST(ContinuousProfilerSafetyTest, ShutdownWaitsForAnAdmittedSetNativeContext)
+{
+    EXPECT_EXIT(RunSetNativeContextShutdownAdmissionTest(), ::testing::ExitedWithCode(EXIT_SUCCESS), "");
 }
 #endif
