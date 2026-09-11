@@ -657,6 +657,7 @@ public sealed class SettingsTests
     [InlineData("CONTAINER", ResourceDetector.Container)]
 #endif
     [InlineData("AZUREAPPSERVICE", ResourceDetector.AzureAppService)]
+    [InlineData("AZURECONTAINERAPPS", ResourceDetector.AzureContainerApps)]
     [InlineData("PROCESSRUNTIME", ResourceDetector.ProcessRuntime)]
     [InlineData("PROCESS", ResourceDetector.Process)]
     [InlineData("OPERATINGSYSTEM", ResourceDetector.OperatingSystem)]

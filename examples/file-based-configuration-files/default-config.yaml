@@ -50,6 +50,7 @@ resource:
     # If no detectors are specified, none will be added automatically.
     detectors:
       azureappservice: # Detects Azure App Service resource information
+      azurecontainerapps: # Detects Azure Container Apps resource information
       container:       # Detects container resource info (container.* attributes) [Core only]
       host:            # Detects host resource info (host.* attributes)
       operatingsystem: # Detects OS-level attributes (os.*)

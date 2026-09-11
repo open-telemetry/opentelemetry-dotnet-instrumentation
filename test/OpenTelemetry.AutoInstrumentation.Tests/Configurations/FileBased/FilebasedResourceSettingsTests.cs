@@ -103,6 +103,7 @@ public class FilebasedResourceSettingsTests
         var detectors = new DotNetDetectors
         {
             AzureAppService = new object(),
+            AzureContainerApps = new object(),
             Host = new object(),
             OperatingSystem = null,
             Process = new object(),
@@ -118,6 +119,7 @@ public class FilebasedResourceSettingsTests
         var expected = new List<ResourceDetector>
         {
             ResourceDetector.AzureAppService,
+            ResourceDetector.AzureContainerApps,
             ResourceDetector.Host,
             ResourceDetector.Process
         };

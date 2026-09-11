@@ -39,4 +39,9 @@ internal enum ResourceDetector
     /// Operating System resource detector.
     /// </summary>
     OperatingSystem = 5,
+
+    /// <summary>
+    /// Azure Container Apps resource detector.
+    /// </summary>
+    AzureContainerApps = 6,
 }
