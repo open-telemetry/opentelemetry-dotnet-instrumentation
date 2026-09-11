@@ -80,6 +80,11 @@ internal static class RabbitMqInstrumentation
         return activity;
     }
 
+    public static bool IsActiveProcessActivity()
+    {
+        return Activity.Current?.Source == Source;
+    }
+
     public static Activity? StartPublish<TBasicProperties, TModel>(TBasicProperties basicProperties, string? exchange, string? routingKey, int bodyLength, TModel instance)
     where TBasicProperties : IBasicProperties
     where TModel : IModelBase

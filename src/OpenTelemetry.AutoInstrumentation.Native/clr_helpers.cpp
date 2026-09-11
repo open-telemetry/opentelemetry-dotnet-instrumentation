@@ -335,7 +335,7 @@ HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit,
         Logger::Debug("Using existing corlib reference: ", corAssemblyProperty.szName);
         return assembly_emit->DefineAssemblyRef(corAssemblyProperty.ppbPublicKey, corAssemblyProperty.pcbPublicKey,
                                                 corAssemblyProperty.szName.c_str(), &corAssemblyProperty.pMetaData,
-                                                NULL, 0, corAssemblyProperty.assemblyFlags, corlib_ref);
+                                                nullptr, 0, corAssemblyProperty.assemblyFlags, corlib_ref);
     }
     else
     {
@@ -346,7 +346,7 @@ HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit,
         metadata.usBuildNumber    = 0;
         metadata.usRevisionNumber = 0;
         BYTE public_key[]         = {0xB7, 0x7A, 0x5C, 0x56, 0x19, 0x34, 0xE0, 0x89};
-        return assembly_emit->DefineAssemblyRef(public_key, sizeof(public_key), WStr("mscorlib"), &metadata, NULL, 0,
+        return assembly_emit->DefineAssemblyRef(public_key, sizeof(public_key), WStr("mscorlib"), &metadata, nullptr, 0,
                                                 corAssemblyProperty.assemblyFlags, corlib_ref);
     }
 }
@@ -361,7 +361,6 @@ std::tuple<unsigned, int> TypeSignature::GetElementTypeAndFlags() const
 
     if (*pbCur == ELEMENT_TYPE_VOID)
     {
-        elementType = ELEMENT_TYPE_VOID;
         typeFlags |= TypeFlagVoid;
     }
 
@@ -973,8 +972,8 @@ HRESULT FunctionMethodSignature::TryParse()
     return S_OK;
 }
 
-bool FindTypeDefByName(const trace::WSTRING            instrumentationTargetMethodTypeName,
-                       const trace::WSTRING            assemblyName,
+bool FindTypeDefByName(const trace::WSTRING&           instrumentationTargetMethodTypeName,
+                       const trace::WSTRING&           assemblyName,
                        const ComPtr<IMetaDataImport2>& metadata_import,
                        mdTypeDef&                      typeDef)
 {

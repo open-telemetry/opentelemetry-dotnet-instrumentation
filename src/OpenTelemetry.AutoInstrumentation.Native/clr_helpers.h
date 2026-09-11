@@ -179,6 +179,16 @@ static Enumerator<mdAssemblyRef> EnumAssemblyRefs(const ComPtr<IMetaDataAssembly
         [assembly_import](HCORENUM ptr) -> void { assembly_import->CloseEnum(ptr); });
 }
 
+static Enumerator<mdInterfaceImpl> EnumInterfaceImpls(const ComPtr<IMetaDataImport2>& metadata_import,
+                                                       const mdTypeDef typeDef)
+{
+    return Enumerator<mdInterfaceImpl>(
+        [metadata_import, typeDef](HCORENUM* ptr, mdInterfaceImpl arr[], ULONG max, ULONG* cnt) -> HRESULT {
+            return metadata_import->EnumInterfaceImpls(ptr, typeDef, arr, max, cnt);
+        },
+        [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
+}
+
 struct RuntimeInformation
 {
     COR_PRF_RUNTIME_TYPE runtime_type;
@@ -234,8 +244,8 @@ struct AssemblyInfo
     {
     }
 
-    AssemblyInfo(AssemblyID id, WSTRING name, ModuleID manifest_module_id, AppDomainID app_domain_id,
-                 WSTRING app_domain_name) :
+    AssemblyInfo(AssemblyID id, const WSTRING& name, ModuleID manifest_module_id, AppDomainID app_domain_id,
+                 const WSTRING& app_domain_name) :
         id(id),
         name(name),
         manifest_module_id(manifest_module_id),
@@ -261,7 +271,7 @@ struct AssemblyMetadata
     {
     }
 
-    AssemblyMetadata(ModuleID module_id, WSTRING name, mdAssembly assembly_token, USHORT major, USHORT minor,
+    AssemblyMetadata(ModuleID module_id, const WSTRING& name, mdAssembly assembly_token, USHORT major, USHORT minor,
                      USHORT build, USHORT revision) :
         module_id(module_id),
         name(name),
@@ -294,7 +304,8 @@ struct AssemblyProperty
     {
     }
 
-    AssemblyProperty(WSTRING szName, void* ppbPublicKey, ULONG pcbPublicKey, ULONG pulHashAlgId, DWORD assemblyFlags) :
+    AssemblyProperty(const WSTRING& szName, void* ppbPublicKey, ULONG pcbPublicKey, ULONG pulHashAlgId,
+                     DWORD assemblyFlags) :
         szName(szName),
         ppbPublicKey(ppbPublicKey),
         pcbPublicKey(pcbPublicKey),
@@ -325,7 +336,7 @@ struct ModuleInfo
     ModuleInfo() : id(0), path(EmptyWStr), assembly({}), flags(0)
     {
     }
-    ModuleInfo(ModuleID id, WSTRING path, AssemblyInfo assembly, DWORD flags) :
+    ModuleInfo(ModuleID id, const WSTRING& path, const AssemblyInfo& assembly, DWORD flags) :
         id(id), path(path), assembly(assembly), flags(flags)
     {
     }
@@ -380,7 +391,8 @@ struct TypeInfo
         scopeToken(0)
     {
     }
-    TypeInfo(mdToken id, WSTRING name, mdTypeSpec type_spec, ULONG32 token_type, std::shared_ptr<TypeInfo> extend_from,
+    TypeInfo(mdToken id, const WSTRING& name, mdTypeSpec type_spec, ULONG32 token_type,
+             std::shared_ptr<TypeInfo> extend_from,
              bool valueType, bool isGeneric, std::shared_ptr<TypeInfo> parent_type, mdToken scopeToken) :
         id(id),
         name(name),
@@ -434,10 +446,8 @@ public:
     FunctionMethodSignature() : pbBase(nullptr), len(0)
     {
     }
-    FunctionMethodSignature(PCCOR_SIGNATURE pb, unsigned cbBuffer)
+    FunctionMethodSignature(PCCOR_SIGNATURE pb, unsigned cbBuffer) : pbBase(pb), len(cbBuffer)
     {
-        pbBase = pb;
-        len = cbBuffer;
     };
     ULONG NumberOfTypeArguments() const
     {
@@ -529,9 +539,9 @@ struct FunctionInfo
     {
     }
 
-    FunctionInfo(mdToken id, WSTRING name, TypeInfo type, MethodSignature signature,
-                 MethodSignature function_spec_signature, mdToken method_def_id,
-                 FunctionMethodSignature method_signature) :
+    FunctionInfo(mdToken id, const WSTRING& name, const TypeInfo& type, const MethodSignature& signature,
+                 const MethodSignature& function_spec_signature, mdToken method_def_id,
+                 const FunctionMethodSignature& method_signature) :
         id(id),
         name(name),
         type(type),
@@ -543,8 +553,8 @@ struct FunctionInfo
     {
     }
 
-    FunctionInfo(mdToken id, WSTRING name, TypeInfo type, MethodSignature signature,
-                 FunctionMethodSignature method_signature) :
+    FunctionInfo(mdToken id, const WSTRING& name, const TypeInfo& type, const MethodSignature& signature,
+                 const FunctionMethodSignature& method_signature) :
         id(id),
         name(name),
         type(type),
@@ -628,7 +638,7 @@ mdAssemblyRef FindAssemblyRef(const ComPtr<IMetaDataAssemblyImport>& assembly_im
 HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit, const AssemblyProperty& corAssemblyProperty,
                              mdAssemblyRef* corlib_ref);
 
-bool FindTypeDefByName(const trace::WSTRING instrumentationTargetMethodTypeName, const trace::WSTRING assemblyName,
+bool FindTypeDefByName(const trace::WSTRING& instrumentationTargetMethodTypeName, const trace::WSTRING& assemblyName,
                        const ComPtr<IMetaDataImport2>& metadata_import, mdTypeDef& typeDef);
 
 // FunctionMethodSignature
