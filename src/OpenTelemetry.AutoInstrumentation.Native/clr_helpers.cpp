@@ -3,6 +3,7 @@
 
 #include "clr_helpers.h"
 
+#include <cstdint>
 #include <cstring>
 
 #include <set>
@@ -129,6 +130,7 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
     mdToken method_def_token  = mdTokenNil;
     WCHAR   function_name[kNameMaxSize]{};
     DWORD   function_name_len = 0;
+    DWORD   method_impl_flags = 0;
 
     PCCOR_SIGNATURE   raw_signature;
     ULONG             raw_signature_len;
@@ -146,8 +148,8 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
             break;
         case mdtMethodDef:
             hr = metadata_import->GetMemberProps(token, &parent_token, function_name, kNameMaxSize, &function_name_len,
-                                                 nullptr, &raw_signature, &raw_signature_len, nullptr, nullptr, nullptr,
-                                                 nullptr, nullptr);
+                                                 nullptr, &raw_signature, &raw_signature_len, nullptr,
+                                                 &method_impl_flags, nullptr, nullptr, nullptr);
             break;
         case mdtMethodSpec:
         {
@@ -164,6 +166,7 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
             function_name_len = DWORD(generic_info.name.length() + 1);
             method_spec_token = token;
             method_def_token  = generic_info.id;
+            method_impl_flags = generic_info.method_impl_flags;
         }
         break;
         default:
@@ -187,13 +190,14 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
                 MethodSignature(final_signature_bytes),
                 MethodSignature(method_spec_signature),
                 method_def_token,
-                FunctionMethodSignature(raw_signature, raw_signature_len)};
+                FunctionMethodSignature(raw_signature, raw_signature_len),
+                method_impl_flags};
     }
 
     final_signature_bytes = GetSignatureByteRepresentation(raw_signature_len, raw_signature);
 
     return {token, WSTRING(function_name), type_info, MethodSignature(final_signature_bytes),
-            FunctionMethodSignature(raw_signature, raw_signature_len)};
+            FunctionMethodSignature(raw_signature, raw_signature_len), method_impl_flags};
 }
 
 ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id)
@@ -647,6 +651,99 @@ ULONG TypeSignature::GetSignature(PCCOR_SIGNATURE& data) const
 {
     data = &pbBase[offset];
     return length;
+}
+
+bool TryGetRuntimeAsyncResultType(const TypeSignature& async_return_type,
+                                  const ComPtr<IMetaDataImport2>& metadata_import,
+                                  TypeSignature* result_type)
+{
+    if (result_type == nullptr)
+    {
+        return false;
+    }
+
+    PCCOR_SIGNATURE signature;
+    const auto signature_length = async_return_type.GetSignature(signature);
+    if (signature == nullptr || signature_length < 2)
+    {
+        return false;
+    }
+
+    PCCOR_SIGNATURE current = signature;
+    PCCOR_SIGNATURE end = signature + signature_length;
+    unsigned char element_type;
+    if (!ParseByte(current, end, &element_type))
+    {
+        return false;
+    }
+
+    bool is_generic = false;
+    if (element_type == ELEMENT_TYPE_GENERICINST)
+    {
+        is_generic = true;
+        if (!ParseByte(current, end, &element_type))
+        {
+            return false;
+        }
+    }
+
+    if (element_type != ELEMENT_TYPE_CLASS && element_type != ELEMENT_TYPE_VALUETYPE)
+    {
+        return false;
+    }
+
+    mdToken type_token = mdTokenNil;
+    uint32_t token_length = 0;
+    const auto remaining_length = static_cast<uint32_t>(end - current);
+    if (FAILED(CorSigUncompressToken(current, remaining_length, &type_token, &token_length)) || token_length == 0)
+    {
+        return false;
+    }
+    current += token_length;
+
+    const auto type_name = GetTypeInfo(metadata_import, type_token).name;
+    if (is_generic)
+    {
+        unsigned generic_argument_count;
+        if (!ParseNumber(current, end, &generic_argument_count) || generic_argument_count != 1 || current >= end)
+        {
+            return false;
+        }
+
+        const bool is_task = element_type == ELEMENT_TYPE_CLASS && type_name == WStr("System.Threading.Tasks.Task`1");
+        const bool is_value_task =
+            element_type == ELEMENT_TYPE_VALUETYPE && type_name == WStr("System.Threading.Tasks.ValueTask`1");
+        if (!is_task && !is_value_task)
+        {
+            return false;
+        }
+
+        PCCOR_SIGNATURE result_start = current;
+        if (!ParseType(current, end) || current != end)
+        {
+            return false;
+        }
+
+        *result_type = {0, static_cast<ULONG>(end - result_start), result_start};
+        return true;
+    }
+
+    if (current != end)
+    {
+        return false;
+    }
+
+    const bool is_task = element_type == ELEMENT_TYPE_CLASS && type_name == WStr("System.Threading.Tasks.Task");
+    const bool is_value_task =
+        element_type == ELEMENT_TYPE_VALUETYPE && type_name == WStr("System.Threading.Tasks.ValueTask");
+    if (!is_task && !is_value_task)
+    {
+        return false;
+    }
+
+    static const COR_SIGNATURE void_signature[] = {ELEMENT_TYPE_VOID};
+    *result_type = {0, 1, void_signature};
+    return true;
 }
 
 // FunctionMethodSignature
