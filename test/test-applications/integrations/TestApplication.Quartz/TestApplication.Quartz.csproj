@@ -23,7 +23,7 @@
     <PackageReference Include="Quartz.Extensions.Hosting" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
   <ItemGroup Condition=" '$(LibraryVersion)' == '' and ( '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == 'net472' ) ">
-    <PackageReference Include="Quartz" VersionOverride="3.20.1" />
+    <PackageReference Include="Quartz" VersionOverride="4.0.1" />
     <PackageReference Include="Quartz.Extensions.DependencyInjection" VersionOverride="3.20.1" />
     <PackageReference Include="Quartz.Extensions.Hosting" VersionOverride="3.20.1" />
   </ItemGroup>
