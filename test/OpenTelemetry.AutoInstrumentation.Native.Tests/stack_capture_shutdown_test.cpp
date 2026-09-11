@@ -463,6 +463,7 @@ TEST(StackWalkGuardTest, TimedOutScheduledRequestIsNotRevivedByWorker)
               ProfilerStackCapture::StackWalkGuardTestPeer::RunWorkerUntilIdle(guard));
 }
 
+#if defined(_M_AMD64)
 TEST(StackWalkGuardTest, SnapshotsRtlProbeContextBeforeScheduling)
 {
     BlockingProfilerApi                  profilerApi;
@@ -480,6 +481,7 @@ TEST(StackWalkGuardTest, SnapshotsRtlProbeContextBeforeScheduling)
     context.Rip = 0;
     EXPECT_EQ(0x12345678, ProfilerStackCapture::StackWalkGuardTestPeer::StagedFrame0Rip(guard));
 }
+#endif
 
 TEST(StackWalkGuardTest, InitializesProfilerThreadBeforeAcceptingAProbe)
 {
