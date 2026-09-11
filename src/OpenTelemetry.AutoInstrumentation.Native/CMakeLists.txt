@@ -225,6 +225,7 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         suspension_guards.cpp
         method_rewriter.cpp
         tracer_tokens.cpp
+        unsafe_accessor_type_attribute_updater.cpp
         lib/coreclr/src/pal/prebuilt/idl/corprof_i.cpp
 )
 
