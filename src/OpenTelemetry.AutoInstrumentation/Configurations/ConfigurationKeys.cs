@@ -50,6 +50,16 @@ internal partial class ConfigurationKeys
     public const string OpAmpServerUrl = "OTEL_DOTNET_AUTO_OPAMP_SERVER_URL";
 
     /// <summary>
+    /// Configuration key for the maximum number of pending OpAMP custom messages.
+    /// </summary>
+    public const string OpAmpMaxPendingCustomMessages = "OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGES";
+
+    /// <summary>
+    /// Configuration key for the maximum aggregate size of pending OpAMP custom message payloads.
+    /// </summary>
+    public const string OpAmpMaxPendingCustomMessageBytes = "OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGE_BYTES";
+
+    /// <summary>
     /// Configuration key for enabling all instrumentations.
     /// </summary>
     public const string InstrumentationEnabled = "OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED";

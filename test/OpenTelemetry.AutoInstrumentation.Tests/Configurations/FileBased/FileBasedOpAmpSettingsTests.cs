@@ -12,11 +12,15 @@ public class FileBasedOpAmpSettingsTests
     public void LoadFile_GeneralSettings()
     {
         var serverUrl = "wss://localhost:4320/v1/opamp";
+        const int maxPendingCustomMessages = 4096;
+        const int maxPendingCustomMessageBytes = 134217728;
         var conf = new YamlConfiguration
         {
             OpAmp = new OpAmpConfiguration()
             {
-                ServerUrl = serverUrl
+                ServerUrl = serverUrl,
+                MaxPendingCustomMessages = maxPendingCustomMessages,
+                MaxPendingCustomMessageBytes = maxPendingCustomMessageBytes,
             }
         };
 
@@ -26,5 +30,68 @@ public class FileBasedOpAmpSettingsTests
 
         Assert.True(settings.OpAmpClientEnabled);
         Assert.Equal(new Uri(serverUrl, UriKind.Absolute), settings.ServerUrl);
+        Assert.Equal(maxPendingCustomMessages, settings.MaxPendingCustomMessages);
+        Assert.Equal(maxPendingCustomMessageBytes, settings.MaxPendingCustomMessageBytes);
+    }
+
+    [Fact]
+    public void LoadFile_EmptyOpAmpConfiguration_ShouldEnableOpAmpWithDefaultSettings()
+    {
+        var conf = new YamlConfiguration
+        {
+            OpAmp = new OpAmpConfiguration(),
+        };
+        var settings = new OpAmpSettings();
+
+        settings.LoadFile(conf);
+
+        Assert.True(settings.OpAmpClientEnabled);
+        Assert.Null(settings.ServerUrl);
+        Assert.Null(settings.MaxPendingCustomMessages);
+        Assert.Null(settings.MaxPendingCustomMessageBytes);
+    }
+
+    [Theory]
+    [InlineData(0, null)]
+    [InlineData(-1, null)]
+    [InlineData(null, 0)]
+    [InlineData(null, -1)]
+    public void LoadFile_NonPositiveCustomMessageLimitIsIgnored(int? maxPendingCustomMessages, int? maxPendingCustomMessageBytes)
+    {
+        var conf = new YamlConfiguration
+        {
+            OpAmp = new OpAmpConfiguration
+            {
+                MaxPendingCustomMessages = maxPendingCustomMessages,
+                MaxPendingCustomMessageBytes = maxPendingCustomMessageBytes,
+            },
+        };
+        var settings = new OpAmpSettings();
+
+        settings.LoadFile(conf);
+
+        Assert.Null(settings.MaxPendingCustomMessages);
+        Assert.Null(settings.MaxPendingCustomMessageBytes);
+    }
+
+    [Theory]
+    [InlineData(0, null)]
+    [InlineData(-1, null)]
+    [InlineData(null, 0)]
+    [InlineData(null, -1)]
+    public void LoadFile_NonPositiveCustomMessageLimitFailsFast(int? maxPendingCustomMessages, int? maxPendingCustomMessageBytes)
+    {
+        var conf = new YamlConfiguration
+        {
+            FailFast = true,
+            OpAmp = new OpAmpConfiguration
+            {
+                MaxPendingCustomMessages = maxPendingCustomMessages,
+                MaxPendingCustomMessageBytes = maxPendingCustomMessageBytes,
+            },
+        };
+        var settings = new OpAmpSettings();
+
+        Assert.Throws<InvalidOperationException>(() => settings.LoadFile(conf));
     }
 }

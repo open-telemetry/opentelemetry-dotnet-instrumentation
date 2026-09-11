@@ -101,6 +101,16 @@ internal static class OpAmpHelper
             settings.ConnectionType = GetConnectionType(serverUrl);
         }
 
+        if (opAmpSettings.MaxPendingCustomMessages.HasValue)
+        {
+            settings.MaxPendingCustomMessages = opAmpSettings.MaxPendingCustomMessages.Value;
+        }
+
+        if (opAmpSettings.MaxPendingCustomMessageBytes.HasValue)
+        {
+            settings.MaxPendingCustomMessageBytes = opAmpSettings.MaxPendingCustomMessageBytes.Value;
+        }
+
         // Configure resource attributes for identification.
         foreach (var resourceAttribute in resources.Attributes)
         {

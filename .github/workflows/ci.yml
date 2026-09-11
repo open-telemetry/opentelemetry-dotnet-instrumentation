@@ -21,21 +21,21 @@ permissions:
 jobs:
   build-ubuntu1604-native:
     name: Build native on Ubuntu 16.04 container
-    uses: ./.github/workflows/build-ubuntu1604-native-container.yml
+    uses: $/.github/workflows/build-ubuntu1604-native-container.yml
 
   build-windows:
     name: Build on Windows
-    uses: ./.github/workflows/build-windows.yml
+    uses: $/.github/workflows/build-windows.yml
 
   build:
     name: Build
     needs: [ build-windows, build-ubuntu1604-native ]
-    uses: ./.github/workflows/build.yml
+    uses: $/.github/workflows/build.yml
 
   build-nuget-packages:
     name: Build NuGet packages
     needs: [ build-windows, build ]
-    uses: ./.github/workflows/build-nuget-packages.yml
+    uses: $/.github/workflows/build-nuget-packages.yml
 
   test-build-managed:
     name: Test ${{ matrix.test-tfm }} on ${{ matrix.machine }} (managed)
@@ -83,7 +83,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup .NET
-        uses: ./.github/actions/setup-dotnet
+        uses: $/.github/actions/setup-dotnet
 
       - name: Check for NuGet packages cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -172,7 +172,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup .NET
-        uses: ./.github/actions/setup-dotnet
+        uses: $/.github/actions/setup-dotnet
 
       - name: Check for NuGet packages cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -213,7 +213,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup .NET
-        uses: ./.github/actions/setup-dotnet
+        uses: $/.github/actions/setup-dotnet
 
       - name: Check for NuGet packages cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -380,7 +380,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup .NET
-        uses: ./.github/actions/setup-dotnet
+        uses: $/.github/actions/setup-dotnet
 
       - name: Check for NuGet packages cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

@@ -56,6 +56,9 @@ resource:
       process:         # Detects process-level attributes (process.*)
       processruntime:  # Detects process runtime attributes (process.runtime.*)
 
+# OpAMP is disabled by default. Uncomment this section to enable it.
+# opamp/development:
+
 # Instrumentation Configuration
 instrumentation/development:
   # If no instrumentation is specified, none will be added automatically.
