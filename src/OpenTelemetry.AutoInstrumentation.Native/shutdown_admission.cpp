@@ -14,8 +14,8 @@ namespace
 {
 // The sampler's callback and publication boundaries are process-wide. The closing bit is the terminal transition;
 // the remaining bits count operations that crossed admission before that transition.
-constexpr uint64_t kShutdownAdmissionClosingBit = uint64_t{1} << 63;
-constexpr uint64_t kShutdownAdmissionCountMask  = ~kShutdownAdmissionClosingBit;
+constexpr uint64_t    kShutdownAdmissionClosingBit = uint64_t{1} << 63;
+constexpr uint64_t    kShutdownAdmissionCountMask  = ~kShutdownAdmissionClosingBit;
 std::atomic<uint64_t> shutdown_admission_gate{0};
 
 // Cold-path wait primitives. Sampler callbacks and publications never take this mutex; they only perform the CAS
@@ -70,8 +70,10 @@ void CloseShutdownAdmissions() noexcept
 void WaitForShutdownAdmissions() noexcept
 {
     std::unique_lock<std::mutex> lock(shutdown_mutex);
-    shutdown_cv.wait(lock, [] {
-        return (shutdown_admission_gate.load(std::memory_order_acquire) & kShutdownAdmissionCountMask) == 0;
-    });
+    shutdown_cv.wait(lock,
+                     [] {
+                         return (shutdown_admission_gate.load(std::memory_order_acquire) &
+                                 kShutdownAdmissionCountMask) == 0;
+                     });
 }
 } // namespace continuous_profiler

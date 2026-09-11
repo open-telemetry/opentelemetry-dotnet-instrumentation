@@ -275,8 +275,8 @@ public:
 private:
     std::mutex              mutex_;
     std::condition_variable cv_;
-    bool                    probeStarted_ = false;
-    bool                    released_     = false;
+    bool                    probeStarted_    = false;
+    bool                    released_        = false;
     int                     initializeCalls_ = 0;
 };
 

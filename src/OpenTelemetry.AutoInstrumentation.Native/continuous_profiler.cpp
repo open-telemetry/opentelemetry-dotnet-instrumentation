@@ -1316,10 +1316,10 @@ static bool ShouldTrackIterations(const ThreadSamplingConfiguration& configurati
     return configuration.BothEnabled();
 }
 
-static void SamplingThreadMainCore(ContinuousProfiler*   prof,
-                                   ShutdownToken         shutdownToken,
+static void SamplingThreadMainCore(ContinuousProfiler*    prof,
+                                   ShutdownToken          shutdownToken,
                                    std::promise<HRESULT>& initializationResult,
-                                   bool&                 initializationResultPublished)
+                                   bool&                  initializationResultPublished)
 {
     ICorProfilerInfo7* info7 = prof->info7;
 
@@ -2175,7 +2175,7 @@ extern "C"
             return;
         }
 
-        ThreadID      threadId;
+        ThreadID    threadId;
         auto* const info = profiler_info.load(std::memory_order_acquire);
         if (info == nullptr)
         {

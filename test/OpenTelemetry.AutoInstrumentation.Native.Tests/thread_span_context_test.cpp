@@ -354,22 +354,22 @@ private:
         // GetCurrentThreadID is slot 13 after QueryInterface, AddRef, and Release in the
         // ICorProfilerInfo base interface. The callback does not use any other slot.
         static void* vtable[14] = {};
-        vtable[13]                         = reinterpret_cast<void*>(&GetCurrentThreadID);
+        vtable[13]              = reinterpret_cast<void*>(&GetCurrentThreadID);
         return vtable;
     }
 
-    void**                 vtable_;
-    std::mutex             mutex_;
+    void**                  vtable_;
+    std::mutex              mutex_;
     std::condition_variable cv_;
-    bool                   entered_  = false;
-    bool                   released_ = false;
+    bool                    entered_  = false;
+    bool                    released_ = false;
 };
 
 void RunSetNativeContextShutdownAdmissionTest()
 {
     continuous_profiler::ClrAllocationSamplingSessionProvider allocationSessions(nullptr);
     continuous_profiler::ContinuousProfiler                   profiler(allocationSessions);
-    BlockingProfilerInfo7               profilerInfo;
+    BlockingProfilerInfo7                                     profilerInfo;
     profiler.SetGlobalInfo7(profilerInfo.GetInterface());
 
     auto setNativeContext = std::async(std::launch::async, [] { ContinuousProfilerSetNativeContext(1, 2, 3); });
@@ -380,7 +380,7 @@ void RunSetNativeContextShutdownAdmissionTest()
         std::exit(EXIT_FAILURE);
     }
 
-    auto shutdown = std::async(std::launch::async, [&profiler] { profiler.Shutdown(); });
+    auto       shutdown       = std::async(std::launch::async, [&profiler] { profiler.Shutdown(); });
     const bool shutdownWaited = shutdown.wait_for(std::chrono::milliseconds(50)) == std::future_status::timeout;
 
     profilerInfo.Release();

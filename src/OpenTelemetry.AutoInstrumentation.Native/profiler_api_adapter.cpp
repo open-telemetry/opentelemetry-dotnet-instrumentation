@@ -13,7 +13,7 @@ namespace ProfilerStackCapture
 struct ProfilerApiAdapter::Impl
 {
     ICorProfilerInfo2*  profilerInfo;
-    ICorProfilerInfo4*  profilerInfo4 = nullptr;
+    ICorProfilerInfo4*  profilerInfo4  = nullptr;
     ICorProfilerInfo10* profilerInfo10 = nullptr;
 
     explicit Impl(ICorProfilerInfo2* info) : profilerInfo(info)
