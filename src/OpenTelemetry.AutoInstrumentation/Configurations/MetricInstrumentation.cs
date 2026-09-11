@@ -51,6 +51,11 @@ internal enum MetricInstrumentation
     /// <summary>
     /// Npgsql instrumentation.
     /// </summary>
-    Npgsql = 8
+    Npgsql = 8,
+
+    /// <summary>
+    /// Quartz instrumentation.
+    /// </summary>
+    Quartz = 9
 #endif
 }

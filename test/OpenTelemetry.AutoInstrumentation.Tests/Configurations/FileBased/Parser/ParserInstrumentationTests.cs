@@ -92,6 +92,9 @@ public class ParserInstrumentationTests
             "netruntime",
             "nservicebus",
             "process",
+#if NET
+            "quartz",
+#endif
             "sqlclient",
         ];
 
