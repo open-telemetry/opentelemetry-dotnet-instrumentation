@@ -344,7 +344,11 @@ internal static class EnvironmentConfigurationTracerHelper
         {
             DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);
 
-            return builder.AddSource("OpenTelemetry.Instrumentation.Quartz")
+            return builder
+#if NET
+                .AddSource("Quartz")
+#endif
+                .AddSource("OpenTelemetry.Instrumentation.Quartz")
                 .AddLegacySource("Quartz.Job.Execute")
                 .AddLegacySource("Quartz.Job.Veto");
         }
