@@ -88,6 +88,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Redirect outer assembly-qualified type names in `UnsafeAccessorType`
+  attributes when native profiler assembly redirection is enabled on .NET 10
+  and later.
 - Allow an empty `opamp/development` section in file-based configuration to
   enable the OpAMP client with default settings.
 - Prevent the shell installer from using a predictable path for temporary
