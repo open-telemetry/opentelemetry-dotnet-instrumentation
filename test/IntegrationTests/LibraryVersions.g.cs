@@ -180,7 +180,7 @@ public static partial class LibraryVersion
 #else
                 "5.2.3",
                 "6.1.5",
-                "7.0.2",
+                "7.0.3",
 #endif
             ];
             return theoryData;

@@ -91,7 +91,7 @@ public static partial class LibraryVersion
             [
                 new("5.2.3"),
                 new("6.1.5"),
-                new("7.0.2"),
+                new("7.0.3"),
             ]
         },
         {
