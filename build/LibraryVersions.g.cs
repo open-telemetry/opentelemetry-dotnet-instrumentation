@@ -221,6 +221,16 @@ public static partial class LibraryVersion
             ]
         },
         {
+            "TestApplication.UnsafeAccessorTypeRedirection",
+            [
+                new("null", supportedFrameworks: [ "net10.0" ], additionalMetaData: new() { { "UnsafeAccessorAssemblyName", "Microsoft.Extensions.DependencyInjection.Abstractions" }, { "UnsafeAccessorComplete", "true" } }),
+                new("9.0.0.0", supportedFrameworks: [ "net10.0" ], additionalMetaData: new() { { "UnsafeAccessorAssemblyName", "Microsoft.Extensions.DependencyInjection.Abstractions" }, { "UnsafeAccessorAssemblyVersion", "9.0.0.0" }, { "UnsafeAccessorComplete", "true" } }),
+                new("10.0.0.0", supportedFrameworks: [ "net10.0" ], additionalMetaData: new() { { "UnsafeAccessorAssemblyName", "Microsoft.Extensions.DependencyInjection.Abstractions" }, { "UnsafeAccessorAssemblyVersion", "10.0.0.0" }, { "UnsafeAccessorComplete", "true" } }),
+                new("11.0.0.0", supportedFrameworks: [ "net10.0" ], additionalMetaData: new() { { "UnsafeAccessorAssemblyName", "Microsoft.Extensions.DependencyInjection.Abstractions" }, { "UnsafeAccessorAssemblyVersion", "11.0.0.0" }, { "UnsafeAccessorComplete", "true" } }),
+                new("1.0.0.0-incomplete", supportedFrameworks: [ "net10.0" ], additionalMetaData: new() { { "UnsafeAccessorAssemblyName", "Microsoft.Extensions.DependencyInjection.Abstractions" }, { "UnsafeAccessorAssemblyVersion", "1.0.0.0" }, { "UnsafeAccessorComplete", "false" } }),
+            ]
+        },
+        {
             "TestApplication.Wcf.Core",
             [
                 new("1.8.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
