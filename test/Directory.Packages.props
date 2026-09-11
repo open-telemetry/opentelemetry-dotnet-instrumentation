@@ -21,7 +21,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Build" Version="15.9.30" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="15.9.30" />
-    <PackageVersion Include="Microsoft.Data.SqlClient" Version="7.0.2" />
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="7.0.3" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.12" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.12" />
@@ -44,7 +44,7 @@
     <PackageVersion Include="Oracle.ManagedDataAccess" Version="23.26.301" />
     <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.26.301" />
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
-    <PackageVersion Include="Quartz" Version="3.20.0" />
+    <PackageVersion Include="Quartz" Version="4.0.0" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.20.0" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.20.0" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
