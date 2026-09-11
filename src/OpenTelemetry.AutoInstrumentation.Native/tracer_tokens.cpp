@@ -29,6 +29,7 @@ static const WSTRING managed_profiler_calltarget_returntype_generics =
     WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn`1");
 static const WSTRING managed_profiler_calltarget_beginmethod_name  = WStr("BeginMethod");
 static const WSTRING managed_profiler_calltarget_endmethod_name    = WStr("EndMethod");
+static const WSTRING managed_profiler_calltarget_endasyncmethod_name = WStr("EndAsyncMethod");
 static const WSTRING managed_profiler_calltarget_logexception_name = WStr("LogException");
 
 /**
@@ -356,6 +357,7 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
 HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void*           rewriterWrapperPtr,
                                                   mdTypeRef       integrationTypeRef,
                                                   const TypeInfo* currentType,
+                                                  bool            isRuntimeAsync,
                                                   ILInstr**       instruction)
 {
     auto hr = EnsureBaseCalltargetTokens();
@@ -366,7 +368,8 @@ HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void*           rewriterWrappe
     ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*)rewriterWrapperPtr;
     ModuleMetadata*    module_metadata = GetMetadata();
 
-    if (endVoidMemberRef == mdMemberRefNil)
+    auto& endMethodMemberRef = isRuntimeAsync ? endAsyncVoidMemberRef : endVoidMemberRef;
+    if (endMethodMemberRef == mdMemberRefNil)
     {
         unsigned callTargetReturnVoidBuffer;
         auto callTargetReturnVoidSize = CorSigCompressToken(callTargetReturnVoidTypeRef, &callTargetReturnVoidBuffer);
@@ -410,9 +413,10 @@ HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void*           rewriterWrappe
         memcpy(&signature[offset], &callTargetStateBuffer, callTargetStateSize);
         offset += callTargetStateSize;
 
-        auto hr = module_metadata->metadata_emit->DefineMemberRef(callTargetTypeRef,
-                                                                  managed_profiler_calltarget_endmethod_name.data(),
-                                                                  signature, signatureLength, &endVoidMemberRef);
+        const auto& end_method_name = isRuntimeAsync ? managed_profiler_calltarget_endasyncmethod_name
+                                                     : managed_profiler_calltarget_endmethod_name;
+        auto hr = module_metadata->metadata_emit->DefineMemberRef(callTargetTypeRef, end_method_name.data(), signature,
+                                                                  signatureLength, &endMethodMemberRef);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper endVoidMemberRef could not be defined.");
@@ -457,7 +461,7 @@ HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void*           rewriterWrappe
     memcpy(&signature[offset], &currentTypeBuffer, currentTypeSize);
     offset += currentTypeSize;
 
-    hr = module_metadata->metadata_emit->DefineMethodSpec(endVoidMemberRef, signature, signatureLength,
+    hr = module_metadata->metadata_emit->DefineMethodSpec(endMethodMemberRef, signature, signatureLength,
                                                           &endVoidMethodSpec);
     if (FAILED(hr))
     {
@@ -474,6 +478,7 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
                                               mdTypeRef       integrationTypeRef,
                                               const TypeInfo* currentType,
                                               TypeSignature*  returnArgument,
+                                              bool            isRuntimeAsync,
                                               ILInstr**       instruction)
 {
     auto hr = EnsureBaseCalltargetTokens();
@@ -537,8 +542,9 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
     memcpy(&signature[offset], &callTargetStateBuffer, callTargetStateSize);
     offset += callTargetStateSize;
 
-    hr = module_metadata->metadata_emit->DefineMemberRef(callTargetTypeRef,
-                                                         managed_profiler_calltarget_endmethod_name.data(), signature,
+    const auto& end_method_name =
+        isRuntimeAsync ? managed_profiler_calltarget_endasyncmethod_name : managed_profiler_calltarget_endmethod_name;
+    hr = module_metadata->metadata_emit->DefineMemberRef(callTargetTypeRef, end_method_name.data(), signature,
                                                          signatureLength, &endMethodMemberRef);
     if (FAILED(hr))
     {

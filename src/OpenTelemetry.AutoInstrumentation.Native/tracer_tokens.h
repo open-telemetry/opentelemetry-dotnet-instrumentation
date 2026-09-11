@@ -19,6 +19,7 @@ private:
     mdMemberRef beginArrayMemberRef = mdMemberRefNil;
     mdMemberRef beginMethodFastPathRefs[FASTPATH_COUNT];
     mdMemberRef endVoidMemberRef = mdMemberRefNil;
+    mdMemberRef endAsyncVoidMemberRef = mdMemberRefNil;
     mdMemberRef logExceptionRef = mdMemberRefNil;
 
     HRESULT WriteBeginMethodWithArgumentsArray(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
@@ -38,10 +39,10 @@ public:
                              const bool ignoreByRefInstrumentation, ILInstr** instruction);
 
     HRESULT WriteEndVoidReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
-                                        const TypeInfo* currentType, ILInstr** instruction);
+                                        const TypeInfo* currentType, bool isRuntimeAsync, ILInstr** instruction);
 
     HRESULT WriteEndReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
-                                    TypeSignature* returnArgument, ILInstr** instruction);
+                                    TypeSignature* returnArgument, bool isRuntimeAsync, ILInstr** instruction);
 
     HRESULT WriteLogException(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
                               ILInstr** instruction);

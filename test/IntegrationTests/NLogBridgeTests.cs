@@ -156,7 +156,12 @@ public class NLogBridgeTests : TestHelper
             Arguments = "--api nlog"
         });
 
-        var regex = new Regex(@"INFO  TestApplication\.NLogBridge\.Program - Hello, world at \d{1,2}\:\d{2}(\s*[AP]M)?\!  TraceId=[a-f0-9]{32} SpanId=[a-f0-9]{16} TraceFlags=0[01]");
+#if NET11_0_OR_GREATER
+        // TODO NET11TODO use this version for all framework when S.D.DS is updated to 11
+        var regex = new Regex(@"INFO  TestApplication\.NLogBridge\.Program - Hello, world at \d{1,2}\:\d{2}(\s*[AP]M)?\!  TraceId=[a-f0-9]{32} SpanId=[a-f0-9]{16} TraceFlags=03");
+#else
+        var regex = new Regex(@"INFO  TestApplication\.NLogBridge\.Program - Hello, world at \d{1,2}\:\d{2}(\s*[AP]M)?\!  TraceId=[a-f0-9]{32} SpanId=[a-f0-9]{16} TraceFlags=01");
+#endif
         var output = standardOutput;
         Assert.Matches(regex, output);
         Assert.Contains("ERROR  TestApplication.NLogBridge.Program - Exception occurred", output, StringComparison.Ordinal);

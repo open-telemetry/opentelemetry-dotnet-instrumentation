@@ -145,7 +145,12 @@ public class Log4NetBridgeTests : TestHelper
             Arguments = "--api log4net"
         });
 
+#if NET11_0_OR_GREATER
+        // TODO NET11TODO use this version for all framework when S.D.DS is updated to 11
+        var regex = new Regex(@"INFO  TestApplication\.Log4NetBridge\.Program - Hello, world at \d{2}\:\d{2}\! span_id=[a-f0-9]{16} trace_id=[a-f0-9]{32} trace_flags=03");
+#else
         var regex = new Regex(@"INFO  TestApplication\.Log4NetBridge\.Program - Hello, world at \d{2}\:\d{2}\! span_id=[a-f0-9]{16} trace_id=[a-f0-9]{32} trace_flags=01");
+#endif
         var output = standardOutput;
         Assert.Matches(regex, output);
         Assert.Contains("ERROR TestApplication.Log4NetBridge.Program - Exception occurred span_id=(null) trace_id=(null) trace_flags=(null)", output, StringComparison.Ordinal);

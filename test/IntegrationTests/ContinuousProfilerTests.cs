@@ -189,19 +189,22 @@ public class ContinuousProfilerTests : TestHelper
         // Second CLR transition between GenericMethodCFromGenericClass(T) and MethodB.
         // Windows x64: resolved to clr.dll (NetFx) or absent (coreclr does not emit a stub frame here).
         // Other platforms / DEBUG: DSS emits Unknown_Native_Function.
-#if NETFRAMEWORK
+#if NETFRAMEWORK || DEBUG
         stackTrace.Add(
             Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.Is64BitProcess
                 ? "clr.dll"
                 : "Unknown_Native_Function(unknown)");
-#elif DEBUG
-        stackTrace.Add("Unknown_Native_Function(unknown)");
 #else
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
         {
             stackTrace.Add("Unknown_Native_Function(unknown)");
         }
 #endif
+
+#if NET11_0_OR_GREATER
+        stackTrace.Add("My.Custom.Test.Namespace.ClassA.OTelAutoCallbackTest(My.Custom.Test.Namespace.ClassA.Callback, System.Int32)");
+#endif
+
         stackTrace.Add("My.Custom.Test.Namespace.ClassA.InternalClassB`2.DoubleInternalClassB.TripleInternalClassB`1.MethodB[T2](System.Int32, T3[], T2, T4, System.Collections.Generic.IList`1[T1], System.Collections.Generic.IList`1[System.String])");
         stackTrace.Add("My.Custom.Test.Namespace.ClassA.<MethodAOthers>g__Action|7_0[T](System.Int32)");
         stackTrace.Add("My.Custom.Test.Namespace.ClassA.MethodAOthers[T](System.String, System.Object, My.Custom.Test.Namespace.CustomClass, My.Custom.Test.Namespace.CustomStruct, My.Custom.Test.Namespace.CustomClass[], My.Custom.Test.Namespace.CustomStruct[], System.Collections.Generic.List`1[T])");
@@ -313,7 +316,7 @@ public class ContinuousProfilerTests : TestHelper
             // DSS yields nothing for them; their presence proves the RTL native walk is working.
             // Security/AV DLLs (e.g. Protector64.dll) may also appear between kernel frames.
             bool hasIoCompletion = frames.Any(f => f.Contains("NtRemoveIoCompletion", StringComparison.OrdinalIgnoreCase));
-            bool hasGetQueued    = frames.Any(f => f.Contains("GetQueuedCompletionStatus", StringComparison.OrdinalIgnoreCase));
+            bool hasGetQueued = frames.Any(f => f.Contains("GetQueuedCompletionStatus", StringComparison.OrdinalIgnoreCase));
 
             if (hasIoCompletion && hasGetQueued)
             {
