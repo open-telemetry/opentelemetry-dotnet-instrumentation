@@ -124,6 +124,18 @@ public:
         }
     }
 
+    bool IsReady() const noexcept override
+    {
+        try
+        {
+            return runtime_ != nullptr && runtime_->IsReady();
+        }
+        catch (...)
+        {
+            return false;
+        }
+    }
+
     void RequestShutdown() noexcept override
     {
         if (!stopping_.exchange(true, std::memory_order_acq_rel))

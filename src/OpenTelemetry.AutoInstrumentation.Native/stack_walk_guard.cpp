@@ -108,6 +108,20 @@ void StackWalkGuard::RequestShutdown() noexcept
     cv_.notify_all();
 }
 
+bool StackWalkGuard::WaitForInitialization() noexcept
+{
+    try
+    {
+        std::unique_lock<std::mutex> lk(mutex_);
+        cv_.wait(lk, [this] { return state_ != State::Starting; });
+        return state_ == State::Idle;
+    }
+    catch (...)
+    {
+        return false;
+    }
+}
+
 bool StackWalkGuard::IsIdle() const noexcept
 {
     std::lock_guard<std::mutex> lk(mutex_);

@@ -49,6 +49,12 @@ public:
     /// </summary>
     virtual HRESULT CaptureStack(ThreadID managedThreadId, StackSnapshotCallbackContext* clientData) = 0;
 
+    /// <summary>
+    /// Reports whether runtime-specific capture dependencies are ready for activation.
+    /// Implementations without an auxiliary worker are ready by default.
+    /// </summary>
+    virtual bool IsReady() noexcept { return true; }
+
     // Lifecycle notifications routed from ICorProfilerCallback.
     // Default no-op; NetFxRuntimeCapture overrides for canary tracking.
     virtual void OnThreadCreated(ThreadID /*threadId*/) {}

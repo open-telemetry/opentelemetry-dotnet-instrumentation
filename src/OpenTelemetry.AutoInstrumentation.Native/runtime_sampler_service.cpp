@@ -188,6 +188,18 @@ ContinuousProfiler* RuntimeSamplerService::EnsureSamplerCreated() noexcept
         // sampler can be started. The member declaration order also preserves this DAG during reverse destruction.
         auto allocationSamplingSessionProvider = std::make_unique<ClrAllocationSamplingSessionProvider>(info12_);
         auto stackWalker                       = std::make_unique<StackWalkerImpl>(info7_, runtime_);
+
+        // Activation follows the dependency DAG: the stack-walk guard must
+        // initialize its profiler API context before the sampling worker is
+        // created and before the configuration can be committed. A failed
+        // guard is terminal for this instance; let the locals tear it down so
+        // a later activation attempt creates a fresh dependency chain.
+        if (!stackWalker->IsReady())
+        {
+            trace::Logger::Warn("RuntimeSamplerService: stack-walk guard initialization failed.");
+            return nullptr;
+        }
+
         auto sampler = std::make_unique<ContinuousProfiler>(*allocationSamplingSessionProvider);
         if (info12_ != nullptr)
         {

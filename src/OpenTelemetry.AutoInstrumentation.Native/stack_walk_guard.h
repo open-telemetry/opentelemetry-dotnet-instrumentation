@@ -116,6 +116,10 @@ public:
     // Waits for the worker to leave CLR/RTL code and terminate. Call RequestShutdown first.
     void WaitForShutdown() noexcept;
 
+    // Waits until the worker has initialized its profiler API context and is ready to accept probes.
+    // Returns false when initialization failed or shutdown was requested before readiness.
+    bool WaitForInitialization() noexcept;
+
     // Schedule/Await is a single-flight protocol: callers pair each successful
     // Schedule with one Await before scheduling another request.
     // CanaryDss: STL gate + (if canary != 0) DSS on a coast-clear thread.

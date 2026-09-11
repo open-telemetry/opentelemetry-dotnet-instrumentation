@@ -45,6 +45,11 @@ public:
     virtual HRESULT CaptureStacks(const std::unordered_set<ThreadID>& threads, void* clientData) = 0;
 
     /// <summary>
+    /// Reports whether the runtime-specific capture dependencies are ready for activation.
+    /// </summary>
+    virtual bool IsReady() const noexcept { return true; }
+
+    /// <summary>
     /// Requests terminal shutdown, stops runtime-specific capture admission, and releases capture waits.
     /// Must be idempotent and non-blocking.
     /// </summary>

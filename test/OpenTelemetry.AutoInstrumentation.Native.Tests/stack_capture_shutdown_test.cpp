@@ -133,6 +133,11 @@ private:
 class CallbackRuntimeCapture final : public ProfilerStackCapture::IRuntimeCapture
 {
 public:
+    bool IsReady() noexcept override
+    {
+        return ready;
+    }
+
     HRESULT SuspendRuntime() override
     {
         return S_OK;
@@ -164,6 +169,7 @@ public:
     }
 
     std::function<void()> onCapture;
+    bool                  ready             = true;
     int                   captureCalls      = 0;
     bool                  resumed           = false;
     bool                  stopped           = false;
@@ -229,10 +235,12 @@ private:
 class BlockingProfilerApi final : public ProfilerStackCapture::IProfilerApi
 {
 public:
+    explicit BlockingProfilerApi(const HRESULT initializeResult = S_OK) : initializeResult_(initializeResult) {}
+
     HRESULT InitializeCurrentThread() override
     {
         initializeCalls_++;
-        return S_OK;
+        return initializeResult_;
     }
 
     HRESULT DoStackSnapshot(ThreadID, StackSnapshotCallback, DWORD, void*, BYTE*, ULONG) override
@@ -275,9 +283,10 @@ public:
 private:
     std::mutex              mutex_;
     std::condition_variable cv_;
-    bool                    probeStarted_    = false;
-    bool                    released_        = false;
-    int                     initializeCalls_ = 0;
+    bool                    probeStarted_     = false;
+    bool                    released_         = false;
+    int                     initializeCalls_  = 0;
+    HRESULT                 initializeResult_ = S_OK;
 };
 
 #endif
@@ -381,6 +390,19 @@ TEST(StackCapturerTest, NativeFrameCancellationIsRecordedByTheSharedCallbackCont
     EXPECT_TRUE(context.cancellationRequested);
 }
 
+TEST(StackCapturerTest, ReadinessTracksRuntimeCaptureDependency)
+{
+    auto  runtime    = std::make_unique<CallbackRuntimeCapture>();
+    auto* runtimePtr = runtime.get();
+    auto  capturer   = ProfilerStackCapture::CreateStackCapturer(nullptr, std::move(runtime));
+
+    ASSERT_NE(nullptr, capturer);
+    EXPECT_TRUE(capturer->IsReady());
+
+    runtimePtr->ready = false;
+    EXPECT_FALSE(capturer->IsReady());
+}
+
 TEST(StackCapturerTest, RequestShutdownClosesFutureCaptureAdmission)
 {
     auto  runtime    = std::make_unique<CallbackRuntimeCapture>();
@@ -461,6 +483,16 @@ TEST(StackWalkGuardTest, TimedOutScheduledRequestIsNotRevivedByWorker)
     EXPECT_EQ(ProfilerStackCapture::StackWalkGuard::ProbeResult::Failed, guard.AwaitProbeResult());
     EXPECT_EQ(ProfilerStackCapture::StackWalkGuard::ProbeResult::Failed,
               ProfilerStackCapture::StackWalkGuardTestPeer::RunWorkerUntilIdle(guard));
+}
+
+TEST(StackWalkGuardTest, InitializationFailureIsReportedAndRejectsProbes)
+{
+    BlockingProfilerApi                  profilerApi(E_FAIL);
+    ProfilerStackCapture::StackWalkGuard guard(&profilerApi, std::chrono::seconds(1), std::chrono::seconds(1));
+
+    EXPECT_FALSE(guard.WaitForInitialization());
+    EXPECT_FALSE(guard.IsIdle());
+    EXPECT_FALSE(guard.ScheduleDssProbe());
 }
 
 #if defined(_M_AMD64)

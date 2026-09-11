@@ -51,6 +51,11 @@ public:
         return capturer_->CaptureStacks(threads, &context);
     }
 
+    bool IsReady() const noexcept
+    {
+        return capturer_ != nullptr && capturer_->IsReady();
+    }
+
     void RequestShutdown() noexcept override
     {
         if (capturer_ != nullptr)

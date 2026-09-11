@@ -38,6 +38,15 @@ HRESULT ClrRuntimeCapture::SuspendRuntime()
     return hr;
 }
 
+bool ClrRuntimeCapture::IsReady() noexcept
+{
+#if defined(_WIN32) && defined(_M_AMD64)
+    return stackWalkGuard_ != nullptr && stackWalkGuard_->WaitForInitialization();
+#else
+    return true;
+#endif
+}
+
 void ClrRuntimeCapture::ResumeRuntime() noexcept
 {
     if (profilerApi_ == nullptr)

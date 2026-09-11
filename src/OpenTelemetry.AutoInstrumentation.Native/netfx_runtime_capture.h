@@ -90,6 +90,7 @@ public:
     void    ResumeRuntime() noexcept override {}
 
     HRESULT CaptureStack(ThreadID managedThreadId, StackSnapshotCallbackContext* clientData) override;
+    bool    IsReady() noexcept override;
 
     void OnThreadDestroyed(ThreadID threadId) override;
     void OnThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[]) override;
