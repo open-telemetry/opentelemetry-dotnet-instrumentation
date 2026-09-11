@@ -41,7 +41,7 @@ runs:
 
     - name: Setup .NET
       if: inputs.environment-type == 'host'
-      uses: ./.github/actions/setup-dotnet
+      uses: $/.github/actions/setup-dotnet
 
     - name: Set up Docker Buildx
       if: inputs.environment-type == 'container'

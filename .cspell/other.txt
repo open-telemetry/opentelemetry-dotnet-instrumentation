@@ -28,6 +28,7 @@ ifdef
 ILOGGER
 inetsrv
 JIT
+LASTEXITCODE
 LINQ
 longdate
 MASSTRANSIT

@@ -12,12 +12,25 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Added a native continuous-profiler runtime configuration contract with
   process-wide startup precedence and lazy CPU, selective-thread, and allocation
   sampler lifecycle management.
+- GitHub immutable release and artifact attestation verification for the
+  PowerShell installation and update commands and the shell installer. Use
+  `-SkipReleaseVerification` with `Install-OpenTelemetryCore` or
+  `Update-OpenTelemetryCore`, or set `SKIP_RELEASE_VERIFICATION=true` for the
+  shell installer, to explicitly skip verification.
 - Experimental Npgsql trace context propagation to PostgreSQL through
   `application_name`, enabled with `OTEL_DOTNET_AUTO_NPGSQL_CONTEXT_PROPAGATION`.
+- Configuration for the maximum number and aggregate payload size of pending
+  OpAMP custom messages.
 - Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
   traces instrumentation for versions `3.1.x`+ for .NET only.
 
 ### Changed
+
+- [BREAKING] The PowerShell installation and update commands and the shell
+  installer now require the [GitHub CLI](https://cli.github.com/) by default.
+- [BREAKING] `OpenTelemetry.OpAmp.Client` now queues outgoing messages. Its
+  `Send*Async` methods were replaced by corresponding `Send*` methods. OpAMP
+  plugins can call `FlushAsync` to wait until the queue is empty.
 
 #### Dependency updates
 
@@ -33,6 +46,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.SqlClient` from `1.16.0` to `1.18.0`,
   - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.16.0-beta.1` to `1.18.0-beta.1`,
   - `OpenTelemetry.Instrumentation.Wcf` from `1.16.0-beta.1` to `1.18.0-beta.1`,
+  - `OpenTelemetry.OpAmp.Client` from `0.6.0-alpha.1` to `0.7.0-alpha.1`,
   - `OpenTelemetry.Resources.Azure` from `1.15.1-beta.1` to `1.18.0-beta.1`,
   - `OpenTelemetry.Resources.Container` from `1.15.1-beta.1` to `1.18.0-beta.1`,
   - `OpenTelemetry.Resources.Host` from `1.15.1-beta.1` to `1.18.0-beta.1`,
@@ -44,27 +58,27 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
     from `1.16.0-beta.1` to `1.18.0-beta.1`.
 - .NET Framework only, following packages updated
-  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.9` to `10.0.11`,
-  - `Microsoft.Extensions.Configuration` from `10.0.9` to `10.0.11`,
-  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.9` to `10.0.11`,
-  - `Microsoft.Extensions.Configuration.Binder` from `10.0.9` to `10.0.11`,
-  - `Microsoft.Extensions.Configuration.EnvironmentVariables` from `10.0.9` to `10.0.11`,
-  - `Microsoft.Extensions.DependencyInjection` from `10.0.9` to `10.0.11`,
+  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Configuration` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Configuration.EnvironmentVariables` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.9` to `10.0.12`,
   - `Microsoft.Extensions.DependencyInjection.Abstractions`
-    from `10.0.9` to `10.0.11`,
-  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.9` to `10.0.11`,
-  - `Microsoft.Extensions.Logging` from `10.0.9` to `10.0.11`,
-  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.9` to `10.0.11`,
-  - `Microsoft.Extensions.Logging.Configuration` from `10.0.9` to `10.0.11`,
-  - `Microsoft.Extensions.Options` from `10.0.9` to `10.0.11`,
+    from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Logging` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Options` from `10.0.9` to `10.0.12`,
   - `Microsoft.Extensions.Options.ConfigurationExtensions`
-    from `10.0.9` to `10.0.11`,
-  - `Microsoft.Extensions.Primitives` from `10.0.9` to `10.0.11`,
+    from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Primitives` from `10.0.9` to `10.0.12`,
   - `OpenTelemetry.Instrumentation.AspNet` from `1.16.0` to `1.18.0`,
-  - `System.Diagnostics.DiagnosticSource` from `10.0.9` to `10.0.11`,
-  - `System.IO.Pipelines` from `10.0.9` to `10.0.11`,
-  - `System.Text.Encodings.Web` from `10.0.9` to `10.0.11`,
-  - `System.Text.Json` from `10.0.9` to `10.0.11`.
+  - `System.Diagnostics.DiagnosticSource` from `10.0.9` to `10.0.12`,
+  - `System.IO.Pipelines` from `10.0.9` to `10.0.12`,
+  - `System.Text.Encodings.Web` from `10.0.9` to `10.0.12`,
+  - `System.Text.Json` from `10.0.9` to `10.0.12`.
 
 ### Deprecated
 
@@ -72,6 +86,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Allow an empty `opamp/development` section in file-based configuration to
+  enable the OpAMP client with default settings.
 - Prevent the shell installer from using a predictable path for temporary
   downloads.
 - Use the standard `service.namespace` resource attribute instead of `service.namespace.name`

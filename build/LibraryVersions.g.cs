@@ -26,7 +26,7 @@ public static partial class LibraryVersion
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("9.5.1"),
+                new("9.5.2"),
             ]
         },
         {
@@ -36,7 +36,7 @@ public static partial class LibraryVersion
                 new("8.0.23"),
                 new("9.0.12"),
                 new("10.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("10.0.11", supportedFrameworks: [ "net10.0" ]),
+                new("10.0.12", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -147,14 +147,14 @@ public static partial class LibraryVersion
             "TestApplication.OracleMda.NetFramework",
             [
                 new("23.5.1", supportedFrameworks: [ "net472" ]),
-                new("23.26.300", supportedFrameworks: [ "net472" ]),
+                new("23.26.301", supportedFrameworks: [ "net472" ]),
             ]
         },
         {
             "TestApplication.OracleMda.Core",
             [
                 new("23.5.1"),
-                new("23.26.300"),
+                new("23.26.301"),
             ]
         },
         {
@@ -179,7 +179,7 @@ public static partial class LibraryVersion
                 new("8.0.0"),
                 new("9.0.0"),
                 new("10.0.0"),
-                new("10.0.11"),
+                new("10.0.12"),
             ]
         },
         {
@@ -216,7 +216,7 @@ public static partial class LibraryVersion
                 new("9.0.0", supportedFrameworks: [ "net9.0" ]),
                 new("6.0.0", supportedFrameworks: [ "net462" ]),
                 new("10.0.0", supportedFrameworks: [ "net8.0", "net9.0" ]),
-                new("10.0.11", supportedFrameworks: [ "net462", "net10.0" ]),
+                new("10.0.12", supportedFrameworks: [ "net462", "net10.0" ]),
             ]
         },
         {

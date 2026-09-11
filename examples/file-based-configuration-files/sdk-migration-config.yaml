@@ -11,8 +11,8 @@
 # when interpreting config files. For example, if "fail_fast: ${OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED:-false}"
 # is replaced with "fail_fast: false", then setting the env var OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED will have
 # no effect. See https://opentelemetry.io/docs/specs/otel/configuration/data-model/
-# for more information. The following spec defined env vars are NOT referenced and are thus
-# ignored:
+# for more information. The following environment variables are NOT referenced and are
+# thus ignored:
 #
 # - OTEL_TRACES_SAMPLER
 # - OTEL_TRACES_SAMPLER_ARG
@@ -22,6 +22,8 @@
 # - OTEL_EXPORTER_OTLP_PROTOCOL, OTEL_EXPORTER_OTLP_{SIGNAL}_PROTOCOL
 # - OTEL_EXPORTER_OTLP_ENDPOINT
 # - OTEL_EXPORTER_OTLP_TIMEOUT
+# - OTEL_DOTNET_AUTO_OPAMP_ENABLED, OTEL_DOTNET_AUTO_OPAMP_SERVER_URL,
+#   OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGES, OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGE_BYTES
 # - OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED, OTEL_DOTNET_AUTO_{DETECTOR}_RESOURCE_DETECTOR_ENABLED,
 # - OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED, OTEL_DOTNET_AUTO_{SIGNAL}_INSTRUMENTATION_ENABLED, OTEL_DOTNET_AUTO_{SIGNAL}_{INSTRUMENTATION}_INSTRUMENTATION_ENABLED
 #
@@ -174,6 +176,20 @@ plugins/development:
   # More information about plugins can be found at https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/plugins.md
   plugins_list: ${OTEL_DOTNET_AUTO_PLUGINS}
 
+# OpAMP Configuration
+# Unlike environment variable configuration, the presence of this section enables the OpAMP client.
+# Uncomment the section when OTEL_DOTNET_AUTO_OPAMP_ENABLED was enabled in the environment variable configuration.
+# opamp/development:
+#   # Configure the server endpoint.
+#   # If omitted or null, https://localhost:4320/v1/opamp is used.
+#   server_url: ${OTEL_DOTNET_AUTO_OPAMP_SERVER_URL:-https://localhost:4320/v1/opamp}
+#   # Configure the maximum number of custom messages that may wait to be sent.
+#   # The value must be positive. If omitted or null, 2048 is used.
+#   max_pending_custom_messages: ${OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGES:-2048}
+#   # Configure the maximum aggregate size, in bytes, of pending custom message payloads.
+#   # The value must be positive. If omitted or null, 67108864 (64 MiB) is used.
+#   max_pending_custom_message_bytes: ${OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGE_BYTES:-67108864}
+
 # Instrumentation Configuration
 instrumentation/development:
   # If no instrumentation is specified, none will be added automatically.
@@ -258,4 +274,3 @@ instrumentation/development:
       ilogger:             # Microsoft.Extensions.Logging
       log4net:             # Log4Net
       nlog:                # NLog
-        
