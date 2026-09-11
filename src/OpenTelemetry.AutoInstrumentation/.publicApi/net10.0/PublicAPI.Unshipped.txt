@@ -1,3 +1,5 @@
 OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlConnectorEndUserActionTraceContextPropagationIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCopyTraceContextPropagationIntegration
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.EndAsyncMethod<TIntegration, TTarget, TReturn>(TTarget instance, TReturn returnValue, System.Exception! exception, in OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<TReturn?>
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.EndAsyncMethod<TIntegration, TTarget>(TTarget instance, System.Exception! exception, in OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn

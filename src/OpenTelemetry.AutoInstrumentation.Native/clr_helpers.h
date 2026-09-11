@@ -23,6 +23,10 @@ class ModuleMetadata;
 const size_t kNameMaxSize = 1024;
 const ULONG kEnumeratorMax = 256;
 
+// MethodImplOptions.Async was added in .NET 11. Keep the value local until the
+// vendored CoreCLR headers expose miAsync.
+constexpr DWORD kRuntimeAsyncMethodImplFlag = 0x2000;
+
 const auto SystemBoolean = WStr("System.Boolean");
 const auto SystemChar = WStr("System.Char");
 const auto SystemByte = WStr("System.Byte");
@@ -523,15 +527,16 @@ struct FunctionInfo
     const MethodSignature signature;
     const MethodSignature function_spec_signature;
     const mdToken method_def_id;
+    const DWORD method_impl_flags;
     FunctionMethodSignature method_signature;
 
-    FunctionInfo() : id(0), name(EmptyWStr), type({}), is_generic(false), method_def_id(0), method_signature({})
+    FunctionInfo() : id(0), name(EmptyWStr), type({}), is_generic(false), method_def_id(0), method_impl_flags(0), method_signature({})
     {
     }
 
     FunctionInfo(mdToken id, WSTRING name, TypeInfo type, MethodSignature signature,
                  MethodSignature function_spec_signature, mdToken method_def_id,
-                 FunctionMethodSignature method_signature) :
+                 FunctionMethodSignature method_signature, DWORD method_impl_flags = 0) :
         id(id),
         name(name),
         type(type),
@@ -539,18 +544,20 @@ struct FunctionInfo
         signature(signature),
         function_spec_signature(function_spec_signature),
         method_def_id(method_def_id),
+        method_impl_flags(method_impl_flags),
         method_signature(method_signature)
     {
     }
 
     FunctionInfo(mdToken id, WSTRING name, TypeInfo type, MethodSignature signature,
-                 FunctionMethodSignature method_signature) :
+                 FunctionMethodSignature method_signature, DWORD method_impl_flags = 0) :
         id(id),
         name(name),
         type(type),
         is_generic(false),
         signature(signature),
         method_def_id(0),
+        method_impl_flags(method_impl_flags),
         method_signature(method_signature)
     {
     }
@@ -558,6 +565,11 @@ struct FunctionInfo
     bool IsValid() const
     {
         return id != 0;
+    }
+
+    bool IsRuntimeAsync() const
+    {
+        return (method_impl_flags & kRuntimeAsyncMethodImplFlag) != 0;
     }
 };
 
@@ -617,6 +629,10 @@ AssemblyMetadata GetReferencedAssemblyMetadata(const ComPtr<IMetaDataAssemblyImp
                                                const mdAssemblyRef& assembly_ref);
 
 FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdToken& token);
+
+bool TryGetRuntimeAsyncResultType(const TypeSignature& async_return_type,
+                                  const ComPtr<IMetaDataImport2>& metadata_import,
+                                  TypeSignature* result_type);
 
 ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id);
 
