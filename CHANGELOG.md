@@ -83,6 +83,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Handle YAML null values consistently in file-based configuration and
+  distinguish them from quoted empty strings.
 - Allow an empty `opamp/development` section in file-based configuration to
   enable the OpAMP client with default settings.
 - Prevent the shell installer from using a predictable path for temporary
