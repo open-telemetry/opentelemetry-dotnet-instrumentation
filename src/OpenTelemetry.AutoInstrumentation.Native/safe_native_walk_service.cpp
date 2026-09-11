@@ -52,7 +52,7 @@ HRESULT SafeNativeWalkService::ContinueFromProbedFrame0(ThreadGuard&            
     clientData->frame          = frame0;
     clientData->frame.threadId = managedThreadId;
 
-    HRESULT cbHr = clientData->callback(clientData);
+    HRESULT cbHr = clientData->InvokeCallback();
     if (cbHr == S_FALSE)
         return S_OK; // caller requested early stop after frame-0
     if (FAILED(cbHr))
@@ -157,7 +157,7 @@ NativeWalkResult SafeNativeWalkService::WalkNativeUntilManaged(const CONTEXT&   
             clientData->frame.context            = nullptr;
             clientData->frame.isUnmanagedFrame   = true;
 
-            HRESULT cbResult = clientData->callback(clientData);
+            HRESULT cbResult = clientData->InvokeCallback();
             if (cbResult != S_OK)
             {
                 // S_FALSE: caller requested early stop - clean termination

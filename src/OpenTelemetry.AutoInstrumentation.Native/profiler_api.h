@@ -22,6 +22,17 @@ struct StackSnapshotCallbackContext
 {
     StackFrameCallback                   callback;
     continuous_profiler::CapturedFrame   frame;
+    bool                                 cancellationRequested = false;
+
+    HRESULT InvokeCallback()
+    {
+        const auto result = callback(this);
+        if (result == S_FALSE)
+        {
+            cancellationRequested = true;
+        }
+        return result;
+    }
 };
 
 inline HRESULT __stdcall StackSnapshotCallbackDefault(
@@ -36,7 +47,7 @@ inline HRESULT __stdcall StackSnapshotCallbackDefault(
     callbackData->frame.isUnmanagedFrame =
         (funcId == 0 && ip != 0);
 
-    return callbackData->callback(callbackData);
+    return callbackData->InvokeCallback();
 }
 
 class IProfilerApi
@@ -60,6 +71,7 @@ public:
 
     virtual HRESULT GetThreadInfo(ThreadID managedThreadId, DWORD* osThreadId) = 0;
     virtual HRESULT GetFunctionFromIP(LPCBYTE ip, FunctionID* pFunctionId)     = 0;
+    virtual HRESULT InitializeCurrentThread()                                 = 0;
     virtual HRESULT SuspendRuntime()  { return E_NOTIMPL; }
     virtual HRESULT ResumeRuntime()   { return E_NOTIMPL; }
 };
@@ -78,6 +90,7 @@ public:
                             BYTE* context, ULONG contextSize) override;
     HRESULT GetThreadInfo(ThreadID managedThreadId, DWORD* osThreadId) override;
     HRESULT GetFunctionFromIP(LPCBYTE ip, FunctionID* pFunctionId) override;
+    HRESULT InitializeCurrentThread() override;
     HRESULT SuspendRuntime() override;
     HRESULT ResumeRuntime() override;
 
