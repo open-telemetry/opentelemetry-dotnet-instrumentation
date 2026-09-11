@@ -39,11 +39,11 @@ Interop callers must initialize
 `sizeof(RuntimeSamplerConfigurationV1)` (16 bytes) and
 `RuntimeSamplerStateV1.structureSize` to `sizeof(RuntimeSamplerStateV1)` (24
 bytes). Each apply call makes one synchronous activation attempt. Native code
-does not schedule retries, impose a retry budget, or permanently disable a
-failed feature; retry cadence and stale-request suppression remain managed
-control-plane responsibilities. A failed attempt returns `ActivationFailed`,
-preserves the last committed state, and can be retried by a later explicit
-apply.
+does not schedule retries or impose a retry budget. If any fallible activation
+step fails, the service latches a terminal `ActivationFailed` state, preserves
+the last committed state, and returns `ActivationFailed` for every subsequent
+apply before shutdown without changing logical state or retrying producer
+activation.
 
 Zero disables the corresponding CPU, selective-thread, or allocation sampling
 feature. The profiler owns one lightweight `RuntimeSamplerService` controller
@@ -53,11 +53,12 @@ sampling machinery: no stack walker, worker thread, allocation controller,
 EventPipe session, or additional CLR event capability.
 The first enabling attempt creates and publishes stable sampler objects before
 enabling CLR callbacks, but does not commit the candidate until all fallible
-activation steps succeed. Thread activation includes an explicit startup
-handshake: native Apply does not report success until the sampling worker has
-successfully called `InitializeCurrentThread`. If a later activation step fails,
-already prepared objects retain closed producer admission and are reused by the
-next explicit attempt. After successful activation,
+activation steps succeed. Thread activation includes explicit startup
+handshakes: the stack-walk guard and sampling worker must initialize their
+profiler API context before native Apply can report success. If any later
+activation step fails, the service latches `ActivationFailed`, preserves the
+last committed state, and subsequent applies fail fast; the partial producer
+chain is not retried. After successful activation,
 disabling thread sampling parks the existing worker and later re-enabling it
 reuses the same worker. Disabling allocation sampling closes its atomic
 admission gate and commits the disabled state before stopping the EventPipe

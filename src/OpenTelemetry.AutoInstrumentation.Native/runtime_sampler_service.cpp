@@ -216,8 +216,8 @@ ContinuousProfiler* RuntimeSamplerService::EnsureSamplerCreated() noexcept
         // Activation follows the dependency DAG: the stack-walk guard must
         // initialize its profiler API context before the sampling worker is
         // created and before the configuration can be committed. A failed
-        // guard is terminal for this instance; let the locals tear it down so
-        // a later activation attempt creates a fresh dependency chain.
+        // guard prevents activation; the service latches the failure and never
+        // retries this dependency chain.
         if (!stackWalker->IsReady())
         {
             trace::Logger::Warn("RuntimeSamplerService: stack-walk guard initialization failed.");

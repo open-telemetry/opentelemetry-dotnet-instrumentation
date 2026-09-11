@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "profiler_api.h"
+#include "com_ptr.h"
 #include <corhlpr.h>
 #include <corprof.h>
 
@@ -12,9 +13,9 @@ namespace ProfilerStackCapture
 
 struct ProfilerApiAdapter::Impl
 {
-    ICorProfilerInfo2*  profilerInfo;
-    ICorProfilerInfo4*  profilerInfo4  = nullptr;
-    ICorProfilerInfo10* profilerInfo10 = nullptr;
+    ICorProfilerInfo2*         profilerInfo;
+    ComPtr<ICorProfilerInfo4>  profilerInfo4;
+    ComPtr<ICorProfilerInfo10> profilerInfo10;
 
     explicit Impl(ICorProfilerInfo2* info) : profilerInfo(info)
     {
@@ -23,22 +24,10 @@ struct ProfilerApiAdapter::Impl
         // SuspendRuntime/ResumeRuntime will return E_NOTIMPL.
         if (profilerInfo)
         {
-            profilerInfo->QueryInterface(__uuidof(ICorProfilerInfo4), reinterpret_cast<void**>(&profilerInfo4));
-            profilerInfo->QueryInterface(__uuidof(ICorProfilerInfo10), reinterpret_cast<void**>(&profilerInfo10));
-        }
-    }
-
-    ~Impl()
-    {
-        if (profilerInfo4)
-        {
-            profilerInfo4->Release();
-            profilerInfo4 = nullptr;
-        }
-        if (profilerInfo10)
-        {
-            profilerInfo10->Release();
-            profilerInfo10 = nullptr;
+            profilerInfo->QueryInterface(__uuidof(ICorProfilerInfo4),
+                                         reinterpret_cast<void**>(profilerInfo4.GetAddressOf()));
+            profilerInfo->QueryInterface(__uuidof(ICorProfilerInfo10),
+                                         reinterpret_cast<void**>(profilerInfo10.GetAddressOf()));
         }
     }
 

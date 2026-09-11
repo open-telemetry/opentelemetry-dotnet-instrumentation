@@ -1569,7 +1569,8 @@ bool ContinuousProfiler::StartThreadSampling() noexcept
     {
         // Apply must not report activation until the CLR has accepted this native worker. Start the thread in the
         // quiescent state, wait for InitializeCurrentThread, and publish configuration only after this handshake
-        // succeeds. A failed handshake leaves no running worker and allows a later Apply to retry activation.
+        // succeeds. A failed handshake leaves no running worker; RuntimeSamplerService latches activation failure
+        // and rejects later Apply calls for this service instance.
         std::promise<HRESULT> initializationResult;
         auto                  initialized = initializationResult.get_future();
         thread_sampling_thread_           = std::make_unique<std::thread>(SamplingThreadMain, this, GetShutdownToken(),
