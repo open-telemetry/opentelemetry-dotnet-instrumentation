@@ -45,11 +45,27 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
         return RuntimeSamplerApplyOutcome{result, {authority_, committedConfiguration_}};
     };
 
-    const auto failActivation = [this, &lock, &outcome]()
+    if (shutdownStarted_)
     {
+        return outcome(RuntimeSamplerApplyResult::ShuttingDown);
+    }
+
+    // A failed first activation has no committed producer to preserve and can tear down the sampler. An incremental
+    // activation must keep every already committed producer running; its candidate-only resources remain quiescent
+    // until a later Apply retries the candidate.
+    const bool hasCommittedProducer = committedConfiguration_.AnyFeatureEnabled();
+    const auto failActivation       = [this, &lock, &outcome, hasCommittedProducer]()
+    {
+        const auto failedOutcome = outcome(RuntimeSamplerApplyResult::ActivationFailed);
+        if (hasCommittedProducer)
+        {
+            // Candidate-local failure: preserve the previously committed producer branches and allow a later Apply
+            // to retry the candidate. Any candidate producer remains quiescent because publication has not occurred.
+            return failedOutcome;
+        }
+
         activationFailed_         = true;
         auto* const failedSampler = sampler_.get();
-        const auto  failedOutcome = outcome(RuntimeSamplerApplyResult::ActivationFailed);
 
         // Shutdown may wait for worker dependencies and must not hold the
         // configuration mutex while doing so. Keep the failed infrastructure
@@ -62,13 +78,8 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
         return failedOutcome;
     };
 
-    if (shutdownStarted_)
-    {
-        return outcome(RuntimeSamplerApplyResult::ShuttingDown);
-    }
-
-    // Activation is monotonic for the lifetime of the service. Once a dependency in the activation DAG has
-    // failed, do not allow a later snapshot to alter logical state or attempt to reuse a partial dependency chain.
+    // A failed first activation is terminal for the service because its dependency chain never became committed.
+    // Incremental candidate failures are handled locally below and do not poison already committed branches.
     if (activationFailed_)
     {
         return outcome(RuntimeSamplerApplyResult::ActivationFailed);
