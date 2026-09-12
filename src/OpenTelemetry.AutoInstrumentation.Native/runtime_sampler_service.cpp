@@ -139,6 +139,16 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
         if (configuration.AllocationEnabled() && !committedConfiguration_.AllocationEnabled() &&
             !sampler->StartAllocationSamplingSession())
         {
+            if (sampler->IsAllocationSamplingPermanentlyDisabled())
+            {
+                // Allocation-session failure is terminal only for that producer branch. Reject this snapshot while
+                // preserving the last committed configuration and any independently running thread sampler.
+                trace::Logger::Warn(
+                    "RuntimeSamplerService: allocation sampling is permanently disabled after an EventPipe session "
+                    "stop failure.");
+                return outcome(RuntimeSamplerApplyResult::ActivationFailed);
+            }
+
             trace::Logger::Warn("RuntimeSamplerService: failed to start the allocation-sampling EventPipe session.");
             return failActivation();
         }
@@ -161,8 +171,12 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
 
         if (!configuration.AllocationEnabled())
         {
-            // Cleanup is best effort. A failed stop retains the session handle with admission closed; any later
-            // non-identical committed configuration retries the stop, while an identical snapshot remains NoChange.
+            // Cleanup is best effort. A failed stop permanently disables the allocation branch and retains the
+            // ambiguous session handle only as evidence; no later path retries or reuses it.
+            // configurationMutex_ is intentionally still held: it serializes this session transition against Apply
+            // and service Shutdown. EventPipeStopSession may synchronously drain EventPipeEventDelivered; the
+            // producer side--including CLR callbacks, periodic sampling ticks, and guard-worker paths--must never
+            // acquire or re-enter configurationMutex_.
             (void)sampler->StopAllocationSamplingSession();
         }
     }
@@ -364,18 +378,14 @@ void RuntimeSamplerService::Shutdown() noexcept
     ContinuousProfiler* sampler = nullptr;
     {
         std::lock_guard<std::mutex> lock(configurationMutex_);
-        if (shutdownStarted_)
-        {
-            return;
-        }
         shutdownStarted_ = true;
         sampler          = sampler_.get();
     }
 
     if (sampler != nullptr)
     {
-        // The blocking phase runs without the configuration lock. ContinuousProfiler first broadcasts terminal
-        // cancellation to allocation DSS, periodic sampling, and the walk guard, then drains them in dependency order.
+        // The blocking phase runs without the configuration lock. ContinuousProfiler makes the first caller own
+        // teardown and makes concurrent or repeated callers wait for that teardown to complete.
         sampler->Shutdown();
     }
 }
@@ -455,6 +465,9 @@ void RuntimeSamplerService::OnAllocationTick(const ULONG dataLength, const LPCBY
 {
     try
     {
+        // This callback may be synchronously drained by StopAllocationSamplingSession while ApplyConfigurationV1
+        // holds configurationMutex_. Like every producer callback/worker path, keep it free of that mutex and of
+        // calls that re-enter the service's configuration transition path.
         auto* const sampler = sampler_.get();
         if (sampler == nullptr)
         {

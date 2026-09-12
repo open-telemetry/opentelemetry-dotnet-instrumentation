@@ -1602,6 +1602,10 @@ void ContinuousProfiler::Shutdown()
 {
     if (shutdown_requested_.exchange(true, std::memory_order_acq_rel))
     {
+        // Shutdown is terminal, but the caller that loses the admission race must still wait for the owner to finish
+        // teardown. Returning here would allow CorProfiler::Shutdown to return while the owner is still using CLR APIs.
+        std::unique_lock<std::mutex> lock(thread_sampling_configuration_mutex_);
+        thread_sampling_configuration_cv_.wait(lock, [this] { return shutdown_completed_; });
         return;
     }
 
@@ -1657,6 +1661,12 @@ void ContinuousProfiler::Shutdown()
         // worker can now be joined. Shutdown returns only after no owned thread can make another profiler API call.
         stackWalker_->WaitForShutdown();
     }
+
+    {
+        std::lock_guard<std::mutex> lock(thread_sampling_configuration_mutex_);
+        shutdown_completed_ = true;
+    }
+    thread_sampling_configuration_cv_.notify_all();
 }
 
 bool ContinuousProfiler::IsShutdownRequested() const noexcept
@@ -1966,6 +1976,11 @@ void ContinuousProfiler::AllocationTick(const ShutdownToken& shutdownToken, ULON
 
 bool ContinuousProfiler::StartAllocationSamplingSession() noexcept
 {
+    if (allocation_sampling_session_state_ == AllocationSamplingSessionState::PermanentlyDisabled)
+    {
+        return false;
+    }
+
     if (allocationSubSampler == nullptr)
     {
         try
@@ -1980,7 +1995,7 @@ bool ContinuousProfiler::StartAllocationSamplingSession() noexcept
         }
     }
 
-    if (session_ != 0)
+    if (allocation_sampling_session_state_ == AllocationSamplingSessionState::Active)
     {
         return true;
     }
@@ -1993,9 +2008,15 @@ bool ContinuousProfiler::StartAllocationSamplingSession() noexcept
         return false;
     }
 
-    session_ = candidateSession;
+    session_                           = candidateSession;
+    allocation_sampling_session_state_ = AllocationSamplingSessionState::Active;
     trace::Logger::Info("ContinuousProfiler::MemoryProfiling started.");
     return true;
+}
+
+bool ContinuousProfiler::IsAllocationSamplingPermanentlyDisabled() const noexcept
+{
+    return allocation_sampling_session_state_ == AllocationSamplingSessionState::PermanentlyDisabled;
 }
 
 void ContinuousProfiler::UpdateAllocationSamplingTarget(const unsigned int maxMemorySamplesPerMinute) noexcept
@@ -2008,7 +2029,17 @@ void ContinuousProfiler::UpdateAllocationSamplingTarget(const unsigned int maxMe
 
 bool ContinuousProfiler::StopAllocationSamplingSession() noexcept
 {
-    if (session_ == 0)
+    // Make the allocation branch logically disabled before asking the CLR to stop its physical producer. Current
+    // service callers already do this before committing a disabled snapshot or beginning terminal teardown; keeping
+    // the invariant here prevents a future caller from leaving publication enabled after an ambiguous stop failure.
+    UpdateAllocationSamplingTarget(0);
+
+    if (allocation_sampling_session_state_ == AllocationSamplingSessionState::PermanentlyDisabled)
+    {
+        return false;
+    }
+
+    if (allocation_sampling_session_state_ == AllocationSamplingSessionState::None)
     {
         return true;
     }
@@ -2020,13 +2051,17 @@ bool ContinuousProfiler::StopAllocationSamplingSession() noexcept
     const HRESULT hr = allocationSamplingSessionProvider_.StopAllocationSamplingSession(session_);
     if (FAILED(hr))
     {
+        // The CLR may have stopped the session despite returning failure. Preserve the handle only as evidence of
+        // the ambiguous outcome; no subsequent path may start, reuse, or stop it again.
+        allocation_sampling_session_state_ = AllocationSamplingSessionState::PermanentlyDisabled;
         trace::Logger::Warn(
-            "Allocation sampling admission is closed, but its EventPipe session could not be stopped; residual "
-            "EventPipe overhead may remain. HRESULT=0x",
+            "Allocation sampling admission is permanently closed because its EventPipe session stop failed; "
+            "residual EventPipe overhead may remain. HRESULT=0x",
             std::setfill('0'), std::setw(8), std::hex, hr);
         return false;
     }
-    session_ = 0;
+    session_                           = 0;
+    allocation_sampling_session_state_ = AllocationSamplingSessionState::None;
 
     trace::Logger::Info("ContinuousProfiler allocation sampling session stopped.");
     return true;

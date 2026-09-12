@@ -54,20 +54,22 @@ public:
 private:
     ContinuousProfiler* EnsureSamplerCreated() noexcept;
     bool                EnsureRequiredClrEventsEnabled() noexcept;
-    bool EnsureSelectiveSamplingBuffersPrepared() noexcept;
-    void PublishCommittedConfiguration(const RuntimeSamplerConfigurationV1& previousConfiguration,
-                                       const RuntimeSamplerConfigurationV1& configuration) noexcept;
+    bool                EnsureSelectiveSamplingBuffersPrepared() noexcept;
+    void                PublishCommittedConfiguration(const RuntimeSamplerConfigurationV1& previousConfiguration,
+                                                      const RuntimeSamplerConfigurationV1& configuration) noexcept;
 
-    ICorProfilerInfo7*                                    info7_   = nullptr;
-    ICorProfilerInfo12*                                   info12_  = nullptr;
-    RuntimeType                                           runtime_ = RuntimeType::Unknown;
+    ICorProfilerInfo7*  info7_   = nullptr;
+    ICorProfilerInfo12* info12_  = nullptr;
+    RuntimeType         runtime_ = RuntimeType::Unknown;
     // Dependencies are declared before their consumer so reverse member destruction follows the service DAG:
     // sampler -> stack walker -> allocation-session provider.
     std::unique_ptr<ClrAllocationSamplingSessionProvider> allocationSamplingSessionProvider_;
     std::unique_ptr<StackWalkerImpl>                      stackWalker_;
     std::unique_ptr<ContinuousProfiler>                   sampler_;
-    mutable std::mutex                                    configurationMutex_;
-    RuntimeSamplerAuthority                               authority_ = RuntimeSamplerAuthority::None;
+    // Control-plane/lifecycle gate only. CLR callbacks, periodic sampling ticks, and guard-worker paths must never
+    // acquire or re-enter this mutex: Apply may hold it while waiting for worker readiness or draining EventPipe.
+    mutable std::mutex            configurationMutex_;
+    RuntimeSamplerAuthority       authority_ = RuntimeSamplerAuthority::None;
     RuntimeSamplerConfigurationV1 committedConfiguration_{sizeof(RuntimeSamplerConfigurationV1), 0, 0, 0};
     bool                          shutdownStarted_                  = false;
     bool                          activationFailed_                 = false;

@@ -291,24 +291,32 @@ TEST(RuntimeSamplerServiceTest, FailedAllocationStartKeepsAdmissionClosedAndCanB
     EXPECT_EQ(0u, sampler->TargetPerCycle());
 }
 
-TEST(RuntimeSamplerServiceTest, FailedAllocationStopRetainsSessionForRetryAndAdmissionRemainsClosed)
+TEST(RuntimeSamplerServiceTest, FailedAllocationStopPermanentlyDisablesAllocationWithoutRetryingTheClrSession)
 {
     FakeAllocationSamplingSessionProvider sessions;
-    sessions.startResults = {S_OK};
-    sessions.sessions     = {303};
+    sessions.startResults = {S_OK, S_OK};
+    sessions.sessions     = {303, 304};
     sessions.stopResults  = {E_FAIL, S_OK};
     ContinuousProfiler profiler(sessions);
 
     ASSERT_TRUE(profiler.StartAllocationSamplingSession());
     profiler.UpdateAllocationSamplingTarget(100);
 
-    profiler.UpdateAllocationSamplingTarget(0);
     EXPECT_FALSE(profiler.StopAllocationSamplingSession());
+    EXPECT_TRUE(profiler.IsAllocationSamplingPermanentlyDisabled());
+    EXPECT_FALSE(profiler.IsShutdownRequested());
     EXPECT_EQ(0u, profiler.allocationSubSampler->TargetPerCycle());
     EXPECT_EQ((std::vector<EVENTPIPE_SESSION>{303}), sessions.stoppedSessions);
 
-    EXPECT_TRUE(profiler.StopAllocationSamplingSession());
-    EXPECT_EQ((std::vector<EVENTPIPE_SESSION>{303, 303}), sessions.stoppedSessions);
+    EXPECT_FALSE(profiler.StartAllocationSamplingSession());
+    EXPECT_FALSE(profiler.StopAllocationSamplingSession());
+    EXPECT_EQ(1u, sessions.startCalls);
+    EXPECT_EQ((std::vector<EVENTPIPE_SESSION>{303}), sessions.stoppedSessions);
+
+    profiler.StageThreadSamplingConfiguration(1000, 30);
+    const auto threadConfiguration = profiler.PullThreadSamplingConfiguration();
+    EXPECT_EQ(1000u, threadConfiguration.cpuSamplingIntervalMilliseconds);
+    EXPECT_EQ(30u, threadConfiguration.selectiveSamplingIntervalMilliseconds);
 }
 
 TEST(RuntimeSamplerServiceTest, ShutdownClosesAllocationAdmissionBeforeSynchronouslyStoppingEventPipe)

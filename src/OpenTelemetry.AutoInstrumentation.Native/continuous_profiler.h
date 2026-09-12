@@ -426,6 +426,7 @@ public:
     ShutdownToken               GetShutdownToken() const noexcept;
     static void                 PrepareSelectiveSamplingBuffers();
     bool                        StartAllocationSamplingSession() noexcept;
+    bool                        IsAllocationSamplingPermanentlyDisabled() const noexcept;
     void                        UpdateAllocationSamplingTarget(unsigned int maxMemorySamplesPerMinute) noexcept;
     bool                        StopAllocationSamplingSession() noexcept;
     void                        AllocationTick(const ShutdownToken& shutdownToken, ULONG dataLen, LPCBYTE data);
@@ -452,15 +453,27 @@ public:
     void                 PublishBuffer(uint32_t samplingInterval);
 
 private:
+    enum class AllocationSamplingSessionState
+    {
+        None,
+        Active,
+        PermanentlyDisabled
+    };
+
     std::atomic_bool shutdown_requested_{false};
+    // Guarded by thread_sampling_configuration_mutex_; shutdown losers wait for this terminal completion mark.
+    bool shutdown_completed_ = false;
     // Latest-value mailbox: commits overwrite desired state and increment its
     // version. The worker pulls a private snapshot at the next cohort boundary,
     // so intermediate updates may coalesce without losing the latest state.
-    mutable std::mutex                  thread_sampling_configuration_mutex_;
-    std::condition_variable             thread_sampling_configuration_cv_;
-    ThreadSamplingConfiguration         desired_thread_sampling_configuration_;
-    std::unique_ptr<std::thread>        thread_sampling_thread_;
-    EVENTPIPE_SESSION                   session_ = 0;
+    mutable std::mutex           thread_sampling_configuration_mutex_;
+    std::condition_variable      thread_sampling_configuration_cv_;
+    ThreadSamplingConfiguration  desired_thread_sampling_configuration_;
+    std::unique_ptr<std::thread> thread_sampling_thread_;
+    // RuntimeSamplerService serializes allocation session transitions with its configuration gate. After that gate
+    // admits terminal shutdown, only the ContinuousProfiler shutdown owner may mutate this state.
+    EVENTPIPE_SESSION                   session_                           = 0;
+    AllocationSamplingSessionState      allocation_sampling_session_state_ = AllocationSamplingSessionState::None;
     IAllocationSamplingSessionProvider& allocationSamplingSessionProvider_;
     IStackWalker*                       stackWalker_ = nullptr;
 };

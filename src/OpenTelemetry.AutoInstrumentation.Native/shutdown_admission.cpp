@@ -18,8 +18,8 @@ constexpr uint64_t    kShutdownAdmissionClosingBit = uint64_t{1} << 63;
 constexpr uint64_t    kShutdownAdmissionCountMask  = ~kShutdownAdmissionClosingBit;
 std::atomic<uint64_t> shutdown_admission_gate{0};
 
-// Cold-path wait primitives. Sampler callbacks and publications never take this mutex; they only perform the CAS
-// admission and notify the condition variable when the final admitted operation leaves.
+// Cold-path wait primitives. Sampler callbacks and publications use only the CAS admission in the normal case; the
+// mutex is acquired only to synchronize the terminal zero-count notification with a shutdown waiter.
 std::mutex              shutdown_mutex;
 std::condition_variable shutdown_cv;
 
@@ -45,8 +45,11 @@ bool TryEnterShutdownAdmission() noexcept
 void LeaveShutdownAdmission() noexcept
 {
     const auto previous = shutdown_admission_gate.fetch_sub(1, std::memory_order_release);
-    if ((previous & kShutdownAdmissionCountMask) == 1)
+    if ((previous & kShutdownAdmissionCountMask) == 1 && (previous & kShutdownAdmissionClosingBit) != 0)
     {
+        // Couple the terminal count transition to the wait mutex. This prevents a waiter from observing a nonzero
+        // count, missing this notification while it registers with the condition variable, and waiting forever.
+        std::lock_guard<std::mutex> lock(shutdown_mutex);
         shutdown_cv.notify_all();
     }
 }
@@ -64,7 +67,13 @@ ShutdownAdmission::~ShutdownAdmission() noexcept
 
 void CloseShutdownAdmissions() noexcept
 {
-    shutdown_admission_gate.fetch_or(kShutdownAdmissionClosingBit, std::memory_order_acq_rel);
+    const auto previous = shutdown_admission_gate.fetch_or(kShutdownAdmissionClosingBit, std::memory_order_acq_rel);
+    if ((previous & kShutdownAdmissionCountMask) == 0)
+    {
+        // No admitted operation remains, so publish the terminal transition under the same mutex used by the waiter.
+        std::lock_guard<std::mutex> lock(shutdown_mutex);
+        shutdown_cv.notify_all();
+    }
 }
 
 void WaitForShutdownAdmissions() noexcept

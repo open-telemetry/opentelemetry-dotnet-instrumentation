@@ -343,6 +343,26 @@ TEST(ContinuousProfilerCaptureTest, ShutdownWaitsForTheStackWalkerWorker)
     shutdown.get();
 }
 
+TEST(ContinuousProfilerCaptureTest, ConcurrentShutdownWaitsForTheTeardownOwner)
+{
+    ClrAllocationSamplingSessionProvider allocationSessions(nullptr);
+    ContinuousProfiler                   profiler(allocationSessions);
+    BlockingShutdownStackWalker          walker;
+    profiler.SetStackWalker(&walker);
+
+    auto firstShutdown = std::async(std::launch::async, [&profiler] { profiler.Shutdown(); });
+    ASSERT_TRUE(walker.WaitUntilShutdownWaitBegins());
+
+    auto secondShutdown = std::async(std::launch::async, [&profiler] { profiler.Shutdown(); });
+    EXPECT_EQ(std::future_status::timeout, secondShutdown.wait_for(std::chrono::milliseconds(20)));
+
+    walker.Release();
+    ASSERT_EQ(std::future_status::ready, firstShutdown.wait_for(std::chrono::seconds(1)));
+    ASSERT_EQ(std::future_status::ready, secondShutdown.wait_for(std::chrono::seconds(1)));
+    firstShutdown.get();
+    secondShutdown.get();
+}
+
 TEST(ContinuousProfilerCaptureTest, RuntimeAbortResultDiscardsThePartialAllocationStack)
 {
     ClrAllocationSamplingSessionProvider allocationSessions(nullptr);
