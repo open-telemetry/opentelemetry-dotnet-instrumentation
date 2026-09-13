@@ -1600,13 +1600,21 @@ bool ContinuousProfiler::StartThreadSampling() noexcept
 
 void ContinuousProfiler::Shutdown()
 {
-    if (shutdown_requested_.exchange(true, std::memory_order_acq_rel))
     {
-        // Shutdown is terminal, but the caller that loses the admission race must still wait for the owner to finish
-        // teardown. Returning here would allow CorProfiler::Shutdown to return while the owner is still using CLR APIs.
         std::unique_lock<std::mutex> lock(thread_sampling_configuration_mutex_);
-        thread_sampling_configuration_cv_.wait(lock, [this] { return shutdown_completed_; });
-        return;
+        if (shutdown_requested_.load(std::memory_order_acquire))
+        {
+            // Shutdown is terminal, but the caller that loses the admission race must still wait for the owner to
+            // finish teardown. Returning here would allow CorProfiler::Shutdown to return while the owner is still
+            // using CLR APIs.
+            thread_sampling_configuration_cv_.wait(lock, [this] { return shutdown_completed_; });
+            return;
+        }
+
+        // Admission closure and shutdown cancellation are separate DAG nodes. Close the gate first so every operation
+        // that can subsequently observe shutdown was either admitted before the terminal boundary or rejected by it.
+        continuous_profiler::CloseShutdownAdmissions();
+        shutdown_requested_.store(true, std::memory_order_release);
     }
 
     // Shutdown wait-for DAG:
@@ -1618,16 +1626,16 @@ void ContinuousProfiler::Shutdown()
     // the callback drain creates a deferred-release cycle back to this Shutdown call.
     //
     // Lock waits release their associated mutex while sleeping; joins wait for the owned thread to terminate. The
-    // required ordering is signal producers, drain EventPipe, join the sampling worker, drain managed callbacks, then
-    // join the StackWalkGuard dependency.
+    // required ordering is close admission, signal producers, drain EventPipe, join the sampling worker, drain managed
+    // callbacks, then join the StackWalkGuard dependency.
 
-    // Close callback and publication admission before invalidating the published pointer. An operation that already
-    // crossed the CAS gate remains counted and is drained below; a later operation cannot enter even if it observes
-    // the old pointer or an old producer configuration.
-    continuous_profiler::CloseShutdownAdmissions();
+    // An operation that crossed the CAS gate before closure remains counted and is drained below. A later operation
+    // cannot enter even if it observes the old pointer or an old producer configuration.
     profiler_info.store(nullptr, std::memory_order_release);
 
-    // Phase 1 (non-blocking): close admission and broadcast terminal cancellation to every producer branch. The
+    // Phase 1 (non-blocking): with admission closed, broadcast terminal cancellation to every producer branch. The
+    // shutdown predicate was transitioned while holding thread_sampling_configuration_mutex_, so a disabled sampling
+    // worker cannot miss this notification between testing the predicate and registering its unbounded CV wait. The
     // shared shutdown token makes in-flight allocation and periodic DSS frame callbacks return S_FALSE.
     UpdateAllocationSamplingTarget(0);
     if (stackWalker_ != nullptr)

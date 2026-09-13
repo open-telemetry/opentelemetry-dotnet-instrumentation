@@ -72,8 +72,8 @@ reuses, or stops the ambiguous session. An identical ControlPlane snapshot
 returns `NoChange` without retrying producer lifecycle work.
 
 Activation follows a dependency DAG. In the diagram below, an arrow points
-from a prerequisite to its dependent node; nodes for unrequested producer
-branches are omitted.
+from a prerequisite to its dependent node; producer branches that were not
+requested are omitted.
 
 ```text
 StackWalkGuard InitializeCurrentThread
