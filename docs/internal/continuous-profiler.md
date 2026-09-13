@@ -39,11 +39,12 @@ Interop callers must initialize
 `sizeof(RuntimeSamplerConfigurationV1)` (16 bytes) and
 `RuntimeSamplerStateV1.structureSize` to `sizeof(RuntimeSamplerStateV1)` (24
 bytes). Each apply call makes one synchronous activation attempt. Native code
-does not schedule retries or impose a retry budget. If any fallible activation
-step fails, the service latches a terminal `ActivationFailed` state, preserves
-the last committed state, and returns `ActivationFailed` for every subsequent
-apply before shutdown without changing logical state or retrying producer
-activation.
+does not schedule retries or impose a retry budget. A failed initial bootstrap
+dependency, such as the stack-walk guard, sampling worker, or shared CLR event
+mask, latches a terminal service-wide `ActivationFailed` state. A failure while
+adding a producer to an already committed configuration preserves the existing
+producer branches and leaves the candidate uncommitted, allowing a later apply
+to retry non-terminal candidate infrastructure.
 
 Zero disables the corresponding CPU, selective-thread, or allocation sampling
 feature. The profiler owns one lightweight `RuntimeSamplerService` controller
@@ -55,17 +56,51 @@ The first enabling attempt creates and publishes stable sampler objects before
 enabling CLR callbacks, but does not commit the candidate until all fallible
 activation steps succeed. Thread activation includes explicit startup
 handshakes: the stack-walk guard and sampling worker must initialize their
-profiler API context before native Apply can report success. If any later
-activation step fails, the service latches `ActivationFailed`, preserves the
-last committed state, and subsequent applies fail fast; the partial producer
-chain is not retried. After successful activation,
-disabling thread sampling parks the existing worker and later re-enabling it
-reuses the same worker. Disabling allocation sampling closes its atomic
-admission gate and commits the disabled state before stopping the EventPipe
-session. If cleanup fails, the retained session cannot admit samples and cleanup
-is retried by the next non-identical committed configuration or terminal
-shutdown. An identical ControlPlane snapshot returns `NoChange` without
-retrying producer lifecycle work.
+profiler API context before native Apply can report success. Complete snapshots
+remain atomic: a failed candidate returns `ActivationFailed` and reports the
+last committed state rather than partially committing its successful branches.
+An allocation EventPipe start failure permanently disables only allocation
+sampling because the failed CLR call may leave session ownership ambiguous;
+CPU and selective sampling remain independently available. After successful
+activation, disabling thread sampling parks the existing worker and later
+re-enabling it reuses the same worker. Disabling allocation sampling closes its
+atomic admission gate and commits the disabled state before stopping the
+EventPipe session. If start or cleanup fails, the retained session value is
+evidence only: the allocation branch remains permanently disabled and no later
+path retries, reuses, or stops the ambiguous session. An identical ControlPlane
+snapshot returns `NoChange` without retrying producer lifecycle work.
+
+Activation follows a dependency DAG. In the diagram below, an arrow points
+from a prerequisite to its dependent node; nodes for unrequested producer
+branches are omitted.
+
+```text
+StackWalkGuard InitializeCurrentThread
+    -> StackWalkGuard ready
+    -> Sampler facade ready
+
+Sampler facade ready
+    -> Sampling worker InitializeCurrentThread
+    -> Sampling worker ready -------------------------+
+                                                       +-> Thread sampling ready
+Sampler facade ready -> Shared CLR event mask enabled -+
+
+Shared CLR event mask enabled
+    -> Allocation EventPipe session
+    -> Allocation sampling ready
+
+Every requested branch ready
+    -> Commit complete snapshot
+    -> Publish sampling targets
+    -> Applied
+```
+
+Thread sampling therefore depends on both its initialized worker and the shared
+CLR event mask. Allocation sampling depends on its EventPipe session, which in
+turn depends on that shared mask. A shared-mask failure dominates both producer
+branches and is service-terminal. An EventPipe start or stop failure cuts only
+the allocation branch and must not tear down an independently committed thread
+sampling branch.
 
 The successfully committed configuration yields three deliberate logical service
 states. A **dormant** service has accepted

@@ -156,7 +156,7 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
                 // preserving the last committed configuration and any independently running thread sampler.
                 trace::Logger::Warn(
                     "RuntimeSamplerService: allocation sampling is permanently disabled after an EventPipe session "
-                    "stop failure.");
+                    "start or stop failure.");
                 return outcome(RuntimeSamplerApplyResult::ActivationFailed);
             }
 

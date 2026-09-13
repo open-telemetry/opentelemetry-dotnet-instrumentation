@@ -470,8 +470,9 @@ private:
     std::condition_variable      thread_sampling_configuration_cv_;
     ThreadSamplingConfiguration  desired_thread_sampling_configuration_;
     std::unique_ptr<std::thread> thread_sampling_thread_;
-    // RuntimeSamplerService serializes allocation session transitions with its configuration gate. After that gate
-    // admits terminal shutdown, only the ContinuousProfiler shutdown owner may mutate this state.
+    // RuntimeSamplerService serializes allocation session transitions with its configuration gate. Failed CLR start
+    // or stop calls permanently disable only this producer branch because either failure can leave session ownership
+    // ambiguous. After the gate admits terminal shutdown, only the ContinuousProfiler shutdown owner may mutate it.
     EVENTPIPE_SESSION                   session_                           = 0;
     AllocationSamplingSessionState      allocation_sampling_session_state_ = AllocationSamplingSessionState::None;
     IAllocationSamplingSessionProvider& allocationSamplingSessionProvider_;

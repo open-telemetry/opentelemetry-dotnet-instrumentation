@@ -272,7 +272,7 @@ TEST(RuntimeSamplerServiceTest, AllocationSessionStartsWithAdmissionClosedAndRat
     EXPECT_EQ(200u, sampler->TargetPerCycle());
 }
 
-TEST(RuntimeSamplerServiceTest, FailedAllocationStartKeepsAdmissionClosedAndCanBeRetried)
+TEST(RuntimeSamplerServiceTest, FailedAllocationStartPermanentlyDisablesOnlyAllocationSampling)
 {
     FakeAllocationSamplingSessionProvider sessions;
     sessions.startResults = {E_FAIL, S_OK};
@@ -284,11 +284,34 @@ TEST(RuntimeSamplerServiceTest, FailedAllocationStartKeepsAdmissionClosedAndCanB
     ASSERT_NE(nullptr, profiler.allocationSubSampler);
     auto* const sampler = profiler.allocationSubSampler.get();
     EXPECT_EQ(0u, sampler->TargetPerCycle());
+    EXPECT_TRUE(profiler.IsAllocationSamplingPermanentlyDisabled());
+    EXPECT_FALSE(profiler.IsShutdownRequested());
 
-    EXPECT_TRUE(profiler.StartAllocationSamplingSession());
+    EXPECT_FALSE(profiler.StartAllocationSamplingSession());
     EXPECT_EQ(sampler, profiler.allocationSubSampler.get());
-    EXPECT_EQ(2u, sessions.startCalls);
+    EXPECT_EQ(1u, sessions.startCalls);
     EXPECT_EQ(0u, sampler->TargetPerCycle());
+
+    profiler.StageThreadSamplingConfiguration(1000, 30);
+    const auto threadConfiguration = profiler.PullThreadSamplingConfiguration();
+    EXPECT_EQ(1000u, threadConfiguration.cpuSamplingIntervalMilliseconds);
+    EXPECT_EQ(30u, threadConfiguration.selectiveSamplingIntervalMilliseconds);
+}
+
+TEST(RuntimeSamplerServiceTest, FailedAllocationStartPreservesAnAmbiguousSessionWithoutRetryOrStop)
+{
+    FakeAllocationSamplingSessionProvider sessions;
+    sessions.startResults = {E_FAIL, S_OK};
+    sessions.sessions     = {202, 203};
+    sessions.stopResults  = {S_OK};
+    ContinuousProfiler profiler(sessions);
+
+    EXPECT_FALSE(profiler.StartAllocationSamplingSession());
+    EXPECT_TRUE(profiler.IsAllocationSamplingPermanentlyDisabled());
+    EXPECT_FALSE(profiler.StartAllocationSamplingSession());
+    EXPECT_FALSE(profiler.StopAllocationSamplingSession());
+    EXPECT_EQ(1u, sessions.startCalls);
+    EXPECT_TRUE(sessions.stoppedSessions.empty());
 }
 
 TEST(RuntimeSamplerServiceTest, FailedAllocationStopPermanentlyDisablesAllocationWithoutRetryingTheClrSession)

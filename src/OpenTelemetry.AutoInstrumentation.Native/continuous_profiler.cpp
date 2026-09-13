@@ -1569,8 +1569,8 @@ bool ContinuousProfiler::StartThreadSampling() noexcept
     {
         // Apply must not report activation until the CLR has accepted this native worker. Start the thread in the
         // quiescent state, wait for InitializeCurrentThread, and publish configuration only after this handshake
-        // succeeds. A failed handshake leaves no running worker; RuntimeSamplerService latches activation failure
-        // and rejects later Apply calls for this service instance.
+        // succeeds. A failed handshake leaves no running worker. Bootstrap failure is terminal for the service;
+        // incremental failure preserves committed producer branches and allows a later Apply to retry this worker.
         std::promise<HRESULT> initializationResult;
         auto                  initialized = initializationResult.get_future();
         thread_sampling_thread_           = std::make_unique<std::thread>(SamplingThreadMain, this, GetShutdownToken(),
@@ -2004,7 +2004,14 @@ bool ContinuousProfiler::StartAllocationSamplingSession() noexcept
     const HRESULT     hr = allocationSamplingSessionProvider_.StartAllocationSamplingSession(&candidateSession);
     if (FAILED(hr) || candidateSession == 0)
     {
-        trace::Logger::Error("Could not enable allocation sampling: session pipe error", hr);
+        // A failed CLR start has no documented rollback contract for a nonzero output handle. Preserve that handle
+        // only as evidence and permanently close this producer branch: it must never be retried, reused, or stopped.
+        // CPU and selective sampling remain independent and may continue or activate later.
+        session_                           = candidateSession;
+        allocation_sampling_session_state_ = AllocationSamplingSessionState::PermanentlyDisabled;
+        trace::Logger::Error("Allocation sampling is permanently disabled after EventPipe session start failed. "
+                             "HRESULT=",
+                             trace::HResultStr(hr));
         return false;
     }
 
