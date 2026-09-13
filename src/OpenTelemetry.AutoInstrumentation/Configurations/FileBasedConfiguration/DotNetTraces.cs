@@ -162,7 +162,7 @@ internal class DotNetTraces
     /// Gets or sets the RabbitMQ traces instrumentation configuration.
     /// </summary>
     [YamlMember(Alias = "rabbitmq")]
-    public object? RabbitMq { get; set; }
+    public RabbitMqConfiguration? RabbitMq { get; set; }
 
     /// <summary>
     /// Gets or sets the Quartz traces instrumentation configuration.

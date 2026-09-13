@@ -30,6 +30,11 @@ internal static class MessagingAttributes
         {
             public const string RoutingKey = "messaging.rabbitmq.destination.routing_key";
             public const string DeliveryTag = "messaging.rabbitmq.delivery_tag";
+
+            // Not yet covered by the OpenTelemetry messaging semantic conventions
+            // (see open-telemetry/semantic-conventions#3997).
+            public const string VirtualHost = "messaging.rabbitmq.vhost.name";
+            public const string ClusterName = "messaging.rabbitmq.cluster.name";
         }
     }
 

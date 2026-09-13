@@ -11,6 +11,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
   traces instrumentation for versions `3.1.x`+ for .NET only.
+- Opt-in `messaging.rabbitmq.vhost.name` and `messaging.rabbitmq.cluster.name`
+  span attributes for RabbitMQ instrumentation, disabled by default. Enable via
+  `OTEL_DOTNET_AUTO_RABBITMQ_CAPTURE_VHOST_AND_CLUSTER_NAME=true`. Neither
+  attribute is part of the messaging semantic conventions yet
+  ([open-telemetry/semantic-conventions#3997](https://github.com/open-telemetry/semantic-conventions/issues/3997)).
 
 ### Changed
 

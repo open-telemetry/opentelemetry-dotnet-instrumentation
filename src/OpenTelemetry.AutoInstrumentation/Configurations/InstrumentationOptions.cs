@@ -31,6 +31,7 @@ internal class InstrumentationOptions
         HttpInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
         OracleMdaDatabaseOpenTelemetryTracing = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaDatabaseOpenTelemetryTracing) ?? true;
         OracleMdaSetDbStatementForText = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText) ?? false;
+        RabbitMqCaptureVhostAndClusterName = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.RabbitMqCaptureVhostAndClusterName) ?? false;
     }
 
     internal InstrumentationOptions(DotNetTraces? instrumentationConfiguration, bool failFast)
@@ -79,6 +80,11 @@ internal class InstrumentationOptions
             {
                 OracleMdaDatabaseOpenTelemetryTracing = instrumentationConfiguration.OracleMda.DatabaseOpenTelemetryTracing;
                 OracleMdaSetDbStatementForText = instrumentationConfiguration.OracleMda.SetDbStatementForText;
+            }
+
+            if (instrumentationConfiguration.RabbitMq != null)
+            {
+                RabbitMqCaptureVhostAndClusterName = instrumentationConfiguration.RabbitMq.CaptureVhostAndClusterName;
             }
         }
     }
@@ -153,6 +159,11 @@ internal class InstrumentationOptions
     /// Gets a value indicating whether text query in Oracle Client can be passed as a db.statement tag.
     /// </summary>
     public bool OracleMdaSetDbStatementForText { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the RabbitMQ instrumentation can capture the vhost and cluster name as span attributes.
+    /// </summary>
+    public bool RabbitMqCaptureVhostAndClusterName { get; }
 
 #if NETFRAMEWORK
     private static bool GetSqlClientNetFxExperimentalContextPropagation(Configuration configuration)

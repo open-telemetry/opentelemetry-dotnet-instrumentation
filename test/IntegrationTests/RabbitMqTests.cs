@@ -21,6 +21,10 @@ public class RabbitMqTests : TestHelper
     private const string RabbitMqRoutingKeyAttributeName = "messaging.rabbitmq.destination.routing_key";
     private const string RabbitMqDeliveryTagAttributeName = "messaging.rabbitmq.delivery_tag";
 
+    // Opt-in RabbitMQ attributes, disabled by default (OTEL_DOTNET_AUTO_RABBITMQ_CAPTURE_VHOST_AND_CLUSTER_NAME)
+    private const string RabbitMqVirtualHostAttributeName = "messaging.rabbitmq.vhost.name";
+    private const string RabbitMqClusterNameAttributeName = "messaging.rabbitmq.cluster.name";
+
     // Recommended messaging attributes set by the instrumentation
     private const string MessagingBodySizeAttributeName = "messaging.message.body.size";
 
@@ -58,6 +62,39 @@ public class RabbitMqTests : TestHelper
         {
             TestRabbitMqLegacy(packageVersion);
         }
+    }
+
+    [SkippableTheory]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Linux")]
+    [MemberData(nameof(LibraryVersion.RabbitMq), MemberType = typeof(LibraryVersion))]
+    public void SubmitsVhostAndClusterNameWhenOptedIn(string packageVersion)
+    {
+        // messaging.rabbitmq.vhost.name / messaging.rabbitmq.cluster.name are only
+        // implemented for the legacy (5.x/6.x) bytecode instrumentation.
+        Skip.If(!string.IsNullOrEmpty(packageVersion) && Version.Parse(packageVersion) >= new Version(7, 0, 0));
+
+        _rabbitMq.SkipIfUnsupportedPlatform();
+
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateProducerSpanHasIdentityAttributes(span));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateProducerSpanHasIdentityAttributes(span));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateProducerSpanHasIdentityAttributes(span));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateConsumerSpanHasIdentityAttributes(span, "receive"));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateConsumerSpanHasIdentityAttributes(span, "deliver"));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateConsumerSpanHasIdentityAttributes(span, "deliver"));
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_RABBITMQ_CAPTURE_VHOST_AND_CLUSTER_NAME", "true");
+        EnableBytecodeInstrumentation();
+        RunTestApplication(new()
+        {
+            Arguments = $"--rabbitmq {_rabbitMq.Port}",
+            PackageVersion = packageVersion
+        });
+
+        collector.AssertExpectations();
     }
 
     private static bool ValidatePropagation(ICollection<MockSpansCollector.Collected> collected)
@@ -139,12 +176,48 @@ public class RabbitMqTests : TestHelper
                span.Links.Count == 1 &&
                ValidateBasicSpanAttributes(span.Attributes, operationName) &&
                (operationName != "receive" || ValidateNetworkAttributes(span.Attributes)) &&
-               !string.IsNullOrEmpty(deliveryTag);
+               !string.IsNullOrEmpty(deliveryTag) &&
+               !HasVhostOrClusterNameAttribute(span.Attributes);
     }
 
     private bool ValidateProducerSpan(Span span)
     {
-        return span.Kind == Span.Types.SpanKind.Producer && ValidateBasicSpanAttributes(span.Attributes, "publish") && ValidateNetworkAttributes(span.Attributes);
+        return span.Kind == Span.Types.SpanKind.Producer &&
+               ValidateBasicSpanAttributes(span.Attributes, "publish") &&
+               ValidateNetworkAttributes(span.Attributes) &&
+               !HasVhostOrClusterNameAttribute(span.Attributes);
+    }
+
+    private bool ValidateConsumerSpanHasIdentityAttributes(Span span, string operationName)
+    {
+        var deliveryTag = span.Attributes.SingleOrDefault(kv => kv.Key == RabbitMqDeliveryTagAttributeName)?.Value.StringValue;
+        return span.Kind == Span.Types.SpanKind.Consumer &&
+               span.Links.Count == 1 &&
+               ValidateBasicSpanAttributes(span.Attributes, operationName) &&
+               (operationName != "receive" || ValidateNetworkAttributes(span.Attributes)) &&
+               !string.IsNullOrEmpty(deliveryTag) &&
+               ValidateVhostAndClusterNameAttributes(span.Attributes);
+    }
+
+    private bool ValidateProducerSpanHasIdentityAttributes(Span span)
+    {
+        return span.Kind == Span.Types.SpanKind.Producer &&
+               ValidateBasicSpanAttributes(span.Attributes, "publish") &&
+               ValidateNetworkAttributes(span.Attributes) &&
+               ValidateVhostAndClusterNameAttributes(span.Attributes);
+    }
+
+    private static bool HasVhostOrClusterNameAttribute(IReadOnlyCollection<KeyValue> spanAttributes)
+    {
+        return spanAttributes.Any(kv => kv.Key == RabbitMqVirtualHostAttributeName || kv.Key == RabbitMqClusterNameAttributeName);
+    }
+
+    private static bool ValidateVhostAndClusterNameAttributes(IReadOnlyCollection<KeyValue> spanAttributes)
+    {
+        var virtualHost = spanAttributes.SingleOrDefault(kv => kv.Key == RabbitMqVirtualHostAttributeName)?.Value.StringValue;
+        var clusterName = spanAttributes.SingleOrDefault(kv => kv.Key == RabbitMqClusterNameAttributeName)?.Value.StringValue;
+
+        return virtualHost == "/" && !string.IsNullOrEmpty(clusterName);
     }
 
     private bool ValidateNetworkAttributes(IReadOnlyCollection<KeyValue> spanAttributes)

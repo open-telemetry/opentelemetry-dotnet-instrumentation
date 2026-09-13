@@ -204,6 +204,11 @@ internal partial class ConfigurationKeys
             /// </summary>
             public const string OracleMdaSetDbStatementForText = "OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT";
 
+            /// <summary>
+            /// Configuration key for RabbitMQ instrumentation to enable capturing the vhost and cluster name as span attributes.
+            /// </summary>
+            public const string RabbitMqCaptureVhostAndClusterName = "OTEL_DOTNET_AUTO_RABBITMQ_CAPTURE_VHOST_AND_CLUSTER_NAME";
+
 #if NETFRAMEWORK
             /// <summary>
             /// Configuration key for enabling IL rewriting of SqlClient on .NET Framework to ensure CommandText is available.

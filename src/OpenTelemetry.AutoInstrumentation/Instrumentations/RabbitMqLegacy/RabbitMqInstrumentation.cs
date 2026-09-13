@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.DuckTypes;
 using OpenTelemetry.Context.Propagation;
 
@@ -26,6 +27,8 @@ internal static class RabbitMqInstrumentation
             connection?.Endpoint?.Port,
             connection?.RemoteEndPoint);
 
+        activity.SetRabbitMqIdentityTags(connection);
+
         return activity;
     }
 
@@ -46,7 +49,7 @@ internal static class RabbitMqInstrumentation
         activity.SetMessagingTags(result.BasicProperties?.MessageId, result.BasicProperties?.CorrelationId, result.DeliveryTag);
     }
 
-    public static Activity? StartProcess<TBasicProperties, TBody>(TBasicProperties properties, string? exchange, string? routingKey, TBody body, ulong deliveryTag)
+    public static Activity? StartProcess<TBasicProperties, TBody>(TBasicProperties properties, string? exchange, string? routingKey, TBody body, ulong deliveryTag, IConnection? connection)
         where TBasicProperties : IBasicProperties
         where TBody : IBody
     {
@@ -75,6 +78,8 @@ internal static class RabbitMqInstrumentation
             activity.SetCommonTags(exchange, routingKey, messageBodyLength, MessagingAttributes.Values.DeliverOperationName);
 
             activity.SetMessagingTags(messageId, correlationId, deliveryTag);
+
+            activity.SetRabbitMqIdentityTags(connection);
         }
 
         return activity;
@@ -108,9 +113,36 @@ internal static class RabbitMqInstrumentation
                 routingKey,
                 bodyLength,
                 MessagingAttributes.Values.PublishOperationName);
+
+            activity.SetRabbitMqIdentityTags(connection);
         }
 
         return activity;
+    }
+
+    internal static IConnection? GetConnectionFromConsumerModel(object? model)
+    {
+        if (model is null)
+        {
+            return null;
+        }
+
+        if (model.TryDuckCast<IModelBase>(out var modelBase))
+        {
+            return modelBase.Session?.Connection;
+        }
+
+        // AutorecoveringModel (used whenever automatic connection recovery is enabled, the client
+        // default) does not derive from ModelBase and has no Session of its own; the real channel
+        // is reachable through its public Delegate property.
+        if (model.TryDuckCast<IAutorecoveringModel>(out var autorecoveringModel) &&
+            autorecoveringModel.Delegate is { } innerModel &&
+            innerModel.TryDuckCast<IModelBase>(out var innerModelBase))
+        {
+            return innerModelBase.Session?.Connection;
+        }
+
+        return null;
     }
 
     private static string GetActivityName(string? routingKey, string operationType)
@@ -176,6 +208,27 @@ internal static class RabbitMqInstrumentation
             {
                 activity.SetTag(NetworkAttributes.Keys.NetworkType, networkType);
             }
+        }
+    }
+
+    private static void SetRabbitMqIdentityTags(this Activity? activity, IConnection? connection)
+    {
+        if (activity is null || !Instrumentation.TracerSettings.Value.InstrumentationOptions.RabbitMqCaptureVhostAndClusterName)
+        {
+            return;
+        }
+
+        var virtualHost = connection?.Factory?.VirtualHost;
+        if (!string.IsNullOrEmpty(virtualHost))
+        {
+            activity.SetTag(MessagingAttributes.Keys.RabbitMq.VirtualHost, virtualHost);
+        }
+
+        // Server-properties table entries decode to their raw AMQP wire representation;
+        // long strings (like cluster_name) arrive as UTF8 byte[], not string.
+        if (connection?.ServerProperties?["cluster_name"] is byte[] clusterNameBytes)
+        {
+            activity.SetTag(MessagingAttributes.Keys.RabbitMq.ClusterName, Encoding.UTF8.GetString(clusterNameBytes));
         }
     }
 

@@ -38,8 +38,10 @@ public static class AsyncDefaultBasicConsumerIntegration
     internal static CallTargetState OnMethodBegin<TTarget, TBasicProperties, TBody>(TTarget instance, string? consumerTag, ulong deliveryTag, bool redelivered, string? exchange, string? routingKey, TBasicProperties properties, TBody body)
         where TBasicProperties : IBasicProperties
         where TBody : IBody
+        where TTarget : IBasicConsumer
     {
-        var activity = RabbitMqInstrumentation.StartProcess(properties, exchange, routingKey, body, deliveryTag);
+        var connection = RabbitMqInstrumentation.GetConnectionFromConsumerModel(instance.Model);
+        var activity = RabbitMqInstrumentation.StartProcess(properties, exchange, routingKey, body, deliveryTag, connection);
         return new CallTargetState(activity, null);
     }
 
