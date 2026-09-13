@@ -65,10 +65,11 @@ CPU and selective sampling remain independently available. After successful
 activation, disabling thread sampling parks the existing worker and later
 re-enabling it reuses the same worker. Disabling allocation sampling closes its
 atomic admission gate and commits the disabled state before stopping the
-EventPipe session. If start or cleanup fails, the retained session value is
-evidence only: the allocation branch remains permanently disabled and no later
-path retries, reuses, or stops the ambiguous session. An identical ControlPlane
-snapshot returns `NoChange` without retrying producer lifecycle work.
+EventPipe session. If `EventPipeStartSession` or `EventPipeStopSession` fails,
+the retained session value is evidence only: the allocation branch remains
+permanently disabled. Neither a later Apply nor terminal shutdown retries,
+reuses, or stops the ambiguous session. An identical ControlPlane snapshot
+returns `NoChange` without retrying producer lifecycle work.
 
 Activation follows a dependency DAG. In the diagram below, an arrow points
 from a prerequisite to its dependent node; nodes for unrequested producer
@@ -119,8 +120,9 @@ ordinary disable allows an already admitted complete capture to finish and be
 published. CLR shutdown is terminal: the next stack-frame callback aborts the
 capture, unpublished partial data is discarded, EventPipe shutdown is attempted
 synchronously after allocation admission closes, and owned threads are joined.
-If EventPipe shutdown fails, the retained session remains unable to admit
-samples and is left for CLR process teardown.
+If `EventPipeStopSession` fails during shutdown, allocation publication remains
+closed and the stop is not retried. The ambiguous retained session is left for
+CLR process teardown.
 
 ## Thread sampling
 
