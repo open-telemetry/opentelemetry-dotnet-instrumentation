@@ -50,6 +50,16 @@ internal partial class ConfigurationKeys
     public const string OpAmpServerUrl = "OTEL_DOTNET_AUTO_OPAMP_SERVER_URL";
 
     /// <summary>
+    /// Configuration key for the maximum number of pending OpAMP custom messages.
+    /// </summary>
+    public const string OpAmpMaxPendingCustomMessages = "OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGES";
+
+    /// <summary>
+    /// Configuration key for the maximum aggregate size of pending OpAMP custom message payloads.
+    /// </summary>
+    public const string OpAmpMaxPendingCustomMessageBytes = "OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGE_BYTES";
+
+    /// <summary>
     /// Configuration key for enabling all instrumentations.
     /// </summary>
     public const string InstrumentationEnabled = "OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED";
@@ -193,6 +203,11 @@ internal partial class ConfigurationKeys
             /// Configuration key for HTTP instrumentation to enable capturing HTTP response headers as span tags.
             /// </summary>
             public const string HttpInstrumentationCaptureResponseHeaders = "OTEL_DOTNET_AUTO_TRACES_HTTP_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS";
+
+            /// <summary>
+            /// Configuration key for enabling Npgsql context propagation to the PostgreSQL server.
+            /// </summary>
+            public const string NpgsqlContextPropagation = "OTEL_DOTNET_AUTO_NPGSQL_CONTEXT_PROPAGATION";
 
             /// <summary>
             /// Configuration key for Oracle Client instrumentation to enable database OpenTelemetry tracing.

@@ -1,0 +1,10 @@
+file_format: "1.0"
+
+plugins/development:
+  plugins:
+    - TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+
+opamp/development:
+  server_url: ${OTEL_DOTNET_AUTO_OPAMP_SERVER_URL}
+  max_pending_custom_messages: 123
+  max_pending_custom_message_bytes: 456

@@ -21,16 +21,60 @@ internal class OpAmpSettings : Settings
     /// </summary>
     public Uri? ServerUrl { get; private set; }
 
+    /// <summary>
+    /// Gets the maximum number of custom messages that may wait to be sent.
+    /// </summary>
+    public int? MaxPendingCustomMessages { get; private set; }
+
+    /// <summary>
+    /// Gets the maximum aggregate size, in bytes, of pending custom message payloads.
+    /// </summary>
+    public int? MaxPendingCustomMessageBytes { get; private set; }
+
     protected override void OnLoadEnvVar(Configuration configuration)
     {
         OpAmpClientEnabled = configuration.GetBool(ConfigurationKeys.OpAmpEnabled) ?? false;
         ServerUrl = GetServerUrl(configuration.GetString(ConfigurationKeys.OpAmpServerUrl), configuration.FailFast);
+        MaxPendingCustomMessages = GetPositiveInt(
+            configuration.GetInt32(ConfigurationKeys.OpAmpMaxPendingCustomMessages),
+            ConfigurationKeys.OpAmpMaxPendingCustomMessages,
+            configuration.FailFast);
+        MaxPendingCustomMessageBytes = GetPositiveInt(
+            configuration.GetInt32(ConfigurationKeys.OpAmpMaxPendingCustomMessageBytes),
+            ConfigurationKeys.OpAmpMaxPendingCustomMessageBytes,
+            configuration.FailFast);
     }
 
     protected override void OnLoadFile(YamlConfiguration configuration)
     {
         OpAmpClientEnabled = configuration.OpAmp != null;
         ServerUrl = GetServerUrl(configuration.OpAmp?.ServerUrl, configuration.FailFast);
+        MaxPendingCustomMessages = GetPositiveInt(
+            configuration.OpAmp?.MaxPendingCustomMessages,
+            "opamp/development.max_pending_custom_messages",
+            configuration.FailFast);
+        MaxPendingCustomMessageBytes = GetPositiveInt(
+            configuration.OpAmp?.MaxPendingCustomMessageBytes,
+            "opamp/development.max_pending_custom_message_bytes",
+            configuration.FailFast);
+    }
+
+    private static int? GetPositiveInt(int? configurationValue, string configurationName, bool failFast)
+    {
+        if (configurationValue is null or > 0)
+        {
+            return configurationValue;
+        }
+
+        var errorMessage = $"OpAMP configuration '{configurationName}' has an invalid value: '{configurationValue}'. The value must be greater than zero.";
+        Logger.Error(errorMessage);
+
+        if (failFast)
+        {
+            throw new InvalidOperationException(errorMessage);
+        }
+
+        return null;
     }
 
     private static Uri? GetServerUrl(string? configurationValue, bool failFast)

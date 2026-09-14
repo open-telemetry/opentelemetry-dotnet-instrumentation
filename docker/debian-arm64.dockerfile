@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.316-bookworm-slim@sha256:2205fd3a7cf5e422c58398a9968aa8b5041fdbb47c76574fe631082e4cbfa2b8
+FROM mcr.microsoft.com/dotnet/sdk:9.0.318-bookworm-slim@sha256:20387c6674c30e46def0cc8cb557bd2a69b35afdf18c19c3694638d0a90897e4
 # There is no official base image for .NET SDK 10+ on Debian, so install .NET10 via dotnet-install
 
 # renovate: datasource=deb depName=cmake
@@ -18,8 +18,8 @@ COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 # Install older SDKs using the install script as there are no arm64 SDK packages.
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 10.0.302 --install-dir /usr/share/dotnet --no-path \
-    && ./dotnet-install.sh -v 8.0.423 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 10.0.401 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 8.0.425 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project

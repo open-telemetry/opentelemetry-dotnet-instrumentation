@@ -20,6 +20,8 @@ public class ParserOpAmpTests
         Assert.Equal("1.0", config.FileFormat);
         Assert.NotNull(config.OpAmp);
         Assert.Equal("wss://localhost:4320/v1/opamp", config.OpAmp?.ServerUrl);
+        Assert.Equal(4096, config.OpAmp?.MaxPendingCustomMessages);
+        Assert.Equal(134217728, config.OpAmp?.MaxPendingCustomMessageBytes);
     }
 
     [Fact]
@@ -35,12 +37,28 @@ public class ParserOpAmpTests
         Assert.Null(config.OpAmp);
     }
 
+    [Theory]
+    [InlineData("file_format: \"1.0\"\nopamp/development:\n")]
+    [InlineData("file_format: \"1.0\"\nopamp/development: {}\n")]
+    public void Parse_EmptyOpAmpConfigYaml_ShouldCreateOpAmpConfigurationWithDefaultSettings(string yaml)
+    {
+        var config = YamlParser.ParseYamlContent<YamlConfiguration>(yaml);
+
+        Assert.NotNull(config);
+        Assert.NotNull(config.OpAmp);
+        Assert.Null(config.OpAmp.ServerUrl);
+        Assert.Null(config.OpAmp.MaxPendingCustomMessages);
+        Assert.Null(config.OpAmp.MaxPendingCustomMessageBytes);
+    }
+
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {
         using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
-            { "OTEL_DOTNET_AUTO_OPAMP_SERVER_URL", "wss://localhost:4320/v1/opamp" }
+            { "OTEL_DOTNET_AUTO_OPAMP_SERVER_URL", "wss://localhost:4320/v1/opamp" },
+            { "OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGES", "4096" },
+            { "OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGE_BYTES", "134217728" },
         });
 
         var config = YamlParser.ParseYaml<YamlConfiguration>("Configurations/FileBased/Files/TestOpAmpFileEnvVars.yaml");
@@ -50,5 +68,7 @@ public class ParserOpAmpTests
         Assert.Equal("1.0", config.FileFormat);
         Assert.NotNull(config.OpAmp);
         Assert.Equal("wss://localhost:4320/v1/opamp", config.OpAmp?.ServerUrl);
+        Assert.Equal(4096, config.OpAmp?.MaxPendingCustomMessages);
+        Assert.Equal(134217728, config.OpAmp?.MaxPendingCustomMessageBytes);
     }
 }

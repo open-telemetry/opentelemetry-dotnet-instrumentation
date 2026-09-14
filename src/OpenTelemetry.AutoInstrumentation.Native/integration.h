@@ -9,6 +9,7 @@
 #include <corhlpr.h>
 #include <iomanip>
 #include <sstream>
+#include <unordered_set>
 #include <vector>
 
 #include "string_utils.h"
@@ -21,6 +22,11 @@ namespace trace
 
 constexpr size_t kPublicKeySize = 8;
 const WSTRING tracemethodintegration_assemblyname = WStr("#TraceMethodFeature");
+const std::unordered_set<WSTRING> tracemethodintegration_wildcard_ignored_methods(
+    {WStr(".ctor"), WStr(".cctor"), WStr("Equals"), WStr("Finalize"), WStr("GetHashCode"), WStr("ToString")});
+const WSTRING tracemethodintegration_wildcardmethodname = WStr("*");
+const WSTRING tracemethodintegration_setterprefix       = WStr("set_");
+const WSTRING tracemethodintegration_getterprefix       = WStr("get_");
 
 // PublicKey represents an Assembly Public Key token, which is an 8 byte binary
 // RSA key.
@@ -359,8 +365,7 @@ namespace
 } // namespace
 
     std::vector<IntegrationDefinition> GetIntegrationsFromTraceMethodsConfiguration(
-    const WSTRING& integration_assembly_name,
-    const WSTRING& integration_type_name,
+    const TypeReference integration_type,
     const WSTRING& configuration_string);
 
 } // namespace trace

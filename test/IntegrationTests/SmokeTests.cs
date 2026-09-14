@@ -529,7 +529,7 @@ public class SmokeTests : TestHelper
     public void NativeLogsHaveNoSensitiveData()
     {
         var tempLogsDirectory = DirectoryHelpers.CreateTempDirectory();
-        var secretIdentificators = new[] { "API", "TOKEN", "SECRET", "KEY", "PASSWORD", "PASS", "PWD", "HEADER", "CREDENTIALS" };
+        var secretIdentificators = new[] { "API", "TOKEN", "SECRET", "KEY", "PASSWORD", "PASS", "PWD", "HEADER", "HEADERS", "CREDENTIALS" };
 
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", tempLogsDirectory.FullName);
