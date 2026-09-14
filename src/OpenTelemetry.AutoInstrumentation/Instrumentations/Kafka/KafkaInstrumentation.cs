@@ -13,7 +13,12 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka;
 
 internal static class KafkaInstrumentation
 {
-    private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.Kafka", AutoInstrumentationVersion.Version);
+    private static readonly ActivitySource Source =
+        new(new ActivitySourceOptions("OpenTelemetry.AutoInstrumentation.Kafka")
+        {
+            Version = AutoInstrumentationVersion.Version,
+            TelemetrySchemaUrl = GenericAttributes.SchemaUrl1440
+        });
 
     public static Activity? StartConsumerActivity(object consumer)
     {
@@ -29,7 +34,7 @@ internal static class KafkaInstrumentation
 
             if (ConsumerCache.TryGet(consumer, out var groupId))
             {
-                activity.SetTag(MessagingAttributes.Keys.Kafka.ConsumerGroupId, groupId);
+                activity.SetTag(MessagingAttributes.Keys.ConsumerGroupName, groupId);
             }
         }
 
@@ -56,7 +61,7 @@ internal static class KafkaInstrumentation
                consumeResult.Message?.Key,
                null);
 
-        activity.SetTag(MessagingAttributes.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
+        activity.SetTag(MessagingAttributes.Keys.Kafka.Offset, consumeResult.Offset.Value);
     }
 
     public static Activity? StartProducerActivity<TTopicPartition, TMessage, TClient>(
@@ -67,14 +72,14 @@ internal static class KafkaInstrumentation
     where TMessage : IKafkaMessage
     where TClient : INamedClient
     {
-        var spanName = GetActivityName(partition.Topic, MessagingAttributes.Values.PublishOperationName);
+        var spanName = GetActivityName(partition.Topic, MessagingAttributes.Values.SendOperationName);
 
         var activity = Source.StartActivity(name: spanName, ActivityKind.Producer);
         if (activity is not null && activity.IsAllDataRequested)
         {
             SetCommonAttributes(
                 activity,
-                MessagingAttributes.Values.PublishOperationName,
+                MessagingAttributes.Values.SendOperationName,
                 partition.Topic,
                 partition.Partition,
                 message.Key,
@@ -99,10 +104,10 @@ internal static class KafkaInstrumentation
     public static void SetDeliveryResults(Activity activity, IDeliveryResult deliveryResult)
     {
         // Set the final partition message was delivered to.
-        activity.SetTag(MessagingAttributes.Keys.Kafka.Partition, deliveryResult.Partition.Value);
+        SetDestinationPartitionId(activity, deliveryResult.Partition);
 
         activity.SetTag(
-            MessagingAttributes.Keys.Kafka.PartitionOffset,
+            MessagingAttributes.Keys.Kafka.Offset,
             deliveryResult.Offset.Value);
     }
 
@@ -123,9 +128,18 @@ internal static class KafkaInstrumentation
         return propagatedContext.ActivityContext.IsValid() ? [new ActivityLink(propagatedContext.ActivityContext)] : [];
     }
 
-    private static string GetActivityName(string? routingKey, string operationType)
+    private static string GetActivityName(string? destination, string operationName)
     {
-        return string.IsNullOrEmpty(routingKey) ? operationType : $"{routingKey} {operationType}";
+        return string.IsNullOrEmpty(destination) ? operationName : $"{operationName} {destination}";
+    }
+
+    // messaging.destination.partition.id is a string, unlike the messaging.kafka.destination.partition
+    // int it replaces.
+    private static void SetDestinationPartitionId(Activity activity, Partition partition)
+    {
+        activity.SetTag(
+            MessagingAttributes.Keys.DestinationPartitionId,
+            partition.Value.ToString(CultureInfo.InvariantCulture));
     }
 
     private static void SetCommonAttributes(
@@ -136,7 +150,10 @@ internal static class KafkaInstrumentation
         object? key,
         INamedClient? client)
     {
-        activity.SetTag(MessagingAttributes.Keys.MessagingOperation, operationName);
+        activity.SetTag(MessagingAttributes.Keys.MessagingOperationName, operationName);
+
+        // Kafka has no operation whose type differs from its system-specific name.
+        activity.SetTag(MessagingAttributes.Keys.MessagingOperationType, operationName);
         activity.SetTag(MessagingAttributes.Keys.MessagingSystem, MessagingAttributes.Values.KafkaMessagingSystemName);
         if (!string.IsNullOrEmpty(topic))
         {
@@ -159,7 +176,7 @@ internal static class KafkaInstrumentation
 
         if (partition is not null)
         {
-            activity.SetTag(MessagingAttributes.Keys.Kafka.Partition, partition.Value.Value);
+            SetDestinationPartitionId(activity, partition.Value);
         }
     }
 
