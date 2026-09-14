@@ -156,11 +156,11 @@ public class KafkaInstrumentationTests
         return listener;
     }
 
-#pragma warning disable CA1032, RCS1194 // Test-only exception; standard constructors are not needed.
+#pragma warning disable CA1032, CA1064, RCS1194 // Test-only exception; stands in for ProduceException<TKey, TValue>.
     private sealed class GenericFailureStub<TKey, TValue> : Exception
     {
     }
-#pragma warning restore CA1032, RCS1194
+#pragma warning restore CA1032, CA1064, RCS1194
 
     private sealed class NamedClientStub : INamedClient
     {
