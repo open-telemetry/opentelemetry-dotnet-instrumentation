@@ -1978,7 +1978,9 @@ void ContinuousProfiler::AllocationTick(const ShutdownToken& shutdownToken, ULON
         return;
     }
 
-    // This is the allocation-sampling publication boundary.
+    // This is the allocation-sampling publication boundary, distinct from the callback-root admission that protects
+    // the lifetime of GetCurrentThreadID and DoStackSnapshot. A shutdown that closes between those points discards
+    // this completed sample while its outer admission keeps the callback visible to the shutdown drain.
     AllocationSamplingAppendToBuffer(static_cast<int32_t>(localBytes.size()), localBytes.data());
 }
 
@@ -2059,8 +2061,9 @@ bool ContinuousProfiler::StopAllocationSamplingSession() noexcept
         return true;
     }
 
-    // Profiler EventPipe sessions deliver callbacks synchronously. Stopping the session prevents new callbacks and
-    // waits for an in-flight EventPipeEventDelivered callback to return. Admission (and, for terminal teardown, the
+    // A successful EventPipe stop prevents future delivery and drains an in-flight EventPipeEventDelivered callback.
+    // A failed stop has an ambiguous outcome, so terminal teardown cannot rely on it as the callback lifetime fence:
+    // callback-root ShutdownAdmission supplies that independent proof. Admission (and, for terminal teardown, the
     // shutdown flag) must therefore be closed before this call so a current-thread DSS can abort promptly. Never call
     // this method from EventPipeEventDelivered itself: waiting for the current callback would self-deadlock.
     const HRESULT hr = allocationSamplingSessionProvider_.StopAllocationSamplingSession(session_);

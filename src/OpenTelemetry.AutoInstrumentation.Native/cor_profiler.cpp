@@ -35,6 +35,7 @@
 #include "member_resolver.h"
 #include "runtime_sampler_configuration.h"
 #include "runtime_sampler_service.h"
+#include "shutdown_admission.h"
 
 #ifdef MACOS
 #include <mach-o/dyld.h>
@@ -3875,6 +3876,15 @@ HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDE
 {
     if (eventId == 10 && eventVersion == 4)
     {
+        // EventPipe delivery is CLR-owned and may overlap profiler shutdown. Admission at the callback root is the
+        // lifetime boundary for every CLR API call made on this path: a callback that wins the gate is drained by
+        // shutdown, while a callback delivered after closure must return without touching sampler state.
+        continuous_profiler::ShutdownAdmission callbackAdmission;
+        if (!callbackAdmission)
+        {
+            return S_OK;
+        }
+
         if (runtime_sampler_service_ != nullptr)
         {
             runtime_sampler_service_->OnAllocationTick(cbEventData, eventData);
