@@ -7,6 +7,7 @@ using System.Text;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
+using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Context.Propagation;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka;
@@ -111,6 +112,18 @@ internal static class KafkaInstrumentation
             deliveryResult.Offset.Value);
     }
 
+    /// <summary>
+    /// Records a failed messaging operation. error.type is Conditionally Required by the
+    /// messaging semantic conventions when the operation has failed.
+    /// </summary>
+    /// <param name="activity">The activity of the failed operation.</param>
+    /// <param name="exception">The exception the operation failed with.</param>
+    public static void SetError(Activity activity, Exception exception)
+    {
+        activity.SetException(exception);
+        activity.SetTag(GenericAttributes.Keys.ErrorType, GetErrorType(exception));
+    }
+
     internal static string? ExtractMessageKeyValue(object key)
     {
         return key switch
@@ -126,6 +139,20 @@ internal static class KafkaInstrumentation
         var propagatedContext = Propagators.DefaultTextMapPropagator.Extract(default, consumeResult, MessageHeaderValueGetter);
 
         return propagatedContext.ActivityContext.IsValid() ? [new ActivityLink(propagatedContext.ActivityContext)] : [];
+    }
+
+    private static string? GetErrorType(Exception exception)
+    {
+        var type = exception.GetType();
+        if (!type.IsGenericType)
+        {
+            return type.FullName;
+        }
+
+        // Confluent.Kafka reports produce failures as ProduceException<TKey, TValue>. The FullName
+        // of a constructed generic type carries assembly-qualified type arguments, which are
+        // neither predictable nor low cardinality, so the canonical class name is reported.
+        return type.GetGenericTypeDefinition().FullName?.Split('`')[0];
     }
 
     private static string GetActivityName(string? destination, string operationName)

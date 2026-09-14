@@ -113,6 +113,37 @@ public class KafkaInstrumentationTests
         Assert.Equal("https://opentelemetry.io/schemas/1.44.0", activity.Source.TelemetrySchemaUrl);
     }
 
+    [Fact]
+    public void ErrorSpansCarryErrorType()
+    {
+        using var listener = CreateListener();
+        using var source = new ActivitySource("test-source");
+        using var activity = source.StartActivity("test");
+        Assert.NotNull(activity);
+
+        KafkaInstrumentation.SetError(activity, new InvalidOperationException("boom"));
+
+        Assert.Equal("System.InvalidOperationException", activity.GetTagItem("error.type"));
+        Assert.Equal(ActivityStatusCode.Error, activity.Status);
+    }
+
+    [Fact]
+    public void ErrorTypeUsesCanonicalNameForGenericExceptions()
+    {
+        // Confluent.Kafka reports produce failures as ProduceException<TKey, TValue>. The mangled
+        // FullName of a generic type is not the canonical class name the conventions ask for.
+        using var listener = CreateListener();
+        using var source = new ActivitySource("test-source");
+        using var activity = source.StartActivity("test");
+        Assert.NotNull(activity);
+
+        KafkaInstrumentation.SetError(activity, new GenericFailureStub<string, int>());
+
+        Assert.Equal(
+            "OpenTelemetry.AutoInstrumentation.Tests.KafkaInstrumentationTests+GenericFailureStub",
+            activity.GetTagItem("error.type"));
+    }
+
     private static ActivityListener CreateListener()
     {
         var listener = new ActivityListener
@@ -124,6 +155,12 @@ public class KafkaInstrumentationTests
         ActivitySource.AddActivityListener(listener);
         return listener;
     }
+
+#pragma warning disable CA1032, RCS1194 // Test-only exception; standard constructors are not needed.
+    private sealed class GenericFailureStub<TKey, TValue> : Exception
+    {
+    }
+#pragma warning restore CA1032, RCS1194
 
     private sealed class NamedClientStub : INamedClient
     {

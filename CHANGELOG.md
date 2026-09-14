@@ -40,6 +40,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - Renamed the `messaging.kafka.message.offset` attribute to
     `messaging.kafka.offset`,
   - Added the `messaging.operation.type` attribute,
+  - Added the `error.type` attribute to failed produce and consume spans,
   - Changed the producer operation name from `publish` to `send`,
   - Changed the span name format from `{destination} {operation}` to
     `{operation} {destination}`.
