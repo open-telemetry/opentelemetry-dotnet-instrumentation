@@ -529,6 +529,7 @@ struct FunctionInfo
     const mdToken method_def_id;
     const DWORD method_impl_flags;
     FunctionMethodSignature method_signature;
+    TypeSignature effective_return_type{};
 
     FunctionInfo() : id(0), name(EmptyWStr), type({}), is_generic(false), method_def_id(0), method_impl_flags(0), method_signature({})
     {
@@ -570,6 +571,21 @@ struct FunctionInfo
     bool IsRuntimeAsync() const
     {
         return (method_impl_flags & kRuntimeAsyncMethodImplFlag) != 0;
+    }
+
+    TypeSignature GetDeclaredReturnType() const
+    {
+        return method_signature.GetReturnValue();
+    }
+
+    TypeSignature GetEffectiveReturnType() const
+    {
+        return effective_return_type;
+    }
+
+    void SetEffectiveReturnType(const TypeSignature& return_type)
+    {
+        effective_return_type = return_type;
     }
 };
 

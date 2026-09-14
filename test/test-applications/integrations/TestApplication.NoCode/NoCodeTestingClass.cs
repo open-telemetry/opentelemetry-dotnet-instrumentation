@@ -259,6 +259,15 @@ internal sealed class NoCodeTestingClass
         return 0;
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional. This shape exercises metadata parsing.
+    public async Task<int[,]> MultiDimensionalArrayTaskTestMethodAsync()
+    {
+        await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
+        return new int[1, 1];
+    }
+#pragma warning restore CA1814 // Prefer jagged arrays over multidimensional
+
 #if NET
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async ValueTask ValueTaskTestMethodAsync()

@@ -110,26 +110,12 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     FunctionInfo*          caller                 = methodHandler->GetFunctionInfo();
     TracerTokens*          tracerTokens           = module_metadata.GetTracerTokens();
     mdToken                function_token         = caller->id;
-    TypeSignature          retFuncArg             = caller->method_signature.GetReturnValue();
+    TypeSignature          retFuncArg             = caller->GetEffectiveReturnType();
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
     bool                   is_integration_method =
         integration_definition->target_method.type.assembly.name != tracemethodintegration_assemblyname;
     bool       ignoreByRefInstrumentation = !is_integration_method;
     const bool isRuntimeAsync             = caller->IsRuntimeAsync();
-    if (isRuntimeAsync)
-    {
-        // The metadata return type remains Task/ValueTask, but a runtime-async method's IL returns
-        // either no stack value or the logical T result directly.
-        TypeSignature runtime_async_result_type;
-        if (!TryGetRuntimeAsyncResultType(retFuncArg, module_metadata.metadata_import, &runtime_async_result_type))
-        {
-            Logger::Warn("*** CallTarget_RewriterCallback() skipping runtime-async method with an unsupported return "
-                         "signature: token=",
-                         function_token, " caller_name=", caller->type.name, ".", caller->name, "()");
-            return S_FALSE;
-        }
-        retFuncArg = runtime_async_result_type;
-    }
     const auto [retFuncElementType, retTypeFlags] = retFuncArg.GetElementTypeAndFlags();
     bool isVoid                                   = (retTypeFlags & TypeFlagVoid) > 0;
     bool isStatic = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);

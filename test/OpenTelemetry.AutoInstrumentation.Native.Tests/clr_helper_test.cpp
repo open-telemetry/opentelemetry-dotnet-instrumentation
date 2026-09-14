@@ -270,6 +270,63 @@ TEST_F(CLRHelperTest, DoesNotFindDoubleNestedTypeDefsByName)
     }
 }
 
+TEST_F(CLRHelperTest, GetsRuntimeAsyncMultidimensionalArrayResultType)
+{
+    mdTypeRef task_type_ref = mdTypeRefNil;
+    for (auto& type_ref : EnumTypeRefs(metadata_import_))
+    {
+        if (GetTypeInfo(metadata_import_, type_ref).name == WStr("System.Threading.Tasks.Task`1"))
+        {
+            task_type_ref = type_ref;
+            break;
+        }
+    }
+    ASSERT_NE(task_type_ref, mdTypeRefNil);
+
+    COR_SIGNATURE compressed_task_token[4]{};
+    const auto token_length = CorSigCompressToken(task_type_ref, compressed_task_token);
+    ASSERT_NE(token_length, static_cast<ULONG>(-1));
+
+    std::vector<COR_SIGNATURE> async_return_signature = {ELEMENT_TYPE_GENERICINST, ELEMENT_TYPE_CLASS};
+    async_return_signature.insert(async_return_signature.end(), compressed_task_token,
+                                  compressed_task_token + token_length);
+    async_return_signature.push_back(1); // generic argument count
+
+    const std::vector<COR_SIGNATURE> expected_result_signature = {
+        ELEMENT_TYPE_ARRAY, ELEMENT_TYPE_I4, 2, 0, 0}; // int[,] with rank 2, no sizes or lower bounds
+    async_return_signature.insert(async_return_signature.end(), expected_result_signature.begin(),
+                                  expected_result_signature.end());
+
+    TypeSignature async_return_type = {
+        0, static_cast<ULONG>(async_return_signature.size()), async_return_signature.data()};
+    TypeSignature result_type{};
+    ASSERT_TRUE(TryGetRuntimeAsyncResultType(async_return_type, metadata_import_, &result_type));
+
+    PCCOR_SIGNATURE result_signature = nullptr;
+    const auto result_length = result_type.GetSignature(result_signature);
+    ASSERT_EQ(result_length, expected_result_signature.size());
+    EXPECT_EQ(std::vector<COR_SIGNATURE>(result_signature, result_signature + result_length),
+              expected_result_signature);
+}
+
+TEST(CLRHelperSignatureTest, ParsesMultidimensionalArrayInGenericReturnType)
+{
+    // Method signature returning Task<int[,]> with no parameters. The TypeRefEncoded value 5 is
+    // TypeRef row 1; metadata resolution is not needed by FunctionMethodSignature::TryParse.
+    const COR_SIGNATURE signature_bytes[] = {
+        IMAGE_CEE_CS_CALLCONV_DEFAULT, 0, ELEMENT_TYPE_GENERICINST, ELEMENT_TYPE_CLASS, 5, 1,
+        ELEMENT_TYPE_ARRAY,            ELEMENT_TYPE_I4, 2,                        0, 0};
+
+    FunctionMethodSignature signature(signature_bytes, static_cast<unsigned>(sizeof(signature_bytes)));
+    ASSERT_EQ(signature.TryParse(), S_OK);
+
+    PCCOR_SIGNATURE return_signature = nullptr;
+    const auto return_length = signature.GetReturnValue().GetSignature(return_signature);
+    ASSERT_EQ(return_length, sizeof(signature_bytes) - 2);
+    EXPECT_EQ(std::vector<COR_SIGNATURE>(return_signature, return_signature + return_length),
+              std::vector<COR_SIGNATURE>(signature_bytes + 2, signature_bytes + sizeof(signature_bytes)));
+}
+
 #ifdef _WIN32
 // Memory-safety regression tests for the managed-metadata signature parser used by
 // FunctionMethodSignature::TryParse. ParseRetType/ParseType historically dereferenced *pbCur

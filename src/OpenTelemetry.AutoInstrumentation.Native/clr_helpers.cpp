@@ -705,15 +705,16 @@ bool TryGetRuntimeAsyncResultType(const TypeSignature&            async_return_t
     }
     current += token_length;
 
-    const auto type_name = GetTypeInfo(metadata_import, type_token).name;
+    const auto type_info = GetTypeInfo(metadata_import, type_token);
+    if (!type_info.IsValid() || type_info.name.empty())
+    {
+        Logger::Warn("[TryGetRuntimeAsyncResultType] Failed to resolve return type token: ", type_token);
+        return false;
+    }
+
+    const auto& type_name = type_info.name;
     if (is_generic)
     {
-        unsigned generic_argument_count;
-        if (!ParseNumber(current, end, &generic_argument_count) || generic_argument_count != 1 || current >= end)
-        {
-            return false;
-        }
-
         const bool is_task = element_type == ELEMENT_TYPE_CLASS && type_name == WStr("System.Threading.Tasks.Task`1");
         const bool is_value_task =
             element_type == ELEMENT_TYPE_VALUETYPE && type_name == WStr("System.Threading.Tasks.ValueTask`1");
@@ -722,13 +723,31 @@ bool TryGetRuntimeAsyncResultType(const TypeSignature&            async_return_t
             return false;
         }
 
-        PCCOR_SIGNATURE result_start = current;
-        if (!ParseType(current, end) || current != end)
+        if (current >= end)
         {
             return false;
         }
 
-        *result_type = {0, static_cast<ULONG>(end - result_start), result_start};
+        uint32_t generic_argument_count        = 0;
+        uint32_t generic_argument_count_length = 0;
+        const auto remaining_length            = static_cast<uint32_t>(end - current);
+        if (FAILED(CorSigUncompressData(current, remaining_length, &generic_argument_count,
+                                        &generic_argument_count_length)) ||
+            generic_argument_count_length == 0 || generic_argument_count != 1)
+        {
+            return false;
+        }
+        current += generic_argument_count_length;
+
+        if (current >= end)
+        {
+            return false;
+        }
+
+        // The TypeSignature is already bounded to the declared return type. Once the outer
+        // Task<T>/ValueTask<T> and its single generic argument are established, the remaining
+        // bytes are the complete logical T signature and must be preserved verbatim.
+        *result_type = {0, static_cast<ULONG>(end - current), current};
         return true;
     }
 
@@ -838,7 +857,6 @@ bool ParseTypeDefOrRefEncoded(PCCOR_SIGNATURE& pbCur,
     PTR CustomMod* Type
     FNPTR MethodDefSig
     FNPTR MethodRefSig
-    ARRAY Type ArrayShape
     SZARRAY CustomMod+ Type (but we do support SZARRAY Type)
  */
 bool ParseType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
@@ -910,8 +928,39 @@ bool ParseType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
             return false;
 
         case ELEMENT_TYPE_ARRAY:
+        {
             // ARRAY Type ArrayShape
-            return false;
+            if (!ParseType(pbCur, pbEnd))
+                return false;
+
+            // ArrayShape ::= Rank NumSizes Size* NumLoBounds LoBound*
+            if (!ParseNumber(pbCur, pbEnd, &number) || number == 0)
+                return false;
+
+            unsigned rank = number;
+            if (!ParseNumber(pbCur, pbEnd, &number) || number > rank)
+                return false;
+
+            for (unsigned i = 0; i < number; i++)
+            {
+                unsigned size;
+                if (!ParseNumber(pbCur, pbEnd, &size))
+                    return false;
+            }
+
+            if (!ParseNumber(pbCur, pbEnd, &number) || number > rank)
+                return false;
+
+            for (unsigned i = 0; i < number; i++)
+            {
+                // Lower bounds use compressed signed integers. ParseNumber advances over the
+                // same bounded 1/2/4-byte representation; the decoded value is not needed here.
+                unsigned lower_bound;
+                if (!ParseNumber(pbCur, pbEnd, &lower_bound))
+                    return false;
+            }
+            break;
+        }
 
         case ELEMENT_TYPE_SZARRAY:
             // SZARRAY Type
