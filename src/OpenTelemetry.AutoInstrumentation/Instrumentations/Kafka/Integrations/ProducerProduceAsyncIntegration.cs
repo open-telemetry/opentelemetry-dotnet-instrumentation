@@ -4,7 +4,6 @@
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
-using OpenTelemetry.AutoInstrumentation.Util;
 
 // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 
@@ -73,7 +72,7 @@ public static class ProducerProduceAsyncIntegration
 
         if (exception is not null)
         {
-            activity.SetException(exception);
+            KafkaInstrumentation.SetError(activity, exception);
         }
 
         activity.Stop();

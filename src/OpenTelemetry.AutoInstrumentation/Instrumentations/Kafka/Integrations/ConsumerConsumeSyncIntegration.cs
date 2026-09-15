@@ -5,7 +5,6 @@ using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
-using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
 
@@ -53,7 +52,7 @@ public static class ConsumerConsumeSyncIntegration
             KafkaInstrumentation.EndConsumerActivity(activity, consumeResult);
             if (exception is not null)
             {
-                activity.SetException(exception);
+                KafkaInstrumentation.SetError(activity, exception);
             }
         }
         else
