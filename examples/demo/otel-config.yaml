@@ -7,7 +7,9 @@ receivers:
   otlp:
     protocols:
       grpc:
+        endpoint: 0.0.0.0:4317
       http:
+        endpoint: 0.0.0.0:4318
   zipkin:
 
 processors:
@@ -22,13 +24,13 @@ exporters:
     path: /log/otel/metrics.log
   file/logs:
     path: /log/otel/logs.log
-  otlp:
+  otlp_grpc/jaeger:
     endpoint: "${JAEGER_ENDPOINT}"
     tls:
       insecure: true
   prometheus:
     endpoint: "0.0.0.0:8889"
-  loki:
+  otlp_http/loki:
     endpoint: "${LOKI_ENDPOINT}"
     tls:
       insecure: true
@@ -43,7 +45,7 @@ service:
       exporters:
         - debug 
         - file/traces
-        - otlp
+        - otlp_grpc/jaeger
     metrics:
       receivers:
         - otlp
@@ -59,7 +61,7 @@ service:
       exporters:
         - debug 
         - file/logs
-        - loki
+        - otlp_http/loki
   extensions:
     - health_check
     - zpages

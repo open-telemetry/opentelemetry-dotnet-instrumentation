@@ -48,7 +48,7 @@ services:
     command: --config /etc/otel/config.yaml
     environment:
       JAEGER_ENDPOINT: "jaeger:4317"
-      LOKI_ENDPOINT: "http://loki:3100/loki/api/v1/push"
+      LOKI_ENDPOINT: "http://loki:3100/otlp"
     ports:
       - "8889:8889"   # Prometheus metrics exporter (scrape endpoint)
       - "13133:13133" # health_check extension
