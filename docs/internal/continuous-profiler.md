@@ -16,6 +16,114 @@ events:
 
 You can export stack traces to any observability back end that supports profiling.
 
+## Native runtime configuration lifecycle
+
+The native sampler is process-wide. Startup configuration is a **Seed**: the
+first valid, successfully committed Seed wins, so repeated .NET Framework
+`AppDomain` startup cannot overwrite process-wide state. A complete
+**ControlPlane** configuration has
+higher authority and permanently supersedes Seed configuration for that
+process. Ordering and stale-document rejection belong to the managed OpAMP
+coordinator; native code validates and atomically commits each complete snapshot
+without patching or merging it.
+
+The V1 apply request carries its authority explicitly. The existing
+`ConfigureContinuousProfiler` export is retained as an ABI-compatible Seed
+adapter and delegates to that same apply operation; it owns no separate
+configuration or lifecycle state. Repeated Seeds report that process startup
+was already committed, while a Seed arriving after ControlPlane authority is
+ignored as lower authority.
+
+Interop callers must initialize
+`RuntimeSamplerConfigurationV1.structureSize` to
+`sizeof(RuntimeSamplerConfigurationV1)` (16 bytes) and
+`RuntimeSamplerStateV1.structureSize` to `sizeof(RuntimeSamplerStateV1)` (24
+bytes). Each apply call makes one synchronous activation attempt. Native code
+does not schedule retries or impose a retry budget. A failed initial bootstrap
+dependency, such as the stack-walk guard, sampling worker, or shared CLR event
+mask, latches a terminal service-wide `ActivationFailed` state. A failure while
+adding a producer to an already committed configuration preserves the existing
+producer branches and leaves the candidate uncommitted, allowing a later apply
+to retry non-terminal candidate infrastructure.
+
+Zero disables the corresponding CPU, selective-thread, or allocation sampling
+feature. The profiler owns one lightweight `RuntimeSamplerService` controller
+facade from initialization so configuration and terminal shutdown share one
+synchronization boundary. An all-disabled initial configuration creates no
+sampling machinery: no stack walker, worker thread, allocation controller,
+EventPipe session, or additional CLR event capability.
+The first enabling attempt creates and publishes stable sampler objects before
+enabling CLR callbacks, but does not commit the candidate until all fallible
+activation steps succeed. Thread activation includes explicit startup
+handshakes: the stack-walk guard and sampling worker must initialize their
+profiler API context before native Apply can report success. Complete snapshots
+remain atomic: a failed candidate returns `ActivationFailed` and reports the
+last committed state rather than partially committing its successful branches.
+An allocation EventPipe start failure permanently disables only allocation
+sampling because the failed CLR call may leave session ownership ambiguous;
+CPU and selective sampling remain independently available. After successful
+activation, disabling thread sampling parks the existing worker and later
+re-enabling it reuses the same worker. Disabling allocation sampling closes its
+atomic admission gate and commits the disabled state before stopping the
+EventPipe session. If `EventPipeStartSession` or `EventPipeStopSession` fails,
+the retained session value is evidence only: the allocation branch remains
+permanently disabled. Neither a later Apply nor terminal shutdown retries,
+reuses, or stops the ambiguous session. An identical ControlPlane snapshot
+returns `NoChange` without retrying producer lifecycle work.
+
+Activation follows a dependency DAG. In the diagram below, an arrow points
+from a prerequisite to its dependent node; producer branches that were not
+requested are omitted.
+
+```text
+StackWalkGuard InitializeCurrentThread
+    -> StackWalkGuard ready
+    -> Sampler facade ready
+
+Sampler facade ready
+    -> Sampling worker InitializeCurrentThread
+    -> Sampling worker ready -------------------------+
+                                                       +-> Thread sampling ready
+Sampler facade ready -> Shared CLR event mask enabled -+
+
+Shared CLR event mask enabled
+    -> Allocation EventPipe session
+    -> Allocation sampling ready
+
+Every requested branch ready
+    -> Commit complete snapshot
+    -> Publish sampling targets
+    -> Applied
+```
+
+Thread sampling therefore depends on both its initialized worker and the shared
+CLR event mask. Allocation sampling depends on its EventPipe session, which in
+turn depends on that shared mask. A shared-mask failure dominates both producer
+branches and is service-terminal. An EventPipe start or stop failure cuts only
+the allocation branch and must not tear down an independently committed thread
+sampling branch.
+
+The successfully committed configuration yields three deliberate logical service
+states. A **dormant** service has accepted
+only an all-disabled configuration and has no sampling infrastructure. An
+**active** service has at least one enabled feature. A **quiescent** service was
+previously active but is currently all-disabled; it retains the parked thread
+worker, stack walker, and CLR thread/stack-snapshot capabilities so that
+re-enablement does not reconstruct thread state or create another worker. The
+stack-snapshot capability is passive until capture is requested. Thread
+lifecycle callbacks remain enabled so thread metadata and .NET Framework canary
+state stay coherent. Allocation EventPipe is stopped because it is an active
+producer with material runtime cost.
+
+Configuration changes are eventually consistent at capture boundaries. An
+ordinary disable allows an already admitted complete capture to finish and be
+published. CLR shutdown is terminal: the next stack-frame callback aborts the
+capture, unpublished partial data is discarded, EventPipe shutdown is attempted
+synchronously after allocation admission closes, and owned threads are joined.
+If `EventPipeStopSession` fails during shutdown, allocation publication remains
+closed and the stop is not retried. The ambiguous retained session is left for
+CLR process teardown.
+
 ## Thread sampling
 
 You can enable thread sampling using the custom plugin, which

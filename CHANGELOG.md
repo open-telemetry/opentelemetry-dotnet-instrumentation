@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Added a native continuous-profiler runtime configuration contract with
+  process-wide startup precedence and lazy CPU, selective-thread, and allocation
+  sampler lifecycle management.
 - GitHub immutable release and artifact attestation verification for the
   PowerShell installation and update commands and the shell installer. Use
   `-SkipReleaseVerification` with `Install-OpenTelemetryCore` or
