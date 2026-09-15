@@ -80,6 +80,7 @@
     <ClCompile Include="startup_hook_test.cpp" />
     <ClCompile Include="string_utils_test.cpp" />
     <ClCompile Include="thread_span_context_test.cpp" />
+    <ClCompile Include="unsafe_accessor_type_attribute_updater_test.cpp" />
     <ClCompile Include="util_test.cpp" />
     <ClCompile Include="version_struct_test.cpp" />
   </ItemGroup>
