@@ -130,6 +130,25 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
             }
         }
 
+        // Keep the declared metadata signature intact for matching and diagnostics. Runtime-async
+        // methods use a different effective return type on the IL evaluation stack: Task/ValueTask
+        // become void, while Task<T>/ValueTask<T> become T.
+        functionInfo.SetEffectiveReturnType(functionInfo.GetDeclaredReturnType());
+        if (functionInfo.IsRuntimeAsync())
+        {
+            TypeSignature runtime_async_result_type;
+            if (!TryGetRuntimeAsyncResultType(functionInfo.GetDeclaredReturnType(), metadataImport,
+                                              &runtime_async_result_type))
+            {
+                Logger::Warn("    * Skipping runtime-async method with an unsupported return signature: token=",
+                             methodDef, " caller_name=", caller.type.name, ".", caller.name, "() Signature=",
+                             caller.signature.str());
+                continue;
+            }
+
+            functionInfo.SetEffectiveReturnType(runtime_async_result_type);
+        }
+
         // As we are in the right method, we gather all information we need and stored it in to the
         // ReJIT handler.
         auto moduleHandler = m_rejit_handler->GetOrAddModule(moduleInfo.id);

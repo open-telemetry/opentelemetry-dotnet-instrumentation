@@ -42,7 +42,7 @@ partial class Build
 
     private static readonly IEnumerable<TargetFramework> TargetFrameworks =
     [
-       TargetFramework.NET8_0,
+       TargetFramework.NET10_0,
        TargetFramework.NET462,
     ];
 
@@ -52,16 +52,14 @@ partial class Build
         TargetFramework.NET47,
         TargetFramework.NET471,
         TargetFramework.NET472,
-        TargetFramework.NET8_0,
-        TargetFramework.NET9_0,
-        TargetFramework.NET10_0
+        TargetFramework.NET10_0,
+        TargetFramework.NET11_0
     ];
 
     private static readonly IEnumerable<TargetFramework> TestFrameworks =
     [
         ..TargetFrameworks,
-        TargetFramework.NET9_0,
-        TargetFramework.NET10_0
+        TargetFramework.NET11_0
     ];
 
     Target CreateRequiredDirectories => _ => _
@@ -174,7 +172,18 @@ partial class Build
                 }
             }
 
-            foreach (var app in testApps)
+            var testApplications = testApps.ToArray();
+            var testProjects = Solution.GetManagedTestProjects().ToArray();
+
+            if (TestTargetFramework != TargetFramework.NOT_SPECIFIED)
+            {
+                ResolveProjectTargetFrameworks(
+                    testApplications
+                        .Where(app => !app.Directory.ContainsFile("packages.config"))
+                        .Concat(testProjects));
+            }
+
+            foreach (var app in testApplications)
             {
 
                 // Special case: a test application using old packages.config needs special treatment.
@@ -195,21 +204,24 @@ partial class Build
                 }
 
                 string actualTestTfm = TestTargetFramework;
-                if (TestTargetFramework != TargetFramework.NOT_SPECIFIED &&
-                    !app.GetTargetFrameworks().Contains(actualTestTfm))
+                if (TestTargetFramework != TargetFramework.NOT_SPECIFIED)
                 {
-                    // Before skipping this app check if not a special case for .NET Framework
-                    actualTestTfm = null;
-                    if (TestTargetFramework == TargetFramework.NET462)
+                    var appTargetFrameworks = GetProjectTargetFrameworks(app);
+                    if (!appTargetFrameworks.Contains(actualTestTfm))
                     {
-                        actualTestTfm = app.GetTargetFrameworks().FirstOrDefault(tfm => tfm.StartsWith("net4"));
-                    }
+                        // Before skipping this app check if not a special case for .NET Framework
+                        actualTestTfm = null;
+                        if (TestTargetFramework == TargetFramework.NET462)
+                        {
+                            actualTestTfm = appTargetFrameworks.FirstOrDefault(tfm => tfm.StartsWith("net4"));
+                        }
 
-                    if (actualTestTfm is null)
-                    {
-                        // App doesn't support the select TFM, skip it.
-                        Log.Information("Skipping {0}: no suitable TFM for {1}", app.Name, TestTargetFramework);
-                        continue;
+                        if (actualTestTfm is null)
+                        {
+                            // App doesn't support the select TFM, skip it.
+                            Log.Information("Skipping {0}: no suitable TFM for {1}", app.Name, TestTargetFramework);
+                            continue;
+                        }
                     }
                 }
 
@@ -237,10 +249,10 @@ partial class Build
                 }
             }
 
-            foreach (var project in Solution.GetManagedTestProjects())
+            foreach (var project in testProjects)
             {
                 if (TestTargetFramework != TargetFramework.NOT_SPECIFIED &&
-                    !project.GetTargetFrameworks().Contains(TestTargetFramework))
+                    !GetProjectTargetFrameworks(project).Contains(TestTargetFramework))
                 {
                     // Skip this test project if it doesn't support the selected test TFM.
                     continue;
@@ -429,7 +441,7 @@ partial class Build
 
             // Generate .NET (Core) redirects
             // .NET Core version normalization:
-            // net8.0 -> 80, net9.0 -> 90, net10.0 -> 100
+            // net10.0 -> 100, net11.0 -> 110
             AssemblyRedirectionSourceGenerator.Generate(
                 TracerHomeDirectory / TargetFramework.OutputFolderNet,
                 SourceDirectory / Projects.AutoInstrumentationNative / $"assembly_redirection_{TargetFramework.OutputFolderNet}.h",
@@ -589,11 +601,16 @@ partial class Build
                 }
             }
 
+            if (TestTargetFramework != TargetFramework.NOT_SPECIFIED || ShouldRunTargetFrameworksSeparately())
+            {
+                ResolveProjectTargetFrameworks(unitTestProjects);
+            }
+
             if (TestTargetFramework != TargetFramework.NOT_SPECIFIED)
             {
                 unitTestProjects = unitTestProjects
                     .Where(p =>
-                        p.GetTargetFrameworks().Contains(TestTargetFramework) &&
+                        GetProjectTargetFrameworks(p).Contains(TestTargetFramework) &&
                         (p.Name != Projects.Tests.AutoInstrumentationLoaderTests || TargetFrameworks.Contains(TestTargetFramework)))
                     .ToArray();
             }
@@ -613,7 +630,7 @@ partial class Build
                 {
                     foreach (var project in unitTestProjects)
                     {
-                        foreach (var targetFramework in project.GetTargetFrameworks())
+                        foreach (var targetFramework in GetProjectTargetFrameworks(project))
                         {
                             DotNetTest(config => ConfigureUnitTest(config)
                                 .SetFramework(targetFramework)
@@ -658,7 +675,7 @@ partial class Build
 
                 if (ShouldRunTargetFrameworksSeparately())
                 {
-                    foreach (var targetFramework in project.GetTargetFrameworks())
+                    foreach (var targetFramework in GetProjectTargetFrameworks(project))
                     {
                         DotNetTest(config => ConfigureIntegrationTest(config)
                             .SetFramework(targetFramework));

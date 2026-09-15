@@ -614,6 +614,16 @@ instrumentation/development:
             assembly:
               name: TestApplication.NoCode
             type: TestApplication.NoCode.NoCodeTestingClass
+            method: MultiDimensionalArrayTaskTestMethodAsync
+            signature:
+              return_type: System.Threading.Tasks.Task`1[System.Int32[,]]
+              parameter_types:
+          span:
+             name: Span-MultiDimensionalArrayTaskTestMethodAsync
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NoCodeTestingClass
             method: ValueTaskTestMethodAsync
             signature:
               return_type: System.Threading.Tasks.ValueTask
