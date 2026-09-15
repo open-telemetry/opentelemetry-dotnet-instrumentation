@@ -213,6 +213,7 @@ internal static class Instrumentation
             }
 
             RegisterBytecodeDerivedInstrumentations(InstrumentationDefinitions.GetDerivedDefinitions());
+            RegisterBytecodeInterfaceInstrumentations(InstrumentationDefinitions.GetInterfaceDefinitions());
         }
         else
         {
@@ -412,6 +413,11 @@ internal static class Instrumentation
     private static void RegisterBytecodeDerivedInstrumentations(InstrumentationDefinitions.Payload payload)
     {
         RegisterBytecodeInstrumentations(payload, "derived", NativeMethods.AddDerivedInstrumentations);
+    }
+
+    private static void RegisterBytecodeInterfaceInstrumentations(InstrumentationDefinitions.Payload payload)
+    {
+        RegisterBytecodeInstrumentations(payload, "interface", NativeMethods.AddInterfaceInstrumentations);
     }
 
     private static void RegisterBytecodeInstrumentations(InstrumentationDefinitions.Payload payload, string type, Action<string, NativeCallTargetDefinition[]> register)

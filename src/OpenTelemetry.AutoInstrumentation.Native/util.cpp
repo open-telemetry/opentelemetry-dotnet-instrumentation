@@ -52,13 +52,13 @@ WSTRING Trim(const WSTRING& str)
 
     WSTRING trimmed = str;
 
-    auto lpos = trimmed.find_first_not_of(WStr(" \t"));
+    auto lpos = trimmed.find_first_not_of(WStr(" \f\n\r\t\v"));
     if (lpos != WSTRING::npos && lpos > 0)
     {
         trimmed = trimmed.substr(lpos);
     }
 
-    auto rpos = trimmed.find_last_not_of(WStr(" \t"));
+    auto rpos = trimmed.find_last_not_of(WStr(" \f\n\r\t\v"));
     if (rpos != WSTRING::npos)
     {
         trimmed = trimmed.substr(0, rpos + 1);

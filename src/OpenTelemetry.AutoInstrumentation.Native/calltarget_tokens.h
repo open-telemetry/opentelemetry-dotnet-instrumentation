@@ -11,6 +11,7 @@
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include "clr_helpers.h"
 #include "com_ptr.h"
@@ -38,9 +39,6 @@ private:
     mdToken getTypeFromHandleToken = mdTokenNil;
     mdTypeRef runtimeMethodHandleRef = mdTypeRefNil;
 
-    // CallTarget tokens
-    mdAssemblyRef profilerAssemblyRef = mdAssemblyRefNil;
-
     mdMemberRef callTargetStateTypeGetDefault = mdMemberRefNil;
     mdMemberRef callTargetReturnVoidTypeGetDefault = mdMemberRefNil;
     mdMemberRef getDefaultMemberRef = mdMemberRefNil;
@@ -51,16 +49,20 @@ private:
     mdMemberRef GetCallTargetStateDefaultMemberRef();
     mdMemberRef GetCallTargetReturnVoidDefaultMemberRef();
     mdMemberRef GetCallTargetReturnValueDefaultMemberRef(mdTypeSpec callTargetReturnTypeSpec);
-    mdMethodSpec GetCallTargetDefaultValueMethodSpec(TypeSignature* methodArgument);
+    mdMethodSpec GetCallTargetDefaultValueMethodSpec(const TypeSignature* methodArgument);
 
     HRESULT ModifyLocalSig(ILRewriter* reWriter, TypeSignature* methodReturnValue, ULONG* callTargetStateIndex,
                            ULONG* exceptionIndex, ULONG* callTargetReturnIndex, ULONG* returnValueIndex,
-                           mdToken* callTargetStateToken, mdToken* exceptionToken, mdToken* callTargetReturnToken);
+                           mdToken* callTargetStateToken, mdToken* exceptionToken, mdToken* callTargetReturnToken,
+                           std::vector<ULONG>& additionalLocalIndices);
 
     HRESULT WriteBeginMethodWithArgumentsArray(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
                                                const TypeInfo* currentType, ILInstr** instruction);
 
 protected:
+    // CallTarget tokens
+    mdAssemblyRef profilerAssemblyRef = mdAssemblyRefNil;
+
     // The variables 'enable_by_ref_instrumentation' and 'enable_calltarget_state_by_ref' will always be true,
     // but instead of removing them and the conditional branches they affect, we will keep the variables to make
     // future upstream pulls easier.
@@ -73,17 +75,21 @@ protected:
     mdTypeRef  exTypeRef                      = mdTypeRefNil;
 
     ModuleMetadata* GetMetadata();
-    HRESULT         EnsureBaseCalltargetTokens();
+    virtual HRESULT EnsureBaseCalltargetTokens();
     mdTypeSpec      GetTargetReturnValueTypeRef(TypeSignature* returnArgument);
 
     virtual const WSTRING& GetCallTargetType()              = 0;
     virtual const WSTRING& GetCallTargetStateType()         = 0;
     virtual const WSTRING& GetCallTargetReturnType()        = 0;
     virtual const WSTRING& GetCallTargetReturnGenericType() = 0;
+    virtual void AddAdditionalLocals(COR_SIGNATURE (&signatureBuffer)[500], ULONG& signatureOffset,
+                                     ULONG& signatureSize);
 
     CallTargetTokens(ModuleMetadata* moduleMetadataPtr);
 
 public:
+    virtual int GetAdditionalLocalsCount();
+
     mdTypeRef GetObjectTypeRef();
     mdTypeRef GetExceptionTypeRef();
     mdTypeRef GetRuntimeTypeHandleTypeRef();
@@ -91,11 +97,12 @@ public:
     mdAssemblyRef GetCorLibAssemblyRef();
     mdToken GetCurrentTypeRef(const TypeInfo* currentType, bool& isValueType);
 
-    HRESULT ModifyLocalSigAndInitialize(void* rewriterWrapperPtr, FunctionInfo* functionInfo,
+    HRESULT ModifyLocalSigAndInitialize(void* rewriterWrapperPtr, TypeSignature* methodReturnType,
                                         ULONG* callTargetStateIndex, ULONG* exceptionIndex,
                                         ULONG* callTargetReturnIndex, ULONG* returnValueIndex,
                                         mdToken* callTargetStateToken, mdToken* exceptionToken,
-                                        mdToken* callTargetReturnToken, ILInstr** firstInstruction);
+                                        mdToken* callTargetReturnToken, ILInstr** firstInstruction,
+                                        std::vector<ULONG>& additionalLocalIndices);
 
     HRESULT WriteCallTargetReturnGetReturnValue(void* rewriterWrapperPtr, mdTypeSpec callTargetReturnTypeSpec,
                                                 ILInstr** instruction);

@@ -29,6 +29,9 @@ public class Plugin : IPlugin
             [
                 // Trace - StrongNameValidation
                 new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "Execute",  ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(Validator).Assembly.FullName!, "TestLibrary.InstrumentationTarget.StrongNamedValidation.Validator"),
+                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "BubbleUpOnBegin", ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(BubbleUpOnBeginValidator).Assembly.FullName!, typeof(BubbleUpOnBeginValidator).FullName!),
+                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "BubbleUpOnEnd", ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(BubbleUpOnEndValidator).Assembly.FullName!, typeof(BubbleUpOnEndValidator).FullName!),
+                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "IgnoreRegularIntegrationException", ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(RegularExceptionValidator).Assembly.FullName!, typeof(RegularExceptionValidator).FullName!),
             ]
         };
 
