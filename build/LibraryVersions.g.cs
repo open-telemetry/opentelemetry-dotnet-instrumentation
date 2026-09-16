@@ -26,7 +26,7 @@ public static partial class LibraryVersion
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("9.5.1"),
+                new("9.5.2"),
             ]
         },
         {
@@ -91,7 +91,7 @@ public static partial class LibraryVersion
             [
                 new("5.2.3"),
                 new("6.1.5"),
-                new("7.0.2"),
+                new("7.0.3"),
             ]
         },
         {
@@ -109,7 +109,7 @@ public static partial class LibraryVersion
                 new("3.0.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
                 new("3.5.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
                 new("3.7.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
-                new("3.11.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.11.2", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
             ]
         },
         {
@@ -140,7 +140,7 @@ public static partial class LibraryVersion
                 new("8.2.6"),
                 new("9.2.10", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("10.1.3", supportedFrameworks: [ "net10.0" ]),
-                new("10.2.8", supportedFrameworks: [ "net10.0" ]),
+                new("10.2.9", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -161,7 +161,9 @@ public static partial class LibraryVersion
             "TestApplication.Quartz",
             [
                 new("3.6.0"),
-                new("3.20.0"),
+                new("3.22.0"),
+                new("4.0.0", supportedFrameworks: [ "net10.0" ]),
+                new("4.1.0", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -189,7 +191,7 @@ public static partial class LibraryVersion
                 new("2.12.14"),
                 new("3.0.25", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("3.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("3.1.31", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("3.2.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
@@ -206,7 +208,7 @@ public static partial class LibraryVersion
             [
                 new("1.8.2"),
                 new("1.9.2"),
-                new("2.15.0"),
+                new("2.15.1"),
             ]
         },
         {

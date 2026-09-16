@@ -81,7 +81,7 @@ jobs:
 
       - name: Prepare build environment
         id: prepare-build-environment
-        uses: ./.github/actions/prepare-build-environment
+        uses: $/.github/actions/prepare-build-environment
         with:
           artifact-name: ${{ inputs.artifact-name }}
           environment-type: ${{ inputs.environment-type }}
@@ -96,7 +96,7 @@ jobs:
 
       - name: Restore NuGet packages
         if: ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
-        uses: ./.github/actions/run-command-in-environment
+        uses: $/.github/actions/run-command-in-environment
         with:
           container-name: ${{ steps.prepare-build-environment.outputs.container-name }}
           run: ${{ env.BUILD_SCRIPT }} Restore
@@ -104,7 +104,7 @@ jobs:
       - name: Run build target
         env:
           OS_TYPE: ${{ inputs.os-type }}
-        uses: ./.github/actions/run-command-in-environment
+        uses: $/.github/actions/run-command-in-environment
         with:
           container-name: ${{ steps.prepare-build-environment.outputs.container-name }}
           container-publish-env: ${{ inputs.os-type != '' && 'OS_TYPE' || '' }}
@@ -118,19 +118,19 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
 
       - name: Replace build artifacts
-        uses: ./.github/actions/replace-build-artifacts
+        uses: $/.github/actions/replace-build-artifacts
         with:
           replace-artifacts: ${{ inputs.replace-artifacts }}
 
       - name: Prepare test environment
-        uses: ./.github/actions/prepare-test-environment
+        uses: $/.github/actions/prepare-test-environment
         with:
           environment-type: ${{ inputs.environment-type }}
           container-name: ${{ steps.prepare-build-environment.outputs.container-name }}
           log-directory: ${{ inputs.log-directory }}
 
       - name: Test the Shell scripts from README.md
-        uses: ./.github/actions/run-command-in-environment
+        uses: $/.github/actions/run-command-in-environment
         env:
           LOG_DIRECTORY: ${{ inputs.log-directory }}
         with:
@@ -181,7 +181,7 @@ jobs:
           path: bin/installation-scripts
 
       - name: Regenerate LibraryVersions.g.cs
-        uses: ./.github/actions/run-command-in-environment
+        uses: $/.github/actions/run-command-in-environment
         with:
           container-name: ${{ steps.prepare-build-environment.outputs.container-name }}
           run: ${{ env.BUILD_SCRIPT }} GenerateLibraryVersionFiles
@@ -196,7 +196,7 @@ jobs:
 
       - name: Cleanup build environment
         if: ${{ always() }}
-        uses: ./.github/actions/cleanup-build-environment
+        uses: $/.github/actions/cleanup-build-environment
         with:
           environment-type: ${{ inputs.environment-type }}
           container-name: ${{ steps.prepare-build-environment.outputs.container-name }}
