@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+#if NET
+using System.Reflection;
+#endif
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -104,6 +107,13 @@ internal static class RuntimeSamplerTransitions
 
     private static class RuntimeSamplerNative
     {
+#if NET
+        static RuntimeSamplerNative()
+        {
+            NativeLibrary.SetDllImportResolver(typeof(RuntimeSamplerNative).Assembly, ImportResolver);
+        }
+#endif
+
         public static int Apply(
             ref RuntimeSamplerConfiguration configuration,
             uint authority,
@@ -113,6 +123,34 @@ internal static class RuntimeSamplerTransitions
                 ? ApplyWindows(ref configuration, authority, ref state)
                 : ApplyNonWindows(ref configuration, authority, ref state);
         }
+
+#if NET
+        private static IntPtr ImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+        {
+            if (libraryName is "OpenTelemetry.AutoInstrumentation.Native" or "OpenTelemetry.AutoInstrumentation.Native.dll")
+            {
+                return NativeLibrary.Load(GetProfilerPath());
+            }
+
+            return IntPtr.Zero;
+        }
+
+        private static string GetProfilerPath()
+        {
+            var bitnessSpecificPathVariable = Environment.Is64BitProcess
+                ? "CORECLR_PROFILER_PATH_64"
+                : "CORECLR_PROFILER_PATH_32";
+            var profilerPath = Environment.GetEnvironmentVariable(bitnessSpecificPathVariable) ??
+                Environment.GetEnvironmentVariable("CORECLR_PROFILER_PATH");
+
+            if (!string.IsNullOrWhiteSpace(profilerPath))
+            {
+                return profilerPath;
+            }
+
+            throw new DllNotFoundException("Could not find native profiler path.");
+        }
+#endif
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", EntryPoint = "ApplyContinuousProfilerConfigurationV1")]
