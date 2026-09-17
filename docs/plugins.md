@@ -339,7 +339,7 @@ public class MyContinuousProfilerPlugin : IPlugin, IContinuousProfilerPlugin
 
 | Settings type                                           | NuGet package              | NuGet version |
 |---------------------------------------------------------|----------------------------|---------------|
-| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.7.0-alpha.1 |
+| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.7.0-alpha.2 |
 
 ## Requirements
 
