@@ -550,6 +550,7 @@ instrumentation/development:
       netruntime:          # .NET Runtime metrics
       nservicebus:         # NServiceBus metrics
       process:             # Process metrics
+      quartz:              # Quartz metrics
       sqlclient:           # SQL Client metrics
     logs:
       ilogger:             # Microsoft.Extensions.Logging
