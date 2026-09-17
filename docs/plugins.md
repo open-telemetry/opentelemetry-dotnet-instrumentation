@@ -313,7 +313,7 @@ public class MyContinuousProfilerPlugin : IPlugin, IContinuousProfilerPlugin
 | OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions                  | OpenTelemetry.Instrumentation.Http                | 1.18.0        |
 | OpenTelemetry.Instrumentation.Quartz.QuartzInstrumentationOptions                         | OpenTelemetry.Instrumentation.Quartz              | 1.18.0-beta.1 |
 | OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions              | OpenTelemetry.Instrumentation.SqlClient           | 1.18.0        |
-| OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions | OpenTelemetry.Instrumentation.StackExchangeRedis  | 1.18.0-beta.2 |
+| OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions | OpenTelemetry.Instrumentation.StackExchangeRedis  | 1.18.0-beta.3 |
 | OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                               | OpenTelemetry.Instrumentation.Wcf                 | 1.18.0-beta.1 |
 
 ### Metrics
@@ -339,7 +339,7 @@ public class MyContinuousProfilerPlugin : IPlugin, IContinuousProfilerPlugin
 
 | Settings type                                           | NuGet package              | NuGet version |
 |---------------------------------------------------------|----------------------------|---------------|
-| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.7.0-alpha.1 |
+| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.7.0-alpha.2 |
 
 ## Requirements
 

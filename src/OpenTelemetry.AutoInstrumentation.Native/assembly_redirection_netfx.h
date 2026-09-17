@@ -41,9 +41,9 @@
         { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 18, 0, 1303} }, \
         { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 18, 0, 1302} }, \
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 18, 0, 1309} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 18, 0, 1343} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 18, 0, 1354} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 18, 0, 1310} }, \
-        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1339} }, \
+        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1355} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 18, 0, 1345} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 18, 0, 1319} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 18, 0, 1314} }, \
@@ -190,9 +190,9 @@
         { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 18, 0, 1303} }, \
         { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 18, 0, 1302} }, \
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 18, 0, 1309} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 18, 0, 1343} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 18, 0, 1354} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 18, 0, 1310} }, \
-        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1339} }, \
+        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1355} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 18, 0, 1345} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 18, 0, 1319} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 18, 0, 1314} }, \
@@ -338,9 +338,9 @@
         { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 18, 0, 1303} }, \
         { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 18, 0, 1302} }, \
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 18, 0, 1309} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 18, 0, 1343} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 18, 0, 1354} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 18, 0, 1310} }, \
-        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1339} }, \
+        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1355} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 18, 0, 1345} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 18, 0, 1319} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 18, 0, 1314} }, \
@@ -404,9 +404,9 @@
         { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 18, 0, 1303} }, \
         { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 18, 0, 1302} }, \
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 18, 0, 1309} }, \
-        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 18, 0, 1343} }, \
+        { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 18, 0, 1354} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 18, 0, 1310} }, \
-        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1339} }, \
+        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1355} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 18, 0, 1345} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 18, 0, 1319} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 18, 0, 1314} }, \
