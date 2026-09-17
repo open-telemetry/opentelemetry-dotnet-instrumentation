@@ -13,6 +13,25 @@ internal static class ResourceConfigurator
         var resourceBuilder = ResourceBuilder
             .CreateEmpty(); // Don't use CreateDefault because it puts service name unknown by default.
 
+        foreach (var enabledResourceDetector in resourceSettings.EnabledDetectors)
+        {
+            resourceBuilder = enabledResourceDetector switch
+            {
+#if NET
+                ResourceDetector.Container => Wrappers.AddContainerResourceDetector(resourceBuilder),
+                ResourceDetector.AzureContainerApps => Wrappers.AddAzureContainerAppsResourceDetector(resourceBuilder),
+#endif
+                ResourceDetector.AzureAppService => Wrappers.AddAzureAppServiceResourceDetector(resourceBuilder),
+                ResourceDetector.ProcessRuntime => Wrappers.AddProcessRuntimeResourceDetector(resourceBuilder),
+                ResourceDetector.Process => Wrappers.AddProcessResourceDetector(resourceBuilder),
+                ResourceDetector.Host => Wrappers.AddHostResourceDetector(resourceBuilder),
+                ResourceDetector.OperatingSystem => Wrappers.AddOperatingSystemResourceDetector(resourceBuilder),
+                _ => resourceBuilder
+            };
+        }
+
+        // Added after the detectors so that explicitly configured attributes take precedence:
+        // ResourceBuilder.Build() merges in registration order and the last value wins.
         if (resourceSettings.EnvironmentalVariablesDetectorEnabled)
         {
             resourceBuilder.AddEnvironmentVariableDetector();
@@ -24,23 +43,6 @@ internal static class ResourceConfigurator
                 new(Constants.DistributionAttributes.TelemetryDistroVersionAttributeName, AutoInstrumentationVersion.Version)
             ])
             .AddAttributes(resourceSettings.Resources);
-
-        foreach (var enabledResourceDetector in resourceSettings.EnabledDetectors)
-        {
-            resourceBuilder = enabledResourceDetector switch
-            {
-#if NET
-                ResourceDetector.Container => Wrappers.AddContainerResourceDetector(resourceBuilder),
-#endif
-                ResourceDetector.AzureAppService => Wrappers.AddAzureAppServiceResourceDetector(resourceBuilder),
-                ResourceDetector.AzureContainerApps => Wrappers.AddAzureContainerAppsResourceDetector(resourceBuilder),
-                ResourceDetector.ProcessRuntime => Wrappers.AddProcessRuntimeResourceDetector(resourceBuilder),
-                ResourceDetector.Process => Wrappers.AddProcessResourceDetector(resourceBuilder),
-                ResourceDetector.Host => Wrappers.AddHostResourceDetector(resourceBuilder),
-                ResourceDetector.OperatingSystem => Wrappers.AddOperatingSystemResourceDetector(resourceBuilder),
-                _ => resourceBuilder
-            };
-        }
 
         var resource = resourceBuilder.Build();
         if (resource.Attributes.All(kvp => kvp.Key != Constants.ResourceAttributes.AttributeServiceName))
@@ -80,11 +82,13 @@ internal static class ResourceConfigurator
             return resourceBuilder.AddAzureAppServiceDetector();
         }
 
+#if NET
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static ResourceBuilder AddAzureContainerAppsResourceDetector(ResourceBuilder resourceBuilder)
         {
             return resourceBuilder.AddAzureContainerAppsDetector();
         }
+#endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static ResourceBuilder AddProcessRuntimeResourceDetector(ResourceBuilder resourceBuilder)
