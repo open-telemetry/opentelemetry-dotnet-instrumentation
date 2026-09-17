@@ -85,6 +85,23 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
         return outcome(RuntimeSamplerApplyResult::ActivationFailed);
     }
 
+    // A worker that completed its startup handshake may still fail later while sampling. That invalidates the
+    // committed thread-sampling producer itself, unlike a candidate-only activation failure. Observe this terminal
+    // dependency state before authority or NoChange handling so no later snapshot can be acknowledged as healthy.
+    if (sampler_ != nullptr && sampler_->HasThreadSamplingWorkerFailed())
+    {
+        activationFailed_         = true;
+        auto* const failedSampler = sampler_.get();
+        const auto  failedOutcome = outcome(RuntimeSamplerApplyResult::ActivationFailed);
+
+        // Shutdown joins the completed worker and tears down its dependent sampler graph. It must run without the
+        // controller lock: worker paths never take configurationMutex_, and joining while holding it would create a
+        // lifecycle wait edge from Apply to a control-plane lock.
+        lock.unlock();
+        failedSampler->Shutdown();
+        return failedOutcome;
+    }
+
     if (source != RuntimeSamplerAuthority::Seed && source != RuntimeSamplerAuthority::ControlPlane)
     {
         return outcome(RuntimeSamplerApplyResult::RejectedInvalidArgument);

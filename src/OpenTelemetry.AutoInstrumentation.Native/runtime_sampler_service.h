@@ -75,6 +75,8 @@ private:
     bool                          activationFailed_                 = false;
     bool                          requiredClrEventsEnabled_         = false;
     bool                          selectiveSamplingBuffersPrepared_ = false;
+
+    friend class RuntimeSamplerServiceTestPeer;
 };
 
 } // namespace continuous_profiler

@@ -183,14 +183,14 @@ Thread sampling resumes when any of the buffers are empty.
 
 #### How do I know if it's working?
 
-At startup, the OpenTelemetry Instrumentation for .NET logs the string
-`ContinuousProfiler::StartThreadSampling` at `info` log level.
+Whenever a continuous-profiling configuration snapshot is applied, the native
+profiler logs `RuntimeSamplerService: configuration applied` at `info` level.
 
 You can grep for this in the native logs for the instrumentation
 to see something like this:
 
 ```text
-10/12/22 12:10:31.962 PM [12096|22036] [info] ContinuousProfiler::StartThreadSampling
+10/12/22 12:10:31.962 PM [12096|22036] [info] RuntimeSamplerService: configuration applied.
 ```
 
 #### How can I see Continuous Profiling configuration?
@@ -277,7 +277,7 @@ If you don't see `[StackCapture] Canary thread ready` in the logs:
 
 1. Ensure thread sampling is enabled in the plugin configuration
 2. Check that the profiler is successfully attached (look for
-   `ContinuousProfiler::StartThreadSampling` in the logs)
+   `RuntimeSamplerService: configuration applied` in the logs)
 
 ## Allocation sampling
 

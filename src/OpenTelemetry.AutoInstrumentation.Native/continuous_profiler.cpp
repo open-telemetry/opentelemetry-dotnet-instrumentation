@@ -1336,17 +1336,22 @@ static void SamplingThreadMainCore(ContinuousProfiler*    prof,
     {
         initializeCurrentThreadResult = info7->InitializeCurrentThread();
     }
-    initializationResult.set_value(initializeCurrentThreadResult);
-    initializationResultPublished = true;
     if (FAILED(initializeCurrentThreadResult))
     {
+        initializationResult.set_value(initializeCurrentThreadResult);
+        initializationResultPublished = true;
         return;
     }
 
     std::unordered_map<ThreadID, std::vector<FunctionIdentifier>> threadStacksBuffer;
     unsigned int                                                  iteration = 0;
     ThreadSamplingConfiguration configuration                               = prof->PullThreadSamplingConfiguration();
+    // The activation handshake covers every fallible bootstrap operation. In particular, ReserveCapacity may
+    // allocate; publishing readiness before it succeeds would let Apply commit a worker that immediately exits.
     ReserveCapacity(prof, threadStacksBuffer);
+
+    initializationResult.set_value(initializeCurrentThreadResult);
+    initializationResultPublished = true;
 
     const auto startTime    = std::chrono::steady_clock::now();
     auto       next_refresh = GetNextRefreshTime(startTime);
@@ -1408,9 +1413,9 @@ static void SamplingThreadMainCore(ContinuousProfiler*    prof,
     }
 }
 
-static void SamplingThreadMain(ContinuousProfiler*   prof,
-                               ShutdownToken         shutdownToken,
-                               std::promise<HRESULT> initializationResult) noexcept
+void ContinuousProfiler::SamplingThreadMain(ContinuousProfiler*   prof,
+                                            ShutdownToken         shutdownToken,
+                                            std::promise<HRESULT> initializationResult) noexcept
 {
     bool initializationResultPublished = false;
     try
@@ -1428,6 +1433,10 @@ static void SamplingThreadMain(ContinuousProfiler*   prof,
             catch (...)
             {
             }
+        }
+        else
+        {
+            prof->MarkThreadSamplingWorkerFailed();
         }
 
         try
@@ -1449,6 +1458,10 @@ static void SamplingThreadMain(ContinuousProfiler*   prof,
             catch (...)
             {
             }
+        }
+        else
+        {
+            prof->MarkThreadSamplingWorkerFailed();
         }
 
         try
@@ -1555,7 +1568,7 @@ bool ContinuousProfiler::WaitForNextThreadSamplingCycle(ThreadSamplingConfigurat
 
 bool ContinuousProfiler::StartThreadSampling() noexcept
 {
-    if (IsShutdownRequested())
+    if (IsShutdownRequested() || HasThreadSamplingWorkerFailed())
     {
         return false;
     }
@@ -1596,6 +1609,16 @@ bool ContinuousProfiler::StartThreadSampling() noexcept
         thread_sampling_thread_.reset();
         return false;
     }
+}
+
+bool ContinuousProfiler::HasThreadSamplingWorkerFailed() const noexcept
+{
+    return thread_sampling_worker_failed_.load(std::memory_order_acquire);
+}
+
+void ContinuousProfiler::MarkThreadSamplingWorkerFailed() noexcept
+{
+    thread_sampling_worker_failed_.store(true, std::memory_order_release);
 }
 
 void ContinuousProfiler::Shutdown()

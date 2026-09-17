@@ -421,6 +421,7 @@ public:
     ThreadSamplingConfiguration PullThreadSamplingConfiguration() const;
     bool                        WaitForNextThreadSamplingCycle(ThreadSamplingConfiguration& configuration);
     bool                        StartThreadSampling() noexcept;
+    bool                        HasThreadSamplingWorkerFailed() const noexcept;
     void                        Shutdown();
     bool                        IsShutdownRequested() const noexcept;
     ShutdownToken               GetShutdownToken() const noexcept;
@@ -453,6 +454,11 @@ public:
     void                 PublishBuffer(uint32_t samplingInterval);
 
 private:
+    static void SamplingThreadMain(ContinuousProfiler*   prof,
+                                   ShutdownToken         shutdownToken,
+                                   std::promise<HRESULT> initializationResult) noexcept;
+    void        MarkThreadSamplingWorkerFailed() noexcept;
+
     enum class AllocationSamplingSessionState
     {
         None,
@@ -470,6 +476,9 @@ private:
     std::condition_variable      thread_sampling_configuration_cv_;
     ThreadSamplingConfiguration  desired_thread_sampling_configuration_;
     std::unique_ptr<std::thread> thread_sampling_thread_;
+    // Once a ready worker exits unexpectedly, this sampler dependency is terminal. RuntimeSamplerService observes
+    // the failure before accepting another controller transaction and tears down the complete sampler graph.
+    std::atomic_bool thread_sampling_worker_failed_{false};
     // RuntimeSamplerService serializes allocation session transitions with its configuration gate. Failed CLR start
     // or stop calls permanently disable only this producer branch because either failure can leave session ownership
     // ambiguous. After the gate admits terminal shutdown, only the ContinuousProfiler shutdown owner may mutate it.
@@ -477,6 +486,8 @@ private:
     AllocationSamplingSessionState      allocation_sampling_session_state_ = AllocationSamplingSessionState::None;
     IAllocationSamplingSessionProvider& allocationSamplingSessionProvider_;
     IStackWalker*                       stackWalker_ = nullptr;
+
+    friend class ContinuousProfilerTestPeer;
 };
 
 // Captures one complete set of thread stacks for the current sampling cohort.

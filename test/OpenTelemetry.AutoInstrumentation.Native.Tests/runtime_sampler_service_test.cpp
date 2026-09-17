@@ -10,6 +10,31 @@
 
 using namespace continuous_profiler;
 
+namespace continuous_profiler
+{
+
+class ContinuousProfilerTestPeer
+{
+public:
+    static void SimulateExitedSamplingWorker(ContinuousProfiler& profiler)
+    {
+        // Match the no-throw worker boundary: std::thread remains non-null and joinable after its entry point exits.
+        profiler.thread_sampling_thread_ = std::make_unique<std::thread>([] {});
+        profiler.MarkThreadSamplingWorkerFailed();
+    }
+};
+
+class RuntimeSamplerServiceTestPeer
+{
+public:
+    static void SetSampler(RuntimeSamplerService& service, std::unique_ptr<ContinuousProfiler> sampler) noexcept
+    {
+        service.sampler_ = std::move(sampler);
+    }
+};
+
+} // namespace continuous_profiler
+
 namespace
 {
 
@@ -216,6 +241,24 @@ TEST(RuntimeSamplerServiceTest, ThreadSamplingStartWaitsForWorkerInitialization)
     ContinuousProfiler                    profiler(sessions);
 
     EXPECT_FALSE(profiler.StartThreadSampling());
+}
+
+TEST(RuntimeSamplerServiceTest, FailedSamplingWorkerTerminatesTheService)
+{
+    FakeAllocationSamplingSessionProvider sessions;
+    RuntimeSamplerService                 service(nullptr, nullptr, RuntimeType::Unknown);
+    auto                                  sampler = std::make_unique<ContinuousProfiler>(sessions);
+
+    // Model the no-throw worker boundary after it has published readiness. The worker cannot be recreated because
+    // the already committed sampler graph no longer has its periodic-sampling dependency.
+    ContinuousProfilerTestPeer::SimulateExitedSamplingWorker(*sampler);
+    EXPECT_FALSE(sampler->StartThreadSampling());
+    RuntimeSamplerServiceTestPeer::SetSampler(service, std::move(sampler));
+
+    EXPECT_EQ(RuntimeSamplerApplyResult::ActivationFailed,
+              Apply(service, RuntimeSamplerAuthority::ControlPlane, Configuration(0, 0, 0)));
+    EXPECT_EQ(RuntimeSamplerApplyResult::ActivationFailed,
+              Apply(service, RuntimeSamplerAuthority::ControlPlane, Configuration(1000, 0, 0)));
 }
 
 TEST(RuntimeSamplerServiceTest, AllocationSamplerObservesAZeroTargetPublishedAtRuntime)
