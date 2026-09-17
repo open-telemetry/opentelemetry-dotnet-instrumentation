@@ -72,7 +72,7 @@ public class ResourceConfiguratorTests
         var resource = ResourceConfigurator.CreateResourceBuilder(settings).Build();
 
         Assert.Equal("azure", resource.Attributes.FirstOrDefault(a => a.Key == CloudProvider).Value);
-        Assert.Equal("azure_container_apps", resource.Attributes.FirstOrDefault(a => a.Key == CloudPlatform).Value);
+        Assert.Equal("azure.container_apps", resource.Attributes.FirstOrDefault(a => a.Key == CloudPlatform).Value);
 
         // The detector supplies service.name, taking precedence over the fallback.
         Assert.Equal("test-app", resource.Attributes.FirstOrDefault(a => a.Key == ServiceName).Value);
