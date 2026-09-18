@@ -23,7 +23,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Added support for [Quartz](https://www.nuget.org/packages/Quartz)
   traces and metrics instrumentation for version `4`+ for .NET 10 only.
 - `AZURECONTAINERAPPS` resource detector, detecting Azure Container Apps
-  resource information.
+  resource information for .NET only.
 
 ### Changed
 
