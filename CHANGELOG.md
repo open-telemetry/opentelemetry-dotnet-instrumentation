@@ -20,6 +20,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   OpAMP custom messages.
 - Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
   traces instrumentation for versions `3.1.x`+ for .NET only.
+- Added support for [Quartz](https://www.nuget.org/packages/Quartz)
+  traces and metrics instrumentation for version `4`+ for .NET 10 only.
 
 ### Changed
 
@@ -41,10 +43,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.Quartz` from `1.15.1-beta.1` to `1.18.0-beta.1`,
   - `OpenTelemetry.Instrumentation.Runtime` from `1.15.1` to `1.18.0`,
   - `OpenTelemetry.Instrumentation.SqlClient` from `1.16.0` to `1.18.0`,
-  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.16.0-beta.1` to `1.18.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.16.0-beta.1` to `1.18.0-beta.3`,
   - `OpenTelemetry.Instrumentation.Wcf` from `1.16.0-beta.1` to `1.18.0-beta.1`,
-  - `OpenTelemetry.OpAmp.Client` from `0.6.0-alpha.1` to `0.7.0-alpha.1`,
-  - `OpenTelemetry.Resources.Azure` from `1.15.1-beta.1` to `1.18.0-beta.1`,
+  - `OpenTelemetry.OpAmp.Client` from `0.6.0-alpha.1` to `0.7.0-alpha.2`,
+  - `OpenTelemetry.Resources.Azure` from `1.15.1-beta.1` to `1.18.0-beta.2`,
   - `OpenTelemetry.Resources.Container` from `1.15.1-beta.1` to `1.18.0-beta.1`,
   - `OpenTelemetry.Resources.Host` from `1.15.1-beta.1` to `1.18.0-beta.1`,
   - `OpenTelemetry.Resources.OperatingSystem` from `1.15.1-beta.1` to `1.18.0-beta.1`,
@@ -79,10 +81,15 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Deprecated
 
+- Deprecate support for [Quartz](https://www.nuget.org/packages/Quartz)
+  traces instrumentation for version `3.x.x`.
+
 ### Removed
 
 ### Fixed
 
+- Handle YAML null values consistently in file-based configuration and
+  distinguish them from quoted empty strings.
 - Allow an empty `opamp/development` section in file-based configuration to
   enable the OpAMP client with default settings.
 - Prevent the shell installer from using a predictable path for temporary

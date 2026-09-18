@@ -46,7 +46,7 @@ jobs:
             os-type: linux-musl
             replace-artifacts: |
               bin-windows-2022!net
-    uses: ./.github/workflows/_build.yml
+    uses: $/.github/workflows/_build.yml
     with:
       artifact-name: ${{ matrix.artifact-name }}
       runner: ${{ matrix.runner }}

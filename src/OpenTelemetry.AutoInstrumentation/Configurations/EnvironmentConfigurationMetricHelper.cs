@@ -59,6 +59,9 @@ internal static class EnvironmentConfigurationMetricHelper
                         "Microsoft.AspNetCore.MemoryPool"),
 #endif
                 MetricInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, lazyInstrumentationLoader, pluginManager),
+#if NET
+                MetricInstrumentation.Quartz => builder.AddMeter("Quartz"),
+#endif
                 _ => null,
             };
         }
