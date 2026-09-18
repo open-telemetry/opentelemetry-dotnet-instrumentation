@@ -14,6 +14,24 @@ public class Command
         Thread.Yield(); // Just to have some call to outside code.
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public void BubbleUpOnBegin()
+    {
+        Thread.Yield();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public void BubbleUpOnEnd()
+    {
+        Thread.Yield();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public void IgnoreRegularIntegrationException()
+    {
+        Thread.Yield();
+    }
+
     public void InstrumentationTargetMissingBytecodeInstrumentationType()
     {
         Thread.Sleep(0); // Just to have some call to outside code.

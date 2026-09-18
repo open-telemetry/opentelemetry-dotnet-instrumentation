@@ -213,11 +213,11 @@ public:
 
     bool ReturnTypeIsObject() const
     {
-        if (data.size() > 2 && (CallingConvention() & IMAGE_CEE_CS_CALLCONV_GENERIC) != 0)
+        if (data.size() > 3 && (CallingConvention() & IMAGE_CEE_CS_CALLCONV_GENERIC) != 0)
         {
             return data[3] == ELEMENT_TYPE_OBJECT;
         }
-        if (data.size() > 1)
+        if (data.size() > 2)
         {
             return data[2] == ELEMENT_TYPE_OBJECT;
         }
@@ -265,7 +265,8 @@ struct TypeReference
     {
     }
 
-    TypeReference(const WSTRING& assembly_name, WSTRING type_name, Version min_version, Version max_version) :
+    TypeReference(const WSTRING& assembly_name, const WSTRING& type_name, const Version& min_version,
+                  const Version& max_version) :
         assembly(*AssemblyReference::GetFromCache(assembly_name)),
         name(type_name),
         min_version(min_version),
@@ -296,8 +297,9 @@ struct MethodReference
     {
     }
 
-    MethodReference(const WSTRING& assembly_name, WSTRING type_name, WSTRING method_name, Version min_version,
-                    Version max_version, const std::vector<WSTRING>& signature_types) :
+    MethodReference(const WSTRING& assembly_name, const WSTRING& type_name, const WSTRING& method_name,
+                    const Version& min_version, const Version& max_version,
+                    const std::vector<WSTRING>& signature_types) :
         type(assembly_name, type_name, min_version, max_version),
         method_name(method_name),
         signature_types(signature_types)
@@ -315,17 +317,19 @@ struct IntegrationDefinition
     const MethodReference target_method;
     const TypeReference integration_type;
     const bool is_derived = false;
+    const bool is_interface = false;
     const bool is_exact_signature_match = true;
 
     IntegrationDefinition()
     {
     }
 
-    IntegrationDefinition(MethodReference target_method, TypeReference integration_type, bool isDerived,
-                          bool is_exact_signature_match) :
+    IntegrationDefinition(const MethodReference& target_method, const TypeReference& integration_type, bool isDerived,
+                          bool isInterface, bool is_exact_signature_match) :
         target_method(target_method),
         integration_type(integration_type),
         is_derived(isDerived),
+        is_interface(isInterface),
         is_exact_signature_match(is_exact_signature_match)
     {
     }
@@ -333,7 +337,8 @@ struct IntegrationDefinition
     inline bool operator==(const IntegrationDefinition& other) const
     {
         return target_method == other.target_method && integration_type == other.integration_type &&
-               is_derived == other.is_derived && is_exact_signature_match == other.is_exact_signature_match;
+               is_derived == other.is_derived && is_interface == other.is_interface &&
+               is_exact_signature_match == other.is_exact_signature_match;
     }
 };
 
@@ -365,7 +370,7 @@ namespace
 } // namespace
 
     std::vector<IntegrationDefinition> GetIntegrationsFromTraceMethodsConfiguration(
-    const TypeReference integration_type,
+    const TypeReference& integration_type,
     const WSTRING& configuration_string);
 
 } // namespace trace
