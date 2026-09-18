@@ -3,6 +3,7 @@
 
 #include "clr_helpers.h"
 
+#include <cstdint>
 #include <cstring>
 
 #include <set>
@@ -129,6 +130,7 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
     mdToken method_def_token  = mdTokenNil;
     WCHAR   function_name[kNameMaxSize]{};
     DWORD   function_name_len = 0;
+    DWORD   method_impl_flags = 0;
 
     PCCOR_SIGNATURE   raw_signature;
     ULONG             raw_signature_len;
@@ -146,8 +148,8 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
             break;
         case mdtMethodDef:
             hr = metadata_import->GetMemberProps(token, &parent_token, function_name, kNameMaxSize, &function_name_len,
-                                                 nullptr, &raw_signature, &raw_signature_len, nullptr, nullptr, nullptr,
-                                                 nullptr, nullptr);
+                                                 nullptr, &raw_signature, &raw_signature_len, nullptr,
+                                                 &method_impl_flags, nullptr, nullptr, nullptr);
             break;
         case mdtMethodSpec:
         {
@@ -164,6 +166,7 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
             function_name_len = DWORD(generic_info.name.length() + 1);
             method_spec_token = token;
             method_def_token  = generic_info.id;
+            method_impl_flags = generic_info.method_impl_flags;
         }
         break;
         default:
@@ -187,13 +190,18 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
                 MethodSignature(final_signature_bytes),
                 MethodSignature(method_spec_signature),
                 method_def_token,
-                FunctionMethodSignature(raw_signature, raw_signature_len)};
+                FunctionMethodSignature(raw_signature, raw_signature_len),
+                method_impl_flags};
     }
 
     final_signature_bytes = GetSignatureByteRepresentation(raw_signature_len, raw_signature);
 
-    return {token, WSTRING(function_name), type_info, MethodSignature(final_signature_bytes),
-            FunctionMethodSignature(raw_signature, raw_signature_len)};
+    return {token,
+            WSTRING(function_name),
+            type_info,
+            MethodSignature(final_signature_bytes),
+            FunctionMethodSignature(raw_signature, raw_signature_len),
+            method_impl_flags};
 }
 
 ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id)
@@ -649,6 +657,118 @@ ULONG TypeSignature::GetSignature(PCCOR_SIGNATURE& data) const
     return length;
 }
 
+bool TryGetRuntimeAsyncResultType(const TypeSignature&            runtime_async_return_type,
+                                  const ComPtr<IMetaDataImport2>& metadata_import,
+                                  TypeSignature*                  result_type)
+{
+    if (result_type == nullptr)
+    {
+        return false;
+    }
+
+    PCCOR_SIGNATURE signature;
+    const auto      signature_length = runtime_async_return_type.GetSignature(signature);
+    if (signature == nullptr || signature_length < 2)
+    {
+        return false;
+    }
+
+    PCCOR_SIGNATURE current = signature;
+    PCCOR_SIGNATURE end     = signature + signature_length;
+    unsigned char   element_type;
+    if (!ParseByte(current, end, &element_type))
+    {
+        return false;
+    }
+
+    bool is_generic = false;
+    if (element_type == ELEMENT_TYPE_GENERICINST)
+    {
+        is_generic = true;
+        if (!ParseByte(current, end, &element_type))
+        {
+            return false;
+        }
+    }
+
+    if (element_type != ELEMENT_TYPE_CLASS && element_type != ELEMENT_TYPE_VALUETYPE)
+    {
+        return false;
+    }
+
+    mdToken    type_token       = mdTokenNil;
+    uint32_t   token_length     = 0;
+    const auto remaining_length = static_cast<uint32_t>(end - current);
+    if (FAILED(CorSigUncompressToken(current, remaining_length, &type_token, &token_length)) || token_length == 0)
+    {
+        return false;
+    }
+    current += token_length;
+
+    const auto type_info = GetTypeInfo(metadata_import, type_token);
+    if (!type_info.IsValid() || type_info.name.empty())
+    {
+        Logger::Warn("[TryGetRuntimeAsyncResultType] Failed to resolve return type token: ", type_token);
+        return false;
+    }
+
+    const auto& type_name = type_info.name;
+    if (is_generic)
+    {
+        const bool is_task = element_type == ELEMENT_TYPE_CLASS && type_name == WStr("System.Threading.Tasks.Task`1");
+        const bool is_value_task =
+            element_type == ELEMENT_TYPE_VALUETYPE && type_name == WStr("System.Threading.Tasks.ValueTask`1");
+        if (!is_task && !is_value_task)
+        {
+            return false;
+        }
+
+        if (current >= end)
+        {
+            return false;
+        }
+
+        uint32_t   generic_argument_count        = 0;
+        uint32_t   generic_argument_count_length = 0;
+        const auto remaining_length              = static_cast<uint32_t>(end - current);
+        if (FAILED(CorSigUncompressData(current, remaining_length, &generic_argument_count,
+                                        &generic_argument_count_length)) ||
+            generic_argument_count_length == 0 || generic_argument_count != 1)
+        {
+            return false;
+        }
+        current += generic_argument_count_length;
+
+        if (current >= end)
+        {
+            return false;
+        }
+
+        // The TypeSignature is already bounded to the declared return type. Once the outer
+        // Task<T>/ValueTask<T> and its single generic argument are established, the remaining
+        // bytes are the complete logical T signature and must be preserved verbatim.
+        *result_type = {0, static_cast<ULONG>(end - current), current};
+        return true;
+    }
+
+    if (current != end)
+    {
+        return false;
+    }
+
+    const bool is_task = element_type == ELEMENT_TYPE_CLASS && type_name == WStr("System.Threading.Tasks.Task");
+    const bool is_value_task =
+        element_type == ELEMENT_TYPE_VALUETYPE && type_name == WStr("System.Threading.Tasks.ValueTask");
+    if (!is_task && !is_value_task)
+    {
+        return false;
+    }
+
+    static const COR_SIGNATURE void_signature[] = {ELEMENT_TYPE_VOID};
+    *result_type                                = {0, 1, void_signature};
+    return true;
+}
+
 // FunctionMethodSignature
 bool ParseByte(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd, unsigned char* pbOut)
 {
@@ -737,7 +857,6 @@ bool ParseTypeDefOrRefEncoded(PCCOR_SIGNATURE& pbCur,
     PTR CustomMod* Type
     FNPTR MethodDefSig
     FNPTR MethodRefSig
-    ARRAY Type ArrayShape
     SZARRAY CustomMod+ Type (but we do support SZARRAY Type)
  */
 bool ParseType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
@@ -809,8 +928,39 @@ bool ParseType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
             return false;
 
         case ELEMENT_TYPE_ARRAY:
+        {
             // ARRAY Type ArrayShape
-            return false;
+            if (!ParseType(pbCur, pbEnd))
+                return false;
+
+            // ArrayShape ::= Rank NumSizes Size* NumLoBounds LoBound*
+            if (!ParseNumber(pbCur, pbEnd, &number) || number == 0)
+                return false;
+
+            unsigned rank = number;
+            if (!ParseNumber(pbCur, pbEnd, &number) || number > rank)
+                return false;
+
+            for (unsigned i = 0; i < number; i++)
+            {
+                unsigned size;
+                if (!ParseNumber(pbCur, pbEnd, &size))
+                    return false;
+            }
+
+            if (!ParseNumber(pbCur, pbEnd, &number) || number > rank)
+                return false;
+
+            for (unsigned i = 0; i < number; i++)
+            {
+                // Lower bounds use compressed signed integers. ParseNumber advances over the
+                // same bounded 1/2/4-byte representation; the decoded value is not needed here.
+                unsigned lower_bound;
+                if (!ParseNumber(pbCur, pbEnd, &lower_bound))
+                    return false;
+            }
+            break;
+        }
 
         case ELEMENT_TYPE_SZARRAY:
             // SZARRAY Type

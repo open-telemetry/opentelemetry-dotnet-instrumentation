@@ -110,11 +110,12 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     FunctionInfo*          caller                 = methodHandler->GetFunctionInfo();
     TracerTokens*          tracerTokens           = module_metadata.GetTracerTokens();
     mdToken                function_token         = caller->id;
-    TypeSignature          retFuncArg             = caller->method_signature.GetReturnValue();
+    TypeSignature          retFuncArg             = caller->GetEffectiveReturnType();
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
     bool                   is_integration_method =
         integration_definition->target_method.type.assembly.name != tracemethodintegration_assemblyname;
-    bool ignoreByRefInstrumentation               = !is_integration_method;
+    bool       ignoreByRefInstrumentation         = !is_integration_method;
+    const bool isRuntimeAsync                     = caller->IsRuntimeAsync();
     const auto [retFuncElementType, retTypeFlags] = retFuncArg.GetElementTypeAndFlags();
     bool isVoid                                   = (retTypeFlags & TypeFlagVoid) > 0;
     bool isStatic = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);
@@ -138,7 +139,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     if (Logger::IsDebugEnabled())
     {
         Logger::Debug("*** CallTarget_RewriterCallback() Start: ", caller->type.name, ".", caller->name,
-                      "() [IsVoid=", isVoid, ", IsStatic=", isStatic,
+                      "() [IsVoid=", isVoid, ", IsStatic=", isStatic, ", IsRuntimeAsync=", isRuntimeAsync,
                       ", IntegrationType=", integration_definition->integration_type.name, ", Arguments=", numArgs,
                       "]");
     }
@@ -186,9 +187,10 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     mdToken  exceptionToken        = mdTokenNil;
     mdToken  callTargetReturnToken = mdTokenNil;
     ILInstr* firstInstruction      = nullptr;
-    hr = tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, caller, &callTargetStateIndex, &exceptionIndex,
-                                                   &callTargetReturnIndex, &returnValueIndex, &callTargetStateToken,
-                                                   &exceptionToken, &callTargetReturnToken, &firstInstruction);
+    hr =
+        tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, &retFuncArg, &callTargetStateIndex, &exceptionIndex,
+                                                  &callTargetReturnIndex, &returnValueIndex, &callTargetStateToken,
+                                                  &exceptionToken, &callTargetReturnToken, &firstInstruction);
     if (FAILED(hr))
     {
         // Signature/local modification failed (e.g. the method's signature is too large to
@@ -514,12 +516,12 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     if (isVoid)
     {
         hr = tracerTokens->WriteEndVoidReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type,
-                                                       &endMethodCallInstr);
+                                                       isRuntimeAsync, &endMethodCallInstr);
     }
     else
     {
         hr = tracerTokens->WriteEndReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type, &retFuncArg,
-                                                   &endMethodCallInstr);
+                                                   isRuntimeAsync, &endMethodCallInstr);
     }
     if (FAILED(hr))
     {
