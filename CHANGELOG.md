@@ -36,7 +36,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
   [`1.18.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.18.0).
 - Following packages updated
-  - `Google.Protobuf` updated from `3.35.0` to `3.36.1`,
+  - `Google.Protobuf` updated from `3.35.0` to `3.36.2`,
   - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.16.0-beta.1` to `1.18.0-beta.1`,
   - `OpenTelemetry.Instrumentation.Http` from `1.16.0` to `1.18.0`,
   - `OpenTelemetry.Instrumentation.Process` from `1.16.0-beta.1` to `1.18.0-rc.1`,
@@ -45,7 +45,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.SqlClient` from `1.16.0` to `1.18.0`,
   - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.16.0-beta.1` to `1.18.0-beta.3`,
   - `OpenTelemetry.Instrumentation.Wcf` from `1.16.0-beta.1` to `1.18.0-beta.1`,
-  - `OpenTelemetry.OpAmp.Client` from `0.6.0-alpha.1` to `0.7.0-alpha.1`,
+  - `OpenTelemetry.OpAmp.Client` from `0.6.0-alpha.1` to `0.7.0-alpha.2`,
   - `OpenTelemetry.Resources.Azure` from `1.15.1-beta.1` to `1.18.0-beta.2`,
   - `OpenTelemetry.Resources.Container` from `1.15.1-beta.1` to `1.18.0-beta.1`,
   - `OpenTelemetry.Resources.Host` from `1.15.1-beta.1` to `1.18.0-beta.1`,

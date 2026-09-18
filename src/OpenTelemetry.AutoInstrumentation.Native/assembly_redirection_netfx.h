@@ -7,7 +7,7 @@
 
 #define ASSEMBLY_REDIRECTION_NETFX \
     { 462, { \
-        { _W("Google.Protobuf"), {3, 36, 1, 0} }, \
+        { _W("Google.Protobuf"), {3, 36, 2, 0} }, \
         { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 12} }, \
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 12} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 12} }, \
@@ -43,7 +43,7 @@
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 18, 0, 1309} }, \
         { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 18, 0, 1354} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 18, 0, 1310} }, \
-        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1339} }, \
+        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1355} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 18, 0, 1345} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 18, 0, 1319} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 18, 0, 1314} }, \
@@ -156,7 +156,7 @@
         { _W("System.Xml.XPath.XDocument"), {4, 1, 0, 0} }, \
     }}, \
     { 470, { \
-        { _W("Google.Protobuf"), {3, 36, 1, 0} }, \
+        { _W("Google.Protobuf"), {3, 36, 2, 0} }, \
         { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 12} }, \
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 12} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 12} }, \
@@ -192,7 +192,7 @@
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 18, 0, 1309} }, \
         { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 18, 0, 1354} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 18, 0, 1310} }, \
-        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1339} }, \
+        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1355} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 18, 0, 1345} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 18, 0, 1319} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 18, 0, 1314} }, \
@@ -305,7 +305,7 @@
         { _W("System.Xml.XPath.XDocument"), {4, 1, 0, 0} }, \
     }}, \
     { 471, { \
-        { _W("Google.Protobuf"), {3, 36, 1, 0} }, \
+        { _W("Google.Protobuf"), {3, 36, 2, 0} }, \
         { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 12} }, \
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 12} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 12} }, \
@@ -340,7 +340,7 @@
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 18, 0, 1309} }, \
         { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 18, 0, 1354} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 18, 0, 1310} }, \
-        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1339} }, \
+        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1355} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 18, 0, 1345} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 18, 0, 1319} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 18, 0, 1314} }, \
@@ -371,7 +371,7 @@
         { _W("System.Xml.XPath.XDocument"), {4, 1, 0, 0} }, \
     }}, \
     { 472, { \
-        { _W("Google.Protobuf"), {3, 36, 1, 0} }, \
+        { _W("Google.Protobuf"), {3, 36, 2, 0} }, \
         { _W("Microsoft.Bcl.AsyncInterfaces"), {10, 0, 0, 12} }, \
         { _W("Microsoft.Extensions.Configuration"), {10, 0, 0, 12} }, \
         { _W("Microsoft.Extensions.Configuration.Abstractions"), {10, 0, 0, 12} }, \
@@ -406,7 +406,7 @@
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 18, 0, 1309} }, \
         { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 18, 0, 1354} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 18, 0, 1310} }, \
-        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1339} }, \
+        { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1355} }, \
         { _W("OpenTelemetry.Resources.Azure"), {1, 18, 0, 1345} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 18, 0, 1319} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 18, 0, 1314} }, \
