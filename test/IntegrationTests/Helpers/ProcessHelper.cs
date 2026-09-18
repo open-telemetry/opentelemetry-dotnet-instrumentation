@@ -26,6 +26,18 @@ internal sealed class ProcessHelper : IDisposable
             return;
         }
 
+        // If this is our special process type and it already has a helper...
+        if (process is InstrumentedProcessHelper.IntegrationTestProcess { AttachedHelper: not null } it)
+        {
+            // "Adopt" the state of the existing helper instead of starting a new one
+            Process = it.AttachedHelper.Process;
+            _outputBuffer = it.AttachedHelper._outputBuffer;
+            _errorBuffer = it.AttachedHelper._errorBuffer;
+            _outputMutex = it.AttachedHelper._outputMutex;
+            // Note: In this case, don't call BeginOutputReadLine()/BeginErrorReadLine() again!
+            return;
+        }
+
         Process = process;
         Process.OutputDataReceived += (_, e) => DrainOutput(e.Data, _outputBuffer, isErrorStream: false);
         Process.ErrorDataReceived += (_, e) => DrainOutput(e.Data, _errorBuffer, isErrorStream: true);
