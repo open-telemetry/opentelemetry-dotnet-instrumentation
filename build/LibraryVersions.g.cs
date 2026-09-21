@@ -76,7 +76,7 @@ public static partial class LibraryVersion
                 new("5.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "5.0.0" } }),
                 new("5.3.4", additionalMetaData: new() { { "NLogExtensionsLogging", "5.3.15" } }),
                 new("6.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "6.0.0" } }),
-                new("6.2.1", additionalMetaData: new() { { "NLogExtensionsLogging", "6.2.0" } }),
+                new("6.2.1", additionalMetaData: new() { { "NLogExtensionsLogging", "6.2.1" } }),
             ]
         },
         {
@@ -91,7 +91,7 @@ public static partial class LibraryVersion
             [
                 new("5.2.3"),
                 new("6.1.5"),
-                new("7.0.3"),
+                new("7.1.0"),
             ]
         },
         {
