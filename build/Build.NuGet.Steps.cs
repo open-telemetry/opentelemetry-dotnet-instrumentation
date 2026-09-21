@@ -92,7 +92,20 @@ partial class Build
             var output = DotNet("dotnet nuget locals global-packages --list", RootDirectory);
             foreach (var line in output)
             {
-                AbsolutePath packagesDir = Path.GetFullPath(line.Text[("global-packages: ".Length)..]);
+                const string globalPackagesLabel = "global-packages:";
+                var globalPackagesStartIndex = line.Text.IndexOf(globalPackagesLabel, StringComparison.OrdinalIgnoreCase);
+                if (globalPackagesStartIndex < 0)
+                {
+                    continue;
+                }
+
+                var packagesDirText = line.Text[(globalPackagesStartIndex + globalPackagesLabel.Length)..].Trim();
+                if (string.IsNullOrWhiteSpace(packagesDirText))
+                {
+                    continue;
+                }
+
+                AbsolutePath packagesDir = Path.GetFullPath(packagesDirText);
                 var autoInstrumentationPackagesDirectories = packagesDir.GlobDirectories(autoInstrumentationGlob);
                 autoInstrumentationPackagesDirectories.ForEach(d => d.DeleteDirectory());
             }
