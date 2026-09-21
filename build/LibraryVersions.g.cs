@@ -109,7 +109,7 @@ public static partial class LibraryVersion
                 new("3.0.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
                 new("3.5.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
                 new("3.7.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
-                new("3.11.2", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.12.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
             ]
         },
         {
@@ -163,7 +163,7 @@ public static partial class LibraryVersion
                 new("3.6.0"),
                 new("3.22.0"),
                 new("4.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("4.1.0", supportedFrameworks: [ "net10.0" ]),
+                new("4.1.1", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -191,7 +191,7 @@ public static partial class LibraryVersion
                 new("2.12.14"),
                 new("3.0.25", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("3.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("3.2.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("3.3.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
