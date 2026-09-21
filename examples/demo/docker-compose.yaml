@@ -41,14 +41,14 @@ services:
 
   # OpenTelemetry Collector
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.88.0
+    image: otel/opentelemetry-collector-contrib:0.160.0
     volumes:
       - ./otel-config.yaml:/etc/otel/config.yaml
       - ./log:/log/otel
     command: --config /etc/otel/config.yaml
     environment:
       JAEGER_ENDPOINT: "jaeger:4317"
-      LOKI_ENDPOINT: "http://loki:3100/loki/api/v1/push"
+      LOKI_ENDPOINT: "http://loki:3100/otlp"
     ports:
       - "8889:8889"   # Prometheus metrics exporter (scrape endpoint)
       - "13133:13133" # health_check extension
@@ -59,24 +59,24 @@ services:
       - loki
 
   jaeger:
-    image: jaegertracing/all-in-one:1.50.0
+    image: jaegertracing/jaeger:2.20.0
     ports:
       - "16686:16686" # Jaeger Web UI
 
   prometheus:
-    image: prom/prometheus:v2.42.0
+    image: prom/prometheus:v3.14.0
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
 
   loki:
-    image: grafana/loki:2.7.4
+    image: grafana/loki:3.7.7
     ports:
       - "3100:3100"
 
   grafana:
-    image: grafana/grafana:9.4.3
+    image: grafana/grafana:13.2.0
     volumes:
       - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
     environment:

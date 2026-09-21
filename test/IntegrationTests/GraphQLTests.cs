@@ -171,6 +171,7 @@ public class GraphQLTests : TestHelper
             if (method == "GET")
             {
                 using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                requestMessage.Headers.Add("GraphQL-Require-Preflight", "1");
                 requestMessage.Headers.Add("traceparent", w3c);
 
                 response = await client.SendAsync(requestMessage).ConfigureAwait(false);

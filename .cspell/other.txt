@@ -30,6 +30,7 @@ ifdef
 ILOGGER
 inetsrv
 JIT
+LASTEXITCODE
 LINQ
 longdate
 MASSTRANSIT
@@ -71,6 +72,7 @@ sqlserver
 srcs
 STACKEXCHANGEREDIS
 TMPDIR
+traceparent
 tracesexporter
 unencrypted
 UNENCRYPTEDSUPPORT

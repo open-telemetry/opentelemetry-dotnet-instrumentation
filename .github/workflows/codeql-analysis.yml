@@ -70,7 +70,7 @@ jobs:
         show-progress: false
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+      uses: github/codeql-action/init@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
@@ -78,7 +78,7 @@ jobs:
         queries: ${{ matrix.queries }}
 
     - name: Setup .NET
-      uses: ./.github/actions/setup-dotnet
+      uses: $/.github/actions/setup-dotnet
       if: matrix.language == 'csharp'
 
     # If the analyze step fails for one of the languages you are analyzing with
@@ -92,7 +92,7 @@ jobs:
       run: ./build.cmd BuildTracer
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
+      uses: github/codeql-action/analyze@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
       with:
         category: "/language:${{matrix.language}}"
 

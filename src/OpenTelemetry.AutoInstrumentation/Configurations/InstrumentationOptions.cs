@@ -29,6 +29,7 @@ internal class InstrumentationOptions
         GrpcNetClientInstrumentationCaptureResponseMetadata = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata, AdditionalTag.CreateGrpcResponseCache);
         HttpInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
         HttpInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
+        NpgsqlContextPropagation = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.NpgsqlContextPropagation) ?? false;
         OracleMdaDatabaseOpenTelemetryTracing = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaDatabaseOpenTelemetryTracing) ?? true;
         OracleMdaSetDbStatementForText = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText) ?? false;
         XmsExperimentalSpanAttributes = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.XmsExperimentalSpanAttributes) ?? false;
@@ -74,6 +75,11 @@ internal class InstrumentationOptions
             {
                 HttpInstrumentationCaptureRequestHeaders = HeaderConfigurationExtensions.ParseHeaders(instrumentationConfiguration.HttpClient.CaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
                 HttpInstrumentationCaptureResponseHeaders = HeaderConfigurationExtensions.ParseHeaders(instrumentationConfiguration.HttpClient.CaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
+            }
+
+            if (instrumentationConfiguration.Npgsql != null)
+            {
+                NpgsqlContextPropagation = instrumentationConfiguration.Npgsql.ContextPropagation;
             }
 
             if (instrumentationConfiguration.OracleMda != null)
@@ -144,6 +150,11 @@ internal class InstrumentationOptions
     /// Gets the list of HTTP response headers to be captured as the span tags by HTTP instrumentation.
     /// </summary>
     public IReadOnlyList<AdditionalTag> HttpInstrumentationCaptureResponseHeaders { get; } = [];
+
+    /// <summary>
+    /// Gets a value indicating whether the Npgsql instrumentation should propagate trace context to PostgreSQL.
+    /// </summary>
+    public bool NpgsqlContextPropagation { get; }
 
     /// <summary>
     /// Gets a value indicating whether the Oracle Client instrumentation should enable database OpenTelemetry tracing.

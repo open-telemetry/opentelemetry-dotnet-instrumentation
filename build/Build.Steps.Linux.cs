@@ -17,10 +17,10 @@ partial class Build
             var (major, minor, patch) = VersionHelper.GetVersionParts();
 
             CMake.Value(
-                arguments: $"../ -DCMAKE_BUILD_TYPE=Release -DOTEL_AUTO_VERSION={VersionHelper.GetVersionWithoutSuffixes()} -DOTEL_AUTO_VERSION_MAJOR={major} -DOTEL_AUTO_VERSION_MINOR={minor} -DOTEL_AUTO_VERSION_PATCH={patch}",
+                arguments: $"../ -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Release -DOTEL_AUTO_VERSION={VersionHelper.GetVersionWithoutSuffixes()} -DOTEL_AUTO_VERSION_MAJOR={major} -DOTEL_AUTO_VERSION_MINOR={minor} -DOTEL_AUTO_VERSION_PATCH={patch}",
                 workingDirectory: buildDirectory);
-            Make.Value(
-                arguments: $"",
+            CMake.Value(
+                arguments: "--build . --parallel",
                 workingDirectory: buildDirectory);
         });
 
@@ -32,10 +32,10 @@ partial class Build
         {
             var buildDirectory = Solution.GetContinuousProfilerNativeDep().Directory.ToString();
             CMake.Value(
-                arguments: "-S .",
+                arguments: "-DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -S .",
                 workingDirectory: buildDirectory);
-            Make.Value(
-                arguments: $"",
+            CMake.Value(
+                arguments: "--build . --parallel",
                 workingDirectory: buildDirectory);
         });
 

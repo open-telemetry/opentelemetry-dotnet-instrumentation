@@ -214,12 +214,10 @@ internal static class XmsInstrumentation
 
     private static string? NormalizeProviderDestination(string? raw)
     {
-        if (string.IsNullOrEmpty(raw))
+        if (raw is not { Length: > 0 } value)
         {
             return null;
         }
-
-        var value = raw;
 
         var schemeIndex = value.IndexOf("://", StringComparison.Ordinal);
         if (schemeIndex >= 0)
@@ -227,7 +225,11 @@ internal static class XmsInstrumentation
             value = value.Substring(schemeIndex + 3).TrimStart('/');
         }
 
+#if NETFRAMEWORK
+        var queryIndex = value.IndexOf('?');
+#else
         var queryIndex = value.IndexOf('?', StringComparison.Ordinal);
+#endif
         if (queryIndex >= 0)
         {
             value = value.Substring(0, queryIndex);

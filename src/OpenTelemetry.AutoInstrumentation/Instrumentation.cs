@@ -464,6 +464,10 @@ internal static class Instrumentation
                 case MetricInstrumentation.SqlClient:
                     DelayedInitialization.Metrics.AddSqlClient(lazyInstrumentationLoader, pluginManager);
                     break;
+#if NET
+                case MetricInstrumentation.Quartz:
+                    break;
+#endif
                 default:
                     Logger.Warning($"Configured metric instrumentation type is not supported: {instrumentation}");
                     if (FailFastSettings.Value.FailFast)

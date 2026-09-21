@@ -4,6 +4,7 @@
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 using Vendors.YamlDotNet.Core;
 using Vendors.YamlDotNet.Serialization;
+using Vendors.YamlDotNet.Serialization.NodeDeserializers;
 using YamlParser = Vendors.YamlDotNet.Core.Parser;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
@@ -26,13 +27,15 @@ public class ConditionalDeserializerTests
         Assert.IsType<UnmarkedClass>(value);
     }
 
-    [Fact]
-    public void WithAttribute_EmptyScalar_CreatesDefaultInstance()
+    [Theory]
+    [InlineData("---")]
+    [InlineData("null")]
+    [InlineData("Null")]
+    [InlineData("NULL")]
+    [InlineData("~")]
+    public void WithAttribute_NullScalar_CreatesDefaultInstance(string yaml)
     {
-        var inner = new DummyDeserializer();
-        var sut = new ConditionalDeserializer(inner);
-
-        var yaml = "\"\"";
+        var sut = new ConditionalDeserializer(new NullNodeDeserializer());
 
         var parser = new YamlParser(new StringReader(yaml));
         FileBasedTestHelper.MoveParserToScalar(parser);
@@ -41,40 +44,38 @@ public class ConditionalDeserializerTests
 
         Assert.True(result);
         Assert.IsType<MarkedClass>(value);
-        Assert.False(inner.Called);
     }
 
-    [Fact]
-    public void WithAttribute_MappingStart_UsesInnerDeserializer()
+    [Theory]
+    [InlineData("\"\"")]
+    [InlineData("''")]
+    public void WithAttribute_EmptyStringScalar_IsNotHandledAsNull(string yaml)
     {
-        var inner = new DummyDeserializer { ReturnValue = null };
-        var sut = new ConditionalDeserializer(inner);
+        var sut = new ConditionalDeserializer(new NullNodeDeserializer());
 
-        var parser = new YamlParser(new StringReader("{}"));
-        FileBasedTestHelper.MoveParserToScalar(parser);
-
-        var result = sut.Deserialize(parser, typeof(MarkedClass), (_, _) => null, out var value, _ => null);
-
-        Assert.True(result);
-        Assert.True(inner.Called);
-        Assert.NotNull(value);
-        Assert.IsType<MarkedClass>(value);
-    }
-
-    [Fact]
-    public void WithAttribute_NeitherScalarNorMapping_ReturnsFalse()
-    {
-        var inner = new DummyDeserializer();
-        var sut = new ConditionalDeserializer(inner);
-
-        var parser = new YamlParser(new StringReader("[]"));
+        var parser = new YamlParser(new StringReader(yaml));
         FileBasedTestHelper.MoveParserToScalar(parser);
 
         var result = sut.Deserialize(parser, typeof(MarkedClass), (_, _) => null, out var value, _ => null);
 
         Assert.False(result);
         Assert.Null(value);
-        Assert.False(inner.Called);
+    }
+
+    [Theory]
+    [InlineData("{}")]
+    [InlineData("[]")]
+    public void WithAttribute_NonNullNode_IsNotHandledAsNull(string yaml)
+    {
+        var sut = new ConditionalDeserializer(new NullNodeDeserializer());
+
+        var parser = new YamlParser(new StringReader(yaml));
+        FileBasedTestHelper.MoveParserToScalar(parser);
+
+        var result = sut.Deserialize(parser, typeof(MarkedClass), (_, _) => null, out var value, _ => null);
+
+        Assert.False(result);
+        Assert.Null(value);
     }
 
     private sealed class DummyDeserializer : INodeDeserializer

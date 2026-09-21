@@ -2,3 +2,5 @@ file_format: "1.0"
 
 opamp/development:
   server_url: "wss://localhost:4320/v1/opamp"
+  max_pending_custom_messages: 4096
+  max_pending_custom_message_bytes: 134217728
