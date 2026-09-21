@@ -44,7 +44,7 @@ enum class RuntimeSamplerStateQueryResult : int32_t
 };
 
 #pragma pack(push, 4)
-struct RuntimeSamplerConfigurationV1
+struct RuntimeSamplerConfiguration
 {
     uint32_t structureSize;
     uint32_t cpuSamplingIntervalMilliseconds;
@@ -63,43 +63,43 @@ struct RuntimeSamplerConfigurationV1
     bool AllocationEnabled() const noexcept;
     bool AnyFeatureEnabled() const noexcept;
 
-    bool operator==(const RuntimeSamplerConfigurationV1& other) const noexcept;
-    bool operator!=(const RuntimeSamplerConfigurationV1& other) const noexcept;
+    bool operator==(const RuntimeSamplerConfiguration& other) const noexcept;
+    bool operator!=(const RuntimeSamplerConfiguration& other) const noexcept;
 };
 
-struct RuntimeSamplerStateV1
+struct RuntimeSamplerState
 {
     // Committed controller state. Asynchronous workers may still be converging to this
     // configuration, and disabled infrastructure may remain allocated or await cleanup.
     uint32_t                      structureSize;
     uint32_t                      authority;
-    RuntimeSamplerConfigurationV1 committedConfiguration;
+    RuntimeSamplerConfiguration committedConfiguration;
 };
 #pragma pack(pop)
 
-struct RuntimeSamplerState
+struct RuntimeSamplerControllerState
 {
     RuntimeSamplerAuthority       authority{RuntimeSamplerAuthority::None};
-    RuntimeSamplerConfigurationV1 configuration{sizeof(RuntimeSamplerConfigurationV1), 0, 0, 0};
+    RuntimeSamplerConfiguration configuration{sizeof(RuntimeSamplerConfiguration), 0, 0, 0};
 };
 
-RuntimeSamplerStateQueryResult EncodeRuntimeSamplerStateV1(const RuntimeSamplerState& state,
-                                                           RuntimeSamplerStateV1*     encoded) noexcept;
+RuntimeSamplerStateQueryResult EncodeRuntimeSamplerState(const RuntimeSamplerControllerState& state,
+                                                           RuntimeSamplerState*     encoded) noexcept;
 
-static_assert(std::is_standard_layout_v<RuntimeSamplerConfigurationV1>);
-static_assert(std::is_trivially_copyable_v<RuntimeSamplerConfigurationV1>);
-static_assert(sizeof(RuntimeSamplerConfigurationV1) == 16);
-static_assert(offsetof(RuntimeSamplerConfigurationV1, structureSize) == 0);
-static_assert(offsetof(RuntimeSamplerConfigurationV1, cpuSamplingIntervalMilliseconds) == 4);
-static_assert(offsetof(RuntimeSamplerConfigurationV1, selectiveThreadSamplingIntervalMilliseconds) == 8);
-static_assert(offsetof(RuntimeSamplerConfigurationV1, maxAllocationSamplesPerMinute) == 12);
+static_assert(std::is_standard_layout_v<RuntimeSamplerConfiguration>);
+static_assert(std::is_trivially_copyable_v<RuntimeSamplerConfiguration>);
+static_assert(sizeof(RuntimeSamplerConfiguration) == 16);
+static_assert(offsetof(RuntimeSamplerConfiguration, structureSize) == 0);
+static_assert(offsetof(RuntimeSamplerConfiguration, cpuSamplingIntervalMilliseconds) == 4);
+static_assert(offsetof(RuntimeSamplerConfiguration, selectiveThreadSamplingIntervalMilliseconds) == 8);
+static_assert(offsetof(RuntimeSamplerConfiguration, maxAllocationSamplesPerMinute) == 12);
 
-static_assert(std::is_standard_layout_v<RuntimeSamplerStateV1>);
-static_assert(std::is_trivially_copyable_v<RuntimeSamplerStateV1>);
-static_assert(sizeof(RuntimeSamplerStateV1) == 24);
-static_assert(offsetof(RuntimeSamplerStateV1, structureSize) == 0);
-static_assert(offsetof(RuntimeSamplerStateV1, authority) == 4);
-static_assert(offsetof(RuntimeSamplerStateV1, committedConfiguration) == 8);
+static_assert(std::is_standard_layout_v<RuntimeSamplerState>);
+static_assert(std::is_trivially_copyable_v<RuntimeSamplerState>);
+static_assert(sizeof(RuntimeSamplerState) == 24);
+static_assert(offsetof(RuntimeSamplerState, structureSize) == 0);
+static_assert(offsetof(RuntimeSamplerState, authority) == 4);
+static_assert(offsetof(RuntimeSamplerState, committedConfiguration) == 8);
 
 } // namespace continuous_profiler
 

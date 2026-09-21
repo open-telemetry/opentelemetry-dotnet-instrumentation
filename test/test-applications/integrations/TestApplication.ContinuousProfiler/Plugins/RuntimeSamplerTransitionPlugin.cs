@@ -36,7 +36,7 @@ public class RuntimeSamplerTransitionPlugin : BasePlugin, IContinuousProfilerPlu
         {
             ThreadSamplingEnabled = true,
             ThreadSamplingInterval = threadSamplingInterval,
-            // Seed CPU sampling keeps the legacy managed exporter available. The test-only V1 snapshot activates
+            // Seed CPU sampling keeps the legacy managed exporter available. The test-only snapshot activates
             // allocation sampling so its EventPipe lifecycle is exercised by the dynamic path.
             AllocationSamplingEnabled = false,
             MaxMemorySamplesPerMinute = 0,

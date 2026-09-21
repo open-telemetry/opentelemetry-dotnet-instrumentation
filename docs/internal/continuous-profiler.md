@@ -27,7 +27,7 @@ process. Ordering and stale-document rejection belong to the managed OpAMP
 coordinator; native code validates and atomically commits each complete snapshot
 without patching or merging it.
 
-The V1 apply request carries its authority explicitly. The existing
+The apply request carries its authority explicitly. The existing
 `ConfigureContinuousProfiler` export is retained as an ABI-compatible Seed
 adapter and delegates to that same apply operation; it owns no separate
 configuration or lifecycle state. Repeated Seeds report that process startup
@@ -35,9 +35,9 @@ was already committed, while a Seed arriving after ControlPlane authority is
 ignored as lower authority.
 
 Interop callers must initialize
-`RuntimeSamplerConfigurationV1.structureSize` to
-`sizeof(RuntimeSamplerConfigurationV1)` (16 bytes) and
-`RuntimeSamplerStateV1.structureSize` to `sizeof(RuntimeSamplerStateV1)` (24
+`RuntimeSamplerConfiguration.structureSize` to
+`sizeof(RuntimeSamplerConfiguration)` (16 bytes) and
+`RuntimeSamplerState.structureSize` to `sizeof(RuntimeSamplerState)` (24
 bytes). Each apply call makes one synchronous activation attempt. Native code
 does not schedule retries or impose a retry budget. A failed initial bootstrap
 dependency, such as the stack-walk guard, sampling worker, or shared CLR event

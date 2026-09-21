@@ -66,15 +66,15 @@ EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamp
 }
 
 EXTERN_C INT32 STDAPICALLTYPE
-ApplyContinuousProfilerConfigurationV1(const continuous_profiler::RuntimeSamplerConfigurationV1* request,
-                                       const continuous_profiler::RuntimeSamplerAuthority        authority,
-                                       continuous_profiler::RuntimeSamplerStateV1*               actualState)
+ApplyContinuousProfilerConfiguration(const continuous_profiler::RuntimeSamplerConfiguration* request,
+                                     const continuous_profiler::RuntimeSamplerAuthority      authority,
+                                     continuous_profiler::RuntimeSamplerState*               actualState)
 {
     try
     {
         if (trace::profiler == nullptr)
         {
-            const auto stateResult = continuous_profiler::EncodeRuntimeSamplerStateV1({}, actualState);
+            const auto stateResult = continuous_profiler::EncodeRuntimeSamplerState({}, actualState);
             if (stateResult == continuous_profiler::RuntimeSamplerStateQueryResult::InvalidArgument)
             {
                 return static_cast<INT32>(continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidArgument);
@@ -87,7 +87,7 @@ ApplyContinuousProfilerConfigurationV1(const continuous_profiler::RuntimeSampler
         }
 
         return static_cast<INT32>(
-            trace::profiler->ApplyContinuousProfilerConfigurationV1(request, authority, actualState));
+            trace::profiler->ApplyContinuousProfilerConfiguration(request, authority, actualState));
     }
     catch (...)
     {
@@ -95,11 +95,11 @@ ApplyContinuousProfilerConfigurationV1(const continuous_profiler::RuntimeSampler
         {
             if (trace::profiler != nullptr)
             {
-                trace::profiler->GetContinuousProfilerStateV1(actualState);
+                trace::profiler->GetContinuousProfilerState(actualState);
             }
             else
             {
-                continuous_profiler::EncodeRuntimeSamplerStateV1({}, actualState);
+                continuous_profiler::EncodeRuntimeSamplerState({}, actualState);
             }
         }
         catch (...)
@@ -109,16 +109,16 @@ ApplyContinuousProfilerConfigurationV1(const continuous_profiler::RuntimeSampler
     }
 }
 
-EXTERN_C INT32 STDAPICALLTYPE GetContinuousProfilerStateV1(continuous_profiler::RuntimeSamplerStateV1* actualState)
+EXTERN_C INT32 STDAPICALLTYPE GetContinuousProfilerState(continuous_profiler::RuntimeSamplerState* actualState)
 {
     try
     {
         if (trace::profiler == nullptr)
         {
-            return static_cast<INT32>(continuous_profiler::EncodeRuntimeSamplerStateV1({}, actualState));
+            return static_cast<INT32>(continuous_profiler::EncodeRuntimeSamplerState({}, actualState));
         }
 
-        return static_cast<INT32>(trace::profiler->GetContinuousProfilerStateV1(actualState));
+        return static_cast<INT32>(trace::profiler->GetContinuousProfilerState(actualState));
     }
     catch (...)
     {

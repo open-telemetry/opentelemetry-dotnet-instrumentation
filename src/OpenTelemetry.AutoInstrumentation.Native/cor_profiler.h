@@ -244,12 +244,12 @@ public:
                                      bool         allocationSamplingEnabled,
                                      unsigned int maxMemorySamplesPerMinute,
                                      unsigned int selectedThreadsSamplingInterval);
-    continuous_profiler::RuntimeSamplerApplyResult ApplyContinuousProfilerConfigurationV1(
-        const continuous_profiler::RuntimeSamplerConfigurationV1* request,
+    continuous_profiler::RuntimeSamplerApplyResult ApplyContinuousProfilerConfiguration(
+        const continuous_profiler::RuntimeSamplerConfiguration* request,
         continuous_profiler::RuntimeSamplerAuthority              authority,
-        continuous_profiler::RuntimeSamplerStateV1*               actualState);
-    continuous_profiler::RuntimeSamplerStateQueryResult GetContinuousProfilerStateV1(
-        continuous_profiler::RuntimeSamplerStateV1* actualState) const;
+        continuous_profiler::RuntimeSamplerState*               actualState);
+    continuous_profiler::RuntimeSamplerStateQueryResult GetContinuousProfilerState(
+        continuous_profiler::RuntimeSamplerState* actualState) const;
 
     //
     // IL Rewriting methods

@@ -1218,15 +1218,15 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
                                               unsigned int selectedThreadsSamplingInterval)
 {
     // Compatibility adapter for the existing managed startup path. Runtime updates use the
-    // versioned entry point directly; this adapter always submits Seed authority.
-    const continuous_profiler::RuntimeSamplerConfigurationV1
-                                               request{sizeof(continuous_profiler::RuntimeSamplerConfigurationV1),
+    // dedicated apply entry point directly; this adapter always submits Seed authority.
+    const continuous_profiler::RuntimeSamplerConfiguration
+                                             request{sizeof(continuous_profiler::RuntimeSamplerConfiguration),
                 threadSamplingEnabled ? threadSamplingInterval : 0, selectedThreadsSamplingInterval,
                 allocationSamplingEnabled ? maxMemorySamplesPerMinute : 0};
-    continuous_profiler::RuntimeSamplerStateV1 actualState{sizeof(continuous_profiler::RuntimeSamplerStateV1)};
-    const auto                                 result =
-        ApplyContinuousProfilerConfigurationV1(&request, continuous_profiler::RuntimeSamplerAuthority::Seed,
-                                               &actualState);
+    continuous_profiler::RuntimeSamplerState actualState{sizeof(continuous_profiler::RuntimeSamplerState)};
+    const auto                               result =
+        ApplyContinuousProfilerConfiguration(&request, continuous_profiler::RuntimeSamplerAuthority::Seed,
+                                             &actualState);
     if (result != continuous_profiler::RuntimeSamplerApplyResult::Applied &&
         result != continuous_profiler::RuntimeSamplerApplyResult::NoChange &&
         result != continuous_profiler::RuntimeSamplerApplyResult::IgnoredSeedAlreadyCommitted &&
@@ -1237,41 +1237,41 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
     }
 }
 
-continuous_profiler::RuntimeSamplerApplyResult CorProfiler::ApplyContinuousProfilerConfigurationV1(
-    const continuous_profiler::RuntimeSamplerConfigurationV1* request,
-    const continuous_profiler::RuntimeSamplerAuthority        authority,
-    continuous_profiler::RuntimeSamplerStateV1*               actualState)
+continuous_profiler::RuntimeSamplerApplyResult CorProfiler::ApplyContinuousProfilerConfiguration(
+    const continuous_profiler::RuntimeSamplerConfiguration* request,
+    const continuous_profiler::RuntimeSamplerAuthority      authority,
+    continuous_profiler::RuntimeSamplerState*               actualState)
 {
     if (actualState == nullptr)
     {
         return continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidArgument;
     }
-    if (actualState->structureSize != sizeof(continuous_profiler::RuntimeSamplerStateV1))
+    if (actualState->structureSize != sizeof(continuous_profiler::RuntimeSamplerState))
     {
         return continuous_profiler::RuntimeSamplerApplyResult::RejectedUnsupportedLayout;
     }
 
     if (request == nullptr)
     {
-        GetContinuousProfilerStateV1(actualState);
+        GetContinuousProfilerState(actualState);
         return continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidArgument;
     }
-    if (request->structureSize != sizeof(continuous_profiler::RuntimeSamplerConfigurationV1))
+    if (request->structureSize != sizeof(continuous_profiler::RuntimeSamplerConfiguration))
     {
-        GetContinuousProfilerStateV1(actualState);
+        GetContinuousProfilerState(actualState);
         return continuous_profiler::RuntimeSamplerApplyResult::RejectedUnsupportedLayout;
     }
 
     if (authority != continuous_profiler::RuntimeSamplerAuthority::Seed &&
         authority != continuous_profiler::RuntimeSamplerAuthority::ControlPlane)
     {
-        GetContinuousProfilerStateV1(actualState);
+        GetContinuousProfilerState(actualState);
         return continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidArgument;
     }
     if (!request->IsValid())
     {
-        Logger::Warn("ApplyContinuousProfilerConfigurationV1: invalid configuration was rejected.");
-        GetContinuousProfilerStateV1(actualState);
+        Logger::Warn("ApplyContinuousProfilerConfiguration: invalid configuration was rejected.");
+        GetContinuousProfilerState(actualState);
         return continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidConfiguration;
     }
     auto configuration = *request;
@@ -1280,41 +1280,40 @@ continuous_profiler::RuntimeSamplerApplyResult CorProfiler::ApplyContinuousProfi
         if (authority == continuous_profiler::RuntimeSamplerAuthority::Seed)
         {
             Logger::Warn(
-                "ApplyContinuousProfilerConfigurationV1: allocation sampling is not supported by this runtime and "
+                "ApplyContinuousProfilerConfiguration: allocation sampling is not supported by this runtime and "
                 "will be disabled for the Seed configuration.");
             configuration.maxAllocationSamplesPerMinute = 0;
         }
         else
         {
-            Logger::Warn(
-                "ApplyContinuousProfilerConfigurationV1: allocation sampling is not supported by this runtime.");
-            GetContinuousProfilerStateV1(actualState);
+            Logger::Warn("ApplyContinuousProfilerConfiguration: allocation sampling is not supported by this runtime.");
+            GetContinuousProfilerState(actualState);
             return continuous_profiler::RuntimeSamplerApplyResult::RejectedUnsupportedRuntime;
         }
     }
 
     if (runtime_sampler_service_ == nullptr)
     {
-        continuous_profiler::EncodeRuntimeSamplerStateV1({}, actualState);
+        continuous_profiler::EncodeRuntimeSamplerState({}, actualState);
         return continuous_profiler::RuntimeSamplerApplyResult::ActivationFailed;
     }
 
     // RuntimeSamplerService owns the sole configuration/lifecycle gate. An admitted apply completes before terminal
     // teardown; an apply ordered after shutdown observes the service's terminal state and is rejected.
-    const auto outcome = runtime_sampler_service_->ApplyConfigurationV1(authority, configuration);
-    continuous_profiler::EncodeRuntimeSamplerStateV1(outcome.state, actualState);
+    const auto outcome = runtime_sampler_service_->ApplyConfiguration(authority, configuration);
+    continuous_profiler::EncodeRuntimeSamplerState(outcome.state, actualState);
     return outcome.result;
 }
 
-continuous_profiler::RuntimeSamplerStateQueryResult CorProfiler::GetContinuousProfilerStateV1(
-    continuous_profiler::RuntimeSamplerStateV1* actualState) const
+continuous_profiler::RuntimeSamplerStateQueryResult CorProfiler::GetContinuousProfilerState(
+    continuous_profiler::RuntimeSamplerState* actualState) const
 {
     if (runtime_sampler_service_ != nullptr)
     {
-        return continuous_profiler::EncodeRuntimeSamplerStateV1(runtime_sampler_service_->GetState(), actualState);
+        return continuous_profiler::EncodeRuntimeSamplerState(runtime_sampler_service_->GetState(), actualState);
     }
 
-    return continuous_profiler::EncodeRuntimeSamplerStateV1({}, actualState);
+    return continuous_profiler::EncodeRuntimeSamplerState({}, actualState);
 }
 
 void CorProfiler::InitializeTraceMethods(WCHAR* id,

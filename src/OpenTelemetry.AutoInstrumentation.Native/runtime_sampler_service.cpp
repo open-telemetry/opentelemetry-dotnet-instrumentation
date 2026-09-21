@@ -36,8 +36,8 @@ RuntimeSamplerService::RuntimeSamplerService(ICorProfilerInfo7*  info7,
 {
 }
 
-RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
-    const RuntimeSamplerAuthority source, const RuntimeSamplerConfigurationV1& configuration)
+RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfiguration(const RuntimeSamplerAuthority      source,
+                                                                     const RuntimeSamplerConfiguration& configuration)
 {
     std::unique_lock<std::mutex> lock(configurationMutex_);
 
@@ -218,7 +218,7 @@ RuntimeSamplerApplyOutcome RuntimeSamplerService::ApplyConfigurationV1(
     return outcome(RuntimeSamplerApplyResult::Applied);
 }
 
-RuntimeSamplerState RuntimeSamplerService::GetState() const
+RuntimeSamplerControllerState RuntimeSamplerService::GetState() const
 {
     std::lock_guard<std::mutex> lock(configurationMutex_);
     return {authority_, committedConfiguration_};
@@ -378,8 +378,8 @@ bool RuntimeSamplerService::EnsureSelectiveSamplingBuffersPrepared() noexcept
     }
 }
 
-void RuntimeSamplerService::PublishCommittedConfiguration(const RuntimeSamplerConfigurationV1& previousConfiguration,
-                                                          const RuntimeSamplerConfigurationV1& configuration) noexcept
+void RuntimeSamplerService::PublishCommittedConfiguration(const RuntimeSamplerConfiguration& previousConfiguration,
+                                                          const RuntimeSamplerConfiguration& configuration) noexcept
 {
     // Post-commit publication only: no CLR calls, resource transitions, or unbounded waits belong here. The short
     // mailbox and allocation-pacing locks are private producer-state publication boundaries.
@@ -493,7 +493,7 @@ void RuntimeSamplerService::OnAllocationTick(const ULONG dataLength, const LPCBY
 {
     try
     {
-        // This callback may be synchronously drained by StopAllocationSamplingSession while ApplyConfigurationV1
+        // This callback may be synchronously drained by StopAllocationSamplingSession while ApplyConfiguration
         // holds configurationMutex_. Like every producer callback/worker path, keep it free of that mutex and of
         // calls that re-enter the service's configuration transition path.
         auto* const sampler = sampler_.get();

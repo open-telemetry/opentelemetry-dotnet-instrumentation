@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 
 namespace TestApplication.ContinuousProfiler;
 
-// This is an integration-test-only driver for the versioned native ABI. Production managed host selection and
+// This is an integration-test-only driver for the native ABI. Production managed host selection and
 // control-plane transport deliberately remain outside this test fixture and this PR.
 internal static class RuntimeSamplerTransitions
 {
@@ -153,14 +153,14 @@ internal static class RuntimeSamplerTransitions
 #endif
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", EntryPoint = "ApplyContinuousProfilerConfigurationV1")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", EntryPoint = "ApplyContinuousProfilerConfiguration")]
         private static extern int ApplyWindows(
             ref RuntimeSamplerConfiguration configuration,
             uint authority,
             ref RuntimeSamplerState state);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native", EntryPoint = "ApplyContinuousProfilerConfigurationV1")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native", EntryPoint = "ApplyContinuousProfilerConfiguration")]
         private static extern int ApplyNonWindows(
             ref RuntimeSamplerConfiguration configuration,
             uint authority,

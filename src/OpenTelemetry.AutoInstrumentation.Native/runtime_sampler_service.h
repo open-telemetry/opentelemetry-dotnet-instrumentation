@@ -24,7 +24,7 @@ class StackWalkerImpl;
 struct RuntimeSamplerApplyOutcome
 {
     RuntimeSamplerApplyResult result;
-    RuntimeSamplerState       state;
+    RuntimeSamplerControllerState       state;
 };
 
 class RuntimeSamplerService final
@@ -36,9 +36,9 @@ public:
     RuntimeSamplerService(const RuntimeSamplerService&)            = delete;
     RuntimeSamplerService& operator=(const RuntimeSamplerService&) = delete;
 
-    RuntimeSamplerApplyOutcome ApplyConfigurationV1(RuntimeSamplerAuthority              source,
-                                                    const RuntimeSamplerConfigurationV1& configuration);
-    RuntimeSamplerState        GetState() const;
+    RuntimeSamplerApplyOutcome ApplyConfiguration(RuntimeSamplerAuthority              source,
+                                                    const RuntimeSamplerConfiguration& configuration);
+    RuntimeSamplerControllerState        GetState() const;
     // Physical state is distinct from logical enablement: an all-disabled first commit remains dormant, while a
     // service disabled after first use retains its quiescent infrastructure for inexpensive re-enablement.
     bool HasSamplingInfrastructure() const;
@@ -55,8 +55,8 @@ private:
     ContinuousProfiler* EnsureSamplerCreated() noexcept;
     bool                EnsureRequiredClrEventsEnabled() noexcept;
     bool                EnsureSelectiveSamplingBuffersPrepared() noexcept;
-    void                PublishCommittedConfiguration(const RuntimeSamplerConfigurationV1& previousConfiguration,
-                                                      const RuntimeSamplerConfigurationV1& configuration) noexcept;
+    void                PublishCommittedConfiguration(const RuntimeSamplerConfiguration& previousConfiguration,
+                                                      const RuntimeSamplerConfiguration& configuration) noexcept;
 
     ICorProfilerInfo7*  info7_   = nullptr;
     ICorProfilerInfo12* info12_  = nullptr;
@@ -70,7 +70,7 @@ private:
     // acquire or re-enter this mutex: Apply may hold it while waiting for worker readiness or draining EventPipe.
     mutable std::mutex            configurationMutex_;
     RuntimeSamplerAuthority       authority_ = RuntimeSamplerAuthority::None;
-    RuntimeSamplerConfigurationV1 committedConfiguration_{sizeof(RuntimeSamplerConfigurationV1), 0, 0, 0};
+    RuntimeSamplerConfiguration committedConfiguration_{sizeof(RuntimeSamplerConfiguration), 0, 0, 0};
     bool                          shutdownStarted_                  = false;
     bool                          activationFailed_                 = false;
     bool                          requiredClrEventsEnabled_         = false;

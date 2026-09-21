@@ -11,36 +11,36 @@ HINSTANCE DllHandle = nullptr;
 #endif
 
 extern "C" std::int32_t STDAPICALLTYPE
-ApplyContinuousProfilerConfigurationV1(const continuous_profiler::RuntimeSamplerConfigurationV1* request,
-                                       continuous_profiler::RuntimeSamplerAuthority              authority,
-                                       continuous_profiler::RuntimeSamplerStateV1*               actualState);
+ApplyContinuousProfilerConfiguration(const continuous_profiler::RuntimeSamplerConfiguration* request,
+                                     continuous_profiler::RuntimeSamplerAuthority            authority,
+                                     continuous_profiler::RuntimeSamplerState*               actualState);
 extern "C" std::int32_t STDAPICALLTYPE
-GetContinuousProfilerStateV1(continuous_profiler::RuntimeSamplerStateV1* actualState);
+GetContinuousProfilerState(continuous_profiler::RuntimeSamplerState* actualState);
 
 using namespace continuous_profiler;
 using namespace std::chrono_literals;
 
-static_assert(std::is_standard_layout_v<RuntimeSamplerConfigurationV1>);
-static_assert(std::is_trivially_copyable_v<RuntimeSamplerConfigurationV1>);
-static_assert(sizeof(RuntimeSamplerConfigurationV1) == 16);
-static_assert(offsetof(RuntimeSamplerConfigurationV1, structureSize) == 0);
-static_assert(offsetof(RuntimeSamplerConfigurationV1, cpuSamplingIntervalMilliseconds) == 4);
-static_assert(offsetof(RuntimeSamplerConfigurationV1, selectiveThreadSamplingIntervalMilliseconds) == 8);
-static_assert(offsetof(RuntimeSamplerConfigurationV1, maxAllocationSamplesPerMinute) == 12);
+static_assert(std::is_standard_layout_v<RuntimeSamplerConfiguration>);
+static_assert(std::is_trivially_copyable_v<RuntimeSamplerConfiguration>);
+static_assert(sizeof(RuntimeSamplerConfiguration) == 16);
+static_assert(offsetof(RuntimeSamplerConfiguration, structureSize) == 0);
+static_assert(offsetof(RuntimeSamplerConfiguration, cpuSamplingIntervalMilliseconds) == 4);
+static_assert(offsetof(RuntimeSamplerConfiguration, selectiveThreadSamplingIntervalMilliseconds) == 8);
+static_assert(offsetof(RuntimeSamplerConfiguration, maxAllocationSamplesPerMinute) == 12);
 
-static_assert(std::is_standard_layout_v<RuntimeSamplerStateV1>);
-static_assert(std::is_trivially_copyable_v<RuntimeSamplerStateV1>);
-static_assert(sizeof(RuntimeSamplerStateV1) == 24);
-static_assert(offsetof(RuntimeSamplerStateV1, structureSize) == 0);
-static_assert(offsetof(RuntimeSamplerStateV1, authority) == 4);
-static_assert(offsetof(RuntimeSamplerStateV1, committedConfiguration) == 8);
+static_assert(std::is_standard_layout_v<RuntimeSamplerState>);
+static_assert(std::is_trivially_copyable_v<RuntimeSamplerState>);
+static_assert(sizeof(RuntimeSamplerState) == 24);
+static_assert(offsetof(RuntimeSamplerState, structureSize) == 0);
+static_assert(offsetof(RuntimeSamplerState, authority) == 4);
+static_assert(offsetof(RuntimeSamplerState, committedConfiguration) == 8);
 
 namespace
 {
 
-RuntimeSamplerConfigurationV1 Configuration(const uint32_t cpu, const uint32_t selective, const uint32_t allocation)
+RuntimeSamplerConfiguration Configuration(const uint32_t cpu, const uint32_t selective, const uint32_t allocation)
 {
-    return {sizeof(RuntimeSamplerConfigurationV1), cpu, selective, allocation};
+    return {sizeof(RuntimeSamplerConfiguration), cpu, selective, allocation};
 }
 
 class NetFrameworkCorProfiler final : public trace::CorProfiler
@@ -109,7 +109,7 @@ TEST(RuntimeSamplerConfigurationTest, CpuIntervalMustBeAnExactMultipleOfSelectiv
     EXPECT_TRUE(Configuration(100, 20, 0).IsValid());
 }
 
-TEST(RuntimeSamplerConfigurationTest, V1ConfigurationRepresentsOneCompleteSnapshot)
+TEST(RuntimeSamplerConfigurationTest, ConfigurationRepresentsOneCompleteSnapshot)
 {
     const auto configuration = Configuration(1000, 20, 200);
 
@@ -119,7 +119,7 @@ TEST(RuntimeSamplerConfigurationTest, V1ConfigurationRepresentsOneCompleteSnapsh
     EXPECT_EQ(200u, configuration.MaxAllocationSamplesPerMinute());
 }
 
-TEST(RuntimeSamplerConfigurationTest, V1ConfigurationRejectsTheWholeInvalidCandidate)
+TEST(RuntimeSamplerConfigurationTest, ConfigurationRejectsTheWholeInvalidCandidate)
 {
     EXPECT_FALSE(Configuration(1000, 30, 0).IsValid());
 }
@@ -128,53 +128,53 @@ TEST(RuntimeSamplerConfigurationTest, UnsupportedAllocationIsNormalizedForSeedAn
 {
     NetFrameworkCorProfiler profiler;
     const auto              configuration = Configuration(0, 0, 200);
-    RuntimeSamplerStateV1   state{sizeof(RuntimeSamplerStateV1)};
+    RuntimeSamplerState     state{sizeof(RuntimeSamplerState)};
 
     EXPECT_EQ(RuntimeSamplerApplyResult::Applied,
-              profiler.ApplyContinuousProfilerConfigurationV1(&configuration, RuntimeSamplerAuthority::Seed, &state));
+              profiler.ApplyContinuousProfilerConfiguration(&configuration, RuntimeSamplerAuthority::Seed, &state));
     EXPECT_EQ(static_cast<uint32_t>(RuntimeSamplerAuthority::Seed), state.authority);
     EXPECT_EQ(0u, state.committedConfiguration.maxAllocationSamplesPerMinute);
 
     EXPECT_EQ(RuntimeSamplerApplyResult::RejectedUnsupportedRuntime,
-              profiler.ApplyContinuousProfilerConfigurationV1(&configuration, RuntimeSamplerAuthority::ControlPlane,
-                                                              &state));
+              profiler.ApplyContinuousProfilerConfiguration(&configuration, RuntimeSamplerAuthority::ControlPlane,
+                                                            &state));
     EXPECT_EQ(static_cast<uint32_t>(RuntimeSamplerAuthority::Seed), state.authority);
     EXPECT_EQ(0u, state.committedConfiguration.maxAllocationSamplesPerMinute);
 }
 
-TEST(RuntimeSamplerConfigurationTest, V1StateEncoderReturnsTheCompleteAuthoritativeState)
+TEST(RuntimeSamplerConfigurationTest, StateEncoderReturnsTheCompleteAuthoritativeState)
 {
-    const RuntimeSamplerState state{RuntimeSamplerAuthority::ControlPlane, Configuration(1000, 20, 200)};
-    RuntimeSamplerStateV1     encoded{sizeof(RuntimeSamplerStateV1)};
+    const RuntimeSamplerControllerState state{RuntimeSamplerAuthority::ControlPlane, Configuration(1000, 20, 200)};
+    RuntimeSamplerState                 encoded{sizeof(RuntimeSamplerState)};
 
-    ASSERT_EQ(RuntimeSamplerStateQueryResult::Succeeded, EncodeRuntimeSamplerStateV1(state, &encoded));
-    EXPECT_EQ(sizeof(RuntimeSamplerStateV1), encoded.structureSize);
+    ASSERT_EQ(RuntimeSamplerStateQueryResult::Succeeded, EncodeRuntimeSamplerState(state, &encoded));
+    EXPECT_EQ(sizeof(RuntimeSamplerState), encoded.structureSize);
     EXPECT_EQ(static_cast<uint32_t>(RuntimeSamplerAuthority::ControlPlane), encoded.authority);
-    EXPECT_EQ(sizeof(RuntimeSamplerConfigurationV1), encoded.committedConfiguration.structureSize);
+    EXPECT_EQ(sizeof(RuntimeSamplerConfiguration), encoded.committedConfiguration.structureSize);
     EXPECT_EQ(1000u, encoded.committedConfiguration.cpuSamplingIntervalMilliseconds);
     EXPECT_EQ(20u, encoded.committedConfiguration.selectiveThreadSamplingIntervalMilliseconds);
     EXPECT_EQ(200u, encoded.committedConfiguration.maxAllocationSamplesPerMinute);
 }
 
-TEST(RuntimeSamplerConfigurationTest, V1StateEncoderRejectsInvalidOutputLayout)
+TEST(RuntimeSamplerConfigurationTest, StateEncoderRejectsInvalidOutputLayout)
 {
-    const RuntimeSamplerState state{};
-    RuntimeSamplerStateV1     encoded{};
+    const RuntimeSamplerControllerState state{};
+    RuntimeSamplerState                 encoded{};
 
-    EXPECT_EQ(RuntimeSamplerStateQueryResult::InvalidArgument, EncodeRuntimeSamplerStateV1(state, nullptr));
-    EXPECT_EQ(RuntimeSamplerStateQueryResult::UnsupportedLayout, EncodeRuntimeSamplerStateV1(state, &encoded));
+    EXPECT_EQ(RuntimeSamplerStateQueryResult::InvalidArgument, EncodeRuntimeSamplerState(state, nullptr));
+    EXPECT_EQ(RuntimeSamplerStateQueryResult::UnsupportedLayout, EncodeRuntimeSamplerState(state, &encoded));
 }
 
 TEST(RuntimeSamplerConfigurationTest, RuntimeConfigurationExportsHaveStableSignatures)
 {
-    using ApplyFunction = std::int32_t(STDAPICALLTYPE*)(const RuntimeSamplerConfigurationV1*, RuntimeSamplerAuthority,
-                                                        RuntimeSamplerStateV1*);
+    using ApplyFunction = std::int32_t(STDAPICALLTYPE*)(const RuntimeSamplerConfiguration*, RuntimeSamplerAuthority,
+                                                        RuntimeSamplerState*);
     using CorProfilerApplyFunction = RuntimeSamplerApplyResult (
-        trace::CorProfiler::*)(const RuntimeSamplerConfigurationV1*, RuntimeSamplerAuthority, RuntimeSamplerStateV1*);
-    using GetFunction = std::int32_t(STDAPICALLTYPE*)(RuntimeSamplerStateV1*);
+        trace::CorProfiler::*)(const RuntimeSamplerConfiguration*, RuntimeSamplerAuthority, RuntimeSamplerState*);
+    using GetFunction = std::int32_t(STDAPICALLTYPE*)(RuntimeSamplerState*);
 
-    static_assert(std::is_same_v<decltype(&ApplyContinuousProfilerConfigurationV1), ApplyFunction>);
-    static_assert(std::is_same_v<decltype(&trace::CorProfiler::ApplyContinuousProfilerConfigurationV1),
-                                 CorProfilerApplyFunction>);
-    static_assert(std::is_same_v<decltype(&GetContinuousProfilerStateV1), GetFunction>);
+    static_assert(std::is_same_v<decltype(&ApplyContinuousProfilerConfiguration), ApplyFunction>);
+    static_assert(
+        std::is_same_v<decltype(&trace::CorProfiler::ApplyContinuousProfilerConfiguration), CorProfilerApplyFunction>);
+    static_assert(std::is_same_v<decltype(&GetContinuousProfilerState), GetFunction>);
 }

@@ -38,16 +38,16 @@ public:
 namespace
 {
 
-RuntimeSamplerConfigurationV1 Configuration(const uint32_t cpu, const uint32_t selective, const uint32_t allocation)
+RuntimeSamplerConfiguration Configuration(const uint32_t cpu, const uint32_t selective, const uint32_t allocation)
 {
-    return {sizeof(RuntimeSamplerConfigurationV1), cpu, selective, allocation};
+    return {sizeof(RuntimeSamplerConfiguration), cpu, selective, allocation};
 }
 
-RuntimeSamplerApplyResult Apply(RuntimeSamplerService&               service,
-                                const RuntimeSamplerAuthority        authority,
-                                const RuntimeSamplerConfigurationV1& configuration)
+RuntimeSamplerApplyResult Apply(RuntimeSamplerService&             service,
+                                const RuntimeSamplerAuthority      authority,
+                                const RuntimeSamplerConfiguration& configuration)
 {
-    return service.ApplyConfigurationV1(authority, configuration).result;
+    return service.ApplyConfiguration(authority, configuration).result;
 }
 
 class FakeAllocationSamplingSessionProvider final : public IAllocationSamplingSessionProvider
@@ -466,12 +466,12 @@ TEST(RuntimeSamplerServiceTest, ApplyReturnsTheStateFromTheSameControllerTransac
     RuntimeSamplerService service(nullptr, nullptr, RuntimeType::Unknown);
     const auto            disabled = Configuration(0, 0, 0);
 
-    const auto seedOutcome = service.ApplyConfigurationV1(RuntimeSamplerAuthority::Seed, disabled);
+    const auto seedOutcome = service.ApplyConfiguration(RuntimeSamplerAuthority::Seed, disabled);
     ASSERT_EQ(RuntimeSamplerApplyResult::Applied, seedOutcome.result);
     EXPECT_EQ(RuntimeSamplerAuthority::Seed, seedOutcome.state.authority);
     EXPECT_EQ(disabled, seedOutcome.state.configuration);
 
-    const auto promotionOutcome = service.ApplyConfigurationV1(RuntimeSamplerAuthority::ControlPlane, disabled);
+    const auto promotionOutcome = service.ApplyConfiguration(RuntimeSamplerAuthority::ControlPlane, disabled);
     ASSERT_EQ(RuntimeSamplerApplyResult::Applied, promotionOutcome.result);
     EXPECT_EQ(RuntimeSamplerAuthority::ControlPlane, promotionOutcome.state.authority);
     EXPECT_EQ(disabled, promotionOutcome.state.configuration);
