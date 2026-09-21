@@ -160,17 +160,13 @@ controlled by a version map compiled into the native profiler (see
 and
 [`assembly_redirection_netfx.h`](../src/OpenTelemetry.AutoInstrumentation.Native/assembly_redirection_netfx.h)).
 
-On .NET 10 and later, the profiler also rewrites the outer assembly qualifier
-of type names stored in `UnsafeAccessorType` attributes when that assembly
-appears in the same version map. This includes attributes in
-`System.Private.CoreLib` and in application or library modules. It considers
-only parameter and return-value attributes whose declaring method also has
-`UnsafeAccessor`, because that pairing is what gives `UnsafeAccessorType` its
-native-reflection meaning. A missing or lower `Version` is raised to the mapped
-version; an equal or higher version is preserved. As with `AssemblyRef`, a
-higher version seen before any rewrite becomes the target for later references.
-Only the outer type's assembly qualifier is handled; assembly qualifiers nested
-inside generic type arguments are left unchanged.
+On .NET 10 and later, the profiler also rewrites assembly qualifiers of type
+names stored in `UnsafeAccessorType` attributes, including qualifiers nested in
+generic arguments, when those assemblies appear in the same version map. It
+considers only parameter and return-value attributes whose declaring method
+also has `UnsafeAccessor`, because that pairing is what gives
+`UnsafeAccessorType` its native-reflection meaning. A missing or lower `Version`
+is raised to the mapped version; an equal or higher version is preserved.
 
 > **NOTE**: On .NET, the instrumentation ships the baseline versions of its
 > dependencies for each target framework (for example, for `net8.0` the
