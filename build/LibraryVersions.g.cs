@@ -60,7 +60,7 @@ public static partial class LibraryVersion
             "TestApplication.GrpcNetClient",
             [
                 new("2.52.0"),
-                new("2.83.0"),
+                new("2.84.0"),
             ]
         },
         {
