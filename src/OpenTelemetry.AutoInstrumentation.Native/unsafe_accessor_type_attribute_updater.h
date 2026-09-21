@@ -7,6 +7,7 @@
 #define OTEL_CLR_PROFILER_UNSAFE_ACCESSOR_TYPE_ATTRIBUTE_UPDATER_H_
 
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -21,25 +22,27 @@ class ModuleMetadata;
 // runtime capability check; it does not search for usages.
 bool HasUnsafeAccessorTypeAttribute(const ComPtr<IMetaDataImport2>& metadata_import);
 
-// Rewrites only the outer assembly qualifier: adds Version when absent or replaces a lower version. An explicit higher
-// version is preserved and can raise the shared target until a redirect is committed. True means rewritten output was
-// produced; false can still mean that a preserved higher version updated the shared redirection state.
-bool TryRewriteUnsafeAccessorTypeName(const std::string&                                       type_name,
+// Rewrites every mapped assembly qualifier, including qualifiers in nested generic arguments. Missing or lower versions
+// are raised; an explicit higher version is preserved and can raise the shared target until an earlier reference fixes
+// it. True means rewritten output was produced; false leaves both outputs empty but can still mean that a preserved
+// higher version updated shared state. redirected_assembly_names contains one entry per rewritten qualifier and can
+// therefore contain duplicate names.
+bool TryRewriteUnsafeAccessorTypeName(std::string_view                                         type_name,
                                       std::unordered_map<WSTRING, AssemblyVersionRedirection>& assembly_redirects,
                                       std::string&                                             rewritten_type_name,
-                                      WSTRING& redirected_assembly_name);
+                                      std::vector<WSTRING>& redirected_assembly_names);
 
 // Parses the attribute's string argument and rebuilds the blob because the encoded length can grow or shrink. All
-// trailing metadata bytes are preserved. Outputs are valid only when this function returns true.
+// trailing metadata bytes are preserved. False leaves both outputs empty.
 bool TryRewriteUnsafeAccessorTypeAttributeBlob(
     const BYTE*                                              blob,
     ULONG                                                    blob_size,
     std::unordered_map<WSTRING, AssemblyVersionRedirection>& assembly_redirects,
     std::vector<BYTE>&                                       rewritten_blob,
-    WSTRING&                                                 redirected_assembly_name);
+    std::vector<WSTRING>&                                    redirected_assembly_names);
 
-// Scans one module for UnsafeAccessorType attributes on UnsafeAccessor return values and parameters. Redirect state is
-// committed only after a successful metadata write.
+// Scans one module for UnsafeAccessorType attributes on UnsafeAccessor return values and parameters. Rewritten
+// qualifier state is committed only after a successful metadata write.
 void UpdateUnsafeAccessorTypeAttributes(const ModuleMetadata&                                    module_metadata,
                                         std::unordered_map<WSTRING, AssemblyVersionRedirection>& assembly_redirects);
 
