@@ -16,9 +16,9 @@ to .NET applications without having to modify their source code.
 > [!WARNING]
 > The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([1.16.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+([1.17.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
 can be found in [opentelemetry.io](https://opentelemetry.io/docs/zero-code/dotnet/)
-or [versioned README](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.16.0/docs/README.md).
+or [versioned README](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.17.0/docs/README.md).
 
 ---
 
@@ -198,7 +198,7 @@ Example usage:
 
 ```sh
 # Download the installer into a private directory
-version="v1.16.0"
+version="v1.17.0"
 repository="open-telemetry/opentelemetry-dotnet-instrumentation"
 release_workflow="$repository/.github/workflows/release.yml"
 download_dir="$(mktemp -d "${TMPDIR:-/tmp}/otel-dotnet-auto-installer.XXXXXX")"
@@ -254,7 +254,7 @@ uses environment variables as parameters:
 | `DOWNLOAD_DIR`              | Folder to download the archive to. Will use local archive if it already exists  | No       | *Calculated*                |
 | `LOCAL_PATH`                | Full path the archive to use for installation. (ideal for air-gapped scenarios) | No       | *Calculated*                |
 | `SKIP_RELEASE_VERIFICATION` | Set to `true` to skip GitHub release and artifact attestation verification      | No       | `false`                     |
-| `VERSION`                   | Version to download                                                             | No       | `v1.16.0`                   |
+| `VERSION`                   | Version to download                                                             | No       | `v1.17.0`                   |
 
 The installer copies the archive into a unique `otel-dotnet-auto.XXXXXX`
 directory under `${TMPDIR:-/tmp}` before verification and extraction. When
@@ -294,7 +294,7 @@ Example usage (run as administrator):
 # PowerShell 5.1 is required
 #Requires -PSEdition Desktop
 
-$version = "v1.16.0"
+$version = "v1.17.0"
 $repository = "open-telemetry/opentelemetry-dotnet-instrumentation"
 $release_workflow = "$repository/.github/workflows/release.yml"
 $skip_release_verification = $false

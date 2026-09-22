@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.16.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.17.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [v1.17.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.17.0)
 
 ### Added
 
@@ -87,8 +101,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Deprecate support for [Quartz](https://www.nuget.org/packages/Quartz)
   traces instrumentation for version `3.x.x`.
-
-### Removed
 
 ### Fixed
 
