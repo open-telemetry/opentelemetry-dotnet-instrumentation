@@ -825,25 +825,23 @@ mdAssemblyRef CallTargetTokens::GetCorLibAssemblyRef()
     return corLibAssemblyRef;
 }
 
-HRESULT CallTargetTokens::ModifyLocalSigAndInitialize(void*         rewriterWrapperPtr,
-                                                      FunctionInfo* functionInfo,
-                                                      ULONG*        callTargetStateIndex,
-                                                      ULONG*        exceptionIndex,
-                                                      ULONG*        callTargetReturnIndex,
-                                                      ULONG*        returnValueIndex,
-                                                      mdToken*      callTargetStateToken,
-                                                      mdToken*      exceptionToken,
-                                                      mdToken*      callTargetReturnToken,
-                                                      ILInstr**     firstInstruction)
+HRESULT CallTargetTokens::ModifyLocalSigAndInitialize(void*          rewriterWrapperPtr,
+                                                      TypeSignature* methodReturnValue,
+                                                      ULONG*         callTargetStateIndex,
+                                                      ULONG*         exceptionIndex,
+                                                      ULONG*         callTargetReturnIndex,
+                                                      ULONG*         returnValueIndex,
+                                                      mdToken*       callTargetStateToken,
+                                                      mdToken*       exceptionToken,
+                                                      mdToken*       callTargetReturnToken,
+                                                      ILInstr**      firstInstruction)
 {
     ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*)rewriterWrapperPtr;
 
     // Modify the Local Var Signature of the method
-    auto returnFunctionMethod = functionInfo->method_signature.GetReturnValue();
-
-    auto hr = ModifyLocalSig(rewriterWrapper->GetILRewriter(), &returnFunctionMethod, callTargetStateIndex,
-                             exceptionIndex, callTargetReturnIndex, returnValueIndex, callTargetStateToken,
-                             exceptionToken, callTargetReturnToken);
+    auto hr = ModifyLocalSig(rewriterWrapper->GetILRewriter(), methodReturnValue, callTargetStateIndex, exceptionIndex,
+                             callTargetReturnIndex, returnValueIndex, callTargetStateToken, exceptionToken,
+                             callTargetReturnToken);
 
     if (FAILED(hr))
     {
@@ -854,7 +852,7 @@ HRESULT CallTargetTokens::ModifyLocalSigAndInitialize(void*         rewriterWrap
     // Init locals
     if (*returnValueIndex != static_cast<ULONG>(ULONG_MAX))
     {
-        const mdMethodSpec defaultValueMethodSpec = GetCallTargetDefaultValueMethodSpec(&returnFunctionMethod);
+        const mdMethodSpec defaultValueMethodSpec = GetCallTargetDefaultValueMethodSpec(methodReturnValue);
         if (defaultValueMethodSpec == mdMethodSpecNil)
         {
             // The signature was too large to build safely; abort instrumentation rather than
