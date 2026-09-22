@@ -58,6 +58,7 @@ private:
     bool startup_fix_required = false;
 
     bool corlib_module_loaded = false;
+    bool unsafe_accessor_type_redirection_enabled_ = false;
     AppDomainID corlib_app_domain_id = 0;
     bool managed_profiler_loaded_domain_neutral = false;
     std::unordered_set<AppDomainID> managed_profiler_loaded_app_domains;

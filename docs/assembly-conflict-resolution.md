@@ -160,6 +160,14 @@ controlled by a version map compiled into the native profiler (see
 and
 [`assembly_redirection_netfx.h`](../src/OpenTelemetry.AutoInstrumentation.Native/assembly_redirection_netfx.h)).
 
+On .NET 10 and later, the profiler also rewrites assembly qualifiers of type
+names stored in `UnsafeAccessorType` attributes, including qualifiers nested in
+generic arguments, when those assemblies appear in the same version map. It
+considers only parameter and return-value attributes whose declaring method
+also has `UnsafeAccessor`, because that pairing is what gives
+`UnsafeAccessorType` its native-reflection meaning. A missing or lower `Version`
+is raised to the mapped version; an equal or higher version is preserved.
+
 > **NOTE**: On .NET, the instrumentation ships the baseline versions of its
 > dependencies for each target framework (for example, for `net8.0` the
 > 8.0.0 versions, for `net9.0` - 9.0.0, etc.) unless known issues
@@ -302,11 +310,13 @@ This can happen in the following scenarios:
   `AssemblyLoadContext.Default.LoadFromAssemblyPath` or `Assembly.LoadFrom`
   to load an assembly into the Default ALC.
 
-- **`UnsafeAccessorType` reflection (.NET 10+)**: Code uses
+- **StartupHook-only: `UnsafeAccessorType` reflection (.NET 10+)**: Code uses
   `UnsafeAccessorType` attributes in assemblies loaded in the Default ALC;
   in this case, types bind to the requesting assembly's load context.
   Once the runtime resolves a type for an `UnsafeAccessor` method in the
   Default ALC, it cannot interact with a different version loaded elsewhere.
+  StartupHook-only deployment cannot rewrite this metadata because the native
+  profiler is not attached.
 
 ### StartupHook-only: the customer application is loaded twice
 
@@ -352,12 +362,16 @@ architectures.
 
 ### Native profiler: conflicting version ordering
 
-The native profiler processes assembly references in module-load order.
-If an earlier module has been redirected to the instrumentation's version
-and a later module references a **higher** version than the
-instrumentation ships, the profiler cannot reconcile the two. This is
-logged as an error. In practice this is rare because the instrumentation
-ships the latest versions of its dependencies.
+The native profiler processes assembly references and `UnsafeAccessorType`
+attribute values in module-load order. CoreLib attributes are considered during
+CoreLib loading; in each later module, `AssemblyRef` entries are considered
+before attribute values. If an earlier reference has been
+redirected to the instrumentation's version and a later reference requests a
+**higher** version than the instrumentation ships, the profiler cannot safely
+revise the earlier metadata. This is logged as an error. An attribute in
+`System.Private.CoreLib` can be that first redirection because CoreLib loads
+before application modules. In practice this is rare because the
+instrumentation ships recent versions of its dependencies.
 
 ### Unexpected resolution request for a higher version than available
 
@@ -403,8 +417,9 @@ starts.
    `COREHOST_TRACEFILE=corehost_verbose_tracing.log` to capture the
    runtime's own assembly-loading decisions.
 3. **Review the native profiler log** — look for
-   `RedirectAssemblyReferences` entries to confirm that IL rewriting
-   happened and which versions were involved.
+   `RedirectAssemblyReferences` and `UnsafeAccessorTypeAttributeUpdater`
+   entries to confirm which metadata was rewritten and which versions were
+   involved.
 
 ### Last resort: `DOTNET_ADDITIONAL_DEPS` and the runtime store
 
