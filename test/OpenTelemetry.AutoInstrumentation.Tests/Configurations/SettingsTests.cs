@@ -660,6 +660,7 @@ public sealed class SettingsTests
     [Theory]
 #if NET
     [InlineData("CONTAINER", ResourceDetector.Container)]
+    [InlineData("AZURECONTAINERAPPS", ResourceDetector.AzureContainerApps)]
 #endif
     [InlineData("AZUREAPPSERVICE", ResourceDetector.AzureAppService)]
     [InlineData("PROCESSRUNTIME", ResourceDetector.ProcessRuntime)]
