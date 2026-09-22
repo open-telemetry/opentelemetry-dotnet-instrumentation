@@ -88,6 +88,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- StackExchange.Redis trace instrumentation for asynchronous connections with
+  version `3.3.0`+ for .NET only.
 - Handle YAML null values consistently in file-based configuration and
   distinguish them from quoted empty strings.
 - Allow an empty `opamp/development` section in file-based configuration to
