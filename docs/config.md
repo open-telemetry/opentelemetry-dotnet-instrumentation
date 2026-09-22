@@ -101,12 +101,12 @@ The following resource detectors are included and enabled by default:
 
 | ID                | Description                | Documentation                                                                                                                                                                                                                          | Status                                                                                                                            |
 |-------------------|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `AZUREAPPSERVICE` | Azure App Service detector | [Azure resource detector documentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Resources.Azure-1.19.0-beta.1/src/OpenTelemetry.Resources.Azure/README.md)                                                 | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `CONTAINER`       | Container detector         | [Container resource detector documentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Resources.Container-1.19.0-beta.1/src/OpenTelemetry.Resources.Container/README.md) **Not supported on .NET Framework** | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `HOST`            | Host detector              | [Host resource detector documentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Resources.Host-1.19.0-beta.1/src/OpenTelemetry.Resources.Host/README.md)                                                    | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `OPERATINGSYSTEM` | Operating System detector  | [Operating System resource detector documentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Resources.OperatingSystem-1.19.0-beta.1/src/OpenTelemetry.Resources.OperatingSystem/README.md)                  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `PROCESS`         | Process detector           | [Process resource detector documentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Resources.Process-1.19.0-rc.1/src/OpenTelemetry.Resources.Process/README.md)                                             | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `PROCESSRUNTIME`  | Process Runtime detector   | [Process Runtime resource detector documentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Resources.ProcessRuntime-1.19.0-beta.1/src/OpenTelemetry.Resources.ProcessRuntime/README.md)                     | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `AZUREAPPSERVICE` | Azure App Service detector | [Azure resource detector documentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Resources.Azure-1.19.1-beta.1/src/OpenTelemetry.Resources.Azure/README.md)                                                 | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `CONTAINER`       | Container detector         | [Container resource detector documentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Resources.Container-1.19.1-beta.1/src/OpenTelemetry.Resources.Container/README.md) **Not supported on .NET Framework** | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `HOST`            | Host detector              | [Host resource detector documentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Resources.Host-1.19.1-beta.1/src/OpenTelemetry.Resources.Host/README.md)                                                    | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OPERATINGSYSTEM` | Operating System detector  | [Operating System resource detector documentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Resources.OperatingSystem-1.19.1-beta.1/src/OpenTelemetry.Resources.OperatingSystem/README.md)                  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `PROCESS`         | Process detector           | [Process resource detector documentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Resources.Process-1.19.1-rc.1/src/OpenTelemetry.Resources.Process/README.md)                                             | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `PROCESSRUNTIME`  | Process Runtime detector   | [Process Runtime resource detector documentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Resources.ProcessRuntime-1.19.1-beta.1/src/OpenTelemetry.Resources.ProcessRuntime/README.md)                     | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 
 ## Instrumentations
 
@@ -414,7 +414,7 @@ To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER`/`OTEL_METRICS_EXPORT
 environment variable to `otlp`.
 
 To customize the OTLP exporter using environment variables, see the
-[OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.19.0/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
+[OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.19.1/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
 Important environment variables include:
 
 | Environment variable                                | Description                                                                                                                                                                                                | Default value                                                                        | Status                                                                                                                      |
@@ -505,7 +505,7 @@ The exporter exposes the metrics HTTP endpoint on `http://localhost:9464/metrics
 and it caches the responses for 300 milliseconds.
 
 See the
-[Prometheus Exporter HttpListener documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/coreunstable-1.19.0-beta.1/src/OpenTelemetry.Exporter.Prometheus.HttpListener).
+[Prometheus Exporter HttpListener documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/coreunstable-1.19.1-beta.1/src/OpenTelemetry.Exporter.Prometheus.HttpListener).
 to learn more.
 
 ### Zipkin
@@ -516,7 +516,7 @@ To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment
 variable to `zipkin`.
 
 To customize the Zipkin exporter using environment variables,
-see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.19.0/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
+see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.19.1/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
 Important environment variables include:
 
 | Environment variable            | Description | Default value                        | Status                                                                                                                      |
