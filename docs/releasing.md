@@ -65,6 +65,6 @@
 
    - [`examples/demo/Dockerfile`](../examples/demo/Dockerfile)
    - [`test/test-applications/nuget-packages/TestApplication.NugetSample/TestApplication.NugetSample.csproj`](../test/test-applications/nuget-packages/TestApplication.NugetSample/TestApplication.NugetSample.csproj)
-   - [OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo/blob/main/src/accounting/Accounting.csproj#L20)
+   - [OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo/blob/main/src/accounting/Directory.Packages.props#L13)
 
 1. For a stable release, update documentation under [opentelemetry.io](https://github.com/open-telemetry/opentelemetry.io/tree/main/content/en/docs/zero-code/dotnet).

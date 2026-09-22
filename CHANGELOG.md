@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.16.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.17.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [v1.17.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.17.0)
 
 ### Added
 
@@ -22,6 +36,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   traces instrumentation for versions `3.1.x`+ for .NET only.
 - Added support for [Quartz](https://www.nuget.org/packages/Quartz)
   traces and metrics instrumentation for version `4`+ for .NET 10 only.
+- `AZURECONTAINERAPPS` resource detector, detecting Azure Container Apps
+  resource information for .NET only.
 
 ### Changed
 
@@ -86,10 +102,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Deprecate support for [Quartz](https://www.nuget.org/packages/Quartz)
   traces instrumentation for version `3.x.x`.
 
-### Removed
-
 ### Fixed
 
+- StackExchange.Redis trace instrumentation for asynchronous connections with
+  version `3.3.0`+ for .NET only.
 - Handle YAML null values consistently in file-based configuration and
   distinguish them from quoted empty strings.
 - Allow an empty `opamp/development` section in file-based configuration to
