@@ -15,8 +15,6 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 internal static class NoCodeIntegrationHelper
 {
     private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.NoCode", AutoInstrumentationVersion.Version);
-    private static readonly string[] GenericParameterClassNames = ["!0", "!1", "!2", "!3", "!4", "!5", "!6", "!7", "!8", "!9"];
-    private static readonly string[] GenericParameterMethodNames = ["!!0", "!!1", "!!2", "!!3", "!!4", "!!5", "!!6", "!!7", "!!8", "!!9"];
     private static readonly IOtelLogger Log = OtelLogging.GetLogger();
 
     internal static List<NoCodeInstrumentedMethod> NoCodeEntries { get; set; } = [];
@@ -254,9 +252,25 @@ internal static class NoCodeIntegrationHelper
         var definedOnMethod = parameterInfo.ParameterType.DeclaringMethod != null;
         var genericParameterPosition = parameterInfo.ParameterType.GenericParameterPosition;
 
-        return definedOnMethod
-                ? GenericParameterMethodNames[genericParameterPosition]
-                : GenericParameterClassNames[genericParameterPosition];
+        return genericParameterPosition switch
+        {
+            0 => definedOnMethod ? "!!0" : "!0",
+            1 => definedOnMethod ? "!!1" : "!1",
+            2 => definedOnMethod ? "!!2" : "!2",
+            3 => definedOnMethod ? "!!3" : "!3",
+            4 => definedOnMethod ? "!!4" : "!4",
+            5 => definedOnMethod ? "!!5" : "!5",
+            6 => definedOnMethod ? "!!6" : "!6",
+            7 => definedOnMethod ? "!!7" : "!7",
+            8 => definedOnMethod ? "!!8" : "!8",
+            9 => definedOnMethod ? "!!9" : "!9",
+            _ => FormatGenericParameterName(definedOnMethod, genericParameterPosition)
+        };
+    }
+
+    private static string FormatGenericParameterName(bool definedOnMethod, int genericParameterPosition)
+    {
+        return definedOnMethod ? $"!!{genericParameterPosition}" : $"!{genericParameterPosition}";
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
