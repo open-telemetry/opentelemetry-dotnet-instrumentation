@@ -39,4 +39,11 @@ internal enum ResourceDetector
     /// Operating System resource detector.
     /// </summary>
     OperatingSystem = 5,
+
+#if NET
+    /// <summary>
+    /// Azure Container Apps resource detector.
+    /// </summary>
+    AzureContainerApps = 6,
+#endif
 }

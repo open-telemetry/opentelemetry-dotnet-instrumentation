@@ -459,12 +459,13 @@ resource:
   detection/development:
     # If no detectors are specified, none will be added automatically.
     detectors:
-      azureappservice: # Detects Azure App Service resource information
-      container:       # Detects container resource info (container.* attributes) [Core only]
-      host:            # Detects host resource info (host.* attributes)
-      operatingsystem: # Detects OS-level attributes (os.*)
-      process:         # Detects process-level attributes (process.*)
-      processruntime:  # Detects process runtime attributes (process.runtime.*)
+      azureappservice:    # Detects Azure App Service resource information
+      azurecontainerapps: # Detects Azure Container Apps resource information [.NET only]
+      container:          # Detects container resource info (container.* attributes) [.NET only]
+      host:               # Detects host resource info (host.* attributes)
+      operatingsystem:    # Detects OS-level attributes (os.*)
+      process:            # Detects process-level attributes (process.*)
+      processruntime:     # Detects process runtime attributes (process.runtime.*)
 ```
 
 ### Plugins Configuration
