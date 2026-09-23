@@ -16,6 +16,14 @@ internal class DotNetDetectors
 
 #if NET
     /// <summary>
+    /// Gets or sets the Azure Container Apps detector configuration.
+    /// </summary>
+    [YamlMember(Alias = "azurecontainerapps")]
+    public object? AzureContainerApps { get; set; }
+#endif
+
+#if NET
+    /// <summary>
     /// Gets or sets the container detector configuration.
     /// </summary>
     [YamlMember(Alias = "container")]
