@@ -111,6 +111,7 @@ public class FilebasedResourceSettingsTests
 
 #if NET
         detectors.Container = new object();
+        detectors.AzureContainerApps = new object();
 #endif
 
         var result = detectors.GetEnabledResourceDetectors();
@@ -124,6 +125,7 @@ public class FilebasedResourceSettingsTests
 
 #if NET
         expected.Add(ResourceDetector.Container);
+        expected.Add(ResourceDetector.AzureContainerApps);
 #endif
 
         Assert.Equal(expected.Count, result.Count);

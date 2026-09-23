@@ -20,11 +20,14 @@ internal static class RabbitMqInstrumentation
         var connection = instance.Session?.Connection;
         var activity = Source.StartActivity(name: string.Empty, kind: ActivityKind.Consumer);
 
-        SetNetworkTags(
-            activity!,
-            connection?.Endpoint?.HostName,
-            connection?.Endpoint?.Port,
-            connection?.RemoteEndPoint);
+        if (activity is not null)
+        {
+            SetNetworkTags(
+                activity,
+                connection?.Endpoint?.HostName,
+                connection?.Endpoint?.Port,
+                connection?.RemoteEndPoint);
+        }
 
         return activity;
     }
