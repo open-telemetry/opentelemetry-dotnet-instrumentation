@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.16.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.17.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [v1.17.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.17.0)
 
 ### Added
 
@@ -22,6 +36,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   traces instrumentation for versions `3.1.x`+ for .NET only.
 - Added support for [Quartz](https://www.nuget.org/packages/Quartz)
   traces and metrics instrumentation for version `4`+ for .NET 10 only.
+- `AZURECONTAINERAPPS` resource detector, detecting Azure Container Apps
+  resource information for .NET only.
 
 ### Changed
 
@@ -48,28 +64,30 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 #### Dependency updates
 
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-  [`1.18.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.18.0).
+  [`1.19.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.19.1).
 - Following packages updated
-  - `Google.Protobuf` updated from `3.35.0` to `3.36.1`,
-  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.16.0-beta.1` to `1.18.0-beta.1`,
-  - `OpenTelemetry.Instrumentation.Http` from `1.16.0` to `1.18.0`,
-  - `OpenTelemetry.Instrumentation.Process` from `1.16.0-beta.1` to `1.18.0-rc.1`,
-  - `OpenTelemetry.Instrumentation.Quartz` from `1.15.1-beta.1` to `1.18.0-beta.1`,
-  - `OpenTelemetry.Instrumentation.Runtime` from `1.15.1` to `1.18.0`,
-  - `OpenTelemetry.Instrumentation.SqlClient` from `1.16.0` to `1.18.0`,
-  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.16.0-beta.1` to `1.18.0-beta.2`,
-  - `OpenTelemetry.Instrumentation.Wcf` from `1.16.0-beta.1` to `1.18.0-beta.1`,
-  - `OpenTelemetry.OpAmp.Client` from `0.6.0-alpha.1` to `0.7.0-alpha.1`,
-  - `OpenTelemetry.Resources.Azure` from `1.15.1-beta.1` to `1.18.0-beta.2`,
-  - `OpenTelemetry.Resources.Container` from `1.15.1-beta.1` to `1.18.0-beta.1`,
-  - `OpenTelemetry.Resources.Host` from `1.15.1-beta.1` to `1.18.0-beta.1`,
-  - `OpenTelemetry.Resources.OperatingSystem` from `1.15.1-beta.1` to `1.18.0-beta.1`,
-  - `OpenTelemetry.Resources.Process` from `1.15.1-beta.2` to `1.18.0-rc.1`,
-  - `OpenTelemetry.Resources.ProcessRuntime` from `1.15.1-beta.1` to `1.18.0-beta.1`.
+  - `Google.Protobuf` updated from `3.35.0` to `3.36.2`,
+  - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.18.0-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.16.0-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.16.0` to `1.19.0`,
+  - `OpenTelemetry.Instrumentation.Process` from `1.16.0-beta.1` to `1.19.0-rc.1`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.15.1-beta.1` to `1.19.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.15.1` to `1.19.0`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.16.0` to `1.19.0`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.16.0-beta.1` to `1.19.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.16.0-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.OpAmp.Client` from `0.6.0-alpha.1` to `0.7.0-alpha.2`,
+  - `OpenTelemetry.Shims.OpenTracing` from `1.18.0-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.Resources.Azure` from `1.15.1-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.Resources.Container` from `1.15.1-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.Resources.Host` from `1.15.1-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.Resources.OperatingSystem` from `1.15.1-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.Resources.Process` from `1.15.1-beta.2` to `1.19.1-rc.1`,
+  - `OpenTelemetry.Resources.ProcessRuntime` from `1.15.1-beta.1` to `1.19.1-beta.1`.
 - .NET only, following packages updated
-  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.16.0` to `1.18.0`,
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.16.0` to `1.19.0`,
   - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
-    from `1.16.0-beta.1` to `1.18.0-beta.1`.
+    from `1.16.0-beta.1` to `1.19.0-beta.1`.
 - .NET Framework only, following packages updated
   - `Microsoft.Bcl.AsyncInterfaces` from `10.0.9` to `10.0.12`,
   - `Microsoft.Extensions.Configuration` from `10.0.9` to `10.0.12`,
@@ -87,7 +105,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Extensions.Options.ConfigurationExtensions`
     from `10.0.9` to `10.0.12`,
   - `Microsoft.Extensions.Primitives` from `10.0.9` to `10.0.12`,
-  - `OpenTelemetry.Instrumentation.AspNet` from `1.16.0` to `1.18.0`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.16.0` to `1.19.0`,
   - `System.Diagnostics.DiagnosticSource` from `10.0.9` to `10.0.12`,
   - `System.IO.Pipelines` from `10.0.9` to `10.0.12`,
   - `System.Text.Encodings.Web` from `10.0.9` to `10.0.12`,
@@ -98,10 +116,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Deprecate support for [Quartz](https://www.nuget.org/packages/Quartz)
   traces instrumentation for version `3.x.x`.
 
-### Removed
-
 ### Fixed
 
+- StackExchange.Redis trace instrumentation for asynchronous connections with
+  version `3.3.0`+ for .NET only.
+- Handle YAML null values consistently in file-based configuration and
+  distinguish them from quoted empty strings.
 - Allow an empty `opamp/development` section in file-based configuration to
   enable the OpAMP client with default settings.
 - Prevent the shell installer from using a predictable path for temporary

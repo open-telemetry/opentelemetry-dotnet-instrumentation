@@ -1,6 +1,7 @@
 appcmd
 AWSSDK
 AZUREAPPSERVICE
+AZURECONTAINERAPPS
 bazel
 bazelized
 bazelversion
