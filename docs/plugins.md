@@ -180,10 +180,14 @@ public class MyOptionsPlugin : IPlugin,
 
 Implement `IOpAmpPlugin` to customize the OpAMP client and observe its
 lifecycle.
-OpAMP methods are called on every configured plugin implementing `IOpAmpPlugin`.
+Only the first configured plugin implementing `IOpAmpPlugin` controls OpAMP.
+Additional OpAMP plugins are ignored for OpAMP and named in a warning, but they
+continue to receive ordinary `IPlugin` callbacks and participate through any
+other plugin interfaces they implement. For file-based configuration, entries
+in `plugins` precede entries in `plugins_list`; otherwise list order is used.
 
 > [!NOTE]
-> `OpenTelemetry.OpAmp.Client` 0.7.0-alpha.1 queues outgoing messages. The
+> The bundled `OpenTelemetry.OpAmp.Client` queues outgoing messages. The
 > `Send*Async` methods available in 0.6.0-alpha.1 were replaced by corresponding
 > `Send*` methods. Call `FlushAsync` when the plugin must wait until the outgoing
 > queue is empty.
@@ -191,11 +195,12 @@ OpAMP methods are called on every configured plugin implementing `IOpAmpPlugin`.
 ```csharp
 using OpenTelemetry.AutoInstrumentation.PluginApi;
 using OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
-using OpenTelemetry.OpAmp.Client;
 using OpenTelemetry.OpAmp.Client.Settings;
 
 public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
 {
+    private IOpAmpClient? _client;
+
     public void Initializing()
     {
     }
@@ -206,12 +211,20 @@ public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
 
     public void ConfigureOpAmpOptions(OpAmpClientSettings settings)
     {
-        // Called before the OpAMP client is created.
+        // Called before the OpAMP client is created. Provider-backed reporting
+        // must be explicitly enabled here when supported by this plugin.
     }
 
-    public void AfterOpAmpClientStarted(OpAmpClient client)
+    public void ConfigureOpAmpClient(IOpAmpClient client)
     {
-        // Called after the OpAMP client is created and started.
+        // Called after client construction and before transport startup.
+        // Register message listeners here and retain the client if needed later.
+        _client = client;
+    }
+
+    public void AfterOpAmpClientStarted()
+    {
+        // Called after the OpAMP transport starts successfully.
     }
 
     public void BeforeOpAmpClientStopped()
@@ -221,6 +234,98 @@ public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
     }
 }
 ```
+
+OpAMP initialization calls `ConfigureOpAmpOptions`, constructs the client and
+registers its internal listeners, calls `ConfigureOpAmpClient` on the selected
+OpAMP plugin, and then invokes the ordinary `IPlugin.Initialized` callbacks. The
+transport starts only after those callbacks complete. A listener subscribed in
+`ConfigureOpAmpClient` therefore observes messages in the initial server
+response. `AfterOpAmpClientStarted` runs only after successful startup. When
+startup activation races with shutdown, the callback runs only if startup wins
+the lifecycle transition, and it completes before `BeforeOpAmpClientStopped`
+begins. `BeforeOpAmpClientStopped` may still run for a successfully prepared
+client when startup fails, is cancelled, or loses that lifecycle transition, so
+cleanup must not assume the post-start callback ran. Use
+`IOpAmpClient.Unsubscribe` to remove a listener when it is no longer needed.
+
+Implement `IProvideEffectiveConfig` to report effective configuration and
+`IProvideRemoteConfigStatus` to report the status of remote configuration.
+These interfaces make the corresponding reporting capabilities available to
+the selected OpAMP plugin, but do not enable them. Both reporting settings are
+disabled before `ConfigureOpAmpOptions` runs. The plugin must explicitly set
+`EffectiveConfigurationReporting.EnableReporting` or
+`RemoteConfiguration.ReportsRemoteConfigStatus` to `true`, optionally based on
+its own local configuration. After the callback, a setting without its provider
+is forced off, and the final choices remain fixed for the client lifetime.
+Provider interfaces implemented only by ignored OpAMP plugins do not make
+reporting available.
+`RemoteConfiguration.AcceptsRemoteConfig` remains plugin-controlled.
+
+`IProvideEffectiveConfig.GetEffectiveConfig` returns the plugin's complete
+current effective configuration. Automatic instrumentation requests it when a
+server starts accepting effective configuration and after the plugin calls
+`IOpAmpClient.NotifyEffectiveConfigChanged` while that support is available.
+Files are copied, sorted by name, and compared with the last valid state, so
+equivalent state is not reported again. Effective configuration must satisfy
+all of these limits:
+
+- No more than 16 files.
+- No file content larger than 512 KiB.
+- File names must be ordinally unique.
+- The empty string is a valid file name, including in a multi-file configuration.
+
+`IProvideRemoteConfigStatus.GetRemoteConfigStatus` is requested when a server
+starts offering remote configuration and after the plugin calls
+`IOpAmpClient.NotifyRemoteConfigStatusChanged` while that support is available.
+Return `null` when no remote configuration has been processed. Status reports
+are also copied and sent only when their state changes. Notifications received
+while server support is unavailable do not query providers; the current state
+is requested if support later becomes available. If a provider throws, or an
+effective configuration is invalid, the last valid state is retained and the
+failure is logged without logging configuration contents. A failed refresh does
+not send a partial report.
+
+A server full-state request refreshes enabled providers supported by the server
+and reports their latest valid state even when it has not changed. If a refresh
+fails, the last valid state is used. Full-state requests are honored when
+`ReportFullState` is combined with other server flags. Call
+`IOpAmpClient.FlushAsync` to wait for state changes already accepted by
+automatic instrumentation and for the upstream client's outgoing queue. Its
+cancellation token and upstream failures are propagated to the caller. Call it
+only after `AfterOpAmpClientStarted`; it fails if startup has not completed
+successfully or shutdown has begun.
+
+Call `IOpAmpClient.ReportCustomCapabilities` with the complete set of custom
+capabilities supported by the plugin. Capability names are case-sensitive
+reverse fully qualified domain names with optional version information. Each
+call replaces the previous set; duplicate entries and ordering are ignored, and
+an empty collection clears all previously reported capabilities. A custom
+message is sent only when both the plugin and the server advertise its
+capability. Custom capabilities may be reported during `ConfigureOpAmpClient`.
+Before startup completes, only the latest set is retained and a nonempty set is
+reported after the transport starts successfully. All later state reports are
+serialized so a full-state response cannot overwrite a newer custom-capability
+set. Pending replacement-state updates may be coalesced to their latest value.
+Custom messages are accepted only for capabilities already submitted to
+the upstream client. If capability publication is pending, await `FlushAsync`
+and retry the message; a rejected message is not retried automatically. In
+particular, a response produced by an initial-response listener may need to be
+deferred until startup has completed and the capability report has been
+flushed. Custom messages continue to use the upstream client's bounded queue.
+
+Automatic instrumentation suppresses tracing around calls into the upstream
+OpAMP client, including sends and flushes, so OpAMP transport requests do not
+produce application spans. Provider callbacks do not modify suppression state;
+they inherit the ambient state and should not depend on emitting telemetry.
+
+### Security considerations
+
+Automatic instrumentation does not validate plugin-defined remote
+configuration or custom-message payloads, or redact reported effective
+configuration. `RemoteConfiguration.AcceptsRemoteConfig` defaults to disabled
+and is changed only by the selected plugin. Configure transport authentication
+through `OpAmpClientSettings` and follow the
+[OpAMP security recommendations](https://github.com/open-telemetry/opamp-spec/blob/v0.20.0/specification.md#security).
 
 ## Selective sampling
 

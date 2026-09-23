@@ -21,7 +21,8 @@ internal partial class PluginManager
 
     public PluginManager(PluginsSettings settings)
     {
-        var plugins = new Dictionary<Type, IPlugin>();
+        var pluginTypes = new HashSet<Type>();
+        var plugins = new List<(Type Type, IPlugin Instance)>();
 
         foreach (var assemblyQualifiedName in settings.Plugins)
         {
@@ -41,7 +42,7 @@ internal partial class PluginManager
                 continue;
             }
 
-            if (plugins.ContainsKey(type))
+            if (pluginTypes.Contains(type))
             {
                 continue;
             }
@@ -60,10 +61,11 @@ internal partial class PluginManager
                 continue;
             }
 
-            plugins.Add(type, plugin);
+            pluginTypes.Add(type);
+            plugins.Add((type, plugin));
         }
 
-        _plugins = [.. plugins.Select(it => (it.Key, it.Value))];
+        _plugins = plugins;
         _hasTelemetryPlugins = HasTelemetryPlugins(_plugins);
     }
 

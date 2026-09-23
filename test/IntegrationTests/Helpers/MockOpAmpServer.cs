@@ -23,11 +23,25 @@ internal sealed class MockOpAmpServer : IDisposable
 
     private readonly List<Expectation> _expectations = new();
     private readonly BlockingCollection<AgentToServer> _frames = new(10); // bounded to avoid memory leak
+    private readonly ConcurrentQueue<AgentToServer> _receivedFrames = new();
     private readonly List<NameValueCollection> _receivedHeaders = [];
+    private readonly SemaphoreSlim _frameReceived = new(0);
+    private readonly string[]? _customCapabilities;
+    private readonly bool _sendCustomMessageOnlyInFirstResponse;
+    private readonly ulong _firstResponseFlags;
+    private int _responseCount;
 
-    public MockOpAmpServer(ITestOutputHelper output, string host = "localhost")
+    public MockOpAmpServer(
+        ITestOutputHelper output,
+        string host = "localhost",
+        IReadOnlyCollection<string>? customCapabilities = null,
+        bool sendCustomMessageOnlyInFirstResponse = false,
+        ulong firstResponseFlags = 0)
     {
         _output = output;
+        _customCapabilities = customCapabilities?.ToArray();
+        _sendCustomMessageOnlyInFirstResponse = sendCustomMessageOnlyInFirstResponse;
+        _firstResponseFlags = firstResponseFlags;
 #if NETFRAMEWORK
         _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/opamp/");
 #else
@@ -115,10 +129,35 @@ internal sealed class MockOpAmpServer : IDisposable
         }
     }
 
+    public int GetFrameCount(Func<AgentToServer, bool> predicate)
+    {
+        return _receivedFrames.Count(predicate);
+    }
+
+    public void WaitForFrameCount(
+        Func<AgentToServer, bool> predicate,
+        int expectedCount,
+        string description,
+        TimeSpan? timeout = null)
+    {
+        timeout ??= TestTimeout.Expectation;
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+        while (GetFrameCount(predicate) < expectedCount)
+        {
+            var remaining = timeout.Value - stopwatch.Elapsed;
+            if (remaining <= TimeSpan.Zero || !_frameReceived.Wait(remaining))
+            {
+                Assert.Fail($"Timed out waiting for {expectedCount} frame(s): {description}");
+            }
+        }
+    }
+
     public void Dispose()
     {
         WriteOutput("Shutting down.");
         _listener?.Dispose();
+        _frameReceived.Dispose();
         _frames.Dispose();
     }
 
@@ -151,18 +190,39 @@ internal sealed class MockOpAmpServer : IDisposable
         Assert.Fail(message.ToString());
     }
 
-    private static byte[] GenerateResponse(AgentToServer frame)
+    private static byte[] GenerateResponse(
+        AgentToServer frame,
+        IReadOnlyCollection<string>? customCapabilities,
+        bool sendCustomMessage,
+        ulong flags)
     {
         var content = "This is a mock server frame for testing purposes.";
+        var capabilities =
+            ServerCapabilities.AcceptsStatus |
+            ServerCapabilities.AcceptsEffectiveConfig |
+            ServerCapabilities.OffersRemoteConfig;
+
         var responseFrame = new ServerToAgent
         {
             InstanceUid = frame.InstanceUid,
-            CustomMessage = new CustomMessage()
+            Capabilities = (ulong)capabilities,
+            Flags = flags
+        };
+
+        if (sendCustomMessage)
+        {
+            responseFrame.CustomMessage = new CustomMessage()
             {
                 Data = ByteString.CopyFromUtf8(content),
                 Type = "Utf8String",
-            },
-        };
+            };
+        }
+
+        if (customCapabilities != null)
+        {
+            responseFrame.CustomCapabilities = new CustomCapabilities();
+            responseFrame.CustomCapabilities.Capabilities.Add(customCapabilities);
+        }
 
         return responseFrame.ToByteArray();
     }
@@ -171,6 +231,8 @@ internal sealed class MockOpAmpServer : IDisposable
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
         var frame = AgentToServer.Parser.ParseFrom(ctx.Request.InputStream);
+        _receivedFrames.Enqueue(frame);
+        _frameReceived.Release();
         _frames.Add(frame);
 
         var headersCopy = new NameValueCollection();
@@ -181,7 +243,12 @@ internal sealed class MockOpAmpServer : IDisposable
 
         _receivedHeaders.Add(headersCopy);
 
-        var response = GenerateResponse(frame);
+        var responseNumber = Interlocked.Increment(ref _responseCount);
+        var response = GenerateResponse(
+            frame,
+            _customCapabilities,
+            ShouldSendCustomMessage(responseNumber),
+            responseNumber == 1 ? _firstResponseFlags : 0);
 
         ctx.Response.StatusCode = (int)HttpStatusCode.OK;
         ctx.Response.ContentType = "application/x-protobuf";
@@ -233,6 +300,8 @@ internal sealed class MockOpAmpServer : IDisposable
             return;
         }
 
+        _receivedFrames.Enqueue(frame);
+        _frameReceived.Release();
         _frames.Add(frame);
 
         var headersCopy = new NameValueCollection();
@@ -243,7 +312,12 @@ internal sealed class MockOpAmpServer : IDisposable
 
         _receivedHeaders.Add(headersCopy);
 
-        var response = GenerateResponse(frame);
+        var responseNumber = Interlocked.Increment(ref _responseCount);
+        var response = GenerateResponse(
+            frame,
+            _customCapabilities,
+            ShouldSendCustomMessage(responseNumber),
+            responseNumber == 1 ? _firstResponseFlags : 0);
 
         ctx.Response.StatusCode = (int)HttpStatusCode.OK;
         ctx.Response.ContentType = "application/x-protobuf";
@@ -252,6 +326,11 @@ internal sealed class MockOpAmpServer : IDisposable
         await ctx.Response.CompleteAsync().ConfigureAwait(false);
     }
 #endif
+
+    private bool ShouldSendCustomMessage(int responseNumber)
+    {
+        return !_sendCustomMessageOnlyInFirstResponse || responseNumber == 1;
+    }
 
     private void WriteOutput(string msg)
     {

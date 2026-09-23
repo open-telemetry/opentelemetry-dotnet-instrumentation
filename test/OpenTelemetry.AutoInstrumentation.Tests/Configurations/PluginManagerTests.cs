@@ -116,6 +116,17 @@ public class PluginManagerTests
     }
 
     [Fact]
+    public void DuplicatePluginTypesAreInstantiatedOnce()
+    {
+        var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName!;
+        var settings = GetSettings($"{pluginAssemblyQualifiedName}:{pluginAssemblyQualifiedName}");
+
+        var pluginManager = new PluginManager(settings);
+
+        Assert.Single(pluginManager.Plugins);
+    }
+
+    [Fact]
     public void ConfigureLogsOptionsSuccess()
     {
         var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName!;

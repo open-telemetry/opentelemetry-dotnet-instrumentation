@@ -11,6 +11,13 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Reworked the experimental OpAMP plugin API with pre-start listener
+  registration, provider-based state reporting that plugins explicitly
+  enable, custom capabilities, and `IOpAmpClient.FlushAsync` for waiting on
+  manager-accepted reports and the upstream outgoing queue. Only the first
+  configured `IOpAmpPlugin` controls OpAMP. See the
+  [OpAMP plugin documentation](./docs/plugins.md#opamp).
+
 #### Dependency updates
 
 ### Deprecated
@@ -18,6 +25,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Removed
 
 ### Fixed
+
+- Harden OpAMP state reporting and shutdown, including bounded coalescing,
+  deduplication, full-state handling, custom-capability clearing and message ordering,
+  atomic startup/shutdown transitions, and a bounded graceful-shutdown period.
 
 ## [v1.17.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.17.0)
 
