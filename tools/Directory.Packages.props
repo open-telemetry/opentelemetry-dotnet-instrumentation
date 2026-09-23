@@ -5,7 +5,7 @@
     <PackageVersion Include="Microsoft.Build" Version="17.14.28" />
     <PackageVersion Include="NuGet.ProjectModel" Version="7.9.0" />
     <PackageVersion Include="System.IO.Abstractions" Version="22.2.0" />
-    <PackageVersion Include="Valleysoft.DockerfileModel" Version="2.0.0" />
+    <PackageVersion Include="Valleysoft.DockerfileModel" Version="3.0.0" />
     <PackageVersion Include="YamlDotNet" Version="18.1.0" />
   </ItemGroup>
 </Project>
