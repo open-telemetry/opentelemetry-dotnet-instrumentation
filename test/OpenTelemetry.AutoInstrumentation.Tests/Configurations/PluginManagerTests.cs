@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Specialized;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using OpenTelemetry.AutoInstrumentation.Configurations;
@@ -23,6 +24,17 @@ public class PluginManagerTests
         var pluginAssemblyQualifiedName = "Missing.Assembly.PluginType, Missing.Assembly";
         var settings = GetSettings(pluginAssemblyQualifiedName);
 
+        var pluginManager = new PluginManager(settings);
+
+        Assert.Empty(pluginManager.Plugins);
+    }
+
+    [Fact]
+    public void MissingAssemblyFailFast()
+    {
+        var pluginAssemblyQualifiedName = "Missing.Assembly.PluginType, Missing.Assembly";
+        var settings = GetSettings(pluginAssemblyQualifiedName, failFast: true);
+
         Assert.Throws<FileNotFoundException>(() => new PluginManager(settings));
     }
 
@@ -31,6 +43,17 @@ public class PluginManagerTests
     {
         var pluginAssemblyQualifiedName = "Missing.PluginType";
         var settings = GetSettings(pluginAssemblyQualifiedName);
+
+        var pluginManager = new PluginManager(settings);
+
+        Assert.Empty(pluginManager.Plugins);
+    }
+
+    [Fact]
+    public void MissingPluginTypeFromAssemblyFailFast()
+    {
+        var pluginAssemblyQualifiedName = "Missing.PluginType";
+        var settings = GetSettings(pluginAssemblyQualifiedName, failFast: true);
 
         Assert.Throws<TypeLoadException>(() => new PluginManager(settings));
     }
@@ -65,6 +88,37 @@ public class PluginManagerTests
         var settings = GetSettings(pluginAssemblyQualifiedName);
 
         Assert.Null(Record.Exception(() => new PluginManager(settings)));
+    }
+
+    [Fact]
+    public void PluginConstructorThrows()
+    {
+        var pluginAssemblyQualifiedName = typeof(PluginWithThrowingConstructor).AssemblyQualifiedName!;
+        var settings = GetSettings(pluginAssemblyQualifiedName);
+
+        var pluginManager = new PluginManager(settings);
+
+        Assert.Empty(pluginManager.Plugins);
+    }
+
+    [Fact]
+    public void PluginConstructorThrowsFailFast()
+    {
+        var pluginAssemblyQualifiedName = typeof(PluginWithThrowingConstructor).AssemblyQualifiedName!;
+        var settings = GetSettings(pluginAssemblyQualifiedName, failFast: true);
+
+        Assert.Throws<TargetInvocationException>(() => new PluginManager(settings));
+    }
+
+    [Fact]
+    public void EmptyPluginEntriesAreIgnored()
+    {
+        var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName!;
+        var settings = GetSettings($" :{pluginAssemblyQualifiedName}:: ");
+
+        var pluginManager = new PluginManager(settings);
+
+        Assert.Single(pluginManager.Plugins);
     }
 
     [Fact]
@@ -153,9 +207,9 @@ public class PluginManagerTests
         Assert.Equal("value", resource.Attributes.First().Value);
     }
 
-    private static PluginsSettings GetSettings(string assemblyQualifiedName)
+    private static PluginsSettings GetSettings(string assemblyQualifiedName, bool failFast = false)
     {
-        var config = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection()
+        var config = new Configuration(failFast, new NameValueConfigurationSource(failFast, new NameValueCollection()
         {
             { ConfigurationKeys.ProviderPlugins, assemblyQualifiedName }
         }));
@@ -361,6 +415,26 @@ public class PluginManagerTests
         public MockPluginMissingDefaultConstructor(string ignored)
         {
             throw new InvalidOperationException("this plugin is not expected to be successfully constructed");
+        }
+    }
+
+#pragma warning disable CA1515 // Consider making public types internal. Needed for plugin purposes.
+#pragma warning disable CA1034 // Nested types should not be visible. It is used only for test purposes.
+    public class PluginWithThrowingConstructor : IPlugin
+#pragma warning restore CA1034 // Nested types should not be visible. It is used only for test purposes.
+#pragma warning restore CA1515 // Consider making public types internal. Needed for plugin purposes.
+    {
+        public PluginWithThrowingConstructor()
+        {
+            throw new InvalidOperationException("Plugin constructor failed.");
+        }
+
+        public void Initialized()
+        {
+        }
+
+        public void Initializing()
+        {
         }
     }
 }
