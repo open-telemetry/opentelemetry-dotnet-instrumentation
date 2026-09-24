@@ -155,6 +155,57 @@ const WSTRING& TracerTokens::GetCallTargetReturnGenericType()
     return managed_profiler_calltarget_returntype_generics;
 }
 
+HRESULT TracerTokens::EnsureBaseCalltargetTokens()
+{
+    auto hr = CallTargetTokens::EnsureBaseCalltargetTokens();
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    // The type may be unavailable when a newer native profiler is used with an older managed assembly.
+    if (bubbleUpExceptionTypeRef == mdTypeRefNil)
+    {
+        const ModuleMetadata* module_metadata = GetMetadata();
+        module_metadata->metadata_emit->DefineTypeRefByName(profilerAssemblyRef,
+                                                            calltarget_bubble_up_exception_type_name.data(),
+                                                            &bubbleUpExceptionTypeRef);
+    }
+
+    return hr;
+}
+
+int TracerTokens::GetAdditionalLocalsCount()
+{
+    // Exception filters need their own exception local for BeginMethod and EndMethod.
+    return 2;
+}
+
+void TracerTokens::AddAdditionalLocals(COR_SIGNATURE (&signatureBuffer)[500],
+                                       ULONG& signatureOffset,
+                                       ULONG& signatureSize)
+{
+    unsigned   exTypeRefBuffer;
+    const auto exTypeRefSize           = CorSigCompressToken(exTypeRef, &exTypeRefBuffer);
+    const auto additionalSignatureSize = 2 * (1 + exTypeRefSize);
+    signatureSize += additionalSignatureSize;
+
+    if (signatureSize > signatureBufferSize)
+    {
+        return;
+    }
+
+    // Exception value for the BeginMethod CallTarget exception filter.
+    signatureBuffer[signatureOffset++] = ELEMENT_TYPE_CLASS;
+    memcpy(&signatureBuffer[signatureOffset], &exTypeRefBuffer, exTypeRefSize);
+    signatureOffset += exTypeRefSize;
+
+    // Exception value for the EndMethod CallTarget exception filter.
+    signatureBuffer[signatureOffset++] = ELEMENT_TYPE_CLASS;
+    memcpy(&signatureBuffer[signatureOffset], &exTypeRefBuffer, exTypeRefSize);
+    signatureOffset += exTypeRefSize;
+}
+
 /**
  * PUBLIC
  **/
@@ -703,8 +754,19 @@ HRESULT TracerTokens::WriteLogException(void*           rewriterWrapperPtr,
         return hr;
     }
 
-    *instruction = rewriterWrapper->CallMember(logExceptionMethodSpec, false);
+    ILInstr* callInstruction = rewriterWrapper->CallMember(logExceptionMethodSpec, false);
+    // A filter handler does not provide the exception on the evaluation stack in the same way as a typed catch.
+    // Preserve the POP/LDLOC sequence emitted by the rewriter as the handler's first instruction.
+    if (*instruction == nullptr)
+    {
+        *instruction = callInstruction;
+    }
     return S_OK;
+}
+
+mdTypeRef TracerTokens::GetBubbleUpExceptionTypeRef() const
+{
+    return bubbleUpExceptionTypeRef;
 }
 
 } // namespace trace

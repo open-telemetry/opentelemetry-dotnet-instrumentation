@@ -16,11 +16,11 @@ namespace trace
 RejitHandlerModuleMethod::RejitHandlerModuleMethod(mdMethodDef         methodDef,
                                                    RejitHandlerModule* module,
                                                    const FunctionInfo& functionInfo)
+    : m_methodDef(methodDef)
+    , m_module(module)
+    , m_pFunctionControl(nullptr)
+    , m_functionInfo(std::make_unique<FunctionInfo>(functionInfo))
 {
-    m_methodDef = methodDef;
-    SetFunctionInfo(functionInfo);
-    m_pFunctionControl = nullptr;
-    m_module           = module;
 }
 
 mdMethodDef RejitHandlerModuleMethod::GetMethodDef()
@@ -80,7 +80,7 @@ bool RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
             unsigned int             total = 0;
             std::vector<ModuleID>    modules;
             std::vector<mdMethodDef> methods;
-            while (methodEnum->Next(1, &method, NULL) == S_OK)
+            while (methodEnum->Next(1, &method, nullptr) == S_OK)
             {
                 Logger::Debug("NGEN:: Asking rewrite for inliner [ModuleId=", method.moduleId,
                               ",MethodDef=", method.methodId, "]");
@@ -160,10 +160,8 @@ MethodRewriter* TracerRejitHandlerModuleMethod::GetMethodRewriter()
 //
 
 RejitHandlerModule::RejitHandlerModule(ModuleID moduleId, RejitHandler* handler)
+    : m_moduleId(moduleId), m_handler(handler), m_metadata(nullptr)
 {
-    m_moduleId = moduleId;
-    m_metadata = nullptr;
-    m_handler  = handler;
 }
 
 ModuleID RejitHandlerModule::GetModuleId()
@@ -305,17 +303,13 @@ void RejitHandler::RequestRejit(std::vector<ModuleID>& modulesVector, std::vecto
 }
 
 RejitHandler::RejitHandler(ICorProfilerInfo7* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader)
+    : m_profilerInfo(pInfo), m_profilerInfo12(nullptr), m_work_offloader(work_offloader)
 {
-    m_profilerInfo   = pInfo;
-    m_profilerInfo12 = nullptr;
-    m_work_offloader = work_offloader;
 }
 
 RejitHandler::RejitHandler(ICorProfilerInfo12* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader)
+    : m_profilerInfo(pInfo), m_profilerInfo12(pInfo), m_work_offloader(work_offloader)
 {
-    m_profilerInfo   = pInfo;
-    m_profilerInfo12 = pInfo;
-    m_work_offloader = work_offloader;
 }
 
 RejitHandlerModule* RejitHandler::GetOrAddModule(ModuleID moduleId)

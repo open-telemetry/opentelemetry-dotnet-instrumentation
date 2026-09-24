@@ -70,10 +70,11 @@ private:
     bool enable_by_ref_instrumentation = true;
     bool enable_calltarget_state_by_ref = true;
     std::unique_ptr<TracerRejitPreprocessor> tracer_integration_preprocessor = nullptr;
+    bool call_target_bubble_up_exception_available = false;
 
     // Cor assembly properties
     AssemblyProperty corAssemblyProperty{};
-    AssemblyReference* managed_profiler_assembly_reference;
+    AssemblyReference* managed_profiler_assembly_reference = nullptr;
 
     //
     // OpCodes helper
@@ -128,11 +129,13 @@ private:
     bool GetIntegrationTypeRef(ModuleMetadata& module_metadata, ModuleID module_id,
                                const IntegrationDefinition& integration_definition, mdTypeRef& integration_type_ref);
     bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);
+    static bool EnsureCallTargetBubbleUpExceptionTypeAvailable(const ModuleMetadata& module_metadata);
 
     //
     // Initialization methods
     //
-    void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
+    void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived,
+                                    bool isInterface);
 
 protected:
     void InitializeRuntimeSamplerService() noexcept;
@@ -232,6 +235,7 @@ public:
     //
     void AddInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
     void AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
+    void AddInterfaceInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
     void InitializeTraceMethods(WCHAR* id,
                                 WCHAR* integration_assembly_name_ptr,
                                 WCHAR* integration_type_name_ptr,
