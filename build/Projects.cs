@@ -18,6 +18,7 @@ public static class Projects
         public const string AutoInstrumentationBuildTasksTests = "OpenTelemetry.AutoInstrumentation.BuildTasks.Tests";
         public const string AutoInstrumentationLoaderTests = "OpenTelemetry.AutoInstrumentation.Loader.Tests";
         public const string AutoInstrumentationBootstrappingTests = "OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests";
+        public const string AutoInstrumentationFuzzTests = "OpenTelemetry.AutoInstrumentation.FuzzTests";
         public const string AutoInstrumentationTests = "OpenTelemetry.AutoInstrumentation.Tests";
         public const string AutoInstrumentationStartupHookTests = "OpenTelemetry.AutoInstrumentation.StartupHook.Tests";
         public const string IntegrationTests = "IntegrationTests";

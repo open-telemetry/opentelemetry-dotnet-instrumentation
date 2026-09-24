@@ -573,6 +573,7 @@ partial class Build
             var unitTestProjects = new[]
             {
                 Solution.GetProjectByName(Projects.Tests.AutoInstrumentationBuildTasksTests),
+                Solution.GetProjectByName(Projects.Tests.AutoInstrumentationFuzzTests),
                 Solution.GetProjectByName(Projects.Tests.AutoInstrumentationLoaderTests),
                 Solution.GetProjectByName(Projects.Tests.AutoInstrumentationStartupHookTests),
                 Solution.GetProjectByName(Projects.Tests.AutoInstrumentationTests)
