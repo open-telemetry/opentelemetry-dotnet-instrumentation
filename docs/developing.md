@@ -7,6 +7,7 @@ On all platforms, the minimum requirements are:
 - [Docker](https://www.docker.com/products/docker-desktop)
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 ### Windows
 
@@ -36,7 +37,7 @@ with Windows and Visual Studio preinstalled.
 Run:
 
 ```sh
-`./dev/codespaces-init.sh`
+./dev/codespaces-init.sh
 ```
 
 ## Build
@@ -134,13 +135,13 @@ If you made changes to the Markdown documents (`*.md` files), ensure that lint
 tool and spellcheck passed without any issues by executing:
 
 ```cmd
-nuke InstallDocumentationTools ValidateDocumentation
+dotnet nuke InstallDocumentationTools ValidateDocumentation
 ```
 
 Some issues can be automatically fixed by:
 
 ```cmd
-nuke MarkdownLintFix
+dotnet nuke MarkdownLintFix
 ```
 
 All MarkdownLint tasks require [Node.js](https://nodejs.org/) installed locally.
@@ -150,16 +151,16 @@ All MarkdownLint tasks require [Node.js](https://nodejs.org/) installed locally.
 The .NET code formatting is based on the
 [OpenTelemetry .NET repository](https://github.com/open-telemetry/opentelemetry-dotnet).
 
-Installing formatter:
+Verify formatting using the same solution and options as CI:
 
-```sh
-dotnet tool install -g dotnet-format
+```cmd
+dotnet format OpenTelemetry.AutoInstrumentation.sln --verify-no-changes
 ```
 
-Formatting (Bash):
+To apply formatting changes, omit `--verify-no-changes`:
 
-```sh
-dotnet-format --folder
+```cmd
+dotnet format OpenTelemetry.AutoInstrumentation.sln
 ```
 
 ### Native code formatting
