@@ -150,5 +150,10 @@ internal enum TracerInstrumentation
     /// <summary>
     /// SQLite instrumentation.
     /// </summary>
-    Sqlite = 25
+    Sqlite = 25,
+
+    /// <summary>
+    /// XMS (IBM MQ) instrumentation.
+    /// </summary>
+    Xms = 26
 }

@@ -1,3 +1,4 @@
+amqmxmsstd
 appcmd
 AWSSDK
 AZUREAPPSERVICE
@@ -25,6 +26,7 @@ envvars
 GRPCNETCLIENT
 HKLM
 HTTPCLIENT
+IBMXMS
 ifdef
 ILOGGER
 inetsrv
@@ -61,6 +63,7 @@ PROCESSRUNTIME
 proto
 protobuf
 protos
+QMID
 RABBITMQ
 Serilog
 Sonoma
@@ -80,3 +83,4 @@ vcpkg
 WCFCLIENT
 WCFSERVICE
 LOGRECORD
+xms

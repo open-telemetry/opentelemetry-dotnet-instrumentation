@@ -31,11 +31,17 @@ internal static class MessagingAttributes
             public const string RoutingKey = "messaging.rabbitmq.destination.routing_key";
             public const string DeliveryTag = "messaging.rabbitmq.delivery_tag";
         }
+
+        internal static class IbmMq
+        {
+            public const string QueueManagerId = "messaging.ibmmq.queue_manager.id";
+        }
     }
 
     internal static class Values
     {
         public const string KafkaMessagingSystemName = "kafka";
+        public const string IbmMqMessagingSystemName = "ibmmq";
         public const string PublishOperationName = "publish";
         public const string ReceiveOperationName = "receive";
         public const string DeliverOperationName = "deliver";
