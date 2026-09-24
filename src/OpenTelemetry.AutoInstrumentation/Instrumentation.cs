@@ -8,6 +8,7 @@ using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.OpAmp;
 using OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling;
 using OpenTelemetry.AutoInstrumentation.PluginApi.SelectiveSampling;
 using OpenTelemetry.AutoInstrumentation.Plugins;
@@ -224,15 +225,21 @@ internal static class Instrumentation
             OpenTracingHelper.EnableOpenTracing(_tracerProvider);
         }
 
-        if (OpAmpSettings.Value.OpAmpClientEnabled)
+        var opAmpClientEnabled = OpAmpSettings.Value.OpAmpClientEnabled;
+        if (opAmpClientEnabled)
         {
             var resources = ResourceHelper.AggregateResources(_tracerProvider, _meterProvider, LoggerProvider);
 
-            OpAmpHelper.EnableOpAmpClient(resources, OpAmpSettings.Value, _pluginManager);
+            OpAmpLoader.PrepareOpAmpClient(resources, OpAmpSettings.Value, _pluginManager);
         }
 
         // Notify plugins all initialization is done
         _pluginManager.Initialized();
+
+        if (opAmpClientEnabled)
+        {
+            OpAmpLoader.StartOpAmpClient();
+        }
     }
 
     private static void TryInitializeContinuousProfiling()
@@ -572,7 +579,7 @@ internal static class Instrumentation
 
         try
         {
-            OpAmpHelper.StopOpAmpClientIfRunning(_pluginManager);
+            OpAmpLoader.StopOpAmpClientIfRunning();
 
             LazyInstrumentationLoader?.Dispose();
             _sampleExporter?.Dispose();
