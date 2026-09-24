@@ -136,13 +136,13 @@ internal sealed class OpAmpManager : IDisposable
             return _forcedShutdownCompletion.Task;
         }
 
-        // The loader's deadline also bounds a blocked lifecycle callback or client disposal.
+        // Forced disposal must not wait for lifecycle callbacks or startup cancellation because
+        // either can execute plugin-controlled code after the loader's shutdown deadline.
         _ = Task.Factory.StartNew(
             () =>
             {
                 try
                 {
-                    InvokeBeforeStopCallback();
                     ForceDisposeClient();
                 }
                 catch (Exception ex)

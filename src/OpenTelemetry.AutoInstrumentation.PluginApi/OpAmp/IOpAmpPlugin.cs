@@ -51,8 +51,10 @@ public interface IOpAmpPlugin
     /// shutdown suppresses <see cref="AfterOpAmpClientStarted"/>. Implementations must not assume the
     /// post-start callback ran and should release resources acquired during
     /// <see cref="ConfigureOpAmpClient"/> here. Automatic instrumentation bounds how long its loader
-    /// waits for shutdown, but cleanup may continue asynchronously after that deadline. For a
-    /// successfully prepared client, this callback completes before that client is disposed.
+    /// waits for shutdown. During graceful shutdown, this callback completes before the client is
+    /// disposed. If the callback does not complete before the shutdown deadline, forced cleanup may
+    /// dispose the client before the callback returns. Implementations should return promptly and
+    /// tolerate client operations failing after the deadline.
     /// </remarks>
     void BeforeOpAmpClientStopped();
 }

@@ -227,7 +227,7 @@ public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
     public void BeforeOpAmpClientStopped()
     {
         // Called before the OpAMP client is stopped.
-        // Avoid long-running work during application shutdown.
+        // Return promptly; forced cleanup may dispose the client after the shutdown deadline.
     }
 }
 ```
@@ -243,7 +243,11 @@ with shutdown, the callback runs only if startup wins, and it completes before
 `BeforeOpAmpClientStopped` begins. `BeforeOpAmpClientStopped` may still run for
 a successfully prepared client when startup fails or is cancelled, so cleanup
 must not assume the post-start callback ran. Use `IOpAmpClient.Unsubscribe` to
-remove listeners acquired during client configuration.
+remove listeners acquired during client configuration. During graceful
+shutdown, `BeforeOpAmpClientStopped` completes before the client is disposed.
+If it does not complete before the loader's shutdown deadline, forced cleanup
+disposes the client independently and may overlap the callback. The callback
+must return promptly and tolerate client operations failing after the deadline.
 
 Automatic instrumentation suppresses tracing around upstream OpAMP transport
 operations so those requests do not produce application spans. Listener

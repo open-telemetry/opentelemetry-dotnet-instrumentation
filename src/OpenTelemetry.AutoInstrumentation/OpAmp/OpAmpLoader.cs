@@ -113,17 +113,22 @@ internal static class OpAmpLoader
 
     private static void ContinueForcedCleanup(OpAmpManager manager, Task? stopTask)
     {
-        var forcedCleanupTask = manager.RequestForcedShutdown();
-        var cleanupTask = stopTask == null
-            ? forcedCleanupTask
-            : Task.WhenAll(stopTask, forcedCleanupTask);
+        if (stopTask != null)
+        {
+            _ = stopTask.ContinueWith(
+                completedStopTask => Logger.Error(completedStopTask.Exception!, "An error occurred while stopping the OpAmp client."),
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+        }
 
-        _ = cleanupTask.ContinueWith(
-            completedCleanupTask =>
+        var forcedCleanupTask = manager.RequestForcedShutdown();
+        _ = forcedCleanupTask.ContinueWith(
+            completedForcedCleanupTask =>
             {
-                if (completedCleanupTask.Exception != null)
+                if (completedForcedCleanupTask.Exception != null)
                 {
-                    Logger.Error(completedCleanupTask.Exception, "An error occurred while stopping the OpAmp client.");
+                    Logger.Error(completedForcedCleanupTask.Exception, "An error occurred while forcefully disposing the OpAmp client.");
                 }
 
                 try
@@ -136,7 +141,7 @@ internal static class OpAmpLoader
                 }
             },
             CancellationToken.None,
-            TaskContinuationOptions.ExecuteSynchronously,
+            TaskContinuationOptions.None,
             TaskScheduler.Default);
     }
 }
