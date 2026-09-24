@@ -11,7 +11,10 @@ namespace OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
 /// <remarks>
 /// When multiple configured plugins implement this interface, only the first one in configuration
 /// order is used for OpAMP. Other plugin interfaces implemented by the ignored OpAMP plugins are
-/// unaffected.
+/// unaffected. Lifecycle callbacks should return promptly. During graceful shutdown, lifecycle
+/// callbacks complete before the client is disposed. If the loader's shutdown deadline expires,
+/// forced cleanup may dispose the client while either lifecycle callback is still running.
+/// Implementations must tolerate client operations failing once forced cleanup begins.
 /// </remarks>
 public interface IOpAmpPlugin
 {
@@ -39,7 +42,9 @@ public interface IOpAmpPlugin
     /// This callback is not called if preparation or startup fails, startup is cancelled, or shutdown
     /// begins before startup activation. If startup activation wins a race with shutdown, this callback
     /// completes before <see cref="BeforeOpAmpClientStopped"/> begins. Message listeners should be
-    /// registered in <see cref="ConfigureOpAmpClient"/> rather than in this callback.
+    /// registered in <see cref="ConfigureOpAmpClient"/> rather than in this callback. If this callback
+    /// does not complete before the shutdown deadline, forced cleanup may dispose the client before
+    /// the callback returns.
     /// </remarks>
     void AfterOpAmpClientStarted();
 

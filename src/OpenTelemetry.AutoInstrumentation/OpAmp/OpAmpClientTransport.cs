@@ -17,10 +17,10 @@ internal sealed class OpAmpClientTransport : IDisposable
         _client = client ?? throw new ArgumentNullException(nameof(client));
     }
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         using var suppressInstrumentation = SuppressInstrumentationScope.Begin();
-        return _client.StartAsync(cancellationToken);
+        await _client.StartAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken = default)

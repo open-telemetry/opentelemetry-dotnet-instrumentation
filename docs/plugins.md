@@ -222,6 +222,7 @@ public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
     public void AfterOpAmpClientStarted()
     {
         // Called after the OpAMP transport starts successfully.
+        // Return promptly; forced cleanup may dispose the client after the shutdown deadline.
     }
 
     public void BeforeOpAmpClientStopped()
@@ -239,15 +240,16 @@ callbacks complete. A listener subscribed in `ConfigureOpAmpClient` therefore
 observes messages in the initial server response.
 
 `AfterOpAmpClientStarted` runs only after successful startup. When startup races
-with shutdown, the callback runs only if startup wins, and it completes before
-`BeforeOpAmpClientStopped` begins. `BeforeOpAmpClientStopped` may still run for
-a successfully prepared client when startup fails or is cancelled, so cleanup
-must not assume the post-start callback ran. Use `IOpAmpClient.Unsubscribe` to
-remove listeners acquired during client configuration. During graceful
-shutdown, `BeforeOpAmpClientStopped` completes before the client is disposed.
-If it does not complete before the loader's shutdown deadline, forced cleanup
-disposes the client independently and may overlap the callback. The callback
-must return promptly and tolerate client operations failing after the deadline.
+with shutdown, the callback runs only if startup wins, and during graceful
+shutdown it completes before `BeforeOpAmpClientStopped` begins.
+`BeforeOpAmpClientStopped` may still run for a successfully prepared client when
+startup fails or is cancelled, so cleanup must not assume the post-start
+callback ran. Use `IOpAmpClient.Unsubscribe` to remove listeners acquired during
+client configuration. During graceful shutdown, `BeforeOpAmpClientStopped`
+completes before the client is disposed. If either lifecycle callback does not
+complete before the loader's shutdown deadline, forced cleanup disposes the
+client independently and may overlap that callback. Both callbacks must return
+promptly and tolerate client operations failing after the deadline.
 
 Automatic instrumentation suppresses tracing around upstream OpAMP transport
 operations so those requests do not produce application spans. Listener

@@ -44,6 +44,11 @@ public class OpAmpLoaderTests
             {
                 await Task.WhenAny(loaderStopTask, Task.Delay(TestTimeout)).ConfigureAwait(true);
             }
+
+            if (plugin.BeforeStopCallbackEntered.IsCompleted)
+            {
+                await Task.WhenAny(plugin.BeforeStopCallbackCompleted, Task.Delay(TestTimeout)).ConfigureAwait(true);
+            }
         }
 
         await AssertCompletes(plugin.BeforeStopCallbackCompleted).ConfigureAwait(true);
