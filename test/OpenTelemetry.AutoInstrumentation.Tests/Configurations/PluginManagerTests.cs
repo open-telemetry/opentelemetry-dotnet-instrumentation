@@ -18,6 +18,19 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 public class PluginManagerTests
 {
     [Fact]
+    public void DuplicatePluginTypesAreInstantiatedOnce()
+    {
+        var pluginTypeName = typeof(MockPlugin).AssemblyQualifiedName!;
+        var settings = new PluginsSettings();
+        settings.Plugins.Add(pluginTypeName);
+        settings.Plugins.Add(pluginTypeName);
+
+        var pluginManager = new PluginManager(settings);
+
+        Assert.Single(pluginManager.Plugins);
+    }
+
+    [Fact]
     public void MissingAssembly()
     {
         var pluginAssemblyQualifiedName = "Missing.Assembly.PluginType, Missing.Assembly";

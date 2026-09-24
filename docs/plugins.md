@@ -180,22 +180,25 @@ public class MyOptionsPlugin : IPlugin,
 
 Implement `IOpAmpPlugin` to customize the OpAMP client and observe its
 lifecycle.
-OpAMP methods are called on every configured plugin implementing `IOpAmpPlugin`.
+Only the first configured plugin implementing `IOpAmpPlugin` controls OpAMP.
+Additional OpAMP plugins are ignored for OpAMP and named in a warning, but they
+continue to receive ordinary `IPlugin` callbacks and participate through any
+other plugin interfaces they implement. For file-based configuration, entries
+in `plugins` precede entries in `plugins_list`; otherwise list order is used.
 
 > [!NOTE]
-> `OpenTelemetry.OpAmp.Client` 0.7.0-alpha.1 queues outgoing messages. The
-> `Send*Async` methods available in 0.6.0-alpha.1 were replaced by corresponding
-> `Send*` methods. Call `FlushAsync` when the plugin must wait until the outgoing
-> queue is empty.
+> The OpAMP client is owned by automatic instrumentation. Plugins receive a
+> restricted client interface and cannot start, stop, or dispose the client.
 
 ```csharp
 using OpenTelemetry.AutoInstrumentation.PluginApi;
 using OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
-using OpenTelemetry.OpAmp.Client;
 using OpenTelemetry.OpAmp.Client.Settings;
 
 public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
 {
+    private IOpAmpClient? _client;
+
     public void Initializing()
     {
     }
@@ -209,9 +212,16 @@ public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
         // Called before the OpAMP client is created.
     }
 
-    public void AfterOpAmpClientStarted(OpAmpClient client)
+    public void ConfigureOpAmpClient(IOpAmpClient client)
     {
-        // Called after the OpAMP client is created and started.
+        // Called after client construction and before transport startup.
+        // Register message listeners here and retain the client if needed later.
+        _client = client;
+    }
+
+    public void AfterOpAmpClientStarted()
+    {
+        // Called after the OpAMP transport starts successfully.
     }
 
     public void BeforeOpAmpClientStopped()
@@ -221,6 +231,23 @@ public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
     }
 }
 ```
+
+OpAMP initialization calls `ConfigureOpAmpOptions`, constructs the client,
+calls `ConfigureOpAmpClient` on the selected OpAMP plugin, and then invokes the
+ordinary `IPlugin.Initialized` callbacks. The transport starts only after those
+callbacks complete. A listener subscribed in `ConfigureOpAmpClient` therefore
+observes messages in the initial server response.
+
+`AfterOpAmpClientStarted` runs only after successful startup. When startup races
+with shutdown, the callback runs only if startup wins, and it completes before
+`BeforeOpAmpClientStopped` begins. `BeforeOpAmpClientStopped` may still run for
+a successfully prepared client when startup fails or is cancelled, so cleanup
+must not assume the post-start callback ran. Use `IOpAmpClient.Unsubscribe` to
+remove listeners acquired during client configuration.
+
+Automatic instrumentation suppresses tracing around upstream OpAMP transport
+operations so those requests do not produce application spans. Listener
+callbacks run on the upstream dispatch path and should return promptly.
 
 ## Selective sampling
 

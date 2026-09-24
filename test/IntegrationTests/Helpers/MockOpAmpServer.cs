@@ -20,14 +20,22 @@ internal sealed class MockOpAmpServer : IDisposable
 {
     private readonly ITestOutputHelper _output;
     private readonly TestHttpServer _listener;
+    private readonly string _host;
 
     private readonly List<Expectation> _expectations = new();
     private readonly BlockingCollection<AgentToServer> _frames = new(10); // bounded to avoid memory leak
     private readonly List<NameValueCollection> _receivedHeaders = [];
+    private readonly bool _sendCustomMessageInInitialResponseOnly;
+    private int _responseCount;
 
-    public MockOpAmpServer(ITestOutputHelper output, string host = "localhost")
+    public MockOpAmpServer(
+        ITestOutputHelper output,
+        string host = "127.0.0.1",
+        bool sendCustomMessageInInitialResponseOnly = false)
     {
         _output = output;
+        _host = host;
+        _sendCustomMessageInInitialResponseOnly = sendCustomMessageInInitialResponseOnly;
 #if NETFRAMEWORK
         _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/opamp/");
 #else
@@ -39,6 +47,8 @@ internal sealed class MockOpAmpServer : IDisposable
     /// Gets the TCP port that this collector is listening on.
     /// </summary>
     public int Port { get => _listener.Port; }
+
+    public string Endpoint => $"http://{_host}:{Port}/v1/opamp";
 
     public void Expect(Func<AgentToServer, bool>? predicate = null, string? description = null)
     {
@@ -151,18 +161,22 @@ internal sealed class MockOpAmpServer : IDisposable
         Assert.Fail(message.ToString());
     }
 
-    private static byte[] GenerateResponse(AgentToServer frame)
+    private static byte[] GenerateResponse(AgentToServer frame, bool sendCustomMessage)
     {
         var content = "This is a mock server frame for testing purposes.";
         var responseFrame = new ServerToAgent
         {
             InstanceUid = frame.InstanceUid,
-            CustomMessage = new CustomMessage()
+        };
+
+        if (sendCustomMessage)
+        {
+            responseFrame.CustomMessage = new CustomMessage()
             {
                 Data = ByteString.CopyFromUtf8(content),
                 Type = "Utf8String",
-            },
-        };
+            };
+        }
 
         return responseFrame.ToByteArray();
     }
@@ -181,7 +195,7 @@ internal sealed class MockOpAmpServer : IDisposable
 
         _receivedHeaders.Add(headersCopy);
 
-        var response = GenerateResponse(frame);
+        var response = GenerateResponse(frame, ShouldSendCustomMessage());
 
         ctx.Response.StatusCode = (int)HttpStatusCode.OK;
         ctx.Response.ContentType = "application/x-protobuf";
@@ -243,7 +257,7 @@ internal sealed class MockOpAmpServer : IDisposable
 
         _receivedHeaders.Add(headersCopy);
 
-        var response = GenerateResponse(frame);
+        var response = GenerateResponse(frame, ShouldSendCustomMessage());
 
         ctx.Response.StatusCode = (int)HttpStatusCode.OK;
         ctx.Response.ContentType = "application/x-protobuf";
@@ -252,6 +266,12 @@ internal sealed class MockOpAmpServer : IDisposable
         await ctx.Response.CompleteAsync().ConfigureAwait(false);
     }
 #endif
+
+    private bool ShouldSendCustomMessage()
+    {
+        var responseNumber = Interlocked.Increment(ref _responseCount);
+        return !_sendCustomMessageInInitialResponseOnly || responseNumber == 1;
+    }
 
     private void WriteOutput(string msg)
     {

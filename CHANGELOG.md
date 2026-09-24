@@ -11,6 +11,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Reworked the experimental OpAMP plugin lifecycle with pre-start listener
+  registration and manager-owned client lifetime. Only the first configured
+  `IOpAmpPlugin` controls OpAMP. See the
+  [OpAMP plugin documentation](./docs/plugins.md#opamp).
+
 #### Dependency updates
 
 ### Deprecated
