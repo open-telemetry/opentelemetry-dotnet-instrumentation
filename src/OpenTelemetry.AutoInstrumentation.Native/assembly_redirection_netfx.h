@@ -44,7 +44,7 @@
         { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 19, 0, 1382} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 19, 1, 1401} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1355} }, \
-        { _W("OpenTelemetry.Resources.Azure"), {1, 19, 1, 1408} }, \
+        { _W("OpenTelemetry.Resources.Azure"), {1, 19, 1, 1424} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 19, 1, 1411} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 19, 1, 1410} }, \
         { _W("OpenTelemetry.Resources.Process"), {1, 19, 1, 1413} }, \
@@ -193,7 +193,7 @@
         { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 19, 0, 1382} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 19, 1, 1401} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1355} }, \
-        { _W("OpenTelemetry.Resources.Azure"), {1, 19, 1, 1408} }, \
+        { _W("OpenTelemetry.Resources.Azure"), {1, 19, 1, 1424} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 19, 1, 1411} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 19, 1, 1410} }, \
         { _W("OpenTelemetry.Resources.Process"), {1, 19, 1, 1413} }, \
@@ -341,7 +341,7 @@
         { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 19, 0, 1382} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 19, 1, 1401} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1355} }, \
-        { _W("OpenTelemetry.Resources.Azure"), {1, 19, 1, 1408} }, \
+        { _W("OpenTelemetry.Resources.Azure"), {1, 19, 1, 1424} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 19, 1, 1411} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 19, 1, 1410} }, \
         { _W("OpenTelemetry.Resources.Process"), {1, 19, 1, 1413} }, \
@@ -407,7 +407,7 @@
         { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 19, 0, 1382} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 19, 1, 1401} }, \
         { _W("OpenTelemetry.OpAmp.Client"), {0, 7, 0, 1355} }, \
-        { _W("OpenTelemetry.Resources.Azure"), {1, 19, 1, 1408} }, \
+        { _W("OpenTelemetry.Resources.Azure"), {1, 19, 1, 1424} }, \
         { _W("OpenTelemetry.Resources.Host"), {1, 19, 1, 1411} }, \
         { _W("OpenTelemetry.Resources.OperatingSystem"), {1, 19, 1, 1410} }, \
         { _W("OpenTelemetry.Resources.Process"), {1, 19, 1, 1413} }, \
