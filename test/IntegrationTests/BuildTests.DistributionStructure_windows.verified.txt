@@ -1,6 +1,12 @@
 ﻿[
+  \AdditionalDeps\shared-store-copy-plan.txt,
+  \AdditionalDeps\shared\Microsoft.NETCore.App\10.0.0\OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
+  \AdditionalDeps\shared\Microsoft.NETCore.App\8.0.0\OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
+  \AdditionalDeps\shared\Microsoft.NETCore.App\9.0.0\OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
   \LICENSE,
   \VERSION,
+  \generate-additional-deps.ps1,
+  \generate-additional-deps.sh,
   \instrument.sh,
   \net\Google.Protobuf.dll,
   \net\OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper.dll,

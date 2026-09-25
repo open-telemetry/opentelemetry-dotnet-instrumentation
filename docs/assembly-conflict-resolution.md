@@ -281,6 +281,69 @@ If setup fails, the isolation is reverted and the runtime falls back to
 executing the application normally (unless fail-fast mode is enabled via
 `OTEL_DOTNET_AUTO_FAIL_FAST`).
 
+## AdditionalDeps and shared-store workaround
+
+For framework-dependent standalone .NET deployments, this supported workaround
+configures the .NET host to include the instrumentation's package dependencies
+during application startup with
+[`DOTNET_ADDITIONAL_DEPS`](https://learn.microsoft.com/dotnet/core/dependency-loading/understanding-assemblyloadcontext#additional-deps)
+and
+[`DOTNET_SHARED_STORE`](https://learn.microsoft.com/dotnet/core/deploying/runtime-store).
+This makes the runtime aware of those dependencies before the application and
+instrumentation begin loading assemblies.
+
+Standalone distributions ship build-time-generated dependency contexts and
+scripts that materialize the required shared-store directory structure from
+assemblies already present in the distribution. Choose a dedicated, writable
+output directory and run the script before starting the application:
+
+```sh
+"$OTEL_DOTNET_AUTO_HOME/generate-additional-deps.sh" \
+  --output /var/lib/otel-dotnet-auto/additional-deps
+```
+
+On Windows, run:
+
+```powershell
+& "$env:OTEL_DOTNET_AUTO_HOME\generate-additional-deps.ps1" `
+    -OutputPath "C:\ProgramData\OpenTelemetry\additional-deps"
+```
+
+Configure the application using the paths printed by the script:
+
+```text
+DOTNET_ADDITIONAL_DEPS=<output>/AdditionalDeps
+DOTNET_SHARED_STORE=<output>/store
+```
+
+This workaround is primarily useful when automatic assembly redirection cannot
+resolve a conflict or must be disabled. If redirection must be disabled for the
+application, configure:
+
+```text
+OTEL_DOTNET_AUTO_REDIRECT_ENABLED=false
+```
+
+Its limitations are inherent to the .NET host mechanism:
+
+- It applies only to framework-dependent standalone .NET applications. It is
+  not used by .NET Framework or self-contained applications. NuGet package
+  deployments resolve their dependencies through the application's NuGet
+  graph and do not need this script.
+- It changes the dependency graph seen by the .NET host, but cannot override
+  every explicit or custom assembly-loading decision. Assemblies loaded from
+  an explicit file path or by a custom `AssemblyLoadContext` may bypass it.
+- The generated store is specific to the architectures, target frameworks,
+  and dependency versions in that standalone distribution. Generate it into
+  a clean output directory after every instrumentation upgrade; do not combine
+  files from different versions.
+- The generated dependency graph applies to the entire application. Validate
+  the application after enabling it, especially when the application directly
+  references different versions of the same dependencies.
+
+If the host still cannot select a compatible version, the final fallback is to
+update or copy compatible dependency versions into the application itself.
+
 ## Known limitations
 
 The resolution strategies described above cover the majority of cases,
@@ -389,10 +452,9 @@ originates from a third-party component — ensure the required assembly
 version is available to the application by adding or upgrading the
 dependency. When the required version is present (either in the TPA list
 or shipped by the instrumentation), the resolver will be able to satisfy
-the request. As a last resort, consider the
-[`DOTNET_ADDITIONAL_DEPS` approach](#last-resort-dotnet_additional_deps-and-the-runtime-store)
-to supply the required version to the runtime before the application
-starts.
+the request. For framework-dependent standalone deployments, consider the
+[AdditionalDeps and shared-store workaround](#additionaldeps-and-shared-store-workaround)
+to supply the required version to the runtime before the application starts.
 
 ## Troubleshooting
 
@@ -405,21 +467,3 @@ starts.
 3. **Review the native profiler log** — look for
    `RedirectAssemblyReferences` entries to confirm that IL rewriting
    happened and which versions were involved.
-
-### Last resort: `DOTNET_ADDITIONAL_DEPS` and the runtime store
-
-If the above strategies do not resolve a conflict — for example, the
-application uses a framework-level assembly that cannot be redirected
-— you can configure the .NET host to include additional dependencies
-at startup using
-[`DOTNET_ADDITIONAL_DEPS`](https://learn.microsoft.com/dotnet/core/dependency-loading/understanding-assemblyloadcontext#additional-deps)
-and
-[`DOTNET_SHARED_STORE`](https://learn.microsoft.com/dotnet/core/deploying/runtime-store)
-environment variables. This approach makes the runtime aware of the
-instrumentation's assemblies before the application starts, avoiding
-version conflicts entirely. However, it requires preparing a
-`.deps.json` file and potentially a shared store layout — a
-significant effort compared to the other deployment options. Consult
-the
-[.NET documentation](https://learn.microsoft.com/dotnet/core/dependency-loading/understanding-assemblyloadcontext)
-for details.
