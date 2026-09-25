@@ -46,7 +46,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     [InlineData("10.0.12", AssemblyName, "10.0.0.12", "10.0.1226.42308")]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
 #endif
-    public void SubmitsTraces(
+    public void DefaultRedirection(
         string libraryVersion,
         string expectedAssemblyName,
         string expectedAssemblyVersion,
@@ -84,4 +84,106 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
         // Assert
         collector.AssertExpectations();
     }
+
+#if !NETFRAMEWORK
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+#if NET8_0
+    [InlineData("8.0.0", "10.0.0.0", "10.0.25.52411")]
+#elif NET9_0
+    [InlineData("9.0.0", "10.0.0.0", "10.0.25.52411")]
+#elif NET10_0
+    [InlineData("10.0.12", "10.0.0.0", "10.0.1226.42308")]
+#endif
+    public void AdditionalDepsFallback(
+        string libraryVersion,
+        string expectedAssemblyVersion,
+        string expectedAssemblyFileVersion)
+    {
+        var generatedDirectory = Path.Combine(
+            EnvironmentTools.GetSolutionDirectory(),
+            "test-artifacts",
+            "additional-deps",
+            Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            GenerateAdditionalDeps(generatedDirectory);
+
+            using var collector = new MockSpansCollector(Output);
+            SetExporter(collector);
+            SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "AssemblyRedirection.ActivitySource");
+            SetEnvironmentVariable("OTEL_DOTNET_AUTO_REDIRECT_ENABLED", "false");
+            SetEnvironmentVariable("DOTNET_ADDITIONAL_DEPS", Path.Combine(generatedDirectory, "AdditionalDeps"));
+            SetEnvironmentVariable("DOTNET_SHARED_STORE", Path.Combine(generatedDirectory, "store"));
+            collector.Expect("AssemblyRedirection.ActivitySource");
+
+            RunTestApplication(new TestSettings
+            {
+                PackageVersion = libraryVersion,
+                Arguments = $"--assembly-name {AssemblyName} --assembly-version {expectedAssemblyVersion} --assembly-file-version {expectedAssemblyFileVersion}"
+            });
+
+            collector.AssertExpectations();
+        }
+        finally
+        {
+            if (Directory.Exists(generatedDirectory))
+            {
+                Directory.Delete(generatedDirectory, recursive: true);
+            }
+        }
+    }
+
+    private void GenerateAdditionalDeps(string outputDirectory)
+    {
+        var tracerHome = EnvironmentHelper.GetNukeBuildOutput();
+        var startInfo = new System.Diagnostics.ProcessStartInfo
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        // The same target-framework test assembly runs on Windows and Unix, so host selection must be
+        // made at runtime rather than with target-framework compilation symbols.
+        if (EnvironmentTools.IsWindows())
+        {
+            startInfo.FileName = "powershell.exe";
+            startInfo.ArgumentList.Add("-NoProfile");
+            startInfo.ArgumentList.Add("-NonInteractive");
+            startInfo.ArgumentList.Add("-ExecutionPolicy");
+            startInfo.ArgumentList.Add("Bypass");
+            startInfo.ArgumentList.Add("-File");
+            startInfo.ArgumentList.Add(Path.Combine(tracerHome, "generate-additional-deps.ps1"));
+            startInfo.ArgumentList.Add("-OutputPath");
+            startInfo.ArgumentList.Add(outputDirectory);
+        }
+        else
+        {
+            startInfo.FileName = "/bin/sh";
+            startInfo.ArgumentList.Add(Path.Combine(tracerHome, "generate-additional-deps.sh"));
+            startInfo.ArgumentList.Add("--output");
+            startInfo.ArgumentList.Add(outputDirectory);
+        }
+
+        using var process = System.Diagnostics.Process.Start(startInfo);
+        Assert.NotNull(process);
+        using var helper = new ProcessHelper(process);
+
+        var exitedInTime = process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
+        if (!exitedInTime)
+        {
+            process.Kill();
+            process.WaitForExit();
+        }
+
+        Output.WriteLine($"AdditionalDeps generator exit code: {process.ExitCode}");
+        Output.WriteResult(helper);
+
+        Assert.True(exitedInTime, "AdditionalDeps generator timed out");
+        Assert.Equal(0, process.ExitCode);
+    }
+#endif
 }

@@ -9,6 +9,13 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Added scripts to standalone distributions that prepare an on-demand
+  `DOTNET_ADDITIONAL_DEPS` and `DOTNET_SHARED_STORE` assembly-conflict
+  workaround from the instrumentation dependencies already included in the
+  distribution. This lets framework-dependent applications make those
+  dependencies available to the .NET host when automatic assembly redirection
+  cannot resolve a conflict.
+
 ### Changed
 
 #### Dependency updates

@@ -147,6 +147,10 @@ instrumentation is using the NuGet packages. For instructions on how to add the
 packages to your application, and the limitations of this installation method,
 see [Using the OpenTelemetry.AutoInstrumentation NuGet packages](./using-the-nuget-packages.md#using-the-opentelemetryautoinstrumentation-nuget-packages).
 
+For framework-dependent standalone .NET deployments where automatic assembly
+redirection cannot resolve a conflict or must be disabled, use the
+[AdditionalDeps fallback](./assembly-conflict-resolution.md#last-resort-dotnet_additional_deps-and-the-runtime-store).
+
 Alternatively, you can handle the dependency versions conflicts by
 updating the instrumented application's project references
 to use the same versions as OpenTelemetry .NET Automatic Instrumentation.
