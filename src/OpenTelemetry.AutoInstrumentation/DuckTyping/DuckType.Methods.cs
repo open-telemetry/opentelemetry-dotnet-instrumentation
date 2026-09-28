@@ -97,8 +97,15 @@ internal static partial class DuckType
 
         var targetMethodsDefinitions = GetMethods(targetType);
 
-        // These are the methods that we can attempt to duck type
-        var allTargetMethods = targetType.GetMethods(DuckAttribute.DefaultFlags);
+        // These are the methods that we can attempt to duck type.
+        // NOTE: when targetType is an interface, Type.GetMethods() only returns methods declared
+        // directly on that interface - methods inherited from base interfaces (e.g. IPropertyContext's
+        // SetStringProperty/GetStringProperty/PropertyExists inherited by IBM.XMS.IMessage) are silently
+        // omitted. targetMethodsDefinitions is already computed via the interface-flattening GetMethods()
+        // helper above, so reuse it for interfaces. For non-interface (class/struct) target types that
+        // helper only yields abstract/virtual methods, which would drop plain non-virtual concrete
+        // methods from the candidate list, so keep the original unfiltered lookup in that case.
+        IEnumerable<MethodInfo> allTargetMethods = targetType.IsInterface ? targetMethodsDefinitions : targetType.GetMethods(DuckAttribute.DefaultFlags);
 
         foreach (var method in targetMethodsDefinitions)
         {

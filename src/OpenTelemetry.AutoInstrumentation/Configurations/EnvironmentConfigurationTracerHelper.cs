@@ -45,6 +45,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.WcfClient => AddWcfIfNeeded(builder, ref wcfInstrumentationAdded),
                 TracerInstrumentation.OracleMda => Wrappers.AddOracleMdaInstrumentation(builder, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.RabbitMq => builder.AddSource("RabbitMQ.Client.Publisher").AddSource("RabbitMQ.Client.Subscriber"),
+                TracerInstrumentation.Xms => builder.AddSource("OpenTelemetry.AutoInstrumentation.Xms"),
                 TracerInstrumentation.StackExchangeRedis => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
                 TracerInstrumentation.MongoDB => builder.AddSource("MongoDB.Driver"),
 #if NET

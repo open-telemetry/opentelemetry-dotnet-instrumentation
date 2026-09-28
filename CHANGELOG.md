@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support for [IBMXMSDotnetClient](https://www.nuget.org/packages/IBMXMSDotnetClient)
+  traces instrumentation for versions `9.0.0`+.
+
 ### Changed
 
 #### Dependency updates
