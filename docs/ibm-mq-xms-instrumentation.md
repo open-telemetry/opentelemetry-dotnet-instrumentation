@@ -8,16 +8,16 @@ XMS.NET client, assembly `IBM.XMS`. Supported versions are `9.0.0` and later
 
 ## Instrumented methods
 
-| Assembly  | Type                                     | Method            | Signature                                                  | Span kind |
-|-----------|-------------------------------------------|--------------------|-------------------------------------------------------------|-----------|
-| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageProducerImpl` | `Send`             | `Send(IMessage)`                                             | Producer  |
-| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageProducerImpl` | `Send`             | `Send(IMessage, DeliveryMode, Int32, Int64)`                  | Producer  |
-| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageProducerImpl` | `Send`             | `Send(IDestination, IMessage)`                                | Producer  |
-| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageProducerImpl` | `Send`             | `Send(IDestination, IMessage, DeliveryMode, Int32, Int64)`    | Producer  |
-| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageConsumerImpl` | `Receive`          | `Receive()`                                                   | Consumer  |
-| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageConsumerImpl` | `Receive`          | `Receive(Int64)`                                              | Consumer  |
-| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageConsumerImpl` | `ReceiveNoWait`     | `ReceiveNoWait()`                                             | Consumer  |
-| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageListener`     | `OnMessage`        | `OnMessage(IMessage)`                                         | Consumer (async delivery) |
+| Assembly  | Type                                         | Method          | Signature                                                  | Span kind                 |
+| --------- | -------------------------------------------- | --------------- | ---------------------------------------------------------- | ------------------------- |
+| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageProducerImpl` | `Send`          | `Send(IMessage)`                                           | Producer                  |
+| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageProducerImpl` | `Send`          | `Send(IMessage, DeliveryMode, Int32, Int64)`               | Producer                  |
+| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageProducerImpl` | `Send`          | `Send(IDestination, IMessage)`                             | Producer                  |
+| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageProducerImpl` | `Send`          | `Send(IDestination, IMessage, DeliveryMode, Int32, Int64)` | Producer                  |
+| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageConsumerImpl` | `Receive`       | `Receive()`                                                | Consumer                  |
+| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageConsumerImpl` | `Receive`       | `Receive(Int64)`                                           | Consumer                  |
+| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageConsumerImpl` | `ReceiveNoWait` | `ReceiveNoWait()`                                          | Consumer                  |
+| `IBM.XMS` | `IBM.XMS.Client.Impl.XmsMessageListener`     | `OnMessage`     | `OnMessage(IMessage)`                                      | Consumer (async delivery) |
 
 ## Span names
 
@@ -34,19 +34,19 @@ falls back to the bare operation name: `publish`, `receive`, or `deliver`.
 
 ## Attributes
 
-| Attribute                                | Source                                                            |
-|-------------------------------------------|--------------------------------------------------------------------|
-| `messaging.system`                        | Always `ibmmq`.                                                    |
-| `messaging.operation`                     | `publish`, `receive`, or `deliver`, matching the operation table above. |
-| `messaging.destination.name`              | The resolved queue or topic name for the message.                  |
-| `messaging.message.id`                    | The message's `JMSMessageID`.                                      |
-| `messaging.message.conversation_id`       | The message's `JMSCorrelationID`.                                  |
+| Attribute                           | Source                                                                  |
+| ----------------------------------- | ----------------------------------------------------------------------- |
+| `messaging.system`                  | Always `ibmmq`.                                                         |
+| `messaging.operation`               | `publish`, `receive`, or `deliver`, matching the operation table above. |
+| `messaging.destination.name`        | The resolved queue or topic name for the message.                       |
+| `messaging.message.id`              | The message's `JMSMessageID`.                                           |
+| `messaging.message.conversation_id` | The message's `JMSCorrelationID`.                                       |
 
 ### Experimental attributes
 
-| Attribute                                | Source                                                            |
-|-------------------------------------------|--------------------------------------------------------------------|
-| `messaging.ibmmq.queue_manager.id`        | The IBM MQ queue manager identifier (QMID) resolved on the connection, read client-side with no MQI round trip. Present on producer (`publish`), sync consumer (`receive`), and async consumer (`deliver`) spans. |
+| Attribute                          | Source                                                                                                                                                                                                            |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `messaging.ibmmq.queue_manager.id` | The IBM MQ queue manager identifier (QMID) resolved on the connection, read client-side with no MQI round trip. Present on producer (`publish`), sync consumer (`receive`), and async consumer (`deliver`) spans. |
 
 `messaging.ibmmq.queue_manager.id` is set only when
 `OTEL_DOTNET_AUTO_XMS_EXPERIMENTAL_SPAN_ATTRIBUTES` is `true` (default
