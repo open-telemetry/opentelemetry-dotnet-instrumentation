@@ -29,6 +29,16 @@ public class PluginsTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
+    public void InvalidPluginDoesNotCrashApplicationWhenFailFastDisabled()
+    {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "Missing.PluginType, Missing.Assembly");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "false");
+
+        RunTestApplication();
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
     public void InitPluginOnlyOnce()
     {
         var pluginName =

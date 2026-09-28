@@ -25,42 +25,49 @@ internal partial class PluginManager
 
         foreach (var assemblyQualifiedName in settings.Plugins)
         {
-            var type = Type.GetType(assemblyQualifiedName, throwOnError: true)!;
-
-            // Ensure type implements IPlugin
-            if (!typeof(IPlugin).IsAssignableFrom(type))
+            try
             {
-                Logger.Warning($"Type '{type.FullName}' does not implement {nameof(IPlugin)}.");
-                continue;
-            }
+                var type = Type.GetType(assemblyQualifiedName, throwOnError: true)!;
 
-            // Ensure type is concrete
-            if (type.IsAbstract || type.IsInterface)
+                // Ensure type implements IPlugin
+                if (!typeof(IPlugin).IsAssignableFrom(type))
+                {
+                    Logger.Warning($"Type '{type.FullName}' does not implement {nameof(IPlugin)}.");
+                    continue;
+                }
+
+                // Ensure type is concrete
+                if (type.IsAbstract || type.IsInterface)
+                {
+                    Logger.Warning($"Type '{type.FullName}' cannot be instantiated.");
+                    continue;
+                }
+
+                if (plugins.ContainsKey(type))
+                {
+                    continue;
+                }
+
+                if (!HasDefaultConstructor(type))
+                {
+                    Logger.Warning($"Type '{type.FullName}' cannot be instantiated. No public parameterless constructor.");
+                    continue;
+                }
+
+                var instance = Activator.CreateInstance(type);
+
+                if (instance is not IPlugin plugin)
+                {
+                    Logger.Warning($"Failed to create plugin '{type.FullName}'.");
+                    continue;
+                }
+
+                plugins.Add(type, plugin);
+            }
+            catch (Exception ex) when (!settings.FailFast)
             {
-                Logger.Warning($"Type '{type.FullName}' cannot be instantiated.");
-                continue;
+                Logger.Error(ex, "Failed to initialize plugin type '{0}'. Plugin will be skipped.", assemblyQualifiedName);
             }
-
-            if (plugins.ContainsKey(type))
-            {
-                continue;
-            }
-
-            if (!HasDefaultConstructor(type))
-            {
-                Logger.Warning($"Type '{type.FullName}' cannot be instantiated. No public parameterless constructor.");
-                continue;
-            }
-
-            var instance = Activator.CreateInstance(type);
-
-            if (instance is not IPlugin plugin)
-            {
-                Logger.Warning($"Failed to create plugin '{type.FullName}'.");
-                continue;
-            }
-
-            plugins.Add(type, plugin);
         }
 
         _plugins = [.. plugins.Select(it => (it.Key, it.Value))];
