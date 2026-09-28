@@ -9,11 +9,12 @@ namespace IntegrationTests;
 [Collection(XmsCollectionFixture.Name)]
 public class XmsTests : TestHelper
 {
-    private const string PublishOperationAttributeValue = "publish";
+    private const string SendOperationAttributeValue = "send";
     private const string ReceiveOperationAttributeValue = "receive";
-    private const string DeliverOperationAttributeValue = "deliver";
+    private const string ProcessOperationAttributeValue = "process";
     private const string MessagingSystemAttributeName = "messaging.system";
-    private const string MessagingOperationAttributeName = "messaging.operation";
+    private const string MessagingOperationNameAttributeName = "messaging.operation.name";
+    private const string MessagingOperationTypeAttributeName = "messaging.operation.type";
     private const string MessagingDestinationAttributeName = "messaging.destination.name";
     private const string MessagingMessageIdAttributeName = "messaging.message.id";
     private const string IbmMqMessagingSystemAttributeValue = "ibmmq";
@@ -45,7 +46,7 @@ public class XmsTests : TestHelper
         collector.Expect(
             XmsInstrumentationScopeName,
             VersionHelper.AutoInstrumentationVersion,
-            span => span.Kind == Span.Types.SpanKind.Producer && ValidateSpan(span, SyncQueueName, PublishOperationAttributeValue),
+            span => span.Kind == Span.Types.SpanKind.Producer && ValidateSpan(span, SyncQueueName, SendOperationAttributeValue),
             "Publish to the synchronous-receive queue.");
         collector.Expect(
             XmsInstrumentationScopeName,
@@ -55,12 +56,12 @@ public class XmsTests : TestHelper
         collector.Expect(
             XmsInstrumentationScopeName,
             VersionHelper.AutoInstrumentationVersion,
-            span => span.Kind == Span.Types.SpanKind.Producer && ValidateSpan(span, AsyncQueueName, PublishOperationAttributeValue),
+            span => span.Kind == Span.Types.SpanKind.Producer && ValidateSpan(span, AsyncQueueName, SendOperationAttributeValue),
             "Publish to the asynchronous-delivery queue.");
         collector.Expect(
             XmsInstrumentationScopeName,
             VersionHelper.AutoInstrumentationVersion,
-            span => span.Kind == Span.Types.SpanKind.Consumer && ValidateSpan(span, AsyncQueueName, DeliverOperationAttributeValue),
+            span => span.Kind == Span.Types.SpanKind.Consumer && ValidateSpan(span, AsyncQueueName, ProcessOperationAttributeValue),
             "Asynchronous delivery from the queue via a registered MessageListener.");
 
         collector.ExpectCollected(ValidatePropagation);
@@ -79,12 +80,14 @@ public class XmsTests : TestHelper
     private static bool ValidateSpan(Span span, string destinationName, string operationName)
     {
         var messagingSystem = span.Attributes.SingleOrDefault(kv => kv.Key == MessagingSystemAttributeName)?.Value.StringValue;
-        var messagingOperation = span.Attributes.SingleOrDefault(kv => kv.Key == MessagingOperationAttributeName)?.Value.StringValue;
+        var messagingOperationName = span.Attributes.SingleOrDefault(kv => kv.Key == MessagingOperationNameAttributeName)?.Value.StringValue;
+        var messagingOperationType = span.Attributes.SingleOrDefault(kv => kv.Key == MessagingOperationTypeAttributeName)?.Value.StringValue;
         var destination = span.Attributes.SingleOrDefault(kv => kv.Key == MessagingDestinationAttributeName)?.Value.StringValue;
         var messageId = span.Attributes.SingleOrDefault(kv => kv.Key == MessagingMessageIdAttributeName)?.Value.StringValue;
 
         return messagingSystem == IbmMqMessagingSystemAttributeValue &&
-               messagingOperation == operationName &&
+               messagingOperationName == operationName &&
+               messagingOperationType == operationName &&
                destination == destinationName &&
                !string.IsNullOrEmpty(messageId) &&
                span.Name == $"{destinationName} {operationName}";
@@ -93,12 +96,12 @@ public class XmsTests : TestHelper
     private static bool ValidatePropagation(ICollection<MockSpansCollector.Collected> collectedSpans)
     {
         return ConsumerLinksToProducer(collectedSpans, SyncQueueName, ReceiveOperationAttributeValue) &&
-               ConsumerLinksToProducer(collectedSpans, AsyncQueueName, DeliverOperationAttributeValue);
+               ConsumerLinksToProducer(collectedSpans, AsyncQueueName, ProcessOperationAttributeValue);
     }
 
     private static bool ConsumerLinksToProducer(ICollection<MockSpansCollector.Collected> collectedSpans, string destinationName, string consumerOperationName)
     {
-        var producerSpan = collectedSpans.SingleOrDefault(c => c.Span.Kind == Span.Types.SpanKind.Producer && c.Span.Name == $"{destinationName} {PublishOperationAttributeValue}");
+        var producerSpan = collectedSpans.SingleOrDefault(c => c.Span.Kind == Span.Types.SpanKind.Producer && c.Span.Name == $"{destinationName} {SendOperationAttributeValue}");
         var consumerSpan = collectedSpans.SingleOrDefault(c => c.Span.Kind == Span.Types.SpanKind.Consumer && c.Span.Name == $"{destinationName} {consumerOperationName}");
 
         return producerSpan is not null &&

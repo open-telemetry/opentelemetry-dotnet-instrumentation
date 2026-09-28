@@ -10,6 +10,8 @@ internal static class MessagingAttributes
     {
         public const string MessagingSystem = "messaging.system";
         public const string MessagingOperation = "messaging.operation";
+        public const string MessagingOperationName = "messaging.operation.name";
+        public const string MessagingOperationType = "messaging.operation.type";
         public const string DestinationName = "messaging.destination.name";
         public const string ClientId = "messaging.client_id";
         public const string MessageBodySize = "messaging.message.body.size";
@@ -45,6 +47,8 @@ internal static class MessagingAttributes
         public const string PublishOperationName = "publish";
         public const string ReceiveOperationName = "receive";
         public const string DeliverOperationName = "deliver";
+        public const string SendOperationName = "send";
+        public const string ProcessOperationName = "process";
 
         internal static class RabbitMq
         {

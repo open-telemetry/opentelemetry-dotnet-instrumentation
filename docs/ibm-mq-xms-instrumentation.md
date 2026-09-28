@@ -24,29 +24,30 @@ XMS.NET client, assembly `IBM.XMS`. Supported versions are `9.0.0` and later
 Span names follow the OpenTelemetry messaging semantic convention pattern of
 `{destination} {operation}`:
 
-* `{destination} publish` for `Send` overloads.
+* `{destination} send` for `Send` overloads.
 * `{destination} receive` for `Receive` / `Receive(Int64)` / `ReceiveNoWait`.
-* `{destination} deliver` for `XmsMessageListener.OnMessage`.
+* `{destination} process` for `XmsMessageListener.OnMessage`.
 
 When the destination name cannot be resolved (for example the destination
 object could not be inspected at the time the span is created), the span name
-falls back to the bare operation name: `publish`, `receive`, or `deliver`.
+falls back to the bare operation name: `send`, `receive`, or `process`.
 
 ## Attributes
 
-| Attribute                           | Source                                                                  |
-| ----------------------------------- | ----------------------------------------------------------------------- |
-| `messaging.system`                  | Always `ibmmq`.                                                         |
-| `messaging.operation`               | `publish`, `receive`, or `deliver`, matching the operation table above. |
-| `messaging.destination.name`        | The resolved queue or topic name for the message.                       |
-| `messaging.message.id`              | The message's `JMSMessageID`.                                           |
-| `messaging.message.conversation_id` | The message's `JMSCorrelationID`.                                       |
+| Attribute                           | Source                                                               |
+| ----------------------------------- | -------------------------------------------------------------------- |
+| `messaging.system`                  | Always `ibmmq`.                                                      |
+| `messaging.operation.name`          | `send`, `receive`, or `process`, matching the operation table above. |
+| `messaging.operation.type`          | `send`, `receive`, or `process`, matching the operation table above. |
+| `messaging.destination.name`        | The resolved queue or topic name for the message.                    |
+| `messaging.message.id`              | The message's `JMSMessageID`.                                        |
+| `messaging.message.conversation_id` | The message's `JMSCorrelationID`.                                    |
 
 ### Experimental attributes
 
-| Attribute                          | Source                                                                                                                                                                                                            |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `messaging.ibmmq.queue_manager.id` | The IBM MQ queue manager identifier (QMID) resolved on the connection, read client-side with no MQI round trip. Present on producer (`publish`), sync consumer (`receive`), and async consumer (`deliver`) spans. |
+| Attribute                          | Source                                                                                                                                                                                                         |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `messaging.ibmmq.queue_manager.id` | The IBM MQ queue manager identifier (QMID) resolved on the connection, read client-side with no MQI round trip. Present on producer (`send`), sync consumer (`receive`), and async consumer (`process`) spans. |
 
 `messaging.ibmmq.queue_manager.id` is set only when
 `OTEL_DOTNET_AUTO_XMS_EXPERIMENTAL_SPAN_ATTRIBUTES` is `true` (default

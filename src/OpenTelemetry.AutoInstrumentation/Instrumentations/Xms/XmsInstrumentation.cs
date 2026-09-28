@@ -20,14 +20,14 @@ internal static class XmsInstrumentation
                            ?? ResolveDestinationName(TryDuckCastOrNull<IXmsMessageProducer>(producerInstance)?.Destination);
 
         var name = destination is null
-            ? MessagingAttributes.Values.PublishOperationName
-            : $"{destination} {MessagingAttributes.Values.PublishOperationName}";
+            ? MessagingAttributes.Values.SendOperationName
+            : $"{destination} {MessagingAttributes.Values.SendOperationName}";
 
         var activity = Source.StartActivity(name, ActivityKind.Producer);
 
         if (activity is { IsAllDataRequested: true })
         {
-            SetCommonTags(activity, message.JMSMessageID, message.JMSCorrelationID, destination, MessagingAttributes.Values.PublishOperationName);
+            SetCommonTags(activity, message.JMSMessageID, message.JMSCorrelationID, destination, MessagingAttributes.Values.SendOperationName);
         }
 
         SetQueueManagerId(activity, producerInstance);
@@ -274,7 +274,8 @@ internal static class XmsInstrumentation
     private static void SetCommonTags(Activity activity, string? messageId, string? correlationId, string? destination, string operationName)
     {
         activity.SetTag(MessagingAttributes.Keys.MessagingSystem, MessagingAttributes.Values.IbmMqMessagingSystemName);
-        activity.SetTag(MessagingAttributes.Keys.MessagingOperation, operationName);
+        activity.SetTag(MessagingAttributes.Keys.MessagingOperationName, operationName);
+        activity.SetTag(MessagingAttributes.Keys.MessagingOperationType, operationName);
 
         if (destination is not null)
         {

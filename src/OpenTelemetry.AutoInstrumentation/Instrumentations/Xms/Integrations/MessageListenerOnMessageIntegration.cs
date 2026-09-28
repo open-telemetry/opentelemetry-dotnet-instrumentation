@@ -32,7 +32,7 @@ public static class MessageListenerOnMessageIntegration
             return CallTargetState.GetDefault();
         }
 
-        var activity = XmsInstrumentation.StartConsumerActivity(message, instance, MessagingAttributes.Values.DeliverOperationName);
+        var activity = XmsInstrumentation.StartConsumerActivity(message, instance, MessagingAttributes.Values.ProcessOperationName);
 
         // The listener instance has no public path to its owning connection; it is only reachable
         // through the private `connection_` field (see IXmsProviderMessageListener).
