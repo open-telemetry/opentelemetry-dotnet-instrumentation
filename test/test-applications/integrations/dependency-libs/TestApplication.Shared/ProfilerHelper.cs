@@ -15,7 +15,7 @@ internal static class ProfilerHelper
 {
     // Keep this pattern and replacement aligned with MatchesSecretsPattern in native regex_utils.cpp.
     // The native profiler matches the complete KEY=value entry.
-    private static readonly Regex SecretsPattern = new(@"(?:^|_)(API|TOKEN|SECRET|KEY|PASSWORD|PASS|PWD|HEADERS?|CREDENTIALS)(?:_|=|$)", RegexOptions.ECMAScript | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    private static readonly Regex SecretsPattern = new(@"(?:^|_)(API|TOKEN|SECRET|KEY|PASSWORD|PASS|PWD|HEADERS?|CREDENTIALS)(?:_|=|$)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     public static IEnumerable<KeyValuePair<string, string>> GetEnvironmentConfiguration()
     {
