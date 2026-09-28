@@ -21,8 +21,8 @@ XMS.NET client, assembly `IBM.XMS`. Supported versions are `9.0.0` and later
 
 ## Span names
 
-Span names follow the OpenTelemetry messaging semantic convention pattern of
-`{destination} {operation}`:
+Span names use the `{destination} {operation}` pattern, matching the existing
+Kafka and RabbitMQ instrumentations in this repository:
 
 * `{destination} send` for `Send` overloads.
 * `{destination} receive` for `Receive` / `Receive(Int64)` / `ReceiveNoWait`.

@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support for [IBMXMSDotnetClient](https://www.nuget.org/packages/IBMXMSDotnetClient)
+  traces instrumentation for versions `9.0.0`+.
+
 ### Changed
 
 #### Dependency updates
@@ -36,8 +39,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   traces instrumentation for versions `3.1.x`+ for .NET only.
 - Added support for [Quartz](https://www.nuget.org/packages/Quartz)
   traces and metrics instrumentation for version `4`+ for .NET 10 only.
-- Support for [IBMXMSDotnetClient](https://www.nuget.org/packages/IBMXMSDotnetClient)
-  traces instrumentation for versions `9.0.0`+.
 - `AZURECONTAINERAPPS` resource detector, detecting Azure Container Apps
   resource information for .NET only.
 
