@@ -11,6 +11,7 @@
 
 #include "cor_profiler.h"
 #include "configuration.h"
+#include "logger.h"
 
 #ifndef _WIN32
 #include <dlfcn.h>
@@ -25,7 +26,13 @@ EXTERN_C VOID STDAPICALLTYPE GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray,
                                                         BYTE** pSymbolsArray,
                                                         int*   symbolsSize)
 {
-    return trace::profiler->GetAssemblyAndSymbolsBytes(pAssemblyArray, assemblySize, pSymbolsArray, symbolsSize);
+    if (trace::profiler == nullptr)
+    {
+        trace::Logger::Error("GetAssemblyAndSymbolsBytes: CLR profiler is not initialized.");
+        return;
+    }
+
+    trace::profiler->GetAssemblyAndSymbolsBytes(pAssemblyArray, assemblySize, pSymbolsArray, symbolsSize);
 }
 #endif
 
@@ -36,17 +43,35 @@ EXTERN_C BOOL STDAPICALLTYPE IsProfilerAttached()
 
 EXTERN_C VOID STDAPICALLTYPE AddInstrumentations(WCHAR* id, trace::CallTargetDefinition* items, int size)
 {
-    return trace::profiler->AddInstrumentations(id, items, size);
+    if (trace::profiler == nullptr)
+    {
+        trace::Logger::Error("AddInstrumentations: CLR profiler is not initialized.");
+        return;
+    }
+
+    trace::profiler->AddInstrumentations(id, items, size);
 }
 
 EXTERN_C VOID STDAPICALLTYPE AddDerivedInstrumentations(WCHAR* id, trace::CallTargetDefinition* items, int size)
 {
-    return trace::profiler->AddDerivedInstrumentations(id, items, size);
+    if (trace::profiler == nullptr)
+    {
+        trace::Logger::Error("AddDerivedInstrumentations: CLR profiler is not initialized.");
+        return;
+    }
+
+    trace::profiler->AddDerivedInstrumentations(id, items, size);
 }
 
 EXTERN_C VOID STDAPICALLTYPE AddInterfaceInstrumentations(WCHAR* id, trace::CallTargetDefinition* items, int size)
 {
-    return trace::profiler->AddInterfaceInstrumentations(id, items, size);
+    if (trace::profiler == nullptr)
+    {
+        trace::Logger::Error("AddInterfaceInstrumentations: CLR profiler is not initialized.");
+        return;
+    }
+
+    trace::profiler->AddInterfaceInstrumentations(id, items, size);
 }
 
 EXTERN_C VOID STDAPICALLTYPE SetSqlClientNetFxILRewriteEnabled(bool enabled)
@@ -62,9 +87,15 @@ EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamp
 {
     try
     {
-        return trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
-                                                            allocationSamplingEnabled, maxMemorySamplesPerMinute,
-                                                            selectedThreadSamplingInterval);
+        if (trace::profiler == nullptr)
+        {
+            trace::Logger::Error("ConfigureContinuousProfiler: CLR profiler is not initialized.");
+            return;
+        }
+
+        trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
+                                                    allocationSamplingEnabled, maxMemorySamplesPerMinute,
+                                                    selectedThreadSamplingInterval);
     }
     catch (...)
     {
@@ -138,8 +169,14 @@ EXTERN_C VOID STDAPICALLTYPE InitializeTraceMethods(WCHAR* id,
                                                     WCHAR* integration_type_name_ptr,
                                                     WCHAR* configuration_string_ptr)
 {
-    return trace::profiler->InitializeTraceMethods(id, integration_assembly_name_ptr, integration_type_name_ptr,
-                                                   configuration_string_ptr);
+    if (trace::profiler == nullptr)
+    {
+        trace::Logger::Error("InitializeTraceMethods: CLR profiler is not initialized.");
+        return;
+    }
+
+    trace::profiler->InitializeTraceMethods(id, integration_assembly_name_ptr, integration_type_name_ptr,
+                                           configuration_string_ptr);
 }
 
 #ifndef _WIN32
