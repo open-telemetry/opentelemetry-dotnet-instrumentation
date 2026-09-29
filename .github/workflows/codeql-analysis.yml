@@ -34,13 +34,13 @@ jobs:
         include:
         - language: actions
           # renovate: datasource=github-runners depType=github-runner
-          machine: ubuntu-24.04
+          machine: ubuntu-26.04
         - language: c-cpp
           # Keep this as "none" so paths-ignore in codeql-config.yml excludes vendored native lib files.
           build-mode: none
           queries: security-extended
           # renovate: datasource=github-runners depType=github-runner
-          machine: ubuntu-24.04
+          machine: ubuntu-26.04
         - language: csharp
           build-mode: manual
           # renovate: datasource=github-runners depType=github-runner
