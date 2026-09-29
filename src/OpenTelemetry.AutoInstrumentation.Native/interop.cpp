@@ -14,6 +14,8 @@
 
 #ifndef _WIN32
 #include <dlfcn.h>
+#undef EXTERN_C
+#define EXTERN_C extern "C" __attribute__((visibility("default")))
 #endif
 
 #ifdef _WIN32
@@ -40,6 +42,11 @@ EXTERN_C VOID STDAPICALLTYPE AddInstrumentations(WCHAR* id, trace::CallTargetDef
 EXTERN_C VOID STDAPICALLTYPE AddDerivedInstrumentations(WCHAR* id, trace::CallTargetDefinition* items, int size)
 {
     return trace::profiler->AddDerivedInstrumentations(id, items, size);
+}
+
+EXTERN_C VOID STDAPICALLTYPE AddInterfaceInstrumentations(WCHAR* id, trace::CallTargetDefinition* items, int size)
+{
+    return trace::profiler->AddInterfaceInstrumentations(id, items, size);
 }
 
 EXTERN_C VOID STDAPICALLTYPE SetSqlClientNetFxILRewriteEnabled(bool enabled)

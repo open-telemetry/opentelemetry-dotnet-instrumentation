@@ -21,7 +21,7 @@ internal abstract class CSharpFileBuilder
 //     re-run the LibraryVersionsGenerator project in Visual Studio.
 // 
 //     Changes to this file may cause incorrect behavior and will be lost if
-//     the code is regenerated. 
+//     the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
 ");
