@@ -362,16 +362,13 @@ architectures.
 
 ### Native profiler: conflicting version ordering
 
-The native profiler processes assembly references and `UnsafeAccessorType`
-attribute values in module-load order. CoreLib attributes are considered during
-CoreLib loading; in each later module, `AssemblyRef` entries are considered
-before attribute values. If an earlier reference has been
-redirected to the instrumentation's version and a later reference requests a
-**higher** version than the instrumentation ships, the profiler cannot safely
-revise the earlier metadata. This is logged as an error. An attribute in
-`System.Private.CoreLib` can be that first redirection because CoreLib loads
-before application modules. In practice this is rare because the
-instrumentation ships recent versions of its dependencies.
+The native profiler establishes redirection targets as modules load. This
+applies to both `AssemblyRef` entries and assembly-qualified type names in
+`UnsafeAccessorType` attributes. Once metadata has been rewritten to a target
+version, a later request for a **higher** version cannot change that target
+retroactively. The profiler leaves the later request unchanged and logs the
+conflict. Runtime assembly resolution may still satisfy the request, for
+example when the higher version is available in the TPA list.
 
 ### Unexpected resolution request for a higher version than available
 

@@ -4,6 +4,7 @@
 
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/string_utils.h"
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/unsafe_accessor_type_attribute_updater.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/type_name_assembly_redirection_rewriter.h"
 
 using namespace trace;
 
@@ -76,7 +77,7 @@ std::vector<BYTE> CreateUnsafeAccessorTypeAttributeBlob(const std::string& type_
 // - the assemblies reported as rewritten,
 // - the resulting target versions in the redirection map, and
 // - the redirect count where the scenario changes or preconfigures it.
-TEST(UnsafeAccessorTypeNameRewriterTest, AddsMissingVersion)
+TEST(TypeNameAssemblyRedirectionRewriterTest, AddsMissingVersion)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -85,14 +86,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, AddsMissingVersion)
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, MatchesAssemblyNameCaseInsensitively)
+TEST(TypeNameAssemblyRedirectionRewriterTest, MatchesAssemblyNameCaseInsensitively)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -101,14 +102,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, MatchesAssemblyNameCaseInsensitively)
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, ReplacesLowerVersionAndPreservesQualifiers)
+TEST(TypeNameAssemblyRedirectionRewriterTest, ReplacesLowerVersionAndPreservesQualifiers)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -121,14 +122,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, ReplacesLowerVersionAndPreservesQualifi
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, PreservesIrregularSpacing)
+TEST(TypeNameAssemblyRedirectionRewriterTest, PreservesIrregularSpacing)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -137,14 +138,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, PreservesIrregularSpacing)
     std::string rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, PreservesEqualVersion)
+TEST(TypeNameAssemblyRedirectionRewriterTest, PreservesEqualVersion)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -152,14 +153,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, PreservesEqualVersion)
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    EXPECT_FALSE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    EXPECT_FALSE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                        rewritten_assembly_names));
     EXPECT_TRUE(rewritten_type_name.empty());
     EXPECT_TRUE(rewritten_assembly_names.empty());
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, FindsOuterAssemblyAfterGenericArguments)
+TEST(TypeNameAssemblyRedirectionRewriterTest, FindsOuterAssemblyAfterGenericArguments)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -170,14 +171,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, FindsOuterAssemblyAfterGenericArguments
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, AddsMissingVersionInsideGenericArgument)
+TEST(TypeNameAssemblyRedirectionRewriterTest, AddsMissingVersionInsideGenericArgument)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -188,14 +189,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, AddsMissingVersionInsideGenericArgument
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, ReplacesLowerVersionInsideGenericArgument)
+TEST(TypeNameAssemblyRedirectionRewriterTest, ReplacesLowerVersionInsideGenericArgument)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -206,14 +207,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, ReplacesLowerVersionInsideGenericArgume
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, PreservesEqualVersionInsideGenericArgument)
+TEST(TypeNameAssemblyRedirectionRewriterTest, PreservesEqualVersionInsideGenericArgument)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -222,14 +223,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, PreservesEqualVersionInsideGenericArgum
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    EXPECT_FALSE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    EXPECT_FALSE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                        rewritten_assembly_names));
     EXPECT_TRUE(rewritten_type_name.empty());
     EXPECT_TRUE(rewritten_assembly_names.empty());
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, PromotesMapForHigherVersionInsideGenericArgument)
+TEST(TypeNameAssemblyRedirectionRewriterTest, PromotesMapForHigherVersionInsideGenericArgument)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -238,15 +239,15 @@ TEST(UnsafeAccessorTypeNameRewriterTest, PromotesMapForHigherVersionInsideGeneri
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    EXPECT_FALSE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    EXPECT_FALSE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                        rewritten_assembly_names));
     EXPECT_TRUE(rewritten_type_name.empty());
     EXPECT_TRUE(rewritten_assembly_names.empty());
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("12.0.0.0"));
     EXPECT_EQ(redirects.at(assembly_name).ulRedirectionCount, 1);
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, RewritesMappedAssembliesAtEveryGenericDepth)
+TEST(TypeNameAssemblyRedirectionRewriterTest, RewritesMappedAssembliesAtEveryGenericDepth)
 {
     const WSTRING                                           leaf_assembly_name   = WStr("Test.Leaf.Assembly");
     const WSTRING                                           middle_assembly_name = WStr("Test.Middle.Assembly");
@@ -265,8 +266,8 @@ TEST(UnsafeAccessorTypeNameRewriterTest, RewritesMappedAssembliesAtEveryGenericD
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names,
               (std::vector<WSTRING>{leaf_assembly_name, middle_assembly_name, outer_assembly_name}));
@@ -275,7 +276,7 @@ TEST(UnsafeAccessorTypeNameRewriterTest, RewritesMappedAssembliesAtEveryGenericD
     EXPECT_EQ(redirects.at(outer_assembly_name).VersionStr(), WStr("13.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, RewritesAtMaximumGenericNestingDepth)
+TEST(TypeNameAssemblyRedirectionRewriterTest, RewritesAtMaximumGenericNestingDepth)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -286,14 +287,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, RewritesAtMaximumGenericNestingDepth)
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, RejectsTypeNameBeyondMaximumGenericNestingDepth)
+TEST(TypeNameAssemblyRedirectionRewriterTest, RejectsTypeNameBeyondMaximumGenericNestingDepth)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -302,14 +303,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, RejectsTypeNameBeyondMaximumGenericNest
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    EXPECT_FALSE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    EXPECT_FALSE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                        rewritten_assembly_names));
     EXPECT_TRUE(rewritten_type_name.empty());
     EXPECT_TRUE(rewritten_assembly_names.empty());
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, RewritesMixedBracketedAndUnbracketedGenericArguments)
+TEST(TypeNameAssemblyRedirectionRewriterTest, RewritesMixedBracketedAndUnbracketedGenericArguments)
 {
     const WSTRING                                           first_assembly_name = WStr("Test.First.Assembly");
     const WSTRING                                           outer_assembly_name = WStr("Test.Outer.Assembly");
@@ -323,15 +324,15 @@ TEST(UnsafeAccessorTypeNameRewriterTest, RewritesMixedBracketedAndUnbracketedGen
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, (std::vector<WSTRING>{first_assembly_name, outer_assembly_name}));
     EXPECT_EQ(redirects.at(first_assembly_name).VersionStr(), WStr("11.0.0.0"));
     EXPECT_EQ(redirects.at(outer_assembly_name).VersionStr(), WStr("12.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, UsesHigherNestedVersionForEveryReferenceInTheAttribute)
+TEST(TypeNameAssemblyRedirectionRewriterTest, UsesHigherNestedVersionForEveryReferenceInTheAttribute)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -342,15 +343,15 @@ TEST(UnsafeAccessorTypeNameRewriterTest, UsesHigherNestedVersionForEveryReferenc
     std::string rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("12.0.0.0"));
     EXPECT_EQ(redirects.at(assembly_name).ulRedirectionCount, 1);
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, UsesHigherNestedVersionWhenItAppearsFirst)
+TEST(TypeNameAssemblyRedirectionRewriterTest, UsesHigherNestedVersionWhenItAppearsFirst)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -361,15 +362,15 @@ TEST(UnsafeAccessorTypeNameRewriterTest, UsesHigherNestedVersionWhenItAppearsFir
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("12.0.0.0"));
     EXPECT_EQ(redirects.at(assembly_name).ulRedirectionCount, 1);
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, UsesHighestRequestedVersionForRepeatedReferencesInTheAttribute)
+TEST(TypeNameAssemblyRedirectionRewriterTest, UsesHighestRequestedVersionForRepeatedReferencesInTheAttribute)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -380,15 +381,15 @@ TEST(UnsafeAccessorTypeNameRewriterTest, UsesHighestRequestedVersionForRepeatedR
     std::string rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("13.0.0.0"));
     EXPECT_EQ(redirects.at(assembly_name).ulRedirectionCount, 1);
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, RewritesEveryLowerRepeatedReference)
+TEST(TypeNameAssemblyRedirectionRewriterTest, RewritesEveryLowerRepeatedReference)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {3, 0, 0, 0}}};
@@ -399,14 +400,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, RewritesEveryLowerRepeatedReference)
     std::string rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, (std::vector<WSTRING>{assembly_name, assembly_name}));
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("3.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, DoesNotTreatUnqualifiedGenericArgumentsAsAssemblies)
+TEST(TypeNameAssemblyRedirectionRewriterTest, DoesNotTreatUnqualifiedGenericArgumentsAsAssemblies)
 {
     const WSTRING                                           unqualified_type_name = WStr("Test.Second");
     const WSTRING                                           outer_assembly_name   = WStr("Test.Outer.Assembly");
@@ -418,15 +419,15 @@ TEST(UnsafeAccessorTypeNameRewriterTest, DoesNotTreatUnqualifiedGenericArguments
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{outer_assembly_name});
     EXPECT_EQ(redirects.at(unqualified_type_name).VersionStr(), WStr("11.0.0.0"));
     EXPECT_EQ(redirects.at(outer_assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, PreservesEscapedDelimiters)
+TEST(TypeNameAssemblyRedirectionRewriterTest, PreservesEscapedDelimiters)
 {
     const WSTRING                                           assembly_name = WStr("Test,Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -436,14 +437,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, PreservesEscapedDelimiters)
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, PreservesNonAsciiUtf8BytesAdjacentToDelimiters)
+TEST(TypeNameAssemblyRedirectionRewriterTest, PreservesNonAsciiUtf8BytesAdjacentToDelimiters)
 {
     const auto type_name                = std::string("Test.Type") + "\xC3\xB6";
     const auto assembly_name            = std::string("Test.Redirected.Assembly") + "\xC2\xA0";
@@ -454,14 +455,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, PreservesNonAsciiUtf8BytesAdjacentToDel
     std::string                                             rewritten_type_name;
     std::vector<WSTRING>                                    rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{redirected_assembly_name});
     EXPECT_EQ(redirects.at(redirected_assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, PreservesReflectionTypeForms)
+TEST(TypeNameAssemblyRedirectionRewriterTest, PreservesReflectionTypeForms)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -471,14 +472,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, PreservesReflectionTypeForms)
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, DoesNotRewriteUnmappedAssembly)
+TEST(TypeNameAssemblyRedirectionRewriterTest, DoesNotRewriteUnmappedAssembly)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -486,14 +487,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, DoesNotRewriteUnmappedAssembly)
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    EXPECT_FALSE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    EXPECT_FALSE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                        rewritten_assembly_names));
     EXPECT_TRUE(rewritten_type_name.empty());
     EXPECT_TRUE(rewritten_assembly_names.empty());
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, DoesNotRewriteUnqualifiedType)
+TEST(TypeNameAssemblyRedirectionRewriterTest, DoesNotRewriteUnqualifiedType)
 {
     const WSTRING                                           assembly_name   = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects       = {{assembly_name, {11, 0, 0, 0}}};
@@ -501,14 +502,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, DoesNotRewriteUnqualifiedType)
     std::string                                             rewritten_type_name;
     std::vector<WSTRING>                                    rewritten_assembly_names;
 
-    EXPECT_FALSE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    EXPECT_FALSE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                        rewritten_assembly_names));
     EXPECT_TRUE(rewritten_type_name.empty());
     EXPECT_TRUE(rewritten_assembly_names.empty());
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, RewritesValidShortVersions)
+TEST(TypeNameAssemblyRedirectionRewriterTest, RewritesValidShortVersions)
 {
     const WSTRING assembly_name = WStr("Test.Redirected.Assembly");
     for (const auto* version : {"9.0", "9.0.1"})
@@ -520,15 +521,15 @@ TEST(UnsafeAccessorTypeNameRewriterTest, RewritesValidShortVersions)
         std::string          rewritten_type_name;
         std::vector<WSTRING> rewritten_assembly_names;
 
-        ASSERT_TRUE(TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name,
-                                                     rewritten_assembly_names));
+        ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                           rewritten_assembly_names));
         EXPECT_EQ(rewritten_type_name, expected_type_name);
         EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
         EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
     }
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, PreservesEqualShortVersionWhileRewritingLowerReference)
+TEST(TypeNameAssemblyRedirectionRewriterTest, PreservesEqualShortVersionWhileRewritingLowerReference)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -539,14 +540,14 @@ TEST(UnsafeAccessorTypeNameRewriterTest, PreservesEqualShortVersionWhileRewritin
     std::string rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, DoesNotRewriteMalformedVersions)
+TEST(TypeNameAssemblyRedirectionRewriterTest, DoesNotRewriteMalformedVersions)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -559,15 +560,35 @@ TEST(UnsafeAccessorTypeNameRewriterTest, DoesNotRewriteMalformedVersions)
         SCOPED_TRACE(input_type_name);
         std::string          rewritten_type_name;
         std::vector<WSTRING> rewritten_assembly_names;
-        EXPECT_FALSE(TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name,
-                                                      rewritten_assembly_names));
+        EXPECT_FALSE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                            rewritten_assembly_names));
         EXPECT_TRUE(rewritten_type_name.empty());
         EXPECT_TRUE(rewritten_assembly_names.empty());
         EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
     }
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, PromotesMapForHigherVersionBeforeFirstRedirection)
+TEST(TypeNameAssemblyRedirectionRewriterTest, RejectsMalformedTypeSyntax)
+{
+    const WSTRING assembly_name = WStr("Test.Redirected.Assembly");
+    for (const auto* input_type_name : {"Test.Type[, Test.Redirected.Assembly", "Test.Type], Test.Redirected.Assembly",
+                                        "Test.Type, Test.Redirected.Assembly]",
+                                        "Test.Type, Test.Redirected.Assembly, Version=1.0.0.0, Culture=neutral\\"})
+    {
+        SCOPED_TRACE(input_type_name);
+        std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects = {{assembly_name, {11, 0, 0, 0}}};
+        std::string                                             rewritten_type_name;
+        std::vector<WSTRING>                                    rewritten_assembly_names;
+
+        EXPECT_FALSE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                            rewritten_assembly_names));
+        EXPECT_TRUE(rewritten_type_name.empty());
+        EXPECT_TRUE(rewritten_assembly_names.empty());
+        EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
+    }
+}
+
+TEST(TypeNameAssemblyRedirectionRewriterTest, PromotesMapForHigherVersionBeforeFirstRedirection)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -575,15 +596,15 @@ TEST(UnsafeAccessorTypeNameRewriterTest, PromotesMapForHigherVersionBeforeFirstR
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    EXPECT_FALSE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    EXPECT_FALSE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                        rewritten_assembly_names));
     EXPECT_TRUE(rewritten_type_name.empty());
     EXPECT_TRUE(rewritten_assembly_names.empty());
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("12.0.0.0"));
     EXPECT_EQ(redirects.at(assembly_name).ulRedirectionCount, 1);
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, DoesNotPromoteMapAfterRedirectionWasApplied)
+TEST(TypeNameAssemblyRedirectionRewriterTest, DoesNotPromoteMapAfterRedirectionWasApplied)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
@@ -592,15 +613,15 @@ TEST(UnsafeAccessorTypeNameRewriterTest, DoesNotPromoteMapAfterRedirectionWasApp
     std::string          rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    EXPECT_FALSE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    EXPECT_FALSE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                        rewritten_assembly_names));
     EXPECT_TRUE(rewritten_type_name.empty());
     EXPECT_TRUE(rewritten_assembly_names.empty());
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("11.0.0.0"));
     EXPECT_EQ(redirects.at(assembly_name).ulRedirectionCount, 1);
 }
 
-TEST(UnsafeAccessorTypeNameRewriterTest, RewritesLowerAndPreservesHigherAfterTargetWasCommitted)
+TEST(TypeNameAssemblyRedirectionRewriterTest, RewritesLowerAndPreservesHigherAfterTargetWasCommitted)
 {
     const WSTRING                                           assembly_name = WStr("Test.Redirected.Assembly");
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {1, 5, 0, 0}}};
@@ -612,8 +633,8 @@ TEST(UnsafeAccessorTypeNameRewriterTest, RewritesLowerAndPreservesHigherAfterTar
     std::string rewritten_type_name;
     std::vector<WSTRING> rewritten_assembly_names;
 
-    ASSERT_TRUE(
-        TryRewriteUnsafeAccessorTypeName(input_type_name, redirects, rewritten_type_name, rewritten_assembly_names));
+    ASSERT_TRUE(TryRewriteTypeNameAssemblyRedirections(input_type_name, redirects, rewritten_type_name,
+                                                       rewritten_assembly_names));
     EXPECT_EQ(rewritten_type_name, expected_type_name);
     EXPECT_EQ(rewritten_assembly_names, std::vector<WSTRING>{assembly_name});
     EXPECT_EQ(redirects.at(assembly_name).VersionStr(), WStr("1.5.0.0"));
