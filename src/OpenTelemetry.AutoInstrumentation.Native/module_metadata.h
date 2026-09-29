@@ -25,6 +25,7 @@ class ModuleMetadata
 {
 private:
     std::mutex wrapper_mutex;
+    std::once_flag tracer_tokens_once_flag;
     std::unique_ptr<std::unordered_map<WSTRING, mdTypeRef>> integration_types = nullptr;
     std::unique_ptr<TracerTokens> tracerTokens = nullptr;
     std::unique_ptr<std::vector<IntegrationDefinition>> integrations = nullptr;
@@ -71,8 +72,10 @@ public:
     {
     }
 
-    bool TryGetIntegrationTypeRef(const WSTRING& keyIn, mdTypeRef& valueOut) const
+    bool TryGetIntegrationTypeRef(const WSTRING& keyIn, mdTypeRef& valueOut)
     {
+        std::scoped_lock<std::mutex> lock(wrapper_mutex);
+
         if (integration_types == nullptr)
         {
             return false;
@@ -102,10 +105,10 @@ public:
 
     TracerTokens* GetTracerTokens(const WSTRING& bytecodeInstrumentationName)
     {
-        if (tracerTokens == nullptr)
-        {
+        std::call_once(tracer_tokens_once_flag, [this, bytecodeInstrumentationName] {
             tracerTokens = std::make_unique<TracerTokens>(this, bytecodeInstrumentationName);
-        }
+        });
+
         return tracerTokens.get();
     }
 };
