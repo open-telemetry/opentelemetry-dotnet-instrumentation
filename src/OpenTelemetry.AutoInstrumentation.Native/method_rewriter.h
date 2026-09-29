@@ -17,24 +17,35 @@ namespace trace
     // forward declarations
     class RejitHandlerModule;
     class RejitHandlerModuleMethod;
+    class CorProfiler;
 
 class MethodRewriter
 {
+protected:
+    CorProfiler* m_corProfiler;
+
 public:
+    explicit MethodRewriter(CorProfiler* corProfiler) : m_corProfiler(corProfiler)
+    {
+    }
+
     virtual HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler) = 0;
+
+    virtual ~MethodRewriter() = default;
 };
 
 
-class TracerMethodRewriter : public MethodRewriter, public Singleton<TracerMethodRewriter>
+class TracerMethodRewriter : public MethodRewriter
 {
-    friend class Singleton<TracerMethodRewriter>;
-    
 private:
-    TracerMethodRewriter(){}
     static ILInstr* CreateFilterForException(ILRewriterWrapper* rewriter, mdTypeRef exceptionTypeRef,
                                              mdTypeRef bubbleUpExceptionTypeRef, ULONG exceptionValueIndex);
 
 public:
+    explicit TracerMethodRewriter(CorProfiler* corProfiler) : MethodRewriter(corProfiler)
+    {
+    }
+
     HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler) override;
 };
 

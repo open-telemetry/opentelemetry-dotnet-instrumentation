@@ -100,12 +100,11 @@ public:
         (*integration_types)[keyIn] = valueIn;
     }
 
-    TracerTokens* GetTracerTokens()
+    TracerTokens* GetTracerTokens(const WSTRING& bytecodeInstrumentationName)
     {
         if (tracerTokens == nullptr)
         {
-            tracerTokens =
-                std::make_unique<TracerTokens>(this);
+            tracerTokens = std::make_unique<TracerTokens>(this, bytecodeInstrumentationName);
         }
         return tracerTokens.get();
     }

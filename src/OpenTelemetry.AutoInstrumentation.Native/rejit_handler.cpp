@@ -15,8 +15,10 @@ namespace trace
 
 RejitHandlerModuleMethod::RejitHandlerModuleMethod(mdMethodDef         methodDef,
                                                    RejitHandlerModule* module,
-                                                   const FunctionInfo& functionInfo)
-    : m_methodDef(methodDef)
+                                                   const FunctionInfo& functionInfo,
+                                                   std::unique_ptr<MethodRewriter> methodRewriter)
+    : m_methodRewriter(std::move(methodRewriter))
+    , m_methodDef(methodDef)
     , m_module(module)
     , m_pFunctionControl(nullptr)
     , m_functionInfo(std::make_unique<FunctionInfo>(functionInfo))
@@ -132,6 +134,11 @@ bool RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
     return false;
 }
 
+MethodRewriter* RejitHandlerModuleMethod::GetMethodRewriter()
+{
+    return m_methodRewriter.get();
+}
+
 //
 // TracerRejitHandlerModuleMethod
 //
@@ -139,8 +146,9 @@ bool RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
 TracerRejitHandlerModuleMethod::TracerRejitHandlerModuleMethod(mdMethodDef                  methodDef,
                                                                RejitHandlerModule*          module,
                                                                const FunctionInfo&          functionInfo,
-                                                               const IntegrationDefinition& integrationDefinition)
-    : RejitHandlerModuleMethod(methodDef, module, functionInfo)
+                                                               const IntegrationDefinition& integrationDefinition,
+                                                               std::unique_ptr<MethodRewriter> methodRewriter)
+    : RejitHandlerModuleMethod(methodDef, module, functionInfo, std::move(methodRewriter))
     , m_integrationDefinition(std::make_unique<IntegrationDefinition>(integrationDefinition))
 {
 }
@@ -148,11 +156,6 @@ TracerRejitHandlerModuleMethod::TracerRejitHandlerModuleMethod(mdMethodDef      
 IntegrationDefinition* TracerRejitHandlerModuleMethod::GetIntegrationDefinition()
 {
     return m_integrationDefinition.get();
-}
-
-MethodRewriter* TracerRejitHandlerModuleMethod::GetMethodRewriter()
-{
-    return TracerMethodRewriter::Instance();
 }
 
 //

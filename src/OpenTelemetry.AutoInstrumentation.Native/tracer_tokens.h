@@ -35,7 +35,7 @@ protected:
                              ULONG& signatureSize) override;
 
 public:
-    TracerTokens(ModuleMetadata* module_metadata_ptr);
+    TracerTokens(ModuleMetadata* module_metadata_ptr, const WSTRING& bytecode_instrumentation_name);
 
     int GetAdditionalLocalsCount() override;
 

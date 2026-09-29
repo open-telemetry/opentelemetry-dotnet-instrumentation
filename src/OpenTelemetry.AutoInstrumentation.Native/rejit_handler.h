@@ -36,6 +36,9 @@ class RejitHandler;
 /// </summary>
 class RejitHandlerModuleMethod
 {
+private:
+    std::unique_ptr<MethodRewriter> m_methodRewriter;
+
 protected:
     mdMethodDef m_methodDef;
     ICorProfilerFunctionControl* m_pFunctionControl;
@@ -44,7 +47,8 @@ protected:
     RejitHandlerModule* m_module;
 
 public:
-    RejitHandlerModuleMethod(mdMethodDef methodDef, RejitHandlerModule* module, const FunctionInfo& functionInfo);
+    RejitHandlerModuleMethod(mdMethodDef methodDef, RejitHandlerModule* module, const FunctionInfo& functionInfo,
+                             std::unique_ptr<MethodRewriter> methodRewriter);
     mdMethodDef GetMethodDef();
     RejitHandlerModule* GetModule();
 
@@ -55,7 +59,7 @@ public:
     void SetFunctionInfo(const FunctionInfo& functionInfo);
 
     bool RequestRejitForInlinersInModule(ModuleID moduleId);
-    virtual MethodRewriter* GetMethodRewriter() = 0;
+    MethodRewriter* GetMethodRewriter();
 
     virtual ~RejitHandlerModuleMethod() = default;
 };
@@ -73,10 +77,10 @@ public:
                     mdMethodDef methodDef,
                     RejitHandlerModule* module,
                     const FunctionInfo& functionInfo,
-                    const IntegrationDefinition& integrationDefinition);
+                    const IntegrationDefinition& integrationDefinition,
+                    std::unique_ptr<MethodRewriter> methodRewriter);
     
     IntegrationDefinition* GetIntegrationDefinition();
-    MethodRewriter* GetMethodRewriter() override;
 };
 
 using RejitHandlerModuleMethodCreatorFunc = std::function<std::unique_ptr<RejitHandlerModuleMethod>(const mdMethodDef, RejitHandlerModule*)>;

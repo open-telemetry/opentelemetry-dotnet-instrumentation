@@ -14,9 +14,10 @@ namespace trace
 
 // RejitPreprocessor
 template <class RejitRequestDefinition>
-RejitPreprocessor<RejitRequestDefinition>::RejitPreprocessor(std::shared_ptr<RejitHandler>       rejit_handler,
+RejitPreprocessor<RejitRequestDefinition>::RejitPreprocessor(CorProfiler*                         corProfiler,
+                                                             std::shared_ptr<RejitHandler>       rejit_handler,
                                                              std::shared_ptr<RejitWorkOffloader> work_offloader)
-    : m_rejit_handler(std::move(rejit_handler)), m_work_offloader(std::move(work_offloader))
+    : m_corProfiler(corProfiler), m_rejit_handler(std::move(rejit_handler)), m_work_offloader(std::move(work_offloader))
 {
 }
 
@@ -585,7 +586,8 @@ const std::unique_ptr<RejitHandlerModuleMethod> TracerRejitPreprocessor::CreateM
     const FunctionInfo&          functionInfo,
     const IntegrationDefinition& integrationDefinition)
 {
-    return std::make_unique<TracerRejitHandlerModuleMethod>(methodDef, module, functionInfo, integrationDefinition);
+    return std::make_unique<TracerRejitHandlerModuleMethod>(
+        methodDef, module, functionInfo, integrationDefinition, std::make_unique<TracerMethodRewriter>(m_corProfiler));
 }
 
 template class RejitPreprocessor<IntegrationDefinition>;
