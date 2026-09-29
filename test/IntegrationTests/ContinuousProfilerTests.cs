@@ -116,6 +116,30 @@ public class ContinuousProfilerTests : TestHelper
         collector.ResourceExpector.AssertExpectations();
     }
 
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void ExportThreadSamplesAcrossRuntimeSamplerTransitions()
+    {
+        EnableBytecodeInstrumentation();
+        using var collector = new MockProfilesCollector(Output);
+        SetExporter(collector);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.RuntimeSamplerTransitionPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
+        SetEnvironmentVariable("OTEL_TEST_RUNTIME_SAMPLER_TRANSITIONS", "true");
+
+        collector.Expect(profileData => ContainsFunction(profileData, "RuntimeSamplerTransitions.CaptureBeforeDisable"));
+        collector.Expect(profileData => ContainsFunction(profileData, "RuntimeSamplerTransitions.CaptureAfterReenable"));
+
+        // Disable is deliberately lazy: samples admitted before the Apply may still publish, so this test verifies
+        // the committed disabled state in the test application rather than asserting an immediate absence of exports.
+        var (standardOutput, _, _) = RunTestApplication();
+
+        Assert.Contains("Runtime sampler transition applied: enabled.", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("Runtime sampler transition applied: disabled.", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("Runtime sampler transition applied: re-enabled.", standardOutput, StringComparison.Ordinal);
+        collector.AssertExpectations();
+    }
+
     private static bool ExpectCollected(ICollection<ExportProfilesServiceRequest> c)
     {
         foreach (var request in c)
@@ -239,6 +263,19 @@ public class ContinuousProfilerTests : TestHelper
         }
 
         return false;
+    }
+
+    private static bool ContainsFunction(ExportProfilesServiceRequest profileData, string functionName)
+    {
+        return profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile =>
+            scopeProfile.Profiles.Any(profile => profile.Samples.Any(sample =>
+            {
+                var stackIndex = sample.StackIndex;
+                return stackIndex > 0 &&
+                    stackIndex < profileData.Dictionary.StackTable.Count &&
+                    GetFrameNames(profileData.Dictionary.StackTable[stackIndex], profileData.Dictionary)
+                        .Any(frameName => frameName.Contains(functionName, StringComparison.Ordinal));
+            }))));
     }
 
     private static IEnumerable<string> GetFrameNames(Stack stack, ProfilesDictionary dictionary)

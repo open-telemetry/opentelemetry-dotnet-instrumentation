@@ -42,8 +42,10 @@ public:
     HRESULT SuspendRuntime() override;
     void    ResumeRuntime() noexcept override;
 
-    HRESULT CaptureStack(ThreadID                      managedThreadId,
-                         StackSnapshotCallbackContext* clientData) override;
+    HRESULT CaptureStack(ThreadID managedThreadId, StackSnapshotCallbackContext* clientData) override;
+    bool    IsReady() noexcept override;
+    void    RequestShutdown() noexcept override;
+    void    WaitForShutdown() noexcept override;
 
 private:
     IProfilerApi* profilerApi_;

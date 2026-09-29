@@ -34,13 +34,13 @@ jobs:
         include:
         - language: actions
           # renovate: datasource=github-runners depType=github-runner
-          machine: ubuntu-24.04
+          machine: ubuntu-26.04
         - language: c-cpp
           # Keep this as "none" so paths-ignore in codeql-config.yml excludes vendored native lib files.
           build-mode: none
           queries: security-extended
           # renovate: datasource=github-runners depType=github-runner
-          machine: ubuntu-24.04
+          machine: ubuntu-26.04
         - language: csharp
           build-mode: manual
           # renovate: datasource=github-runners depType=github-runner
@@ -70,7 +70,7 @@ jobs:
         show-progress: false
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+      uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
@@ -92,7 +92,7 @@ jobs:
       run: ./build.cmd BuildTracer
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+      uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
       with:
         category: "/language:${{matrix.language}}"
 
@@ -100,7 +100,7 @@ jobs:
     name: results # Matches required status check
     if: ${{ !cancelled() }}
     needs: [ analyze ]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     steps:
       - name: Report status

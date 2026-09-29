@@ -5,7 +5,7 @@
 //     re-run the LibraryVersionsGenerator project in Visual Studio.
 // 
 //     Changes to this file may cause incorrect behavior and will be lost if
-//     the code is regenerated. 
+//     the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
 
@@ -163,7 +163,7 @@ public static partial class LibraryVersion
                 new("3.6.0"),
                 new("3.22.0"),
                 new("4.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("4.1.1", supportedFrameworks: [ "net10.0" ]),
+                new("4.2.2", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -192,6 +192,7 @@ public static partial class LibraryVersion
                 new("3.0.25", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("3.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("3.3.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("3.3.1", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {

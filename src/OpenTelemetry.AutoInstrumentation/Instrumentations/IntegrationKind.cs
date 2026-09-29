@@ -6,5 +6,6 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations;
 internal enum IntegrationKind
 {
     Direct = 0,
-    Derived = 1
+    Derived = 1,
+    Interface = 2
 }

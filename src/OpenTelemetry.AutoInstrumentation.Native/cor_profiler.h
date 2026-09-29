@@ -21,26 +21,17 @@
 #include "pal.h"
 #include "rejit_preprocessor.h"
 #include "rejit_handler.h"
+#include "runtime_sampler_configuration.h"
 #include <unordered_set>
 #include "clr_helpers.h"
-#include "stack_walker_impl.h"
 // Forward declaration
 namespace continuous_profiler
 {
-class ContinuousProfiler;
+class RuntimeSamplerService;
 }
 
 namespace trace
 {
-struct ContinuousProfilerParams
-{
-    bool         threadSamplingEnabled;
-    unsigned int threadSamplingInterval;
-    bool         allocationSamplingEnabled;
-    unsigned int maxMemorySamplesPerMinute;
-    unsigned int selectedThreadsSamplingInterval;
-};
-
 class CorProfiler : public CorProfilerBase
 {
 private:
@@ -65,11 +56,9 @@ private:
     bool in_azure_app_services = false;
     bool is_desktop_iis = false;
 
-    continuous_profiler::ContinuousProfiler* continuousProfiler;
-    std::unique_ptr<continuous_profiler::StackWalkerImpl>       stack_walker_impl_;
-    std::once_flag sampling_init_flag_;
+    // Stable process-lifetime facade. Its sampling infrastructure remains lazy until the first enabling configuration.
+    std::unique_ptr<continuous_profiler::RuntimeSamplerService> runtime_sampler_service_;
     HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) override;
-
 
     //
     // CallTarget Members
@@ -81,10 +70,11 @@ private:
     bool enable_by_ref_instrumentation = true;
     bool enable_calltarget_state_by_ref = true;
     std::unique_ptr<TracerRejitPreprocessor> tracer_integration_preprocessor = nullptr;
+    bool call_target_bubble_up_exception_available = false;
 
     // Cor assembly properties
     AssemblyProperty corAssemblyProperty{};
-    AssemblyReference* managed_profiler_assembly_reference;
+    AssemblyReference* managed_profiler_assembly_reference = nullptr;
 
     //
     // OpCodes helper
@@ -139,16 +129,20 @@ private:
     bool GetIntegrationTypeRef(ModuleMetadata& module_metadata, ModuleID module_id,
                                const IntegrationDefinition& integration_definition, mdTypeRef& integration_type_ref);
     bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);
+    static bool EnsureCallTargetBubbleUpExceptionTypeAvailable(const ModuleMetadata& module_metadata);
 
     //
     // Initialization methods
     //
-    void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
-    bool InitThreadSampler();
-    void ConfigureContinuousProfilerInternal(const ContinuousProfilerParams& params);
+    void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived,
+                                    bool isInterface);
+
+protected:
+    void InitializeRuntimeSamplerService() noexcept;
 
 public:
-    CorProfiler() = default;
+    CorProfiler();
+    ~CorProfiler() override;
 
     bool IsAttached() const;
 
@@ -241,6 +235,7 @@ public:
     //
     void AddInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
     void AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
+    void AddInterfaceInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
     void InitializeTraceMethods(WCHAR* id,
                                 WCHAR* integration_assembly_name_ptr,
                                 WCHAR* integration_type_name_ptr,
@@ -248,8 +243,17 @@ public:
     //
     // Continuous Profiler methods
     //
-    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute, 
-        unsigned int selectedThreadsSamplingInterval);
+    void ConfigureContinuousProfiler(bool         threadSamplingEnabled,
+                                     unsigned int threadSamplingInterval,
+                                     bool         allocationSamplingEnabled,
+                                     unsigned int maxMemorySamplesPerMinute,
+                                     unsigned int selectedThreadsSamplingInterval);
+    continuous_profiler::RuntimeSamplerApplyResult ApplyContinuousProfilerConfiguration(
+        const continuous_profiler::RuntimeSamplerConfiguration* request,
+        continuous_profiler::RuntimeSamplerAuthority              authority,
+        continuous_profiler::RuntimeSamplerState*               actualState);
+    continuous_profiler::RuntimeSamplerStateQueryResult GetContinuousProfilerState(
+        continuous_profiler::RuntimeSamplerState* actualState) const;
 
     //
     // IL Rewriting methods

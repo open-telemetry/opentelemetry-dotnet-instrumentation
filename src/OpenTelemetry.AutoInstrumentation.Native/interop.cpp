@@ -14,6 +14,8 @@
 
 #ifndef _WIN32
 #include <dlfcn.h>
+#undef EXTERN_C
+#define EXTERN_C extern "C" __attribute__((visibility("default")))
 #endif
 
 #ifdef _WIN32
@@ -42,6 +44,11 @@ EXTERN_C VOID STDAPICALLTYPE AddDerivedInstrumentations(WCHAR* id, trace::CallTa
     return trace::profiler->AddDerivedInstrumentations(id, items, size);
 }
 
+EXTERN_C VOID STDAPICALLTYPE AddInterfaceInstrumentations(WCHAR* id, trace::CallTargetDefinition* items, int size)
+{
+    return trace::profiler->AddInterfaceInstrumentations(id, items, size);
+}
+
 EXTERN_C VOID STDAPICALLTYPE SetSqlClientNetFxILRewriteEnabled(bool enabled)
 {
     return trace::SetSqlClientNetFxILRewriteEnabled(enabled);
@@ -53,9 +60,77 @@ EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamp
                                                          unsigned int maxMemorySamplesPerMinute,
                                                          unsigned int selectedThreadSamplingInterval)
 {
-    return trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
-                                                        allocationSamplingEnabled, maxMemorySamplesPerMinute,
-                                                        selectedThreadSamplingInterval);
+    try
+    {
+        return trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
+                                                            allocationSamplingEnabled, maxMemorySamplesPerMinute,
+                                                            selectedThreadSamplingInterval);
+    }
+    catch (...)
+    {
+        return;
+    }
+}
+
+EXTERN_C INT32 STDAPICALLTYPE
+ApplyContinuousProfilerConfiguration(const continuous_profiler::RuntimeSamplerConfiguration* request,
+                                     const continuous_profiler::RuntimeSamplerAuthority      authority,
+                                     continuous_profiler::RuntimeSamplerState*               actualState)
+{
+    try
+    {
+        if (trace::profiler == nullptr)
+        {
+            const auto stateResult = continuous_profiler::EncodeRuntimeSamplerState({}, actualState);
+            if (stateResult == continuous_profiler::RuntimeSamplerStateQueryResult::InvalidArgument)
+            {
+                return static_cast<INT32>(continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidArgument);
+            }
+            if (stateResult == continuous_profiler::RuntimeSamplerStateQueryResult::UnsupportedLayout)
+            {
+                return static_cast<INT32>(continuous_profiler::RuntimeSamplerApplyResult::RejectedUnsupportedLayout);
+            }
+            return static_cast<INT32>(continuous_profiler::RuntimeSamplerApplyResult::ShuttingDown);
+        }
+
+        return static_cast<INT32>(
+            trace::profiler->ApplyContinuousProfilerConfiguration(request, authority, actualState));
+    }
+    catch (...)
+    {
+        try
+        {
+            if (trace::profiler != nullptr)
+            {
+                trace::profiler->GetContinuousProfilerState(actualState);
+            }
+            else
+            {
+                continuous_profiler::EncodeRuntimeSamplerState({}, actualState);
+            }
+        }
+        catch (...)
+        {
+        }
+        return static_cast<INT32>(continuous_profiler::RuntimeSamplerApplyResult::ActivationFailed);
+    }
+}
+
+EXTERN_C INT32 STDAPICALLTYPE GetContinuousProfilerState(continuous_profiler::RuntimeSamplerState* actualState)
+{
+    try
+    {
+        if (trace::profiler == nullptr)
+        {
+            return static_cast<INT32>(continuous_profiler::EncodeRuntimeSamplerState({}, actualState));
+        }
+
+        return static_cast<INT32>(trace::profiler->GetContinuousProfilerState(actualState));
+    }
+    catch (...)
+    {
+        return static_cast<INT32>(continuous_profiler::RuntimeSamplerStateQueryResult::InvalidArgument);
+    }
 }
 
 EXTERN_C VOID STDAPICALLTYPE InitializeTraceMethods(WCHAR* id,

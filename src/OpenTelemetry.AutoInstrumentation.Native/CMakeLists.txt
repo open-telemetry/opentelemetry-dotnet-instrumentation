@@ -97,7 +97,7 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 # ******************************************************
 
 # Sets compiler options
-add_compile_options(-std=c++17 -fPIC -fms-extensions)
+add_compile_options(-std=c++17 -fPIC -fms-extensions -fvisibility=hidden)
 add_compile_options(-DPAL_STDCPP_COMPAT -DPLATFORM_UNIX -DUNICODE)
 add_compile_options(-Wno-invalid-noreturn -Wno-macro-redefined)
 
@@ -203,6 +203,7 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         configuration.cpp
         continuous_profiler_clr_helpers.cpp
         continuous_profiler.cpp
+        shutdown_admission.cpp
         cor_profiler_base.cpp
         cor_profiler.cpp
         il_rewriter_wrapper.cpp
@@ -219,6 +220,8 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         rejit_handler.cpp
         rejit_preprocessor.cpp
         rejit_work_offloader.cpp
+        runtime_sampler_configuration.cpp
+        runtime_sampler_service.cpp
         environment_variables_util.cpp
         stack_capturer.cpp
         stub_generator.cpp

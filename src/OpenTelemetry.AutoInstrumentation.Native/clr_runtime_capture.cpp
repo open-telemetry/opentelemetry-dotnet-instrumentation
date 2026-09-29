@@ -38,6 +38,15 @@ HRESULT ClrRuntimeCapture::SuspendRuntime()
     return hr;
 }
 
+bool ClrRuntimeCapture::IsReady() noexcept
+{
+#if defined(_WIN32) && defined(_M_AMD64)
+    return stackWalkGuard_ != nullptr && stackWalkGuard_->WaitForInitialization();
+#else
+    return true;
+#endif
+}
+
 void ClrRuntimeCapture::ResumeRuntime() noexcept
 {
     if (profilerApi_ == nullptr)
@@ -49,6 +58,26 @@ void ClrRuntimeCapture::ResumeRuntime() noexcept
     {
         trace::Logger::Error("[ClrRuntimeCapture] ResumeRuntime failed. HRESULT=", trace::HResultStr(hr));
     }
+}
+
+void ClrRuntimeCapture::RequestShutdown() noexcept
+{
+#if defined(_WIN32) && defined(_M_AMD64)
+    if (stackWalkGuard_ != nullptr)
+    {
+        stackWalkGuard_->RequestShutdown();
+    }
+#endif
+}
+
+void ClrRuntimeCapture::WaitForShutdown() noexcept
+{
+#if defined(_WIN32) && defined(_M_AMD64)
+    if (stackWalkGuard_ != nullptr)
+    {
+        stackWalkGuard_->WaitForShutdown();
+    }
+#endif
 }
 
 HRESULT ClrRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapshotCallbackContext* clientData)

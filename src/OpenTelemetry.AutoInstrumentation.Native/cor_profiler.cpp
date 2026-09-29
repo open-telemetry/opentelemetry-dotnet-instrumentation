@@ -32,8 +32,10 @@
 #include "stats.h"
 #include "util.h"
 #include "version.h"
-#include "continuous_profiler.h"
 #include "member_resolver.h"
+#include "runtime_sampler_configuration.h"
+#include "runtime_sampler_service.h"
+#include "shutdown_admission.h"
 
 #ifdef MACOS
 #include <mach-o/dyld.h>
@@ -61,13 +63,15 @@ namespace trace
 
 CorProfiler* profiler = nullptr;
 
+CorProfiler::CorProfiler()  = default;
+CorProfiler::~CorProfiler() = default;
+
 //
 // ICorProfilerCallback methods
 //
 HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown)
 {
-    auto _                   = trace::Stats::Instance()->InitializeMeasure();
-    this->continuousProfiler = nullptr;
+    auto _ = trace::Stats::Instance()->InitializeMeasure();
 
     CorProfilerBase::Initialize(cor_profiler_info_unknown);
 
@@ -261,6 +265,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         is_desktop_iis = runtime_information_.is_desktop();
     }
 
+    InitializeRuntimeSamplerService();
+
     // writing opcodes vector for the IL dumper
     if (IsDumpILRewriteEnabled())
     {
@@ -291,6 +297,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
 HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_id, HRESULT hr_status)
 {
+    if (!is_attached_)
+    {
+        return S_OK;
+    }
+
     auto _ = trace::Stats::Instance()->AssemblyLoadFinishedMeasure();
 
     if (FAILED(hr_status))
@@ -305,12 +316,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
     if (Logger::IsDebugEnabled())
     {
         Logger::Debug("AssemblyLoadFinished: ", assembly_id, " ", hr_status);
-    }
-
-    // double check if is_attached_ has changed to avoid possible race condition with shutdown function
-    if (!is_attached_)
-    {
-        return S_OK;
     }
 
     const auto& assembly_info = GetAssemblyInfo(this->info_, assembly_id);
@@ -584,6 +589,11 @@ void CorProfiler::RewritingPInvokeMaps(const ModuleMetadata& module_metadata, co
 
 HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HRESULT hr_status)
 {
+    if (!is_attached_)
+    {
+        return S_OK;
+    }
+
     auto _ = trace::Stats::Instance()->ModuleLoadFinishedMeasure();
 
     if (FAILED(hr_status))
@@ -591,11 +601,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         // if module failed to load, skip it entirely,
         // otherwise we can crash the process if module is not valid
         CorProfilerBase::ModuleLoadFinished(module_id, hr_status);
-        return S_OK;
-    }
-
-    if (!is_attached_)
-    {
         return S_OK;
     }
 
@@ -664,7 +669,7 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id)
 
         hr = assembly_import->GetAssemblyProps(assembly_metadata.assembly_token, &corAssemblyProperty.ppbPublicKey,
                                                &corAssemblyProperty.pcbPublicKey, &corAssemblyProperty.pulHashAlgId,
-                                               NULL, 0, NULL, &corAssemblyProperty.pMetaData,
+                                               nullptr, 0, nullptr, &corAssemblyProperty.pMetaData,
                                                &corAssemblyProperty.assemblyFlags);
 
         if (FAILED(hr))
@@ -784,9 +789,29 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id)
         {
             if (module_info.assembly.name.rfind(skip_assembly_pattern, 0) == 0)
             {
-                Logger::Debug("ModuleLoadFinished skipping module by pattern: ", module_id, " ",
-                              module_info.assembly.name);
-                return S_OK;
+                bool is_included = false;
+                // The assembly matches the "skip" prefix, but check if it's specifically included
+                for (auto&& include_assembly : include_assemblies)
+                {
+                    if (module_info.assembly.name == include_assembly)
+                    {
+                        is_included = true;
+                        break;
+                    }
+                }
+
+                if (is_included)
+                {
+                    Logger::Debug("ModuleLoadFinished matched module by pattern: ", module_id, " ",
+                                  module_info.assembly.name, "but assembly is explicitly included");
+                    break;
+                }
+                else
+                {
+                    Logger::Debug("ModuleLoadFinished skipping module by pattern: ", module_id, " ",
+                                  module_info.assembly.name);
+                    return S_OK;
+                }
             }
         }
     }
@@ -831,6 +856,8 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id)
 #else
             RewritingPInvokeMaps(module_metadata, nonwindows_nativemethods_type);
 #endif // _WIN32
+
+            call_target_bubble_up_exception_available = EnsureCallTargetBubbleUpExceptionTypeAvailable(module_metadata);
         }
 
         if (Logger::IsDebugEnabled())
@@ -875,12 +902,13 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id)
 
 HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
 {
-    auto _ = trace::Stats::Instance()->ModuleUnloadStartedMeasure();
-
     if (!is_attached_)
     {
         return S_OK;
     }
+
+    auto _ = trace::Stats::Instance()->ModuleUnloadStartedMeasure();
+
     // take this lock so we block until the
     // module metadata is not longer being used
     std::lock_guard<std::mutex> guard(module_ids_lock_);
@@ -915,10 +943,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
         const auto appDomainId = moduleInfo.assembly.app_domain_id;
 
         // remove appdomain id from managed_profiler_loaded_app_domains set
-        if (managed_profiler_loaded_app_domains.find(appDomainId) != managed_profiler_loaded_app_domains.end())
-        {
-            managed_profiler_loaded_app_domains.erase(appDomainId);
-        }
+        managed_profiler_loaded_app_domains.erase(appDomainId);
     }
 
     return S_OK;
@@ -926,9 +951,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
 
 HRESULT STDMETHODCALLTYPE CorProfiler::Shutdown()
 {
-    if (continuousProfiler != nullptr)
+    // CorProfiler holds no lock while the service closes admission, broadcasts cancellation, drains callbacks, and
+    // joins its workers.
+    if (runtime_sampler_service_ != nullptr)
     {
-        continuousProfiler->Shutdown();
+        runtime_sampler_service_->Shutdown();
     }
 
     is_attached_.store(false);
@@ -985,11 +1012,16 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ProfilerDetachSucceeded()
 // into the application.
 HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(FunctionID function_id, BOOL is_safe_to_block)
 {
+    if (!is_attached_)
+    {
+        return S_OK;
+    }
+
     auto _ = trace::Stats::Instance()->JITCompilationStartedMeasure();
 
     // The flag for this callback is only set if runtime_information_.is_desktop() is true.
     // So there is no need to check it again here.
-    if (is_attached_ && is_safe_to_block)
+    if (is_safe_to_block)
     {
         // The JIT compilation only needs to be tracked on the .NET Framework so the Loader
         // can be injected. For .NET the DOTNET_STARTUP_HOOK takes care of injecting the
@@ -1003,11 +1035,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(FunctionID function
 
 HRESULT STDMETHODCALLTYPE CorProfiler::AppDomainShutdownFinished(AppDomainID appDomainId, HRESULT hrStatus)
 {
-    if (!is_attached_)
-    {
-        return S_OK;
-    }
-
     // take this lock so we block until the
     // module metadata is not longer being used
     std::lock_guard<std::mutex> guard(module_ids_lock_);
@@ -1028,9 +1055,14 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AppDomainShutdownFinished(AppDomainID app
 
 HRESULT STDMETHODCALLTYPE CorProfiler::JITInlining(FunctionID callerId, FunctionID calleeId, BOOL* pfShouldInline)
 {
+    if (!is_attached_)
+    {
+        return S_OK;
+    }
+
     auto _ = trace::Stats::Instance()->JITInliningMeasure();
 
-    if (!is_attached_ || rejit_handler == nullptr)
+    if (rejit_handler == nullptr)
     {
         return S_OK;
     }
@@ -1072,7 +1104,7 @@ void CorProfiler::AddInstrumentations(WCHAR* id, CallTargetDefinition* items, in
 
     if (size > 0)
     {
-        InternalAddInstrumentation(id, items, size, false);
+        InternalAddInstrumentation(id, items, size, false, false);
     }
 }
 
@@ -1085,11 +1117,25 @@ void CorProfiler::AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* it
 
     if (size > 0)
     {
-        InternalAddInstrumentation(id, items, size, true);
+        InternalAddInstrumentation(id, items, size, true, false);
     }
 }
 
-void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived)
+void CorProfiler::AddInterfaceInstrumentations(WCHAR* id, CallTargetDefinition* items, int size)
+{
+    auto    _             = trace::Stats::Instance()->InitializeProfilerMeasure();
+    WSTRING definitionsId = WSTRING(id);
+    Logger::Info("AddInterfaceInstrumentations: received id: ", definitionsId, " from managed side with ", size,
+                 " integrations.");
+
+    if (size > 0)
+    {
+        InternalAddInstrumentation(id, items, size, false, true);
+    }
+}
+
+void CorProfiler::InternalAddInstrumentation(
+    WCHAR* id, CallTargetDefinition* items, int size, bool isDerived, bool isInterface)
 {
     WSTRING                      definitionsId = WSTRING(id);
     std::scoped_lock<std::mutex> definitionsLock(definitions_ids_lock_);
@@ -1130,10 +1176,10 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
             const Version& maxVersion =
                 Version(current.targetMaximumMajor, current.targetMaximumMinor, current.targetMaximumPatch, 0);
 
-            const auto& integration =
-                IntegrationDefinition(MethodReference(targetAssembly, targetType, targetMethod, minVersion, maxVersion,
-                                                      signatureTypes),
-                                      TypeReference(integrationAssembly, integrationType, {}, {}), isDerived, true);
+            const auto& integration = IntegrationDefinition(MethodReference(targetAssembly, targetType, targetMethod,
+                                                                            minVersion, maxVersion, signatureTypes),
+                                                            TypeReference(integrationAssembly, integrationType, {}, {}),
+                                                            isDerived, isInterface, true);
 
             if (Logger::IsDebugEnabled())
             {
@@ -1186,52 +1232,21 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
     }
 }
 
-bool CorProfiler::InitThreadSampler()
+void CorProfiler::InitializeRuntimeSamplerService() noexcept
 {
-#if defined(_WIN32)
-    // for net fx, the native thread ID is needed by stack capture
-    // the profiler callback, ThreadAssignedToOSThread is not invoked for main thread
-    // for the following machinery to work,
-    // 1 The thread needs to have executed managed code first
-    // 2. InitThreadSampler must must be executing in context of main thread
-    // InitThreadSampler is called from managed code
-    // And more importantly, the main thread calls InitThreadSampler
-    ThreadID mainThreadId = 0;
-    if (auto hr = info_->GetCurrentThreadID(&mainThreadId); SUCCEEDED(hr))
+    try
     {
-        ThreadAssignedToOSThread(mainThreadId, ::GetCurrentThreadId());
+        using continuous_profiler::RuntimeType;
+        const auto runtime = runtime_information_.is_desktop() ? RuntimeType::DotNetFramework
+                             : runtime_information_.is_core()  ? RuntimeType::DotNetCore
+                                                               : RuntimeType::Unknown;
+        runtime_sampler_service_ =
+            std::make_unique<continuous_profiler::RuntimeSamplerService>(info_, info12_, runtime);
     }
-#endif
-
-    DWORD pdvEventsLow;
-    DWORD pdvEventsHigh;
-    auto  hr = this->info_->GetEventMask2(&pdvEventsLow, &pdvEventsHigh);
-    if (FAILED(hr))
+    catch (...)
     {
-        Logger::Warn("ConfigureContinuousProfiler: Failed to take event masks for continuous profiler.");
-        return false;
+        Logger::Warn("Runtime sampler service facade could not be created. Runtime sampling will be unavailable.");
     }
-
-    pdvEventsLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
-
-    hr = this->info_->SetEventMask2(pdvEventsLow, pdvEventsHigh);
-    if (FAILED(hr))
-    {
-        Logger::Warn("ConfigureContinuousProfiler: Failed to set event masks for continuous profiler.");
-        return false;
-    }
-
-    this->continuousProfiler = new continuous_profiler::ContinuousProfiler();
-    this->continuousProfiler->SetGlobalInfo12(this->info12_);
-    this->continuousProfiler->SetGlobalInfo7(this->info_);
-    using continuous_profiler::RuntimeType;
-    RuntimeType runtime = runtime_information_.is_desktop() ? RuntimeType::DotNetFramework
-                          : runtime_information_.is_core()  ? RuntimeType::DotNetCore
-                                                            : RuntimeType::Unknown;
-    stack_walker_impl_  = std::make_unique<continuous_profiler::StackWalkerImpl>(this->info_, runtime);
-    this->continuousProfiler->SetStackWalker(stack_walker_impl_.get());
-    Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
-    return true;
 }
 
 void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled,
@@ -1240,57 +1255,103 @@ void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled
                                               unsigned int maxMemorySamplesPerMinute,
                                               unsigned int selectedThreadsSamplingInterval)
 {
-    ContinuousProfilerParams params{threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled,
-                                    maxMemorySamplesPerMinute, selectedThreadsSamplingInterval};
-    // Guard against multiple initialization: In .NET Framework, this method may be called
-    // once per AppDomain, but the continuous profiler is a process-level singleton.
-    // std::call_once ensures thread-safe one-time initialization across all AppDomains.
-    std::call_once(sampling_init_flag_, [this, &params]() { ConfigureContinuousProfilerInternal(params); });
+    // Compatibility adapter for the existing managed startup path. Runtime updates use the
+    // dedicated apply entry point directly; this adapter always submits Seed authority.
+    const continuous_profiler::RuntimeSamplerConfiguration
+                                             request{sizeof(continuous_profiler::RuntimeSamplerConfiguration),
+                threadSamplingEnabled ? threadSamplingInterval : 0, selectedThreadsSamplingInterval,
+                allocationSamplingEnabled ? maxMemorySamplesPerMinute : 0};
+    continuous_profiler::RuntimeSamplerState actualState{sizeof(continuous_profiler::RuntimeSamplerState)};
+    const auto                               result =
+        ApplyContinuousProfilerConfiguration(&request, continuous_profiler::RuntimeSamplerAuthority::Seed,
+                                             &actualState);
+    if (result != continuous_profiler::RuntimeSamplerApplyResult::Applied &&
+        result != continuous_profiler::RuntimeSamplerApplyResult::NoChange &&
+        result != continuous_profiler::RuntimeSamplerApplyResult::IgnoredSeedAlreadyCommitted &&
+        result != continuous_profiler::RuntimeSamplerApplyResult::IgnoredLowerAuthority)
+    {
+        Logger::Warn("ConfigureContinuousProfiler: seed configuration was not applied. Result: ",
+                     static_cast<int32_t>(result));
+    }
 }
 
-void CorProfiler::ConfigureContinuousProfilerInternal(const ContinuousProfilerParams& params)
+continuous_profiler::RuntimeSamplerApplyResult CorProfiler::ApplyContinuousProfilerConfiguration(
+    const continuous_profiler::RuntimeSamplerConfiguration* request,
+    const continuous_profiler::RuntimeSamplerAuthority      authority,
+    continuous_profiler::RuntimeSamplerState*               actualState)
 {
-    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", params.threadSamplingEnabled,
-                 ", thread sampling interval: ", params.threadSamplingInterval,
-                 ", allocationSamplingEnabled: ", params.allocationSamplingEnabled,
-                 ", max memory samples per minute: ", params.maxMemorySamplesPerMinute,
-                 ", selected threads sampling interval: ", params.selectedThreadsSamplingInterval);
-
-    const bool selectiveSamplingConfigured = params.selectedThreadsSamplingInterval != 0;
-
-    if (!params.threadSamplingEnabled && !params.allocationSamplingEnabled && !selectiveSamplingConfigured)
+    if (actualState == nullptr)
     {
-        Logger::Debug("ConfigureContinuousProfiler: no sampling type configured.");
-        return;
+        return continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidArgument;
+    }
+    if (actualState->structureSize != sizeof(continuous_profiler::RuntimeSamplerState))
+    {
+        return continuous_profiler::RuntimeSamplerApplyResult::RejectedUnsupportedLayout;
     }
 
-    if (!InitThreadSampler())
+    if (request == nullptr)
     {
-        Logger::Warn("ContinuousProfiler: unable to init sampler.");
-        return;
+        GetContinuousProfilerState(actualState);
+        return continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidArgument;
+    }
+    if (request->structureSize != sizeof(continuous_profiler::RuntimeSamplerConfiguration))
+    {
+        GetContinuousProfilerState(actualState);
+        return continuous_profiler::RuntimeSamplerApplyResult::RejectedUnsupportedLayout;
     }
 
-    if (params.threadSamplingEnabled)
+    if (authority != continuous_profiler::RuntimeSamplerAuthority::Seed &&
+        authority != continuous_profiler::RuntimeSamplerAuthority::ControlPlane)
     {
-        this->continuousProfiler->threadSamplingInterval = params.threadSamplingInterval;
+        GetContinuousProfilerState(actualState);
+        return continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidArgument;
     }
-    if (selectiveSamplingConfigured)
+    if (!request->IsValid())
     {
-        this->continuousProfiler->selectedThreadsSamplingInterval = params.selectedThreadsSamplingInterval;
-        this->continuousProfiler->nextOutdatedEntriesScan         = std::chrono::steady_clock::now();
-        continuous_profiler::ContinuousProfiler::InitSelectiveSamplingBuffer();
+        Logger::Warn("ApplyContinuousProfilerConfiguration: invalid configuration was rejected.");
+        GetContinuousProfilerState(actualState);
+        return continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidConfiguration;
+    }
+    auto configuration = *request;
+    if (configuration.AllocationEnabled() && info12_ == nullptr)
+    {
+        if (authority == continuous_profiler::RuntimeSamplerAuthority::Seed)
+        {
+            Logger::Warn(
+                "ApplyContinuousProfilerConfiguration: allocation sampling is not supported by this runtime and "
+                "will be disabled for the Seed configuration.");
+            configuration.maxAllocationSamplesPerMinute = 0;
+        }
+        else
+        {
+            Logger::Warn("ApplyContinuousProfilerConfiguration: allocation sampling is not supported by this runtime.");
+            GetContinuousProfilerState(actualState);
+            return continuous_profiler::RuntimeSamplerApplyResult::RejectedUnsupportedRuntime;
+        }
     }
 
-    if (params.threadSamplingEnabled || selectiveSamplingConfigured)
+    if (runtime_sampler_service_ == nullptr)
     {
-        Logger::Info("ContinuousProfiler::StartThreadSampling");
-        this->continuousProfiler->StartThreadSampling();
+        continuous_profiler::EncodeRuntimeSamplerState({}, actualState);
+        return continuous_profiler::RuntimeSamplerApplyResult::ActivationFailed;
     }
 
-    if (params.allocationSamplingEnabled)
+    // RuntimeSamplerService owns the sole configuration/lifecycle gate. An admitted apply completes before terminal
+    // teardown; an apply ordered after shutdown observes the service's terminal state and is rejected.
+    const auto outcome = runtime_sampler_service_->ApplyConfiguration(authority, configuration);
+    continuous_profiler::EncodeRuntimeSamplerState(outcome.state, actualState);
+    return outcome.result;
+}
+
+continuous_profiler::RuntimeSamplerStateQueryResult CorProfiler::GetContinuousProfilerState(
+    continuous_profiler::RuntimeSamplerState* actualState) const
+{
+    if (runtime_sampler_service_ != nullptr)
     {
-        this->continuousProfiler->StartAllocationSampling(params.maxMemorySamplesPerMinute);
+        return continuous_profiler::EncodeRuntimeSamplerState(runtime_sampler_service_->GetState(), actualState);
     }
+
+    return continuous_profiler::EncodeRuntimeSamplerState({}, actualState);
 }
 
 void CorProfiler::InitializeTraceMethods(WCHAR* id,
@@ -1548,7 +1609,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
                                 caller.name == WStr("InvokePreStartInitMethods");
     }
     else if (module_metadata->assemblyName == WStr("System") ||
-             module_metadata->assemblyName == WStr("System.Net.Http"))
+             module_metadata->assemblyName == WStr("System.Net.Http") ||
+             module_metadata->assemblyName == WStr("System.Linq")) // Avoid instrumenting System.Linq which is used as
+                                                                   // part of the async state machine
     {
         valid_loader_callsite = false;
     }
@@ -1702,9 +1765,9 @@ std::string CorProfiler::GetILCodes(const std::string&              title,
     orig_sstream << rewriter->GetMaxStackValue();
     orig_sstream << ")" << std::endl;
 
-    const auto& ehCount = rewriter->GetEHCount();
-    const auto& ehPtr   = rewriter->GetEHPointer();
-    int         indent  = 1;
+    const auto ehCount = rewriter->GetEHCount();
+    const auto ehPtr   = rewriter->GetEHPointer();
+    int        indent  = 1;
 
     PCCOR_SIGNATURE originalSignature     = nullptr;
     ULONG           originalSignatureSize = 0;
@@ -1795,6 +1858,55 @@ std::string CorProfiler::GetILCodes(const std::string&              title,
                     }
                 }
             }
+            for (unsigned int i = 0; i < ehCount; i++)
+            {
+                const auto& currentEH = ehPtr[i];
+                if (currentEH.m_Flags == COR_ILEXCEPTION_CLAUSE_FILTER)
+                {
+                    if (currentEH.m_pTryBegin == cInstr)
+                    {
+                        if (indent > 0)
+                        {
+                            orig_sstream << indent_values[indent];
+                        }
+                        orig_sstream << ".try {" << std::endl;
+                        indent++;
+                    }
+                    if (currentEH.m_pTryEnd == cInstr)
+                    {
+                        indent--;
+                        if (indent > 0)
+                        {
+                            orig_sstream << indent_values[indent];
+                        }
+                        orig_sstream << "}" << std::endl;
+                    }
+                    if (currentEH.m_pFilter == cInstr)
+                    {
+                        if (indent > 0)
+                        {
+                            orig_sstream << indent_values[indent];
+                        }
+                        orig_sstream << ".filter {" << std::endl;
+                        indent++;
+                    }
+                    if (currentEH.m_pHandlerBegin == cInstr)
+                    {
+                        indent--;
+                        if (indent > 0)
+                        {
+                            orig_sstream << indent_values[indent];
+                        }
+                        orig_sstream << "}" << std::endl;
+                        if (indent > 0)
+                        {
+                            orig_sstream << indent_values[indent];
+                        }
+                        orig_sstream << ".catch {" << std::endl;
+                        indent++;
+                    }
+                }
+            }
         }
 
         if (indent > 0)
@@ -1812,7 +1924,7 @@ std::string CorProfiler::GetILCodes(const std::string&              title,
             orig_sstream << "0x";
             orig_sstream << std::setfill('0') << std::setw(2) << std::hex << cInstr->m_opcode;
         }
-        if (cInstr->m_pTarget != NULL)
+        if (cInstr->m_pTarget != nullptr)
         {
             orig_sstream << "  ";
             orig_sstream << cInstr->m_pTarget;
@@ -1821,6 +1933,10 @@ std::string CorProfiler::GetILCodes(const std::string&              title,
             {
                 const auto memberInfo = GetFunctionInfo(metadata_import, (mdMemberRef)cInstr->m_Arg32);
                 orig_sstream << "  | ";
+                if (memberInfo.signature.IsInstanceMethod())
+                {
+                    orig_sstream << "instance ";
+                }
                 orig_sstream << ToString(memberInfo.type.name);
                 orig_sstream << ".";
                 orig_sstream << ToString(memberInfo.name);
@@ -1838,7 +1954,7 @@ std::string CorProfiler::GetILCodes(const std::string&              title,
             }
             else if (cInstr->m_opcode == CEE_CASTCLASS || cInstr->m_opcode == CEE_BOX ||
                      cInstr->m_opcode == CEE_UNBOX_ANY || cInstr->m_opcode == CEE_NEWARR ||
-                     cInstr->m_opcode == CEE_INITOBJ)
+                     cInstr->m_opcode == CEE_INITOBJ || cInstr->m_opcode == CEE_ISINST)
             {
                 const auto typeInfo = GetTypeInfo(metadata_import, (mdTypeRef)cInstr->m_Arg32);
                 orig_sstream << "  | ";
@@ -1885,6 +2001,15 @@ std::string CorProfiler::GetILCodes(const std::string&              title,
         }
     }
     return orig_sstream.str();
+}
+
+bool CorProfiler::EnsureCallTargetBubbleUpExceptionTypeAvailable(const ModuleMetadata& module_metadata)
+{
+    mdTypeDef  bubbleUpExceptionTypeDef;
+    const auto hr = module_metadata.metadata_import->FindTypeDefByName(calltarget_bubble_up_exception_type_name.data(),
+                                                                       mdTokenNil, &bubbleUpExceptionTypeDef);
+    Logger::Debug("CallTargetBubbleUpException type availability check returned: ", hr);
+    return SUCCEEDED(hr);
 }
 
 #ifdef _WIN32
@@ -2228,7 +2353,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
     //        extends[mscorlib] System.Object
     {
         hr = metadata_emit->DefineTypeDef(WStr("__DDVoidMethodType__"), tdAbstract | tdSealed | tdPublic,
-                                          system_object_token, NULL, loader_type);
+                                          system_object_token, nullptr, loader_type);
         if (FAILED(hr))
         {
             Logger::Warn("GenerateLoaderType: DefineTypeDef __DDVoidMethodType__ failed");
@@ -3013,7 +3138,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         rewriter_already_loaded.InitializeTiny();
 
         ILInstr* pALFirstInstr = rewriter_already_loaded.GetILList()->m_pNext;
-        ILInstr* pALNewInstr   = NULL;
+        ILInstr* pALNewInstr   = nullptr;
 
         // ldsflda _isAssemblyLoaded : Load the address of the "_isAssemblyLoaded" static var
         pALNewInstr           = rewriter_already_loaded.NewILInstr();
@@ -3111,7 +3236,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         rewriter_void.InitializeTiny();
 
         ILInstr* pFirstInstr = rewriter_void.GetILList()->m_pNext;
-        ILInstr* pNewInstr   = NULL;
+        ILInstr* pNewInstr   = nullptr;
 
         pNewInstr           = rewriter_void.NewILInstr();
         pNewInstr->m_opcode = CEE_CALL;
@@ -3586,8 +3711,8 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
     // Get first instruction and set the rewriter to that location
     ILInstr* pInstr = rewriter.GetILList()->m_pNext;
     rewriter_wrapper.SetILPosition(pInstr);
-    ILInstr* pCurrentInstr = NULL;
-    ILInstr* pNewInstr     = NULL;
+    ILInstr* pCurrentInstr = nullptr;
+    ILInstr* pNewInstr     = nullptr;
 
     //////////////////////////////////////////////////
     // At the beginning of the method, call
@@ -3746,8 +3871,13 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ReJITError(ModuleID    moduleId,
 
 HRESULT STDMETHODCALLTYPE CorProfiler::JITCachedFunctionSearchStarted(FunctionID functionId, BOOL* pbUseCachedFunction)
 {
+    if (!is_attached_)
+    {
+        return S_OK;
+    }
+
     auto _ = trace::Stats::Instance()->JITCachedFunctionSearchStartedMeasure();
-    if (!is_attached_ || !pbUseCachedFunction)
+    if (!pbUseCachedFunction)
     {
         return S_OK;
     }
@@ -3804,50 +3934,35 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCachedFunctionSearchStarted(FunctionID
 
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadCreated(ThreadID threadId)
 {
-    if (continuousProfiler != nullptr)
+    if (runtime_sampler_service_ != nullptr)
     {
-        continuousProfiler->ThreadCreated(threadId);
-    }
-
-    if (stack_walker_impl_)
-    {
-        stack_walker_impl_->OnThreadCreated(threadId);
+        runtime_sampler_service_->OnThreadCreated(threadId);
     }
     return S_OK;
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
 {
-    if (continuousProfiler != nullptr)
+    if (runtime_sampler_service_ != nullptr)
     {
-        continuousProfiler->ThreadDestroyed(threadId);
-    }
-
-    if (stack_walker_impl_)
-    {
-        stack_walker_impl_->OnThreadDestroyed(threadId);
+        runtime_sampler_service_->OnThreadDestroyed(threadId);
     }
 
     return S_OK;
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[])
 {
-    if (continuousProfiler != nullptr)
+    if (runtime_sampler_service_ != nullptr)
     {
-        continuousProfiler->ThreadNameChanged(threadId, cchName, name);
-    }
-
-    if (stack_walker_impl_)
-    {
-        stack_walker_impl_->OnThreadNameChanged(threadId, cchName, name);
+        runtime_sampler_service_->OnThreadNameChanged(threadId, cchName, name);
     }
 
     return S_OK;
 }
 HRESULT STDMETHODCALLTYPE CorProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId)
 {
-    if (stack_walker_impl_)
+    if (runtime_sampler_service_ != nullptr)
     {
-        stack_walker_impl_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
+        runtime_sampler_service_->OnThreadAssignedToOSThread(managedThreadId, osThreadId);
     }
     return S_OK;
 }
@@ -3865,9 +3980,21 @@ HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDE
                                                                ULONG              numStackFrames,
                                                                UINT_PTR           stackFrames[])
 {
-    if (continuousProfiler != nullptr && eventId == 10 && eventVersion == 4)
+    if (eventId == 10 && eventVersion == 4)
     {
-        continuousProfiler->AllocationTick(cbEventData, eventData);
+        // EventPipe delivery is CLR-owned and may overlap profiler shutdown. Admission at the callback root is the
+        // lifetime boundary for every CLR API call made on this path: a callback that wins the gate is drained by
+        // shutdown, while a callback delivered after closure must return without touching sampler state.
+        continuous_profiler::ShutdownAdmission callbackAdmission;
+        if (!callbackAdmission)
+        {
+            return S_OK;
+        }
+
+        if (runtime_sampler_service_ != nullptr)
+        {
+            runtime_sampler_service_->OnAllocationTick(cbEventData, eventData);
+        }
     }
     return S_OK;
 }

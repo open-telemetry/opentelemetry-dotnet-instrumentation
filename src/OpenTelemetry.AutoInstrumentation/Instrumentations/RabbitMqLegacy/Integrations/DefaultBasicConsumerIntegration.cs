@@ -13,6 +13,28 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Inte
 /// </summary>
 [InstrumentMethod(
     assemblyName: IntegrationConstants.RabbitMqAssemblyName,
+    typeName: IntegrationConstants.BasicConsumerInterfaceTypeName,
+    methodName: IntegrationConstants.HandleBasicDeliverMethodName,
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: [ClrNames.String, ClrNames.UInt64, ClrNames.Bool, ClrNames.String, ClrNames.String, IntegrationConstants.BasicPropertiesInterfaceTypeName, $"{ClrNames.Byte}[]"],
+    minimumVersion: IntegrationConstants.Min5SupportedVersion,
+    maximumVersion: IntegrationConstants.Max5SupportedVersion,
+    integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
+    type: InstrumentationType.Trace,
+    kind: IntegrationKind.Interface)]
+[InstrumentMethod(
+    assemblyName: IntegrationConstants.RabbitMqAssemblyName,
+    typeName: IntegrationConstants.BasicConsumerInterfaceTypeName,
+    methodName: IntegrationConstants.HandleBasicDeliverMethodName,
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: [ClrNames.String, ClrNames.UInt64, ClrNames.Bool, ClrNames.String, ClrNames.String, IntegrationConstants.BasicPropertiesInterfaceTypeName, $"System.ReadOnlyMemory`1[{ClrNames.Byte}]"],
+    minimumVersion: IntegrationConstants.Min6SupportedVersion,
+    maximumVersion: IntegrationConstants.Max6SupportedVersion,
+    integrationName: IntegrationConstants.RabbitMqByteCodeIntegrationName,
+    type: InstrumentationType.Trace,
+    kind: IntegrationKind.Interface)]
+[InstrumentMethod(
+    assemblyName: IntegrationConstants.RabbitMqAssemblyName,
     typeName: IntegrationConstants.DefaultBasicConsumerTypeName,
     methodName: IntegrationConstants.HandleBasicDeliverMethodName,
     returnTypeName: ClrNames.Void,
@@ -39,6 +61,11 @@ public static class DefaultBasicConsumerIntegration
         where TBasicProperties : IBasicProperties
         where TBody : IBody
     {
+        if (RabbitMqInstrumentation.IsActiveProcessActivity())
+        {
+            return CallTargetState.GetDefault();
+        }
+
         var activity = RabbitMqInstrumentation.StartProcess(properties, exchange, routingKey, body, deliveryTag);
         return new CallTargetState(activity, null);
     }

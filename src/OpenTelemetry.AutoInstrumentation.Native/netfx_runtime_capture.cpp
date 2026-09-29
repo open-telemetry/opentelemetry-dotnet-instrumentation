@@ -22,6 +22,11 @@ NetFxRuntimeCapture::NetFxRuntimeCapture(IProfilerApi* profilerApi, const NetFxC
     trace::Logger::Info(L"[NetFxRuntimeCapture] Initialized with canary prefix: ", options_.canaryNamePrefix);
 }
 
+bool NetFxRuntimeCapture::IsReady() noexcept
+{
+    return stackWalkGuard_ != nullptr && stackWalkGuard_->WaitForInitialization();
+}
+
 CanarySnapshot NetFxRuntimeCapture::SnapshotCanary() const
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -133,6 +138,16 @@ HRESULT NetFxRuntimeCapture::CaptureStack(ThreadID managedThreadId, StackSnapsho
                              ", Reason=", StackWalkGuard::ProbeResultName(result));
         return E_FAIL;
     }
+}
+
+void NetFxRuntimeCapture::RequestShutdown() noexcept
+{
+    stackWalkGuard_->RequestShutdown();
+}
+
+void NetFxRuntimeCapture::WaitForShutdown() noexcept
+{
+    stackWalkGuard_->WaitForShutdown();
 }
 
 // ---------------------------------------------------------------------------

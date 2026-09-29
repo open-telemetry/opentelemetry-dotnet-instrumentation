@@ -5,7 +5,7 @@
 //     re-run the LibraryVersionsGenerator project in Visual Studio.
 // 
 //     Changes to this file may cause incorrect behavior and will be lost if
-//     the code is regenerated. 
+//     the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
 
@@ -362,7 +362,7 @@ public static partial class LibraryVersion
                 "4.0.0",
 #endif
 #if NET10_0
-                "4.1.1",
+                "4.2.2",
 #endif
 #endif
             ];
@@ -424,6 +424,9 @@ public static partial class LibraryVersion
 #endif
 #if NET10_0 || NET9_0 || NET8_0
                 "3.3.0",
+#endif
+#if NET10_0 || NET9_0 || NET8_0
+                "3.3.1",
 #endif
 #endif
             ];
