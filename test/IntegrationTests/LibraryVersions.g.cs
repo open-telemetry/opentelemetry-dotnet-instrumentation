@@ -357,7 +357,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "3.6.0",
-                "3.22.0",
+                "3.22.3",
 #if NET10_0
                 "4.0.0",
 #endif
