@@ -13,11 +13,17 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Following packages updated
+  - `OpenTelemetry.Resources.Azure` from `1.19.1-beta.1` to `1.19.1-beta.2`.
+
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+
+- Invalid plugin type names no longer stop automatic instrumentation or crash
+  .NET Framework applications unless fail-fast is enabled.
 
 ## [v1.17.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.17.0)
 
