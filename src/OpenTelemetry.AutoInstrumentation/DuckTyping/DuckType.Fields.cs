@@ -30,24 +30,38 @@ internal static partial class DuckType
         var il = new LazyILGenerator(proxyMethod?.GetILGenerator());
         var returnType = targetField.FieldType;
 
-        // Load the instance
-        if (!targetField.IsStatic)
-        {
-            il.Emit(OpCodes.Ldarg_0);
-            if (instanceField is not null)
-            {
-                il.Emit(instanceField.FieldType.IsValueType ? OpCodes.Ldflda : OpCodes.Ldfld, instanceField);
-            }
-        }
-
         // Load the field value to the stack
-        if (UseDirectAccessTo(proxyTypeBuilder, targetType) && targetField.IsPublic)
+        if (UseDirectAccessTo(proxyTypeBuilder, targetType))
         {
+            // Load the instance
+            if (!targetField.IsStatic)
+            {
+                il.Emit(OpCodes.Ldarg_0);
+                if (instanceField is not null)
+                {
+                    il.Emit(instanceField.FieldType.IsValueType ? OpCodes.Ldflda : OpCodes.Ldfld, instanceField);
+                }
+            }
+
             // In case is public is pretty simple
             il.Emit(targetField.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld, targetField);
         }
         else if (targetField.DeclaringType is not null && proxyTypeBuilder is not null)
         {
+            // Load the instance
+            if (!targetField.IsStatic)
+            {
+                il.Emit(OpCodes.Ldarg_0);
+                if (instanceField is not null)
+                {
+                    il.Emit(OpCodes.Ldfld, instanceField);
+                    if (instanceField.FieldType.IsValueType)
+                    {
+                        il.Emit(OpCodes.Box, instanceField.FieldType);
+                    }
+                }
+            }
+
             // If the instance or the field are non public we need to create a Dynamic method to overpass the visibility checks
             // we can't access non public types so we have to cast to object type (in the instance object and the return type if is needed).
             var dynMethodName = $"_getNonPublicField_{targetField.DeclaringType.Name}_{targetField.Name}";
@@ -160,7 +174,7 @@ internal static partial class DuckType
         }
 
         // We set the field value
-        if (UseDirectAccessTo(proxyTypeBuilder, targetType) && targetField.IsPublic)
+        if (UseDirectAccessTo(proxyTypeBuilder, targetType))
         {
             // If the instance and the field are public then is easy to set.
             il.WriteTypeConversion(currentValueType, targetField.FieldType);
