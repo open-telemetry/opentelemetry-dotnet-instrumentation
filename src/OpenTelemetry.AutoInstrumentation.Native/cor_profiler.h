@@ -22,6 +22,7 @@
 #include "rejit_preprocessor.h"
 #include "rejit_handler.h"
 #include "runtime_sampler_configuration.h"
+#include "Synchronized.hpp"
 #include <unordered_set>
 #include "clr_helpers.h"
 // Forward declaration
@@ -39,8 +40,7 @@ private:
     RuntimeInformation runtime_information_;
     std::vector<IntegrationDefinition> integration_definitions_;
 
-    std::unordered_set<WSTRING> definitions_ids_;
-    std::mutex definitions_ids_lock_;
+    Synchronized<std::unordered_set<WSTRING>> definitions_ids;
 
     // Startup helper variables
     WSTRING home_path;
@@ -84,8 +84,7 @@ private:
     //
     // Module helper variables
     //
-    std::mutex module_ids_lock_;
-    std::vector<ModuleID> module_ids_;
+    Synchronized<std::vector<ModuleID>> module_ids;
 
     //
     // Methods only for .NET Framework
@@ -125,7 +124,7 @@ private:
     // Helper methods
     //
     static void RewritingPInvokeMaps(const ModuleMetadata& module_metadata, const WSTRING& nativemethods_type_name);
-    HRESULT TryRejitModule(ModuleID module_id);
+    HRESULT TryRejitModule(ModuleID module_id, std::vector<ModuleID>& modules);
     bool GetIntegrationTypeRef(ModuleMetadata& module_metadata, ModuleID module_id,
                                const IntegrationDefinition& integration_definition, mdTypeRef& integration_type_ref);
     bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);

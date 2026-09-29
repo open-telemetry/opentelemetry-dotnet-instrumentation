@@ -237,6 +237,7 @@
     <ClInclude Include="stack_walk_guard.h" />
     <ClInclude Include="startup_hook.h" />
     <ClInclude Include="stats.h" />
+    <ClInclude Include="Synchronized.hpp" />
     <ClInclude Include="string_utils.h" />
     <ClInclude Include="stub_generator.h" />
     <ClInclude Include="suspension_guards.h" />
