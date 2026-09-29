@@ -36,5 +36,19 @@ public class MultipleAppDomainsTests : TestHelper
 
         collector.AssertExpectations();
     }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void SkipsLoaderInPartiallyTrustedAppDomain()
+    {
+        SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "none");
+        SetEnvironmentVariable("OTEL_METRICS_EXPORTER", "none");
+        SetEnvironmentVariable("OTEL_LOGS_EXPORTER", "none");
+
+        var (standardOutput, _, _) = RunTestApplication(new() { Arguments = "--partial-trust" });
+
+        Assert.Contains("PartialTrustDomainIsFullyTrusted=False", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("PartialTrustDomainLoaderLoaded=False", standardOutput, StringComparison.Ordinal);
+    }
 }
 #endif

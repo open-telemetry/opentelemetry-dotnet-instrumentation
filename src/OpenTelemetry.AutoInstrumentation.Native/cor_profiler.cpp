@@ -2034,6 +2034,48 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
         return hr;
     }
 
+    MemberResolver resolver(module_metadata.metadata_import, metadata_emit);
+    mdAssemblyRef corlib_ref = mdTokenNil;
+    if (module_metadata.assemblyName != mscorlib_assemblyName)
+    {
+        hr = GetCorLibAssemblyRef(module_metadata.assembly_emit, corAssemblyProperty, &corlib_ref);
+        if (FAILED(hr))
+        {
+            Logger::Warn("RunAutoInstrumentationLoader: failed to define AssemblyRef to mscorlib");
+            return hr;
+        }
+    }
+
+    mdToken appdomain_type_token;
+    hr = resolver.GetTypeRefOrDefByName(corlib_ref, WStr("System.AppDomain"), &appdomain_type_token);
+    if (FAILED(hr))
+    {
+        Logger::Warn("RunAutoInstrumentationLoader: failed to resolve System.AppDomain");
+        return hr;
+    }
+
+    COR_SIGNATURE current_domain_signature[7] = {IMAGE_CEE_CS_CALLCONV_DEFAULT, 0, ELEMENT_TYPE_CLASS};
+    ULONG current_domain_signature_length =
+        3 + CorSigCompressToken(appdomain_type_token, &current_domain_signature[3]);
+    mdToken get_current_domain_token;
+    hr = resolver.GetMemberRefOrDef(appdomain_type_token, WStr("get_CurrentDomain"), current_domain_signature,
+                                    current_domain_signature_length, &get_current_domain_token);
+    if (FAILED(hr))
+    {
+        Logger::Warn("RunAutoInstrumentationLoader: failed to resolve AppDomain.get_CurrentDomain");
+        return hr;
+    }
+
+    COR_SIGNATURE is_fully_trusted_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 0, ELEMENT_TYPE_BOOLEAN};
+    mdToken get_is_fully_trusted_token;
+    hr = resolver.GetMemberRefOrDef(appdomain_type_token, WStr("get_IsFullyTrusted"), is_fully_trusted_signature,
+                                    sizeof(is_fully_trusted_signature), &get_is_fully_trusted_token);
+    if (FAILED(hr))
+    {
+        Logger::Warn("RunAutoInstrumentationLoader: failed to resolve AppDomain.get_IsFullyTrusted");
+        return hr;
+    }
+
     ILRewriter rewriter(this->info_, nullptr, module_id, function_token);
     hr = rewriter.Import();
 
@@ -2049,7 +2091,14 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
     // Get first instruction and set the rewriter to that location
     ILInstr* pInstr = rewriter.GetILList()->m_pNext;
     rewriter_wrapper.SetILPosition(pInstr);
+
+    // Check trust before calling the loader type: its static constructor loads the managed assembly.
+    rewriter_wrapper.CallMember(get_current_domain_token, false);
+    rewriter_wrapper.CallMember(get_is_fully_trusted_token, true);
+    ILInstr* skip_loader = rewriter_wrapper.CreateInstr(CEE_BRFALSE_S);
     rewriter_wrapper.CallMember(ret_method_token, false);
+    skip_loader->m_pTarget = rewriter_wrapper.NOP();
+
     hr = rewriter.Export();
 
     if (FAILED(hr))

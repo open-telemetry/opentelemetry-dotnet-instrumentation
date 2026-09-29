@@ -3,6 +3,8 @@
 
 #if NETFRAMEWORK
 using System.Reflection;
+using System.Security;
+using System.Security.Permissions;
 #endif
 
 namespace TestApplication.MultipleAppDomains.NetFramework;
@@ -21,6 +23,9 @@ internal static class Program
         command.Execute();
 
         const string NoAppDomainsSwitch = "--no-app-domains";
+#if NETFRAMEWORK
+        const string PartialTrustSwitch = "--partial-trust";
+#endif
 
         if (args?.Length > 0)
         {
@@ -29,6 +34,14 @@ internal static class Program
                 // Nothing else to do, exit.
                 return;
             }
+
+#if NETFRAMEWORK
+            if (args.Length == 1 && ArgumentHelper.HasArgument(args, PartialTrustSwitch))
+            {
+                RunInPartiallyTrustedAppDomain();
+                return;
+            }
+#endif
 
             throw new InvalidOperationException($"Unrecognized command-line arguments: \"{string.Join(" ", args)}\"");
         }
@@ -54,4 +67,32 @@ internal static class Program
         }
 #endif
     }
+
+#if NETFRAMEWORK
+    private static void RunInPartiallyTrustedAppDomain()
+    {
+        var permissions = new PermissionSet(PermissionState.None);
+        permissions.AddPermission(new SecurityPermission(SecurityPermissionFlag.Execution | SecurityPermissionFlag.UnmanagedCode));
+        // DoCallBack serializes the delegate and requires member access.
+        permissions.AddPermission(new ReflectionPermission(ReflectionPermissionFlag.MemberAccess));
+
+        var appDomain = AppDomain.CreateDomain("PartialTrust", null, AppDomain.CurrentDomain.SetupInformation, permissions);
+        try
+        {
+            appDomain.DoCallBack(ReportPartialTrustLoaderState);
+        }
+        finally
+        {
+            AppDomain.Unload(appDomain);
+        }
+    }
+
+    private static void ReportPartialTrustLoaderState()
+    {
+        Console.WriteLine($"PartialTrustDomainIsFullyTrusted={AppDomain.CurrentDomain.IsFullyTrusted}");
+        var loaderLoaded = AppDomain.CurrentDomain.GetAssemblies().Any(assembly =>
+            assembly.FullName.StartsWith("OpenTelemetry.AutoInstrumentation.Loader,", StringComparison.Ordinal));
+        Console.WriteLine($"PartialTrustDomainLoaderLoaded={loaderLoaded}");
+    }
+#endif
 }
