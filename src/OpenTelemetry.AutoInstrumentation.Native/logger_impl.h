@@ -198,21 +198,6 @@ LoggerImpl<TLoggerPolicy>::~LoggerImpl()
     spdlog::shutdown();
 };
 
-#ifdef MACOS
-template <class T>
-void WriteToStream(std::ostringstream& oss, T const& x)
-{
-    if constexpr (std::is_same<T, WSTRING>::value)
-    {
-        oss << ToString(x);
-    }
-    else
-    {
-        oss << x;
-    }
-}
-#else
-
 // The legacy Linux build uses libstdc++ 9, which does not define std::same_as
 // or std::remove_cvref_t. Use the standard implementations where available
 // and provide compatible definitions for older standard libraries.
@@ -273,7 +258,6 @@ void WriteToStream(std::ostringstream& oss, T const& x)
 {
     oss << x;
 }
-#endif
 
 template <typename... Args>
 static std::string LogToString(Args const&... args)
