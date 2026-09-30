@@ -8,6 +8,7 @@
 
 #include "util.h"
 #include "cor.h"
+#include "corprof.h"
 
 struct ILInstr;
 class ILRewriterWrapper;
@@ -29,7 +30,8 @@ public:
     {
     }
 
-    virtual HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler) = 0;
+    virtual HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler,
+                            ICorProfilerFunctionControl* pFunctionControl) = 0;
 
     virtual ~MethodRewriter() = default;
 };
@@ -46,7 +48,8 @@ public:
     {
     }
 
-    HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler) override;
+    HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler,
+                    ICorProfilerFunctionControl* pFunctionControl) override;
 };
 
 } // namespace trace

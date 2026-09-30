@@ -20,7 +20,6 @@ RejitHandlerModuleMethod::RejitHandlerModuleMethod(mdMethodDef         methodDef
     : m_methodRewriter(std::move(methodRewriter))
     , m_methodDef(methodDef)
     , m_module(module)
-    , m_pFunctionControl(nullptr)
     , m_functionInfo(std::make_unique<FunctionInfo>(functionInfo))
 {
 }
@@ -33,16 +32,6 @@ mdMethodDef RejitHandlerModuleMethod::GetMethodDef()
 RejitHandlerModule* RejitHandlerModuleMethod::GetModule()
 {
     return m_module;
-}
-
-ICorProfilerFunctionControl* RejitHandlerModuleMethod::GetFunctionControl()
-{
-    return m_pFunctionControl;
-}
-
-void RejitHandlerModuleMethod::SetFunctionControl(ICorProfilerFunctionControl* pFunctionControl)
-{
-    m_pFunctionControl = pFunctionControl;
 }
 
 FunctionInfo* RejitHandlerModuleMethod::GetFunctionInfo()
@@ -484,8 +473,6 @@ HRESULT RejitHandler::NotifyReJITParameters(ModuleID                     moduleI
         return S_FALSE;
     }
 
-    methodHandler->SetFunctionControl(pFunctionControl);
-
     if (methodHandler->GetMethodDef() == mdMethodDefNil)
     {
         Logger::Warn("NotifyReJITCompilationStarted: mdMethodDef is missing for "
@@ -494,7 +481,7 @@ HRESULT RejitHandler::NotifyReJITParameters(ModuleID                     moduleI
         return S_FALSE;
     }
 
-    if (methodHandler->GetFunctionControl() == nullptr)
+    if (pFunctionControl == nullptr)
     {
         Logger::Warn("NotifyReJITCompilationStarted: ICorProfilerFunctionControl is missing "
                      "for "
@@ -537,7 +524,7 @@ HRESULT RejitHandler::NotifyReJITParameters(ModuleID                     moduleI
         return S_FALSE;
     }
 
-    return rewriter->Rewrite(moduleHandler, methodHandler);
+    return rewriter->Rewrite(moduleHandler, methodHandler, pFunctionControl);
 }
 
 HRESULT RejitHandler::NotifyReJITCompilationStarted(FunctionID functionId, ReJITID rejitId)

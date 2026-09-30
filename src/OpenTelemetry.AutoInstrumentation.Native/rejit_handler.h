@@ -41,7 +41,6 @@ private:
 
 protected:
     mdMethodDef m_methodDef;
-    ICorProfilerFunctionControl* m_pFunctionControl;
     std::unique_ptr<FunctionInfo> m_functionInfo;
 
     RejitHandlerModule* m_module;
@@ -51,9 +50,6 @@ public:
                              std::unique_ptr<MethodRewriter> methodRewriter);
     mdMethodDef GetMethodDef();
     RejitHandlerModule* GetModule();
-
-    ICorProfilerFunctionControl* GetFunctionControl();
-    void SetFunctionControl(ICorProfilerFunctionControl* pFunctionControl);
 
     FunctionInfo* GetFunctionInfo();
     void SetFunctionInfo(const FunctionInfo& functionInfo);
