@@ -719,7 +719,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 ILInstr* TracerMethodRewriter::CreateFilterForException(ILRewriterWrapper* rewriter,
                                                         mdTypeRef          exceptionTypeRef,
                                                         mdTypeRef          bubbleUpExceptionTypeRef,
-                                                        ULONG              exceptionValueIndex) const
+                                                        ULONG              exceptionValueIndex)
 {
     ILInstr* filter = rewriter->CreateInstr(CEE_ISINST);
     filter->m_Arg32 = exceptionTypeRef;

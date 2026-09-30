@@ -31,8 +31,8 @@ class TracerMethodRewriter : public MethodRewriter, public Singleton<TracerMetho
     
 private:
     TracerMethodRewriter(){}
-    ILInstr* CreateFilterForException(ILRewriterWrapper* rewriter, mdTypeRef exceptionTypeRef,
-                                      mdTypeRef bubbleUpExceptionTypeRef, ULONG exceptionValueIndex) const;
+    static ILInstr* CreateFilterForException(ILRewriterWrapper* rewriter, mdTypeRef exceptionTypeRef,
+                                             mdTypeRef bubbleUpExceptionTypeRef, ULONG exceptionValueIndex);
 
 public:
     HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler) override;

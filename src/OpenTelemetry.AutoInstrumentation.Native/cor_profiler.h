@@ -99,14 +99,14 @@ private:
     //
     // Loader methods. These are only used on the .NET Framework.
     //
-    HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, const ModuleID module_id, const mdToken function_token, const FunctionInfo& caller, const ModuleMetadata& module_metadata);
-    HRESULT GenerateLoaderMethod(const ModuleID module_id, mdMethodDef* ret_method_token);
+    HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, ModuleID module_id, mdToken function_token, const FunctionInfo& caller, const ModuleMetadata& module_metadata);
+    HRESULT GenerateLoaderMethod(ModuleID module_id, mdMethodDef* ret_method_token);
     HRESULT GenerateLoaderType(const ModuleID module_id,
                                mdTypeDef*     loader_type,
                                mdMethodDef*   init_method,
                                mdMethodDef*   patch_app_domain_setup_method);
     HRESULT ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef patch_app_domain_setup_method);
-    HRESULT AddIISPreStartInitFlags(const ModuleID module_id, const mdToken function_token);
+    HRESULT AddIISPreStartInitFlags(ModuleID module_id, mdToken function_token);
 #endif
 
     //
@@ -124,7 +124,7 @@ private:
     //
     // Helper methods
     //
-    void RewritingPInvokeMaps(const ModuleMetadata& module_metadata, const WSTRING& nativemethods_type_name);
+    static void RewritingPInvokeMaps(const ModuleMetadata& module_metadata, const WSTRING& nativemethods_type_name);
     HRESULT TryRejitModule(ModuleID module_id);
     bool GetIntegrationTypeRef(ModuleMetadata& module_metadata, ModuleID module_id,
                                const IntegrationDefinition& integration_definition, mdTypeRef& integration_type_ref);
