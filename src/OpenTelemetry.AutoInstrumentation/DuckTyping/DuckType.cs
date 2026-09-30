@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
+using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
@@ -1213,7 +1214,8 @@ internal static partial class DuckType
         /// </summary>
         public static readonly Type Type = typeof(T);
 
-        private static CreateTypeResult _fastPath;
+        // CreateTypeResult is a struct and must be boxed for safe concurrent access.
+        private static StrongBox<CreateTypeResult>? _fastPath;
 
         /// <summary>
         /// Gets the proxy type for a target type using the T proxy definition
@@ -1224,19 +1226,15 @@ internal static partial class DuckType
         public static CreateTypeResult GetProxy(Type targetType)
         {
             // We set a fast path for the first proxy type for a proxy definition. (It's likely to have a proxy definition just for one target type)
-            var fastPath = _fastPath;
-            if (fastPath.TargetType == targetType)
+            var fastPath = Volatile.Read(ref _fastPath);
+            if (fastPath?.Value.TargetType == targetType)
             {
-                return fastPath;
+                return fastPath.Value;
             }
 
             var result = GetOrCreateProxyType(Type, targetType);
 
-            fastPath = _fastPath;
-            if (fastPath.TargetType is null)
-            {
-                _fastPath = result;
-            }
+            _fastPath ??= new(result);
 
             return result;
         }
@@ -1318,19 +1316,15 @@ internal static partial class DuckType
         public static CreateTypeResult GetReverseProxy(Type targetType)
         {
             // We set a fast path for the first proxy type for a proxy definition. (It's likely to have a proxy definition just for one target type)
-            var fastPath = _fastPath;
-            if (fastPath.TargetType == targetType)
+            var fastPath = Volatile.Read(ref _fastPath);
+            if (fastPath?.Value.TargetType == targetType)
             {
-                return fastPath;
+                return fastPath.Value;
             }
 
             var result = GetOrCreateReverseProxyType(Type, targetType);
 
-            fastPath = _fastPath;
-            if (fastPath.TargetType is null)
-            {
-                _fastPath = result;
-            }
+            _fastPath ??= new(result);
 
             return result;
         }
