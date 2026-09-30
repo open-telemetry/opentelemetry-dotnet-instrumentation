@@ -26,7 +26,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Data.Common", "System.Data.Common.DbCommand", "ExecuteDbDataReaderAsync", ["System.Threading.Tasks.Task`1[System.Data.Common.DbDataReader]", "System.Data.CommandBehavior", "System.Threading.CancellationToken"], 4, 0, 0, 11, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderAsyncIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteDbDataReaderAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[System.Data.Common.DbDataReader]", "System.Data.CommandBehavior", "System.Threading.CancellationToken"), 3, 4, 0, 0, 11, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderAsyncIntegration"), 1, categories));
             }
         }
         {
@@ -37,7 +37,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Data", "System.Data.Common.DbCommand", "ExecuteDbDataReaderAsync", ["System.Threading.Tasks.Task`1[System.Data.Common.DbDataReader]", "System.Data.CommandBehavior", "System.Threading.CancellationToken"], 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderAsyncIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteDbDataReaderAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[System.Data.Common.DbDataReader]", "System.Data.CommandBehavior", "System.Threading.CancellationToken"), 3, 4, 0, 0, 4, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderAsyncIntegration"), 1, categories));
             }
         }
         {
@@ -48,7 +48,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("netstandard", "System.Data.Common.DbCommand", "ExecuteDbDataReaderAsync", ["System.Threading.Tasks.Task`1[System.Data.Common.DbDataReader]", "System.Data.CommandBehavior", "System.Threading.CancellationToken"], 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderAsyncIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("netstandard"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteDbDataReaderAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[System.Data.Common.DbDataReader]", "System.Data.CommandBehavior", "System.Threading.CancellationToken"), 3, 2, 0, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderAsyncIntegration"), 1, categories));
             }
         }
         {
@@ -59,7 +59,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Microsoft.Data.Sqlite", "Microsoft.Data.Sqlite.SqliteCommand", "ExecuteReaderAsync", ["System.Threading.Tasks.Task`1[Microsoft.Data.Sqlite.SqliteDataReader]", "System.Data.CommandBehavior", "System.Threading.CancellationToken"], 8, 0, 0, 11, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderAsyncIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Microsoft.Data.Sqlite"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Microsoft.Data.Sqlite.SqliteCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteReaderAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[Microsoft.Data.Sqlite.SqliteDataReader]", "System.Data.CommandBehavior", "System.Threading.CancellationToken"), 3, 8, 0, 0, 11, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderAsyncIntegration"), 0, categories));
             }
         }
         {
@@ -70,7 +70,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Data.Common", "System.Data.Common.DbCommand", "ExecuteDbDataReader", ["System.Data.Common.DbDataReader", "System.Data.CommandBehavior"], 4, 0, 0, 11, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteDbDataReader"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Data.Common.DbDataReader", "System.Data.CommandBehavior"), 2, 4, 0, 0, 11, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderIntegration"), 1, categories));
             }
         }
         {
@@ -81,7 +81,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Data", "System.Data.Common.DbCommand", "ExecuteDbDataReader", ["System.Data.Common.DbDataReader", "System.Data.CommandBehavior"], 2, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteDbDataReader"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Data.Common.DbDataReader", "System.Data.CommandBehavior"), 2, 2, 0, 0, 4, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderIntegration"), 1, categories));
             }
         }
         {
@@ -92,7 +92,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("netstandard", "System.Data.Common.DbCommand", "ExecuteDbDataReader", ["System.Data.Common.DbDataReader", "System.Data.CommandBehavior"], 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("netstandard"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteDbDataReader"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Data.Common.DbDataReader", "System.Data.CommandBehavior"), 2, 2, 0, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderIntegration"), 1, categories));
             }
         }
         {
@@ -103,7 +103,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Microsoft.Data.Sqlite", "Microsoft.Data.Sqlite.SqliteCommand", "ExecuteReader", ["Microsoft.Data.Sqlite.SqliteDataReader", "System.Data.CommandBehavior"], 8, 0, 0, 11, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Microsoft.Data.Sqlite"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Microsoft.Data.Sqlite.SqliteCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteReader"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("Microsoft.Data.Sqlite.SqliteDataReader", "System.Data.CommandBehavior"), 2, 8, 0, 0, 11, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteDbDataReaderIntegration"), 0, categories));
             }
         }
         {
@@ -114,7 +114,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Data.Common", "System.Data.Common.DbCommand", "ExecuteNonQueryAsync", ["System.Threading.Tasks.Task`1<System.Int32>", "System.Threading.CancellationToken"], 4, 0, 0, 11, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryAsyncIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteNonQueryAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1<System.Int32>", "System.Threading.CancellationToken"), 2, 4, 0, 0, 11, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryAsyncIntegration"), 1, categories));
             }
         }
         {
@@ -125,7 +125,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Data", "System.Data.Common.DbCommand", "ExecuteNonQueryAsync", ["System.Threading.Tasks.Task`1<System.Int32>", "System.Threading.CancellationToken"], 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryAsyncIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteNonQueryAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1<System.Int32>", "System.Threading.CancellationToken"), 2, 4, 0, 0, 4, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryAsyncIntegration"), 1, categories));
             }
         }
         {
@@ -136,7 +136,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("netstandard", "System.Data.Common.DbCommand", "ExecuteNonQueryAsync", ["System.Threading.Tasks.Task`1<System.Int32>", "System.Threading.CancellationToken"], 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryAsyncIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("netstandard"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteNonQueryAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1<System.Int32>", "System.Threading.CancellationToken"), 2, 2, 0, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryAsyncIntegration"), 1, categories));
             }
         }
         {
@@ -147,7 +147,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Data.Common", "System.Data.Common.DbCommand", "ExecuteNonQuery", ["System.Int32"], 4, 0, 0, 11, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteNonQuery"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Int32"), 1, 4, 0, 0, 11, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryIntegration"), 1, categories));
             }
         }
         {
@@ -158,7 +158,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Data", "System.Data.Common.DbCommand", "ExecuteNonQuery", ["System.Int32"], 2, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteNonQuery"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Int32"), 1, 2, 0, 0, 4, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryIntegration"), 1, categories));
             }
         }
         {
@@ -169,7 +169,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("netstandard", "System.Data.Common.DbCommand", "ExecuteNonQuery", ["System.Int32"], 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("netstandard"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteNonQuery"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Int32"), 1, 2, 0, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryIntegration"), 1, categories));
             }
         }
         {
@@ -180,7 +180,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Devart.Data.Oracle", "Devart.Data.Oracle.OracleCommand", "ExecuteNonQuery", ["System.Int32"], 9, 0, 0, 11, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Devart.Data.Oracle"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Devart.Data.Oracle.OracleCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteNonQuery"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Int32"), 1, 9, 0, 0, 11, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteNonQueryIntegration"), 0, categories));
             }
         }
         {
@@ -191,7 +191,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Data.Common", "System.Data.Common.DbCommand", "ExecuteScalarAsync", ["System.Threading.Tasks.Task`1<System.Object>", "System.Threading.CancellationToken"], 4, 0, 0, 11, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarAsyncIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteScalarAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1<System.Object>", "System.Threading.CancellationToken"), 2, 4, 0, 0, 11, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarAsyncIntegration"), 1, categories));
             }
         }
         {
@@ -202,7 +202,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Data", "System.Data.Common.DbCommand", "ExecuteScalarAsync", ["System.Threading.Tasks.Task`1<System.Object>", "System.Threading.CancellationToken"], 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarAsyncIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteScalarAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1<System.Object>", "System.Threading.CancellationToken"), 2, 4, 0, 0, 4, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarAsyncIntegration"), 1, categories));
             }
         }
         {
@@ -213,7 +213,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("netstandard", "System.Data.Common.DbCommand", "ExecuteScalarAsync", ["System.Threading.Tasks.Task`1<System.Object>", "System.Threading.CancellationToken"], 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarAsyncIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("netstandard"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteScalarAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1<System.Object>", "System.Threading.CancellationToken"), 2, 2, 0, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarAsyncIntegration"), 1, categories));
             }
         }
         {
@@ -224,7 +224,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Data.Common", "System.Data.Common.DbCommand", "ExecuteScalar", ["System.Object"], 4, 0, 0, 11, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteScalar"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Object"), 1, 4, 0, 0, 11, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarIntegration"), 1, categories));
             }
         }
         {
@@ -235,7 +235,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Data", "System.Data.Common.DbCommand", "ExecuteScalar", ["System.Object"], 2, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteScalar"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Object"), 1, 2, 0, 0, 4, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarIntegration"), 1, categories));
             }
         }
         {
@@ -246,7 +246,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("netstandard", "System.Data.Common.DbCommand", "ExecuteScalar", ["System.Object"], 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("netstandard"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Data.Common.DbCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteScalar"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Object"), 1, 2, 0, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.AdoNet.Integrations.CommandExecuteScalarIntegration"), 1, categories));
             }
         }
         {
@@ -257,7 +257,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Confluent.Kafka", "Confluent.Kafka.Consumer`2", "Close", ["System.Void"], 1, 4, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerCloseIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Confluent.Kafka"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Confluent.Kafka.Consumer`2"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Close"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void"), 1, 1, 4, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerCloseIntegration"), 0, categories));
             }
         }
         {
@@ -268,7 +268,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Confluent.Kafka", "Confluent.Kafka.Consumer`2", ".ctor", ["System.Void", "Confluent.Kafka.ConsumerBuilder`2[!0,!1]"], 1, 4, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerConstructorIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Confluent.Kafka"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Confluent.Kafka.Consumer`2"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(".ctor"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "Confluent.Kafka.ConsumerBuilder`2[!0,!1]"), 2, 1, 4, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerConstructorIntegration"), 0, categories));
             }
         }
         {
@@ -279,7 +279,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Confluent.Kafka", "Confluent.Kafka.Consumer`2", "Consume", ["Confluent.Kafka.ConsumeResult`2[!0,!1]", "System.Int32"], 1, 4, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerConsumeSyncIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Confluent.Kafka"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Confluent.Kafka.Consumer`2"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Consume"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("Confluent.Kafka.ConsumeResult`2[!0,!1]", "System.Int32"), 2, 1, 4, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerConsumeSyncIntegration"), 0, categories));
             }
         }
         {
@@ -290,7 +290,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Confluent.Kafka", "Confluent.Kafka.Consumer`2", "Dispose", ["System.Void"], 1, 4, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerDisposeIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Confluent.Kafka"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Confluent.Kafka.Consumer`2"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Dispose"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void"), 1, 1, 4, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerDisposeIntegration"), 0, categories));
             }
         }
         {
@@ -301,7 +301,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Confluent.Kafka", "Confluent.Kafka.Producer`2+TypedDeliveryHandlerShim_Action", ".ctor", ["System.Void", "System.String", "!0", "!1", "System.Action`1[Confluent.Kafka.DeliveryReport`2[!0,!1]]"], 1, 4, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerDeliveryHandlerActionIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Confluent.Kafka"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Confluent.Kafka.Producer`2+TypedDeliveryHandlerShim_Action"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(".ctor"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.String", "!0", "!1", "System.Action`1[Confluent.Kafka.DeliveryReport`2[!0,!1]]"), 5, 1, 4, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerDeliveryHandlerActionIntegration"), 0, categories));
             }
         }
         {
@@ -312,7 +312,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Confluent.Kafka", "Confluent.Kafka.Producer`2", "ProduceAsync", ["System.Threading.Tasks.Task`1[Confluent.Kafka.DeliveryReport`2[!0,!1]]", "Confluent.Kafka.TopicPartition", "Confluent.Kafka.Message`2[!0,!1]", "System.Threading.CancellationToken"], 1, 4, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerProduceAsyncIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Confluent.Kafka"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Confluent.Kafka.Producer`2"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ProduceAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[Confluent.Kafka.DeliveryReport`2[!0,!1]]", "Confluent.Kafka.TopicPartition", "Confluent.Kafka.Message`2[!0,!1]", "System.Threading.CancellationToken"), 4, 1, 4, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerProduceAsyncIntegration"), 0, categories));
             }
         }
         {
@@ -323,7 +323,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Confluent.Kafka", "Confluent.Kafka.Producer`2", "Produce", ["System.Void", "Confluent.Kafka.TopicPartition", "Confluent.Kafka.Message`2[!0,!1]", "System.Action`1[Confluent.Kafka.DeliveryReport`2[!0,!1]]"], 1, 4, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerProduceSyncIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Confluent.Kafka"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Confluent.Kafka.Producer`2"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Produce"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "Confluent.Kafka.TopicPartition", "Confluent.Kafka.Message`2[!0,!1]", "System.Action`1[Confluent.Kafka.DeliveryReport`2[!0,!1]]"), 4, 1, 4, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerProduceSyncIntegration"), 0, categories));
             }
         }
         {
@@ -334,7 +334,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("log4net", "log4net.Appender.AppenderCollection", "ToArray", ["log4net.Appender.IAppender[]"], 2, 0, 13, 3, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge.Integrations.AppenderCollectionIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("log4net"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("log4net.Appender.AppenderCollection"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ToArray"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("log4net.Appender.IAppender[]"), 1, 2, 0, 13, 3, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge.Integrations.AppenderCollectionIntegration"), 0, categories));
             }
         }
         {
@@ -345,7 +345,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("log4net", "log4net.Util.AppenderAttachedImpl", "AppendLoopOnAppenders", ["System.Int32", "log4net.Core.LoggingEvent"], 2, 0, 13, 3, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.TraceContextInjection.Integrations.AppenderAttachedImplIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("log4net"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("log4net.Util.AppenderAttachedImpl"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("AppendLoopOnAppenders"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Int32", "log4net.Core.LoggingEvent"), 2, 2, 0, 13, 3, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.TraceContextInjection.Integrations.AppenderAttachedImplIntegration"), 0, categories));
             }
         }
         {
@@ -356,7 +356,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Microsoft.Extensions.Logging", "Microsoft.Extensions.Logging.LoggingBuilder", ".ctor", ["System.Void", "Microsoft.Extensions.DependencyInjection.IServiceCollection"], 8, 0, 0, 11, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Microsoft.Extensions.Logging"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Microsoft.Extensions.Logging.LoggingBuilder"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(".ctor"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "Microsoft.Extensions.DependencyInjection.IServiceCollection"), 2, 8, 0, 0, 11, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration"), 0, categories));
             }
         }
         {
@@ -367,7 +367,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1", "Execute", ["!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 3, 0, 0, 3, 4, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Execute"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 3, 0, 0, 3, 4, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute"), 0, categories));
             }
         }
         {
@@ -378,7 +378,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1", "Execute", ["!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 3, 0, 0, 3, 4, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Execute"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 3, 0, 0, 3, 4, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute"), 0, categories));
             }
         }
         {
@@ -389,7 +389,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1", "Execute", ["!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 3, 0, 0, 3, 4, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Execute"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 3, 0, 0, 3, 4, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute"), 0, categories));
             }
         }
         {
@@ -400,7 +400,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1", "Execute", ["!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 3, 0, 0, 3, 4, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Execute"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 3, 0, 0, 3, 4, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute"), 0, categories));
             }
         }
         {
@@ -411,7 +411,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver.Core", "MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1", "Execute", ["!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 2, 7, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Execute"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 2, 7, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute"), 0, categories));
             }
         }
         {
@@ -422,7 +422,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver.Core", "MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1", "Execute", ["!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 2, 7, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Execute"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 2, 7, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute"), 0, categories));
             }
         }
         {
@@ -433,7 +433,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver.Core", "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1", "Execute", ["!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 2, 7, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Execute"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 2, 7, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute"), 0, categories));
             }
         }
         {
@@ -444,7 +444,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver.Core", "MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1", "Execute", ["!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 2, 7, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Execute"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("!0", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 2, 7, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute"), 0, categories));
             }
         }
         {
@@ -455,7 +455,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1", "Execute", ["!0", "MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"], 3, 5, 0, 3, 6, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute35", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Execute"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("!0", "MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"), 3, 3, 5, 0, 3, 6, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute35"), 0, categories));
             }
         }
         {
@@ -466,7 +466,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1", "Execute", ["!0", "MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"], 3, 5, 0, 3, 6, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute35", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Execute"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("!0", "MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"), 3, 3, 5, 0, 3, 6, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute35"), 0, categories));
             }
         }
         {
@@ -477,7 +477,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.Core.WireProtocol.CommandWireProtocol`1", "Execute", ["!0", "MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"], 3, 5, 0, 3, 6, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute35", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.CommandWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Execute"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("!0", "MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"), 3, 3, 5, 0, 3, 6, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecute35"), 0, categories));
             }
         }
         {
@@ -488,7 +488,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1", "ExecuteAsync", ["System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 3, 0, 0, 3, 4, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 3, 0, 0, 3, 4, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync"), 0, categories));
             }
         }
         {
@@ -499,7 +499,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1", "ExecuteAsync", ["System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 3, 0, 0, 3, 4, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 3, 0, 0, 3, 4, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync"), 0, categories));
             }
         }
         {
@@ -510,7 +510,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1", "ExecuteAsync", ["System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 3, 0, 0, 3, 4, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 3, 0, 0, 3, 4, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync"), 0, categories));
             }
         }
         {
@@ -521,7 +521,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1", "ExecuteAsync", ["System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 3, 0, 0, 3, 4, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 3, 0, 0, 3, 4, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync"), 0, categories));
             }
         }
         {
@@ -532,7 +532,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver.Core", "MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1", "ExecuteAsync", ["System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 2, 7, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 2, 7, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync"), 0, categories));
             }
         }
         {
@@ -543,7 +543,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver.Core", "MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1", "ExecuteAsync", ["System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 2, 7, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 2, 7, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync"), 0, categories));
             }
         }
         {
@@ -554,7 +554,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver.Core", "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1", "ExecuteAsync", ["System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 2, 7, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 2, 7, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync"), 0, categories));
             }
         }
         {
@@ -565,7 +565,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver.Core", "MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1", "ExecuteAsync", ["System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"], 2, 7, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.Core.Connections.IConnection", "System.Threading.CancellationToken"), 3, 2, 7, 0, 2, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync"), 0, categories));
             }
         }
         {
@@ -576,7 +576,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1", "ExecuteAsync", ["System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"], 3, 5, 0, 3, 6, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync35", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"), 3, 3, 5, 0, 3, 6, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync35"), 0, categories));
             }
         }
         {
@@ -587,7 +587,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1", "ExecuteAsync", ["System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"], 3, 5, 0, 3, 6, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync35", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"), 3, 3, 5, 0, 3, 6, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync35"), 0, categories));
             }
         }
         {
@@ -598,7 +598,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.Core.WireProtocol.CommandWireProtocol`1", "ExecuteAsync", ["System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"], 3, 5, 0, 3, 6, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync35", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("MongoDB.Driver.Core.WireProtocol.CommandWireProtocol`1"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ExecuteAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[!0]", "MongoDB.Driver.OperationContext", "MongoDB.Driver.Core.Connections.IConnection"), 3, 3, 5, 0, 3, 6, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.Integrations.MongoClientIntegrationExecuteAsync35"), 0, categories));
             }
         }
         {
@@ -609,7 +609,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("NLog", "NLog.Logger", "WriteToTargets", ["System.Void", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"], 5, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog.Logger"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("WriteToTargets"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"), 3, 5, 0, 0, 5, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsIntegration"), 0, categories));
             }
         }
         {
@@ -620,7 +620,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("NLog", "NLog.Logger", "WriteToTargets", ["System.Void", "NLog.LogEventInfo", "NLog.Internal.TargetWithFilterChain"], 5, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog.Logger"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("WriteToTargets"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "NLog.LogEventInfo", "NLog.Internal.TargetWithFilterChain"), 3, 5, 0, 0, 5, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsIntegration"), 0, categories));
             }
         }
         {
@@ -631,7 +631,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("NLog", "NLog.Logger", "WriteLogEventToTargets", ["System.Void", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"], 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog.Logger"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("WriteLogEventToTargets"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"), 3, 6, 0, 0, 6, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsIntegration"), 0, categories));
             }
         }
         {
@@ -642,7 +642,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("NLog", "NLog.Logger", "WriteToTargets", ["System.Void", "System.Type", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"], 5, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsWithWrapperTypeIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog.Logger"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("WriteToTargets"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.Type", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"), 4, 5, 0, 0, 5, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsWithWrapperTypeIntegration"), 0, categories));
             }
         }
         {
@@ -653,7 +653,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("NLog", "NLog.Logger", "WriteToTargets", ["System.Void", "System.Type", "NLog.LogEventInfo", "NLog.Internal.TargetWithFilterChain"], 5, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsWithWrapperTypeIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog.Logger"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("WriteToTargets"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.Type", "NLog.LogEventInfo", "NLog.Internal.TargetWithFilterChain"), 4, 5, 0, 0, 5, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsWithWrapperTypeIntegration"), 0, categories));
             }
         }
         {
@@ -664,7 +664,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("NLog", "NLog.Logger", "WriteLogEventToTargets", ["System.Void", "System.Type", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"], 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsWithWrapperTypeIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog.Logger"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("WriteLogEventToTargets"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.Type", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"), 4, 6, 0, 0, 6, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsWithWrapperTypeIntegration"), 0, categories));
             }
         }
         {
@@ -675,7 +675,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.NpgsqlCommand", "TraceCommandStart", ["System.Void", "Npgsql.Internal.NpgsqlConnector"], 6, 0, 0, 6, 0, 11, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql.NpgsqlCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("TraceCommandStart"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "Npgsql.Internal.NpgsqlConnector"), 2, 6, 0, 0, 6, 0, 11, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"), 0, categories));
             }
         }
         {
@@ -686,7 +686,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.NpgsqlCommand", "TraceCommandEnrich", ["System.Void", "Npgsql.Internal.NpgsqlConnector"], 6, 0, 12, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql.NpgsqlCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("TraceCommandEnrich"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "Npgsql.Internal.NpgsqlConnector"), 2, 6, 0, 12, 6, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"), 0, categories));
             }
         }
         {
@@ -697,7 +697,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.NpgsqlCommand", "TraceCommandStart", ["System.Void", "Npgsql.Internal.NpgsqlConnector"], 7, 0, 0, 7, 0, 7, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql.NpgsqlCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("TraceCommandStart"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "Npgsql.Internal.NpgsqlConnector"), 2, 7, 0, 0, 7, 0, 7, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"), 0, categories));
             }
         }
         {
@@ -708,7 +708,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.NpgsqlCommand", "TraceCommandEnrich", ["System.Void", "Npgsql.Internal.NpgsqlConnector"], 7, 0, 8, 7, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql.NpgsqlCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("TraceCommandEnrich"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "Npgsql.Internal.NpgsqlConnector"), 2, 7, 0, 8, 7, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"), 0, categories));
             }
         }
         {
@@ -719,7 +719,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.NpgsqlCommand", "TraceCommandStart", ["System.Void", "Npgsql.Internal.NpgsqlConnector"], 8, 0, 0, 8, 0, 3, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql.NpgsqlCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("TraceCommandStart"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "Npgsql.Internal.NpgsqlConnector"), 2, 8, 0, 0, 8, 0, 3, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"), 0, categories));
             }
         }
         {
@@ -730,7 +730,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.NpgsqlCommand", "TraceCommandEnrich", ["System.Void", "Npgsql.Internal.NpgsqlConnector"], 8, 0, 4, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql.NpgsqlCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("TraceCommandEnrich"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "Npgsql.Internal.NpgsqlConnector"), 2, 8, 0, 4, 10, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"), 0, categories));
             }
         }
         {
@@ -741,7 +741,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.Internal.NpgsqlConnector", "EndUserAction", ["System.Void"], 6, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlConnectorEndUserActionTraceContextPropagationIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql.Internal.NpgsqlConnector"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("EndUserAction"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void"), 1, 6, 0, 0, 10, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlConnectorEndUserActionTraceContextPropagationIntegration"), 0, categories));
             }
         }
         {
@@ -752,7 +752,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Npgsql", "Npgsql.Internal.NpgsqlConnector", "TraceCopyStart", ["System.Diagnostics.Activity", "System.String", "System.String"], 10, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCopyTraceContextPropagationIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql.Internal.NpgsqlConnector"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("TraceCopyStart"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Diagnostics.Activity", "System.String", "System.String"), 3, 10, 0, 0, 10, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCopyTraceContextPropagationIntegration"), 0, categories));
             }
         }
         {
@@ -767,7 +767,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("NServiceBus.Core", "NServiceBus.EndpointConfiguration", ".ctor", ["System.Void", "System.String"], 8, 0, 0, 9, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NServiceBus.Core"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NServiceBus.EndpointConfiguration"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(".ctor"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.String"), 2, 8, 0, 0, 9, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration"), 0, categories));
             }
         }
         {
@@ -778,7 +778,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Oracle.ManagedDataAccess", "Oracle.ManagedDataAccess.Client.OracleConnection", ".ctor", ["System.Void"], 23, 1, 0, 23, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionConstructorIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess.Client.OracleConnection"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(".ctor"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void"), 1, 23, 1, 0, 23, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionConstructorIntegration"), 0, categories));
             }
         }
         {
@@ -789,7 +789,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Oracle.ManagedDataAccess", "Oracle.ManagedDataAccess.Client.OracleConnection", ".ctor", ["System.Void", "System.String"], 23, 1, 0, 23, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionConstructorIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess.Client.OracleConnection"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(".ctor"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.String"), 2, 23, 1, 0, 23, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionConstructorIntegration"), 0, categories));
             }
         }
         {
@@ -800,7 +800,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Oracle.ManagedDataAccess", "Oracle.ManagedDataAccess.Client.OracleConnection", "Open", ["System.Void"], 23, 1, 0, 23, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionOpenIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess.Client.OracleConnection"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Open"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void"), 1, 23, 1, 0, 23, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionOpenIntegration"), 0, categories));
             }
         }
         {
@@ -811,7 +811,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("Oracle.ManagedDataAccess", "Oracle.ManagedDataAccess.Client.OracleConnection", "OpenAsync", ["System.Threading.Tasks.Task", "System.Threading.CancellationToken"], 23, 1, 0, 23, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionOpenIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess.Client.OracleConnection"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task", "System.Threading.CancellationToken"), 2, 23, 1, 0, 23, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionOpenIntegration"), 0, categories));
             }
         }
         {
@@ -822,7 +822,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.IAsyncBasicConsumer", "HandleBasicDeliver", ["System.Threading.Tasks.Task", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.Byte[]"], 5, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.AsyncDefaultBasicConsumerIntegration", 2, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client.IAsyncBasicConsumer"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("HandleBasicDeliver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.Byte[]"), 8, 5, 0, 0, 5, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.AsyncDefaultBasicConsumerIntegration"), 2, categories));
             }
         }
         {
@@ -833,7 +833,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.IAsyncBasicConsumer", "HandleBasicDeliver", ["System.Threading.Tasks.Task", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"], 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.AsyncDefaultBasicConsumerIntegration", 2, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client.IAsyncBasicConsumer"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("HandleBasicDeliver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"), 8, 6, 0, 0, 6, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.AsyncDefaultBasicConsumerIntegration"), 2, categories));
             }
         }
         {
@@ -844,7 +844,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.AsyncDefaultBasicConsumer", "HandleBasicDeliver", ["System.Threading.Tasks.Task", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.Byte[]"], 5, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.AsyncDefaultBasicConsumerIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client.AsyncDefaultBasicConsumer"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("HandleBasicDeliver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.Byte[]"), 8, 5, 0, 0, 5, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.AsyncDefaultBasicConsumerIntegration"), 1, categories));
             }
         }
         {
@@ -855,7 +855,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.AsyncDefaultBasicConsumer", "HandleBasicDeliver", ["System.Threading.Tasks.Task", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"], 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.AsyncDefaultBasicConsumerIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client.AsyncDefaultBasicConsumer"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("HandleBasicDeliver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"), 8, 6, 0, 0, 6, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.AsyncDefaultBasicConsumerIntegration"), 1, categories));
             }
         }
         {
@@ -866,7 +866,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.IBasicConsumer", "HandleBasicDeliver", ["System.Void", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.Byte[]"], 5, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.DefaultBasicConsumerIntegration", 2, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client.IBasicConsumer"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("HandleBasicDeliver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.Byte[]"), 8, 5, 0, 0, 5, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.DefaultBasicConsumerIntegration"), 2, categories));
             }
         }
         {
@@ -877,7 +877,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.IBasicConsumer", "HandleBasicDeliver", ["System.Void", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"], 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.DefaultBasicConsumerIntegration", 2, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client.IBasicConsumer"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("HandleBasicDeliver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"), 8, 6, 0, 0, 6, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.DefaultBasicConsumerIntegration"), 2, categories));
             }
         }
         {
@@ -888,7 +888,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.DefaultBasicConsumer", "HandleBasicDeliver", ["System.Void", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.Byte[]"], 5, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.DefaultBasicConsumerIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client.DefaultBasicConsumer"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("HandleBasicDeliver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.Byte[]"), 8, 5, 0, 0, 5, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.DefaultBasicConsumerIntegration"), 1, categories));
             }
         }
         {
@@ -899,7 +899,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.DefaultBasicConsumer", "HandleBasicDeliver", ["System.Void", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"], 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.DefaultBasicConsumerIntegration", 1, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client.DefaultBasicConsumer"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("HandleBasicDeliver"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.String", "System.UInt64", "System.Boolean", "System.String", "System.String", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"), 8, 6, 0, 0, 6, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.DefaultBasicConsumerIntegration"), 1, categories));
             }
         }
         {
@@ -910,7 +910,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.Impl.ModelBase", "BasicGet", ["RabbitMQ.Client.BasicGetResult", "System.String", "System.Boolean"], 5, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.ModelBaseBasicGetIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client.Impl.ModelBase"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("BasicGet"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("RabbitMQ.Client.BasicGetResult", "System.String", "System.Boolean"), 3, 5, 0, 0, 6, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.ModelBaseBasicGetIntegration"), 0, categories));
             }
         }
         {
@@ -921,7 +921,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.Framing.Impl.Model", "_Private_BasicPublish", ["System.Void", "System.String", "System.String", "System.Boolean", "RabbitMQ.Client.IBasicProperties", "System.Byte[]"], 5, 0, 0, 5, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.ModelBasicPublishIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client.Framing.Impl.Model"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("_Private_BasicPublish"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.String", "System.String", "System.Boolean", "RabbitMQ.Client.IBasicProperties", "System.Byte[]"), 6, 5, 0, 0, 5, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.ModelBasicPublishIntegration"), 0, categories));
             }
         }
         {
@@ -932,7 +932,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("RabbitMQ.Client", "RabbitMQ.Client.Framing.Impl.Model", "_Private_BasicPublish", ["System.Void", "System.String", "System.String", "System.Boolean", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"], 6, 0, 0, 6, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.ModelBasicPublishIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("RabbitMQ.Client.Framing.Impl.Model"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("_Private_BasicPublish"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.String", "System.String", "System.Boolean", "RabbitMQ.Client.IBasicProperties", "System.ReadOnlyMemory`1[System.Byte]"), 6, 6, 0, 0, 6, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.RabbitMqLegacy.Integrations.ModelBasicPublishIntegration"), 0, categories));
             }
         }
         {
@@ -943,7 +943,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImpl", ["StackExchange.Redis.ConnectionMultiplexer", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]", "StackExchange.Redis.EndPointCollection"], 2, 0, 0, 3, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("StackExchange.Redis"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("StackExchange.Redis.ConnectionMultiplexer"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ConnectImpl"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("StackExchange.Redis.ConnectionMultiplexer", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]", "StackExchange.Redis.EndPointCollection"), 5, 2, 0, 0, 3, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"), 0, categories));
             }
         }
         {
@@ -954,7 +954,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImplAsync", ["System.Threading.Tasks.Task`1[StackExchange.Redis.ConnectionMultiplexer]", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]"], 2, 0, 0, 3, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("StackExchange.Redis"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("StackExchange.Redis.ConnectionMultiplexer"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ConnectImplAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[StackExchange.Redis.ConnectionMultiplexer]", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]"), 4, 2, 0, 0, 3, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"), 0, categories));
             }
         }
         {
@@ -965,7 +965,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImplAsync", ["System.Threading.Tasks.Task`1[StackExchange.Redis.ConnectionMultiplexer]", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]", "StackExchange.Redis.Availability.CircuitBreaker"], 3, 0, 0, 3, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("StackExchange.Redis"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("StackExchange.Redis.ConnectionMultiplexer"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ConnectImplAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[StackExchange.Redis.ConnectionMultiplexer]", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]", "StackExchange.Redis.Availability.CircuitBreaker"), 5, 3, 0, 0, 3, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"), 0, categories));
             }
         }
         {
@@ -976,7 +976,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImplAsync", ["System.Threading.Tasks.Task`1[StackExchange.Redis.ConnectionMultiplexer]", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]", "StackExchange.Redis.Availability.CircuitBreaker", "System.Boolean"], 3, 0, 0, 3, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("StackExchange.Redis"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("StackExchange.Redis.ConnectionMultiplexer"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("ConnectImplAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task`1[StackExchange.Redis.ConnectionMultiplexer]", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]", "StackExchange.Redis.Availability.CircuitBreaker", "System.Boolean"), 6, 3, 0, 0, 3, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"), 0, categories));
             }
         }
         {
@@ -987,7 +987,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Private.ServiceModel", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", ["System.Void", "System.String", "System.ServiceModel.EndpointAddress"], 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Private.ServiceModel"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.ServiceModel.ChannelFactory"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("InitializeEndpoint"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.String", "System.ServiceModel.EndpointAddress"), 3, 4, 0, 0, 4, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration"), 0, categories));
             }
         }
         {
@@ -998,7 +998,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Private.ServiceModel", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", ["System.Void", "System.ServiceModel.Description.ServiceEndpoint"], 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Private.ServiceModel"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.ServiceModel.ChannelFactory"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("InitializeEndpoint"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.ServiceModel.Description.ServiceEndpoint"), 2, 4, 0, 0, 4, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration"), 0, categories));
             }
         }
         {
@@ -1009,7 +1009,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.Private.ServiceModel", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", ["System.Void", "System.ServiceModel.Channels.Binding", "System.ServiceModel.EndpointAddress"], 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Private.ServiceModel"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.ServiceModel.ChannelFactory"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("InitializeEndpoint"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.ServiceModel.Channels.Binding", "System.ServiceModel.EndpointAddress"), 3, 4, 0, 0, 4, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration"), 0, categories));
             }
         }
         {
@@ -1020,7 +1020,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.ServiceModel.Primitives", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", ["System.Void", "System.String", "System.ServiceModel.EndpointAddress"], 6, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.ServiceModel.Primitives"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.ServiceModel.ChannelFactory"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("InitializeEndpoint"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.String", "System.ServiceModel.EndpointAddress"), 3, 6, 0, 0, 10, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration"), 0, categories));
             }
         }
         {
@@ -1031,7 +1031,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.ServiceModel.Primitives", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", ["System.Void", "System.ServiceModel.Description.ServiceEndpoint"], 6, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.ServiceModel.Primitives"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.ServiceModel.ChannelFactory"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("InitializeEndpoint"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.ServiceModel.Description.ServiceEndpoint"), 2, 6, 0, 0, 10, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration"), 0, categories));
             }
         }
         {
@@ -1042,7 +1042,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new("System.ServiceModel.Primitives", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", ["System.Void", "System.ServiceModel.Channels.Binding", "System.ServiceModel.EndpointAddress"], 6, 0, 0, 10, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration", 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.ServiceModel.Primitives"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.ServiceModel.ChannelFactory"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("InitializeEndpoint"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.ServiceModel.Channels.Binding", "System.ServiceModel.EndpointAddress"), 3, 6, 0, 0, 10, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration"), 0, categories));
             }
         }
         return nativeCallTargetDefinitions.ToArray();

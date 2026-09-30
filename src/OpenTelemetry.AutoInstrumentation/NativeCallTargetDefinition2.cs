@@ -10,14 +10,11 @@ namespace OpenTelemetry.AutoInstrumentation;
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 internal struct NativeCallTargetDefinition2
 {
-    [MarshalAs(UnmanagedType.LPWStr)]
-    public readonly string TargetAssembly;
+    public readonly IntPtr TargetAssembly;
 
-    [MarshalAs(UnmanagedType.LPWStr)]
-    public readonly string TargetType;
+    public readonly IntPtr TargetType;
 
-    [MarshalAs(UnmanagedType.LPWStr)]
-    public readonly string TargetMethod;
+    public readonly IntPtr TargetMethod;
 
     public readonly IntPtr TargetSignatureTypes;
 
@@ -35,15 +32,47 @@ internal struct NativeCallTargetDefinition2
 
     public readonly ushort TargetMaximumPatch;
 
-    [MarshalAs(UnmanagedType.LPWStr)]
-    public readonly string IntegrationAssembly;
+    public readonly IntPtr IntegrationAssembly;
 
-    [MarshalAs(UnmanagedType.LPWStr)]
-    public readonly string IntegrationType;
+    public readonly IntPtr IntegrationType;
 
     public readonly byte Kind;
 
     public readonly uint Categories;
+
+    public NativeCallTargetDefinition2(
+        IntPtr targetAssembly,
+        IntPtr targetType,
+        IntPtr targetMethod,
+        IntPtr targetSignatureTypes,
+        ushort targetSignatureTypesLength,
+        ushort targetMinimumMajor,
+        ushort targetMinimumMinor,
+        ushort targetMinimumPatch,
+        ushort targetMaximumMajor,
+        ushort targetMaximumMinor,
+        ushort targetMaximumPatch,
+        IntPtr integrationAssembly,
+        IntPtr integrationType,
+        byte kind,
+        uint categories)
+    {
+        TargetAssembly = targetAssembly;
+        TargetType = targetType;
+        TargetMethod = targetMethod;
+        TargetSignatureTypes = targetSignatureTypes;
+        TargetSignatureTypesLength = targetSignatureTypesLength;
+        TargetMinimumMajor = targetMinimumMajor;
+        TargetMinimumMinor = targetMinimumMinor;
+        TargetMinimumPatch = targetMinimumPatch;
+        TargetMaximumMajor = targetMaximumMajor;
+        TargetMaximumMinor = targetMaximumMinor;
+        TargetMaximumPatch = targetMaximumPatch;
+        IntegrationAssembly = integrationAssembly;
+        IntegrationType = integrationType;
+        Kind = kind;
+        Categories = categories;
+    }
 
     public NativeCallTargetDefinition2(
         string targetAssembly,
@@ -61,21 +90,10 @@ internal struct NativeCallTargetDefinition2
         byte kind,
         uint categories)
     {
-        TargetAssembly = targetAssembly;
-        TargetType = targetType;
-        TargetMethod = targetMethod;
-        TargetSignatureTypes = IntPtr.Zero;
-        if (targetSignatureTypes?.Length > 0)
-        {
-            TargetSignatureTypes = Marshal.AllocHGlobal(targetSignatureTypes.Length * Marshal.SizeOf<IntPtr>());
-            var ptr = TargetSignatureTypes;
-            for (var i = 0; i < targetSignatureTypes.Length; i++)
-            {
-                Marshal.WriteIntPtr(ptr, Marshal.StringToHGlobalUni(targetSignatureTypes[i]));
-                ptr += Marshal.SizeOf<IntPtr>();
-            }
-        }
-
+        TargetAssembly = NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(targetAssembly);
+        TargetType = NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(targetType);
+        TargetMethod = NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(targetMethod);
+        TargetSignatureTypes = NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray(targetSignatureTypes);
         TargetSignatureTypesLength = (ushort)(targetSignatureTypes?.Length ?? 0);
         TargetMinimumMajor = targetMinimumMajor;
         TargetMinimumMinor = targetMinimumMinor;
@@ -83,21 +101,9 @@ internal struct NativeCallTargetDefinition2
         TargetMaximumMajor = targetMaximumMajor;
         TargetMaximumMinor = targetMaximumMinor;
         TargetMaximumPatch = targetMaximumPatch;
-        IntegrationAssembly = integrationAssembly;
-        IntegrationType = integrationType;
+        IntegrationAssembly = NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(integrationAssembly);
+        IntegrationType = NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(integrationType);
         Kind = kind;
         Categories = categories;
-    }
-
-    public void Dispose()
-    {
-        var ptr = TargetSignatureTypes;
-        for (var i = 0; i < TargetSignatureTypesLength; i++)
-        {
-            Marshal.FreeHGlobal(Marshal.ReadIntPtr(ptr));
-            ptr += Marshal.SizeOf<IntPtr>();
-        }
-
-        Marshal.FreeHGlobal(TargetSignatureTypes);
     }
 }

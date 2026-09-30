@@ -77,6 +77,7 @@ public class InstrumentationDefinitionsGenerator : IIncrementalGenerator
                     target.MaximumMinor,
                     target.MaximumPatch,
                     target.SignatureTypes,
+                    target.SignatureTypesLength,
                     target.IntegrationKind);
                 if (!definitions.TryGetValue(key, out var categories))
                 {
@@ -131,15 +132,17 @@ internal static partial class InstrumentationDefinitions
             }
 
             var key = definition.Key;
+            var signatureTypesAllocation = GetSignatureTypesAllocation(key.SignatureTypes, key.SignatureTypesLength);
             sb.AppendLine("            if (categories != 0)")
                 .AppendLine("            {")
                 .AppendFormat(
                     CultureInfo.InvariantCulture,
-                    "                nativeCallTargetDefinitions.Add(new(\"{0}\", \"{1}\", \"{2}\", [{3}], {4}, {5}, {6}, {7}, {8}, {9}, AssemblyFullName, \"{10}\", {11}, categories));",
+                    "                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(\"{0}\"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(\"{1}\"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(\"{2}\"), {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(\"{11}\"), {12}, categories));",
                     key.Assembly,
                     key.Type,
                     key.Method,
-                    key.SignatureTypes,
+                    signatureTypesAllocation,
+                    key.SignatureTypesLength,
                     key.MinimumMajor,
                     key.MinimumMinor,
                     key.MinimumPatch,
@@ -192,7 +195,7 @@ internal static partial class InstrumentationDefinitions
         var targetMaximumMinor = maxVersion.Length > 1 && maxVersion[1] != "*" ? int.Parse(maxVersion[1], CultureInfo.InvariantCulture) : ushort.MaxValue;
         var targetMaximumPatch = maxVersion.Length > 2 && maxVersion[2] != "*" ? int.Parse(maxVersion[2], CultureInfo.InvariantCulture) : ushort.MaxValue;
 
-        return new TargetToGenerate(signalType, integrationName, targetAssembly, targetType, targetMethod, targetMinimumMajor, targetMinimumMinor, targetMinimumPatch, targetMaximumMajor, targetMaximumMinor, targetMaximumPatch, targetSignatureTypesBuilder.ToString(), integrationKind);
+        return new TargetToGenerate(signalType, integrationName, targetAssembly, targetType, targetMethod, targetMinimumMajor, targetMinimumMinor, targetMinimumPatch, targetMaximumMajor, targetMaximumMinor, targetMaximumPatch, targetSignatureTypesBuilder.ToString(), parameterTypeNames.Length + 1, integrationKind);
     }
 
     private static string GenerateInstrumentationDefinitionsPartialClass(
@@ -329,13 +332,15 @@ internal static partial class InstrumentationDefinitions
 
             foreach (var integration in group.Value)
             {
+                var signatureTypesAllocation = GetSignatureTypesAllocation(integration.Target.SignatureTypes, integration.Target.SignatureTypesLength);
                 sb.AppendFormat(
                     CultureInfo.InvariantCulture,
-                    "                nativeCallTargetDefinitions.Add(new(\"{0}\", \"{1}\", \"{2}\", [{3}], {4}, {5}, {6}, {7}, {8}, {9}, AssemblyFullName, \"{10}\"));",
+                    "                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(\"{0}\"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(\"{1}\"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(\"{2}\"), {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(\"{11}\")));",
                     integration.Target.Assembly,
                     integration.Target.Type,
                     integration.Target.Method,
-                    integration.Target.SignatureTypes,
+                    signatureTypesAllocation,
+                    integration.Target.SignatureTypesLength,
                     integration.Target.MinimumMajor,
                     integration.Target.MinimumMinor,
                     integration.Target.MinimumPatch,
@@ -348,6 +353,13 @@ internal static partial class InstrumentationDefinitions
 
             sb.AppendLine("            }");
         }
+    }
+
+    private static string GetSignatureTypesAllocation(string signatureTypes, int signatureTypesLength)
+    {
+        return signatureTypesLength > 9
+            ? $"NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray(new[] {{ {signatureTypes} }})"
+            : $"NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray({signatureTypes})";
     }
 
     private static IntegrationToGenerate? GetClassesMarkedByInstrumentMethodAttribute(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
@@ -383,6 +395,7 @@ internal static partial class InstrumentationDefinitions
         int MaximumMinor,
         int MaximumPatch,
         string SignatureTypes,
+        int SignatureTypesLength,
         int IntegrationKind)
     {
         public readonly string IntegrationType = IntegrationType;
@@ -396,6 +409,7 @@ internal static partial class InstrumentationDefinitions
         public readonly int MaximumMinor = MaximumMinor;
         public readonly int MaximumPatch = MaximumPatch;
         public readonly string SignatureTypes = SignatureTypes;
+        public readonly int SignatureTypesLength = SignatureTypesLength;
         public readonly int IntegrationKind = IntegrationKind;
     }
 }

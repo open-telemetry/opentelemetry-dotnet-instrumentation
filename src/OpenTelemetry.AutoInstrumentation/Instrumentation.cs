@@ -405,11 +405,10 @@ internal static class Instrumentation
 
     private static void RegisterSharedBytecodeInstrumentations(InstrumentationDefinitions.SharedPayload payload)
     {
-        var definitions = payload.Definitions;
         try
         {
             Logger.Debug("Sending shared CallTarget integration definitions to native library.");
-            var count = NativeMethods.RegisterCallTargetDefinitions(payload.DefinitionsId, definitions, uint.MaxValue);
+            var count = NativeMethods.RegisterCallTargetDefinitions(payload.DefinitionsId, payload.Definitions, uint.MaxValue);
             Logger.Information("The profiler has been initialized with {0} shared definitions for {1}.", count, payload.DefinitionsId);
         }
         catch (EntryPointNotFoundException)
@@ -419,16 +418,6 @@ internal static class Instrumentation
         catch (Exception ex)
         {
             Logger.Error(ex, "Exception occurred while registering shared CallTarget definitions.");
-        }
-        finally
-        {
-            if (definitions is not null)
-            {
-                foreach (var definition in definitions)
-                {
-                    definition.Dispose();
-                }
-            }
         }
     }
 
@@ -454,11 +443,6 @@ internal static class Instrumentation
         {
             Logger.Debug($"Sending CallTarget {type} integration definitions to native library.");
             register(payload.DefinitionsId, payload.Definitions);
-            foreach (var def in payload.Definitions)
-            {
-                def.Dispose();
-            }
-
             Logger.Information("The profiler has been initialized with {0} {1} definitions for {2}.", payload.Definitions.Length, type, payload.DefinitionsId);
         }
         catch (Exception ex)
@@ -623,6 +607,8 @@ internal static class Instrumentation
             }
 
             _sdkEventListener?.Dispose();
+
+            NativeCallTargetUnmanagedMemoryHelper.Free();
 
             Logger.Information("OpenTelemetry Automatic Instrumentation exit.");
         }

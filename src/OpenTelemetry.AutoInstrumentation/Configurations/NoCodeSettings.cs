@@ -157,7 +157,18 @@ internal class NoCodeSettings : Settings
 
             Log.Debug($"NoCode adding instrumentation for assembly: '{noCodeTarget.Assembly.Name}', type: '{noCodeTarget.Type}', method: '{noCodeTarget.Method}' with signature: '{string.Join(",", targetSignatureTypes)}'");
 
-            instrumentedMethods.Add(new NoCodeInstrumentedMethod(definition, targetSignatureTypes, noCodeEntry.Span.Name!, activityKind, attributes, dynamicAttributes, statusRules, dynamicSpanName));
+            instrumentedMethods.Add(new NoCodeInstrumentedMethod(
+                definition,
+                noCodeTarget.Assembly.Name!,
+                noCodeTarget.Type!,
+                noCodeTarget.Method!,
+                targetSignatureTypes,
+                noCodeEntry.Span.Name!,
+                activityKind,
+                attributes,
+                dynamicAttributes,
+                statusRules,
+                dynamicSpanName));
         }
 
         if (instrumentedMethods.Count > 0)

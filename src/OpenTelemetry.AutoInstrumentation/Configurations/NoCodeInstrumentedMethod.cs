@@ -11,6 +11,9 @@ internal class NoCodeInstrumentedMethod
 {
     public NoCodeInstrumentedMethod(
         NativeCallTargetDefinition2 definition,
+        string targetAssembly,
+        string targetType,
+        string targetMethod,
         string[] signatureTypes,
         string spanName,
         ActivityKind activityKind,
@@ -20,6 +23,9 @@ internal class NoCodeInstrumentedMethod
         CelExpression? dynamicSpanName = null)
     {
         Definition = definition;
+        TargetAssembly = targetAssembly;
+        TargetType = targetType;
+        TargetMethod = targetMethod;
         SignatureTypes = signatureTypes;
         SpanName = spanName;
         ActivityKind = activityKind;
@@ -31,7 +37,13 @@ internal class NoCodeInstrumentedMethod
 
     public NativeCallTargetDefinition2 Definition { get; }
 
-    // Not possible to reuse the array from Definition because it is marshalled as IntPtr
+    public string TargetAssembly { get; }
+
+    public string TargetType { get; }
+
+    public string TargetMethod { get; }
+
+    // The definition stores unmanaged pointers, while no-code instrumentation needs managed values at runtime.
     public string[] SignatureTypes { get; }
 
     public string SpanName { get; }
