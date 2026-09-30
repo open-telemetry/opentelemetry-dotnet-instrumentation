@@ -1624,6 +1624,28 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
     // OpenTelemetry.AutoInstrumentation.dll and its dependencies on disk.
     if (valid_loader_callsite && !has_loader_injected_in_appdomain)
     {
+        // The <Module> TypeDef is the first row in the table, and the profiling API can also
+        // report mdTypeDefNil for methods on <Module>. It is not a safe loader call site.
+        constexpr auto moduleTypeDef = mdTypeDefNil + 1;
+        if (caller.type.id == mdTypeDefNil || caller.type.id == moduleTypeDef)
+        {
+            Logger::Debug("JITCompilationStarted: Skipping loader injection in <Module>.", caller.name, "()");
+            return S_OK;
+        }
+
+        auto parentType = caller.type.parent_type;
+        while (parentType != nullptr)
+        {
+            if (parentType->id == mdTypeDefNil || parentType->id == moduleTypeDef)
+            {
+                Logger::Debug("JITCompilationStarted: Skipping loader injection in a type nested under <Module>. ",
+                              caller.type.name, ".", caller.name, "()");
+                return S_OK;
+            }
+
+            parentType = parentType->parent_type;
+        }
+
         bool domain_neutral_assembly = runtime_information_.is_desktop() && corlib_module_loaded &&
                                        module_metadata->app_domain_id == corlib_app_domain_id;
         Logger::Info("JITCompilationStarted: Startup hook registered in function_id=", function_id,

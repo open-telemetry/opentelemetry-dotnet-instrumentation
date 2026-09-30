@@ -3,6 +3,7 @@
 
 #if NETFRAMEWORK
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Security;
 using System.Security.Permissions;
 #endif
@@ -69,6 +70,12 @@ internal static class Program
     }
 
 #if NETFRAMEWORK
+    [ModuleInitializer]
+    internal static void InitializeModule()
+    {
+        Console.WriteLine("ModuleInitializerRan=True");
+    }
+
     private static void RunInPartiallyTrustedAppDomain()
     {
         var permissions = new PermissionSet(PermissionState.None);
