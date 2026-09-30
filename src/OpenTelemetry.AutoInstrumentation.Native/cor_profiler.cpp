@@ -924,6 +924,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
         rejit_handler->RemoveModule(module_id);
     }
 
+    auto& loadedModules = modules.Ref();
+    loadedModules.erase(std::remove(loadedModules.begin(), loadedModules.end(), module_id), loadedModules.end());
+
     const auto& moduleInfo = GetModuleInfo(this->info_, module_id);
     if (!moduleInfo.IsValid())
     {
