@@ -3,11 +3,11 @@
 
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
-using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
@@ -381,12 +381,18 @@ internal static partial class DuckType
 #endif
         }
 
-        // Create a valid type name that can be used as a member of a class. (BenchmarkDotNet fails if is an invalid name)
+        // Create a type name that can be used as a member of a class. The name is primarily for debugging.
 #if NET
-        var proxyTypeName = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}.{typeToDeriveFrom.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}_{++_typeCount}";
+        var proxyTypeNamePrefix = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}.{typeToDeriveFrom.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}";
 #else
-        var proxyTypeName = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_").Replace("+", "__")}.{typeToDeriveFrom.FullName?.Replace(".", "_").Replace("+", "__")}_{++_typeCount}";
+        var proxyTypeNamePrefix = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_").Replace("+", "__")}.{typeToDeriveFrom.FullName?.Replace(".", "_").Replace("+", "__")}";
 #endif
+        var proxyTypeNameSuffix = $"_{(++_typeCount).ToString(CultureInfo.InvariantCulture)}";
+        var maxPrefixSize = 1023 - proxyTypeNameSuffix.Length;
+        var proxyTypeName = (proxyTypeNamePrefix.Length > maxPrefixSize
+                                ? proxyTypeNamePrefix.Substring(0, maxPrefixSize)
+                                : proxyTypeNamePrefix)
+                            + proxyTypeNameSuffix;
 
         // Create Type
         proxyTypeBuilder = moduleBuilder.DefineType(
