@@ -288,3 +288,7 @@ set_target_properties(${TARGET_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Define linker libraries
 target_link_libraries(${TARGET_NAME} "OpenTelemetry.AutoInstrumentation.Native.static")
+
+if (ISLINUX)
+    target_link_libraries(${TARGET_NAME} -Wl,--build-id)
+endif()
