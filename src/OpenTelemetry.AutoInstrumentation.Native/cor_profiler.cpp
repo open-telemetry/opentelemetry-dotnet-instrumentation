@@ -1737,6 +1737,14 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
             parentType = parentType->parent_type;
         }
 
+        // C++/CLI runtime initialization must complete before managed code can run.
+        if (caller.type.name.find(WStr("<CrtImplementationDetails>")) != WSTRING::npos)
+        {
+            Logger::Debug("JITCompilationStarted: Skipping loader injection in ", caller.type.name, ".", caller.name,
+                          "()");
+            return S_OK;
+        }
+
         bool domain_neutral_assembly = runtime_information_.is_desktop() && corlib_module_loaded &&
                                        module_metadata->app_domain_id == corlib_app_domain_id;
         Logger::Info("JITCompilationStarted: Startup hook registered in function_id=", function_id,
