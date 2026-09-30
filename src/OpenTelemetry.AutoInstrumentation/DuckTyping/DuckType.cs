@@ -361,6 +361,8 @@ internal static partial class DuckType
         // Ensure visibility
         EnsureTypeVisibility(moduleBuilder, typeToDelegateTo);
         EnsureTypeVisibility(moduleBuilder, typeToDeriveFrom);
+        // Duck chaining calls the internal CreateCache<T> from the generated assembly.
+        EnsureTypeVisibility(moduleBuilder, typeof(DuckType));
 
         var assembly = string.Empty;
         if (typeToDelegateTo.Assembly is not null)
@@ -1037,6 +1039,7 @@ internal static partial class DuckType
         il.Emit(OpCodes.Initobj, proxyDefinitionType);
 
         // Start copy properties from the proxy to the structure
+        var containsFields = false;
         foreach (var finfo in proxyDefinitionType.GetFields())
         {
             // Skip readonly fields
@@ -1058,12 +1061,18 @@ internal static partial class DuckType
                 il.Emit(OpCodes.Ldloca_S, proxyLocal.LocalIndex);
                 il.EmitCall(OpCodes.Call, prop.GetMethod, null);
                 il.Emit(OpCodes.Stfld, finfo);
+                containsFields = true;
             }
         }
 
         // Return
         il.WriteLoadLocal(structLocal.LocalIndex);
         il.Emit(OpCodes.Ret);
+
+        if (!containsFields && proxyDefinitionType.GetProperties().Length != 0)
+        {
+            DuckTypeDuckCopyStructDoesNotContainsAnyField.Throw(proxyDefinitionType);
+        }
 
         var delegateType = typeof(CreateProxyInstance<>).MakeGenericType(proxyDefinitionType);
         return createStructMethod.CreateDelegate(delegateType);

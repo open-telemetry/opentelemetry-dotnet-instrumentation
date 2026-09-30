@@ -95,12 +95,16 @@ internal static partial class DuckType
         // 4. The proxy type can't be a generic parameter (should be a well known type)
         // 5. Can't be a base type or an interface implemented by the targetType type.
         // 6. The proxy type can't be a CLR type
+        // 7. The proxy type is Nullable<T> where T is a DuckCopy struct.
         return proxyType.GetCustomAttribute<DuckCopyAttribute>() != null ||
                (proxyType != targetType &&
                 !proxyType.IsValueType &&
                 !proxyType.IsGenericParameter &&
                 !proxyType.IsAssignableFrom(targetType) &&
-                proxyType.Module != typeof(string).Module);
+                proxyType.Module != typeof(string).Module) ||
+               (proxyType.IsGenericType &&
+                proxyType.GetGenericTypeDefinition() == typeof(Nullable<>) &&
+                proxyType.GenericTypeArguments[0].GetCustomAttribute<DuckCopyAttribute>() != null);
     }
 
     /// <summary>
