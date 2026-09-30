@@ -170,6 +170,48 @@ TEST_F(CLRHelperTest, GetsTypeInfoFromTypeRefs)
     EXPECT_EQ(expected, actual);
 }
 
+TEST_F(CLRHelperTest, GetsTypeInfoFromTypeSpecs)
+{
+    size_t valid_type_specs = 0;
+    for (auto& type_spec : EnumTypeSpecs(metadata_import_))
+    {
+        const auto type_info = GetTypeInfo(metadata_import_, type_spec);
+        if (type_info.IsValid())
+        {
+            EXPECT_EQ(type_spec, type_info.type_spec);
+            EXPECT_EQ(mdtTypeSpec, type_info.token_type);
+            valid_type_specs++;
+        }
+    }
+
+    EXPECT_GT(valid_type_specs, 0u);
+}
+
+TEST_F(CLRHelperTest, ReturnsEmptyForCircularTypeSpec)
+{
+    mdTypeSpec next_type_spec = mdTypeSpecNil + 1;
+    for (auto& type_spec : EnumTypeSpecs(metadata_import_))
+    {
+        if (type_spec >= next_type_spec)
+        {
+            next_type_spec = type_spec + 1;
+        }
+    }
+
+    COR_SIGNATURE signature[8] = {ELEMENT_TYPE_GENERICINST, ELEMENT_TYPE_CLASS};
+    const auto compressed_length = CorSigCompressToken(next_type_spec, &signature[2]);
+    signature[2 + compressed_length] = 1;
+    signature[3 + compressed_length] = ELEMENT_TYPE_I4;
+
+    mdTypeSpec circular_type_spec = mdTypeSpecNil;
+    const auto hr = metadata_emit_->GetTokenFromTypeSpec(signature, 4 + compressed_length, &circular_type_spec);
+    ASSERT_TRUE(SUCCEEDED(hr));
+    ASSERT_EQ(next_type_spec, circular_type_spec);
+
+    const auto type_info = GetTypeInfo(metadata_import_, circular_type_spec);
+    EXPECT_FALSE(type_info.IsValid());
+}
+
 TEST_F(CLRHelperTest, GetsTypeInfoFromModuleRefs)
 {
     // TODO(cbd): figure out how to create a module ref, for now its empty
