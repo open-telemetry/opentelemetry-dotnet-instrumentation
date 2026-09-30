@@ -2179,6 +2179,16 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
         return hr;
     }
 
+    COR_SIGNATURE is_homogenous_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 0, ELEMENT_TYPE_BOOLEAN};
+    mdToken get_is_homogenous_token;
+    hr = resolver.GetMemberRefOrDef(appdomain_type_token, WStr("get_IsHomogenous"), is_homogenous_signature,
+                                    sizeof(is_homogenous_signature), &get_is_homogenous_token);
+    if (FAILED(hr))
+    {
+        Logger::Warn("RunAutoInstrumentationLoader: failed to resolve AppDomain.get_IsHomogenous");
+        return hr;
+    }
+
     COR_SIGNATURE is_fully_trusted_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 0, ELEMENT_TYPE_BOOLEAN};
     mdToken get_is_fully_trusted_token;
     hr = resolver.GetMemberRefOrDef(appdomain_type_token, WStr("get_IsFullyTrusted"), is_fully_trusted_signature,
@@ -2205,12 +2215,18 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
     ILInstr* pInstr = rewriter.GetILList()->m_pNext;
     rewriter_wrapper.SetILPosition(pInstr);
 
-    // Check trust before calling the loader type: its static constructor loads the managed assembly.
+    // Legacy security policy creates non-homogenous domains in which IsFullyTrusted can throw.
+    // Check both properties before calling the loader type: its static constructor loads the managed assembly.
+    rewriter_wrapper.CallMember(get_current_domain_token, false);
+    rewriter_wrapper.CallMember(get_is_homogenous_token, true);
+    ILInstr* skip_loader_if_not_homogenous = rewriter_wrapper.CreateInstr(CEE_BRFALSE_S);
     rewriter_wrapper.CallMember(get_current_domain_token, false);
     rewriter_wrapper.CallMember(get_is_fully_trusted_token, true);
-    ILInstr* skip_loader = rewriter_wrapper.CreateInstr(CEE_BRFALSE_S);
+    ILInstr* skip_loader_if_not_fully_trusted = rewriter_wrapper.CreateInstr(CEE_BRFALSE_S);
     rewriter_wrapper.CallMember(ret_method_token, false);
-    skip_loader->m_pTarget = rewriter_wrapper.NOP();
+    ILInstr* after_loader = rewriter_wrapper.NOP();
+    skip_loader_if_not_homogenous->m_pTarget = after_loader;
+    skip_loader_if_not_fully_trusted->m_pTarget = after_loader;
 
     hr = rewriter.Export();
 
