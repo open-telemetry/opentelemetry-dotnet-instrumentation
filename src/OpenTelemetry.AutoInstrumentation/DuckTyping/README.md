@@ -364,6 +364,17 @@ the `Configuration` property is going to be wrapped with
 a `IProxyMyHandlerConfiguration` instance automatically. That allow us to access
 the internal data of that non public type.
 
+## Preserving the declared type
+
+The public `ValueWithType<TProxy>` helper preserves the target member's
+declared type when its value is null. For example, a proxy can declare
+`ValueWithType<IProxyMyHandlerConfiguration> Configuration`; its `Value` is the
+duck typed configuration, while its `Type` is the original
+`MyHandlerConfiguration` type even if `Value` is null.
+
+The helper works with proxy properties, fields, and method return values. A
+property or field setter passes the wrapped `Value` to the target member.
+
 ## Benchmarks
 
 Several benchmark tests were run for multiple cases to keep track of the time

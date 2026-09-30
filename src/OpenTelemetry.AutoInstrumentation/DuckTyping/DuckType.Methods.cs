@@ -996,6 +996,14 @@ internal static partial class DuckType
             Func<Type, Type, bool> needsDuckChainingFunc,
             Func<LazyILGenerator, Type, Type, Type> addDuckChainIlFunc)
         {
+            var isValueWithType = false;
+            var originalOuterMethodReturnType = outerMethodReturnType;
+            if (outerMethodReturnType.IsGenericType && outerMethodReturnType.GetGenericTypeDefinition() == typeof(ValueWithType<>))
+            {
+                outerMethodReturnType = outerMethodReturnType.GenericTypeArguments[0];
+                isValueWithType = true;
+            }
+
             // Check if the target method returns something
 
             if ((innerMethodReturnType == typeof(void) && outerMethodReturnType != typeof(void))
@@ -1020,6 +1028,13 @@ internal static partial class DuckType
                     // If the type is not the expected type we try a conversion.
                     il.WriteSafeTypeConversion(currentReturnType, outerMethodReturnType);
                 }
+            }
+
+            if (isValueWithType)
+            {
+                il.Emit(OpCodes.Ldtoken, innerMethodReturnType);
+                il.EmitCall(OpCodes.Call, GetTypeFromHandleMethodInfo, null!);
+                il.EmitCall(OpCodes.Call, originalOuterMethodReturnType.GetMethod("Create", BindingFlags.Static | BindingFlags.Public)!, null!);
             }
 
             il.Emit(OpCodes.Ret);

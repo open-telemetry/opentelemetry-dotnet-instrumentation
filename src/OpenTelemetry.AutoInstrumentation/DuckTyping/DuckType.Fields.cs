@@ -27,6 +27,14 @@ internal static partial class DuckType
             proxyMemberReturnType,
             Type.EmptyTypes);
 
+        var isValueWithType = false;
+        var originalProxyMemberReturnType = proxyMemberReturnType;
+        if (proxyMemberReturnType.IsGenericType && proxyMemberReturnType.GetGenericTypeDefinition() == typeof(ValueWithType<>))
+        {
+            proxyMemberReturnType = proxyMemberReturnType.GenericTypeArguments[0];
+            isValueWithType = true;
+        }
+
         var il = new LazyILGenerator(proxyMethod?.GetILGenerator());
         var returnType = targetField.FieldType;
 
@@ -116,6 +124,13 @@ internal static partial class DuckType
             il.WriteTypeConversion(returnType, proxyMemberReturnType);
         }
 
+        if (isValueWithType)
+        {
+            il.Emit(OpCodes.Ldtoken, targetField.FieldType);
+            il.EmitCall(OpCodes.Call, GetTypeFromHandleMethodInfo, null!);
+            il.EmitCall(OpCodes.Call, originalProxyMemberReturnType.GetMethod("Create", BindingFlags.Static | BindingFlags.Public)!, null!);
+        }
+
         il.Emit(OpCodes.Ret);
         il.Flush();
         if (proxyMethod is not null)
@@ -145,6 +160,15 @@ internal static partial class DuckType
         var il = new LazyILGenerator(method?.GetILGenerator());
         var currentValueType = proxyMemberReturnType;
 
+        var isValueWithType = false;
+        var originalProxyMemberReturnType = proxyMemberReturnType;
+        if (proxyMemberReturnType.IsGenericType && proxyMemberReturnType.GetGenericTypeDefinition() == typeof(ValueWithType<>))
+        {
+            proxyMemberReturnType = proxyMemberReturnType.GenericTypeArguments[0];
+            currentValueType = proxyMemberReturnType;
+            isValueWithType = true;
+        }
+
         // Load instance
         if (!targetField.IsStatic)
         {
@@ -160,6 +184,11 @@ internal static partial class DuckType
         {
             // Load the argument and convert it to Duck type
             il.Emit(OpCodes.Ldarg_1);
+            if (isValueWithType)
+            {
+                il.Emit(OpCodes.Ldfld, originalProxyMemberReturnType.GetField("Value")!);
+            }
+
             il.WriteTypeConversion(proxyMemberReturnType, typeof(IDuckType));
 
             // Call IDuckType.Instance property to get the actual value
@@ -171,6 +200,10 @@ internal static partial class DuckType
         {
             // Load the value into the stack
             il.Emit(OpCodes.Ldarg_1);
+            if (isValueWithType)
+            {
+                il.Emit(OpCodes.Ldfld, originalProxyMemberReturnType.GetField("Value")!);
+            }
         }
 
         // We set the field value
