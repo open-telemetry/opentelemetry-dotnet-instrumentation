@@ -74,6 +74,18 @@ EXTERN_C VOID STDAPICALLTYPE AddInterfaceInstrumentations(WCHAR* id, trace::Call
     trace::profiler->AddInterfaceInstrumentations(id, items, size);
 }
 
+EXTERN_C int STDAPICALLTYPE RegisterCallTargetDefinitions(WCHAR* id, trace::CallTargetDefinition2* items, int size,
+                                                           std::uint32_t enabledCategories)
+{
+    if (trace::profiler == nullptr)
+    {
+        trace::Logger::Error("RegisterCallTargetDefinitions: CLR profiler is not initialized.");
+        return 0;
+    }
+
+    return trace::profiler->RegisterCallTargetDefinitions(id, items, size, enabledCategories);
+}
+
 EXTERN_C VOID STDAPICALLTYPE SetSqlClientNetFxILRewriteEnabled(bool enabled)
 {
     return trace::SetSqlClientNetFxILRewriteEnabled(enabled);

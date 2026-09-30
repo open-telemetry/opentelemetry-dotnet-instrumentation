@@ -10,15 +10,18 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal class NoCodeSettings : Settings
 {
+    private const byte DirectCallTargetKind = 0;
+    private const uint TracingCategory = 1;
+
     private static readonly IOtelLogger Log = OtelLogging.GetLogger();
 
     public bool Enabled { get; set; }
 
     public List<NoCodeInstrumentedMethod> InstrumentedMethods { get; set; } = [];
 
-    public Payload GetDirectPayload()
+    public SharedPayload GetDirectPayload()
     {
-        return new Payload
+        return new SharedPayload
         {
             // Fixed Id for definitions payload (to avoid loading same integrations from multiple AppDomains)
             DefinitionsId = "D3B88A224E034D60AC3A923BABEE6B7F",
@@ -130,7 +133,7 @@ internal class NoCodeSettings : Settings
                 Array.Copy(noCodeTarget.Signature.ParameterTypes, 0, targetSignatureTypes, 1, noCodeTarget.Signature.ParameterTypes.Length);
             }
 
-            var definition = new NativeCallTargetDefinition(
+            var definition = new NativeCallTargetDefinition2(
                 noCodeTarget.Assembly.Name!,
                 noCodeTarget.Type!,
                 noCodeTarget.Method!,
@@ -142,7 +145,9 @@ internal class NoCodeSettings : Settings
                 ushort.MaxValue,
                 ushort.MaxValue,
                 AssemblyFullName,
-                $"OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.NoCodeIntegration{parametersCount}");
+                $"OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode.NoCodeIntegration{parametersCount}",
+                DirectCallTargetKind,
+                TracingCategory);
 
             var activityKind = ParseActivityKind(noCodeEntry.Span.Kind);
             var attributes = noCodeEntry.Span.ParseAttributes();

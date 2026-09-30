@@ -10,7 +10,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 internal class NoCodeInstrumentedMethod
 {
     public NoCodeInstrumentedMethod(
-        NativeCallTargetDefinition definition,
+        NativeCallTargetDefinition2 definition,
         string[] signatureTypes,
         string spanName,
         ActivityKind activityKind,
@@ -29,7 +29,7 @@ internal class NoCodeInstrumentedMethod
         DynamicSpanName = dynamicSpanName;
     }
 
-    public NativeCallTargetDefinition Definition { get; }
+    public NativeCallTargetDefinition2 Definition { get; }
 
     // Not possible to reuse the array from Definition because it is marshalled as IntPtr
     public string[] SignatureTypes { get; }

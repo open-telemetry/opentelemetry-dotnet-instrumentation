@@ -7,6 +7,7 @@
 #define OTEL_CLR_PROFILER_INTEGRATION_H_
 
 #include <corhlpr.h>
+#include <cstdint>
 #include <iomanip>
 #include <sstream>
 #include <unordered_set>
@@ -314,6 +315,11 @@ struct MethodReference
 
 struct IntegrationDefinition
 {
+private:
+    std::uint32_t categories = 1;
+    std::uint32_t enabled_categories = 0;
+
+public:
     const MethodReference target_method;
     const TypeReference integration_type;
     const bool is_derived = false;
@@ -325,7 +331,10 @@ struct IntegrationDefinition
     }
 
     IntegrationDefinition(const MethodReference& target_method, const TypeReference& integration_type, bool isDerived,
-                          bool isInterface, bool is_exact_signature_match) :
+                          bool isInterface, bool is_exact_signature_match, std::uint32_t categories = 1,
+                          std::uint32_t enabledCategories = static_cast<std::uint32_t>(-1)) :
+        categories(categories),
+        enabled_categories(categories & enabledCategories),
         target_method(target_method),
         integration_type(integration_type),
         is_derived(isDerived),
@@ -338,7 +347,12 @@ struct IntegrationDefinition
     {
         return target_method == other.target_method && integration_type == other.integration_type &&
                is_derived == other.is_derived && is_interface == other.is_interface &&
-               is_exact_signature_match == other.is_exact_signature_match;
+               is_exact_signature_match == other.is_exact_signature_match && categories == other.categories;
+    }
+
+    inline bool GetEnabled() const
+    {
+        return enabled_categories != 0;
     }
 };
 
@@ -358,6 +372,42 @@ typedef struct _CallTargetDefinition
     WCHAR* integrationAssembly;
     WCHAR* integrationType;
 } CallTargetDefinition;
+
+enum class CallTargetKind : std::uint8_t
+{
+    Default = 0,
+    Derived = 1,
+    Interface = 2
+};
+
+typedef struct _CallTargetDefinition2
+{
+    WCHAR* targetAssembly;
+    WCHAR* targetType;
+    WCHAR* targetMethod;
+    WCHAR** signatureTypes;
+    USHORT signatureTypesLength;
+    USHORT targetMinimumMajor;
+    USHORT targetMinimumMinor;
+    USHORT targetMinimumPatch;
+    USHORT targetMaximumMajor;
+    USHORT targetMaximumMinor;
+    USHORT targetMaximumPatch;
+    WCHAR* integrationAssembly;
+    WCHAR* integrationType;
+    CallTargetKind kind;
+    std::uint32_t categories;
+
+    inline bool GetIsDerived() const
+    {
+        return kind == CallTargetKind::Derived;
+    }
+
+    inline bool GetIsInterface() const
+    {
+        return kind == CallTargetKind::Interface;
+    }
+} CallTargetDefinition2;
 
 namespace
 {

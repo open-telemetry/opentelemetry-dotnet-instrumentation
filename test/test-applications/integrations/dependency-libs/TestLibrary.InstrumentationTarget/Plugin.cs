@@ -9,6 +9,9 @@ namespace TestLibrary.InstrumentationTarget;
 
 public class Plugin : IPlugin
 {
+    private const byte DirectCallTargetKind = 0;
+    private const uint TracingCategory = 1;
+
     public void Initializing()
     {
         Console.WriteLine($"{nameof(Plugin)}.{nameof(Initializing)}() invoked.");
@@ -19,19 +22,19 @@ public class Plugin : IPlugin
         Console.WriteLine($"{nameof(Plugin)}.{nameof(Initialized)}() invoked.");
     }
 
-    internal InstrumentationDefinitions.Payload GetAllDefinitionsPayload()
+    internal InstrumentationDefinitions.SharedPayload GetAllDefinitionsPayload()
     {
         Console.WriteLine($"{nameof(Plugin)}.{nameof(GetAllDefinitionsPayload)}() invoked.");
-        var payload = new InstrumentationDefinitions.Payload
+        var payload = new InstrumentationDefinitions.SharedPayload
         {
             DefinitionsId = "AA83654D58B24C67A4D35ED9E6716271",
             Definitions =
             [
                 // Trace - StrongNameValidation
-                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "Execute",  ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(Validator).Assembly.FullName!, "TestLibrary.InstrumentationTarget.StrongNamedValidation.Validator"),
-                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "BubbleUpOnBegin", ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(BubbleUpOnBeginValidator).Assembly.FullName!, typeof(BubbleUpOnBeginValidator).FullName!),
-                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "BubbleUpOnEnd", ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(BubbleUpOnEndValidator).Assembly.FullName!, typeof(BubbleUpOnEndValidator).FullName!),
-                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "IgnoreRegularIntegrationException", ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(RegularExceptionValidator).Assembly.FullName!, typeof(RegularExceptionValidator).FullName!),
+                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "Execute",  ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(Validator).Assembly.FullName!, "TestLibrary.InstrumentationTarget.StrongNamedValidation.Validator", DirectCallTargetKind, TracingCategory),
+                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "BubbleUpOnBegin", ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(BubbleUpOnBeginValidator).Assembly.FullName!, typeof(BubbleUpOnBeginValidator).FullName!, DirectCallTargetKind, TracingCategory),
+                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "BubbleUpOnEnd", ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(BubbleUpOnEndValidator).Assembly.FullName!, typeof(BubbleUpOnEndValidator).FullName!, DirectCallTargetKind, TracingCategory),
+                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "IgnoreRegularIntegrationException", ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(RegularExceptionValidator).Assembly.FullName!, typeof(RegularExceptionValidator).FullName!, DirectCallTargetKind, TracingCategory),
             ]
         };
 

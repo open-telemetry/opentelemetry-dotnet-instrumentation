@@ -237,6 +237,11 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
 
         for (const RejitRequestDefinition& definition : definitions)
         {
+            if (!GetIsEnabled(definition))
+            {
+                continue;
+            }
+
             const auto target_method = GetTargetMethod(definition);
             const auto is_derived    = GetIsDerived(definition);
             const auto is_interface  = GetIsInterface(definition);
@@ -586,6 +591,11 @@ const bool TracerRejitPreprocessor::GetIsInterface(const IntegrationDefinition& 
 const bool TracerRejitPreprocessor::GetIsExactSignatureMatch(const IntegrationDefinition& integrationDefinition)
 {
     return integrationDefinition.is_exact_signature_match;
+}
+
+const bool TracerRejitPreprocessor::GetIsEnabled(const IntegrationDefinition& integrationDefinition)
+{
+    return integrationDefinition.GetEnabled();
 }
 
 const std::unique_ptr<RejitHandlerModuleMethod> TracerRejitPreprocessor::CreateMethod(

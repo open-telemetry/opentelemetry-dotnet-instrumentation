@@ -20,6 +20,26 @@ TEST(IntegrationTest, AssemblyReference)
     EXPECT_EQ(ref.public_key, PublicKey({0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef}));
 }
 
+TEST(IntegrationTest, CallTargetDefinition2PreservesV1Prefix)
+{
+    EXPECT_EQ(offsetof(CallTargetDefinition2, categories), sizeof(CallTargetDefinition) + 4);
+    EXPECT_EQ(sizeof(CallTargetDefinition2), sizeof(CallTargetDefinition) + 8);
+}
+
+TEST(IntegrationTest, SharedCallTargetRemainsEnabledWhileOneCategoryIsEnabled)
+{
+    MethodReference target(WStr("TargetAssembly"), WStr("TargetType"), WStr("TargetMethod"), Version(1, 0, 0, 0),
+                           Version(2, 0, 0, 0), {});
+    TypeReference integration(WStr("IntegrationAssembly"), WStr("IntegrationType"), {}, {});
+    IntegrationDefinition traceEnabled(target, integration, false, false, true, 3, 1);
+    IntegrationDefinition metricEnabled(target, integration, false, false, true, 3, 2);
+    IntegrationDefinition unrelatedCategoryEnabled(target, integration, false, false, true, 3, 4);
+
+    EXPECT_TRUE(traceEnabled.GetEnabled());
+    EXPECT_TRUE(metricEnabled.GetEnabled());
+    EXPECT_FALSE(unrelatedCategoryEnabled.GetEnabled());
+}
+
 TEST(IntegrationTest, AssemblyReferenceNameOnly)
 {
     AssemblyReference ref(L"Some.Assembly");

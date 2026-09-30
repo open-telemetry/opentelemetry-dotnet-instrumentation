@@ -235,6 +235,8 @@ public:
     void AddInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
     void AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
     void AddInterfaceInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
+    int RegisterCallTargetDefinitions(WCHAR* id, CallTargetDefinition2* items, int size,
+                                      std::uint32_t enabledCategories);
     void InitializeTraceMethods(WCHAR* id,
                                 WCHAR* integration_assembly_name_ptr,
                                 WCHAR* integration_type_name_ptr,

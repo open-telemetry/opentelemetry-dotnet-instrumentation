@@ -1235,6 +1235,97 @@ void CorProfiler::InternalAddInstrumentation(
     }
 }
 
+int CorProfiler::RegisterCallTargetDefinitions(WCHAR* id, CallTargetDefinition2* items, int size,
+                                                std::uint32_t enabledCategories)
+{
+    auto _ = trace::Stats::Instance()->InitializeProfilerMeasure();
+    if (id == nullptr || size < 0 || (size > 0 && items == nullptr))
+    {
+        Logger::Warn("RegisterCallTargetDefinitions: invalid definitions payload.");
+        return 0;
+    }
+
+    const WSTRING definitionsId(id);
+    auto definitions = definitions_ids.Get();
+    if (definitions->find(definitionsId) != definitions->end())
+    {
+        Logger::Info("RegisterCallTargetDefinitions: Id already processed.");
+        return 0;
+    }
+
+    if (rejit_handler == nullptr)
+    {
+        return 0;
+    }
+
+    std::vector<IntegrationDefinition> integrationDefinitions;
+    integrationDefinitions.reserve(size);
+    for (int i = 0; i < size; i++)
+    {
+        const auto& current = items[i];
+        if (current.targetAssembly == nullptr || current.targetType == nullptr || current.targetMethod == nullptr ||
+            current.integrationAssembly == nullptr || current.integrationType == nullptr ||
+            (current.signatureTypesLength > 0 && current.signatureTypes == nullptr) || current.categories == 0 ||
+            (current.kind != CallTargetKind::Default && current.kind != CallTargetKind::Derived &&
+             current.kind != CallTargetKind::Interface))
+        {
+            Logger::Warn("RegisterCallTargetDefinitions: skipping invalid definition at index ", i);
+            continue;
+        }
+
+        const WSTRING targetAssembly(current.targetAssembly);
+        const WSTRING targetType(current.targetType);
+        const WSTRING targetMethod(current.targetMethod);
+        const WSTRING integrationAssembly(current.integrationAssembly);
+        const WSTRING integrationType(current.integrationType);
+
+        std::vector<WSTRING> signatureTypes;
+        signatureTypes.reserve(current.signatureTypesLength);
+        for (int signatureIndex = 0; signatureIndex < current.signatureTypesLength; signatureIndex++)
+        {
+            const auto signature = current.signatureTypes[signatureIndex];
+            if (signature != nullptr)
+            {
+                signatureTypes.emplace_back(signature);
+            }
+        }
+
+        const Version minVersion(current.targetMinimumMajor, current.targetMinimumMinor, current.targetMinimumPatch, 0);
+        const Version maxVersion(current.targetMaximumMajor, current.targetMaximumMinor, current.targetMaximumPatch, 0);
+        integrationDefinitions.emplace_back(
+            MethodReference(targetAssembly, targetType, targetMethod, minVersion, maxVersion, signatureTypes),
+            TypeReference(integrationAssembly, integrationType, {}, {}), current.GetIsDerived(),
+            current.GetIsInterface(), true, current.categories, enabledCategories);
+    }
+
+    auto modules = module_ids.Get();
+    definitions->emplace(definitionsId);
+    integration_definitions_.reserve(integration_definitions_.size() + integrationDefinitions.size());
+    for (const auto& integration : integrationDefinitions)
+    {
+        integration_definitions_.push_back(integration);
+    }
+
+    if (!integrationDefinitions.empty())
+    {
+        auto promise = std::make_shared<std::promise<ULONG>>();
+        auto future = promise->get_future();
+        tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(modules.Ref(), integrationDefinitions,
+                                                                             promise);
+        if (future.wait_for(100ms) == std::future_status::timeout)
+        {
+            Logger::Warn("Timeout while waiting for V2 ReJIT requests. ReJIT will continue asynchronously.");
+        }
+        else
+        {
+            Logger::Debug("RegisterCallTargetDefinitions: Total number of ReJIT requested: ", future.get());
+        }
+    }
+
+    Logger::Info("RegisterCallTargetDefinitions: Total integrations in profiler: ", integration_definitions_.size());
+    return static_cast<int>(integrationDefinitions.size());
+}
+
 void CorProfiler::InitializeRuntimeSamplerService() noexcept
 {
     try

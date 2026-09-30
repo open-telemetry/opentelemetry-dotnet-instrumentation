@@ -43,6 +43,7 @@ protected:
     virtual const bool GetIsDerived(const RejitRequestDefinition& definition) = 0;
     virtual const bool GetIsInterface(const RejitRequestDefinition& definition) = 0;
     virtual const bool GetIsExactSignatureMatch(const RejitRequestDefinition& definition) = 0;
+    virtual const bool GetIsEnabled(const RejitRequestDefinition& definition) = 0;
     virtual const std::unique_ptr<RejitHandlerModuleMethod> CreateMethod(mdMethodDef methodDef,
                                                                          RejitHandlerModule* module,
                                                                          const FunctionInfo& functionInfo,
@@ -74,6 +75,7 @@ protected:
     const bool GetIsDerived(const IntegrationDefinition& definition) final;
     const bool GetIsInterface(const IntegrationDefinition& definition) final;
     const bool GetIsExactSignatureMatch(const IntegrationDefinition& definition) final;
+    const bool GetIsEnabled(const IntegrationDefinition& definition) final;
     const std::unique_ptr<RejitHandlerModuleMethod>
     CreateMethod(mdMethodDef methodDef, RejitHandlerModule* module, const FunctionInfo& functionInfo,
                  const IntegrationDefinition& integrationDefinition) final;

@@ -92,16 +92,16 @@ internal partial class PluginManager
     /// The contacts is based on internal classes and InternalsVisibleTo attributes. It should be refactored before supporting it.
     /// </summary>
     /// <returns>List of payloads.</returns>
-    public IEnumerable<InstrumentationDefinitions.Payload> GetAllDefinitionsPayloads()
+    public IEnumerable<InstrumentationDefinitions.SharedPayload> GetAllDefinitionsPayloads()
     {
-        var payloads = new List<InstrumentationDefinitions.Payload>();
+        var payloads = new List<InstrumentationDefinitions.SharedPayload>();
 
         foreach (var plugin in _plugins)
         {
             var mi = plugin.Type.GetMethod("GetAllDefinitionsPayload", BindingFlags.NonPublic | BindingFlags.Instance);
             if (mi is not null)
             {
-                if (mi.Invoke(plugin.Instance, null) is InstrumentationDefinitions.Payload payload)
+                if (mi.Invoke(plugin.Instance, null) is InstrumentationDefinitions.SharedPayload payload)
                 {
                     payloads.Add(payload);
                 }

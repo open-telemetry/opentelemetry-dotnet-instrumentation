@@ -193,27 +193,25 @@ internal static class Instrumentation
 
         if (GeneralSettings.Value.ProfilerEnabled)
         {
-            RegisterDirectBytecodeInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
+            RegisterSharedBytecodeInstrumentations(InstrumentationDefinitions.GetSharedDefinitions());
+
             if (NoCodeSettings.Value.Enabled)
             {
                 NoCodeIntegrationHelper.NoCodeEntries = NoCodeSettings.Value.InstrumentedMethods;
-                RegisterBytecodeInstrumentations(NoCodeSettings.Value.GetDirectPayload(), "direct, no-code", NativeMethods.AddInstrumentations);
+                RegisterSharedBytecodeInstrumentations(NoCodeSettings.Value.GetDirectPayload());
             }
 
             try
             {
                 foreach (var payload in _pluginManager.GetAllDefinitionsPayloads())
                 {
-                    RegisterDirectBytecodeInstrumentations(payload);
+                    RegisterSharedBytecodeInstrumentations(payload);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
             }
-
-            RegisterBytecodeDerivedInstrumentations(InstrumentationDefinitions.GetDerivedDefinitions());
-            RegisterBytecodeInterfaceInstrumentations(InstrumentationDefinitions.GetInterfaceDefinitions());
         }
         else
         {
@@ -405,6 +403,36 @@ internal static class Instrumentation
         return null;
     }
 
+    private static void RegisterSharedBytecodeInstrumentations(InstrumentationDefinitions.SharedPayload payload)
+    {
+        var definitions = payload.Definitions;
+        try
+        {
+            Logger.Debug("Sending shared CallTarget integration definitions to native library.");
+            var count = NativeMethods.RegisterCallTargetDefinitions(payload.DefinitionsId, definitions, uint.MaxValue);
+            Logger.Information("The profiler has been initialized with {0} shared definitions for {1}.", count, payload.DefinitionsId);
+        }
+        catch (EntryPointNotFoundException)
+        {
+            Logger.Information("Native profiler does not support shared CallTarget definitions.");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Exception occurred while registering shared CallTarget definitions.");
+        }
+        finally
+        {
+            if (definitions is not null)
+            {
+                foreach (var definition in definitions)
+                {
+                    definition.Dispose();
+                }
+            }
+        }
+    }
+
+    // V1 registration is intentionally retained, but unused, to simplify future upstream synchronization.
     private static void RegisterDirectBytecodeInstrumentations(InstrumentationDefinitions.Payload payload)
     {
         RegisterBytecodeInstrumentations(payload, "direct", NativeMethods.AddInstrumentations);
