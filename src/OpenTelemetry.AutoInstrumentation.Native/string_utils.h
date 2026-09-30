@@ -7,6 +7,7 @@
 #define OTEL_CLR_PROFILER_STRING_H_
 
 #include <corhlpr.h>
+#include <iomanip>
 #include <sstream>
 #include <string>
 
@@ -21,6 +22,16 @@
 namespace trace
 {
 
+std::string PadLeft(const std::string& txt, std::size_t len, char c = ' ');
+
+inline std::string Hex(ULONG value, int padding = 8, std::string prefix = "0x")
+{
+    std::stringstream str;
+    str << prefix << std::hex << std::uppercase << std::right << std::setfill('0') << std::setw(padding)
+        << (ULONG)value;
+    return str.str();
+}
+
 typedef std::basic_string<WCHAR> WSTRING;
 
 #ifndef MACOS
@@ -32,6 +43,7 @@ std::string ToString(const char* str);
 std::string ToString(const uint64_t i);
 std::string ToString(const WSTRING& wstr);
 std::string ToString(const WCHAR* wstr, std::size_t nbChars);
+std::string ToString(const GUID& uid);
 
 WSTRING ToWSTRING(const std::string& str);
 WSTRING ToWSTRING(const uint64_t i);
