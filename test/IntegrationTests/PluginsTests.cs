@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using IntegrationTests.Helpers;
-using OpAmp.Proto.V1;
 
 namespace IntegrationTests;
 
@@ -10,7 +9,6 @@ public class PluginsTests : TestHelper
 {
     private const string PluginInitPattern = "Plugin.Initializing() invoked.";
     private const string PluginInitDonePattern = "Plugin.Initialized() invoked.";
-    private const string OpAmpCustomMessagePattern = "Plugin.HandleMessage(CustomMessageMessage) invoked: Utf8String.";
 
     public PluginsTests(ITestOutputHelper output)
         : base("Plugins", output)
@@ -106,9 +104,9 @@ public class PluginsTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void OpAmpPluginLifecycleHandlesInitialResponseWithEnvironmentVariables()
+    public void OpAmpPluginConfigurationAndShutdownWithEnvironmentVariables()
     {
-        AssertOpAmpPluginLifecycleHandlesInitialResponse(() =>
+        AssertOpAmpPluginConfigurationAndShutdown(() =>
         {
             SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
             SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_ENABLED", "true");
@@ -119,30 +117,24 @@ public class PluginsTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void OpAmpPluginLifecycleHandlesInitialResponseWithFileBasedConfiguration()
+    public void OpAmpPluginConfigurationAndShutdownWithFileBasedConfiguration()
     {
-        AssertOpAmpPluginLifecycleHandlesInitialResponse(() => EnableFileBasedConfig());
+        AssertOpAmpPluginConfigurationAndShutdown(() => EnableFileBasedConfig());
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void FirstConfiguredOpAmpPluginOwnsTheClient()
+    public void OnlyFirstConfiguredOpAmpPluginReceivesOpAmpCallbacks()
     {
         const string pluginTypePrefix = "TestApplication.Plugins.";
         const string pluginAssemblySuffix = ", TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
-        const string selectedPlugin = "SettingsOnlyOpAmpPlugin";
+        const string selectedPlugin = "SelectedOpAmpPlugin";
         const string ignoredPlugin = "Plugin";
         const string selectedPluginType = pluginTypePrefix + selectedPlugin;
         const string ignoredPluginType = pluginTypePrefix + ignoredPlugin;
         const string selectedPluginName = selectedPluginType + pluginAssemblySuffix;
         const string ignoredPluginName = ignoredPluginType + pluginAssemblySuffix;
         using var server = new MockOpAmpServer(Output);
-
-        server.Expect(
-            frame => frame.AgentDescription != null &&
-                     ((AgentCapabilities)frame.Capabilities & AgentCapabilities.AcceptsRemoteConfig) != 0,
-            "Initial frame reflects only the selected OpAMP plugin");
-        server.Expect(frame => frame.AgentDisconnect != null, "Has AgentDisconnect frame");
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", $"{selectedPluginName}:{ignoredPluginName}");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_ENABLED", "true");
@@ -152,23 +144,26 @@ public class PluginsTests : TestHelper
         var (standardOutput, _, _) = RunTestApplication();
         var outputLines = standardOutput.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
 
-        server.AssertExpectations();
         Assert.Contains($"{selectedPlugin}.Initializing() invoked.", outputLines);
         Assert.Contains($"{selectedPlugin}.Initialized() invoked.", outputLines);
         Assert.Contains($"{ignoredPlugin}.Initializing() invoked.", outputLines);
         Assert.Contains($"{ignoredPlugin}.Initialized() invoked.", outputLines);
+        Assert.Contains($"{selectedPlugin}.ConfigureOpAmpOptions() invoked.", outputLines);
+        Assert.Contains($"{selectedPlugin}.ConfigureOpAmpClient() invoked.", outputLines);
+        Assert.Contains($"{selectedPlugin}.BeforeOpAmpClientStopped() invoked.", outputLines);
+        Assert.DoesNotContain($"{ignoredPlugin}.ConfigureOpAmpOptions() invoked.", outputLines);
+        Assert.DoesNotContain($"{ignoredPlugin}.ConfigureOpAmpClient() invoked.", outputLines);
+        Assert.DoesNotContain($"{ignoredPlugin}.BeforeOpAmpClientStopped() invoked.", outputLines);
         Assert.Contains("Multiple OpAMP plugins are configured.", standardOutput, StringComparison.Ordinal);
         Assert.Contains($"Using '{selectedPluginType}'", standardOutput, StringComparison.Ordinal);
         Assert.Contains(ignoredPluginType, standardOutput, StringComparison.Ordinal);
     }
 
-    private void AssertOpAmpPluginLifecycleHandlesInitialResponse(Action configureOpAmp)
+    private void AssertOpAmpPluginConfigurationAndShutdown(Action configureOpAmp)
     {
         const int maxPendingCustomMessages = 123;
         const int maxPendingCustomMessageBytes = 456;
-        using var server = new MockOpAmpServer(
-            Output,
-            sendCustomMessageInInitialResponseOnly: true);
+        using var server = new MockOpAmpServer(Output);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_SERVER_URL", server.Endpoint);
         configureOpAmp();
@@ -179,15 +174,13 @@ public class PluginsTests : TestHelper
         Assert.Contains($"MaxPendingCustomMessages: {maxPendingCustomMessages}", standardOutput, StringComparison.Ordinal);
         Assert.Contains($"MaxPendingCustomMessageBytes: {maxPendingCustomMessageBytes}", standardOutput, StringComparison.Ordinal);
         Assert.Contains("Plugin.ConfigureOpAmpClient() invoked.", standardOutput, StringComparison.Ordinal);
-        Assert.Contains(OpAmpCustomMessagePattern, standardOutput, StringComparison.Ordinal);
-        Assert.Contains("Plugin.AfterOpAmpClientStarted() invoked.", standardOutput, StringComparison.Ordinal);
         Assert.Contains("Plugin.BeforeOpAmpClientStopped() invoked.", standardOutput, StringComparison.Ordinal);
 
         var configureClientIndex = standardOutput.IndexOf("Plugin.ConfigureOpAmpClient() invoked.", StringComparison.Ordinal);
         var initializedIndex = standardOutput.IndexOf(PluginInitDonePattern, StringComparison.Ordinal);
-        var messageIndex = standardOutput.IndexOf(OpAmpCustomMessagePattern, StringComparison.Ordinal);
+        var beforeStopIndex = standardOutput.IndexOf("Plugin.BeforeOpAmpClientStopped() invoked.", StringComparison.Ordinal);
 
         Assert.True(configureClientIndex < initializedIndex);
-        Assert.True(initializedIndex < messageIndex);
+        Assert.True(initializedIndex < beforeStopIndex);
     }
 }

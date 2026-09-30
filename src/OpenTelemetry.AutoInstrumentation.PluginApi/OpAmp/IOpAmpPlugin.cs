@@ -9,12 +9,9 @@ namespace OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
 /// Provides extension points for configuring and interacting with the OpAMP client lifecycle.
 /// </summary>
 /// <remarks>
-/// When multiple configured plugins implement this interface, only the first one in configuration
-/// order is used for OpAMP. Other plugin interfaces implemented by the ignored OpAMP plugins are
-/// unaffected. Lifecycle callbacks should return promptly. During graceful shutdown, lifecycle
-/// callbacks complete before the client is disposed. If the loader's shutdown deadline expires,
-/// forced cleanup may dispose the client while either lifecycle callback is still running.
-/// Implementations must tolerate client operations failing once forced cleanup begins.
+/// Only the first configured implementation is used for OpAMP. Ignored implementations still
+/// participate through their other plugin interfaces. Lifecycle callbacks must return promptly
+/// and tolerate client disposal during forced shutdown.
 /// </remarks>
 public interface IOpAmpPlugin
 {
@@ -22,44 +19,38 @@ public interface IOpAmpPlugin
     /// Allows modification of OpAMP client settings before the client is created.
     /// </summary>
     /// <param name="settings">The mutable settings used to configure the OpAMP client.</param>
+    /// <remarks>
+    /// Settings may only be mutated during this callback. Unsupported capabilities are not advertised.
+    /// </remarks>
     void ConfigureOpAmpOptions(OpAmpClientSettings settings);
 
     /// <summary>
-    /// Allows the plugin to configure the constructed OpAMP client before its transport is started.
+    /// Allows the plugin to configure the OpAMP client before it starts.
     /// </summary>
     /// <param name="client">The OpAMP client instance.</param>
     /// <remarks>
-    /// This callback runs synchronously before <see cref="IPlugin.Initialized"/> and before the client
-    /// transport starts. Register message listeners here to ensure they can observe the initial server
-    /// response. The client may be retained for later use.
+    /// This callback runs before <see cref="IPlugin.Initialized"/>. Register listeners here to receive
+    /// messages from the initial server response. The client may be retained for later use.
     /// </remarks>
     void ConfigureOpAmpClient(IOpAmpClient client);
 
     /// <summary>
-    /// Called after the OpAMP client has been successfully started.
+    /// Called after the OpAMP client's start operation completes.
     /// </summary>
     /// <remarks>
-    /// This callback is not called if preparation or startup fails, startup is cancelled, or shutdown
-    /// begins before startup activation. If startup activation wins a race with shutdown, this callback
-    /// completes before <see cref="BeforeOpAmpClientStopped"/> begins. Message listeners should be
-    /// registered in <see cref="ConfigureOpAmpClient"/> rather than in this callback. If this callback
-    /// does not complete before the shutdown deadline, forced cleanup may dispose the client before
-    /// the callback returns.
+    /// This does not guarantee server connectivity or successful initial-message delivery. The callback
+    /// is skipped if preparation fails, the start operation throws or is cancelled, or shutdown begins
+    /// first. When invoked, it completes before <see cref="BeforeOpAmpClientStopped"/> begins.
     /// </remarks>
     void AfterOpAmpClientStarted();
 
     /// <summary>
-    /// Called before the OpAMP client is stopped, allowing plugins to release resources or stop work.
+    /// Called before the OpAMP client stops.
     /// </summary>
     /// <remarks>
-    /// This callback may run after successful preparation even when startup fails, is cancelled, or
-    /// shutdown suppresses <see cref="AfterOpAmpClientStarted"/>. Implementations must not assume the
-    /// post-start callback ran and should release resources acquired during
-    /// <see cref="ConfigureOpAmpClient"/> here. Automatic instrumentation bounds how long its loader
-    /// waits for shutdown. During graceful shutdown, this callback completes before the client is
-    /// disposed. If the callback does not complete before the shutdown deadline, forced cleanup may
-    /// dispose the client before the callback returns. Implementations should return promptly and
-    /// tolerate client operations failing after the deadline.
+    /// This callback may run without <see cref="AfterOpAmpClientStarted"/>. Release resources acquired
+    /// during <see cref="ConfigureOpAmpClient"/> here. During graceful shutdown, it completes before
+    /// the client is disposed.
     /// </remarks>
     void BeforeOpAmpClientStopped();
 }

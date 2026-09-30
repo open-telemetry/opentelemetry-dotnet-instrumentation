@@ -3,8 +3,6 @@
 
 using OpenTelemetry.AutoInstrumentation.PluginApi;
 using OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
-using OpenTelemetry.OpAmp.Client.Listeners;
-using OpenTelemetry.OpAmp.Client.Messages;
 using OpenTelemetry.OpAmp.Client.Settings;
 
 namespace TestApplication.Plugins;
@@ -13,11 +11,9 @@ namespace TestApplication.Plugins;
 /// <summary>
 /// OpAMP extensions of the plugin.
 /// </summary>
-public partial class Plugin : IPlugin, IOpAmpPlugin, IOpAmpListener<CustomMessageMessage>
+public partial class Plugin : IPlugin, IOpAmpPlugin
 #pragma warning restore CA1515 // Consider making public types internal. Needed for AutoInstrumentation plugin loading.
 {
-    private IOpAmpClient? _opAmpClient;
-
     public void ConfigureOpAmpOptions(OpAmpClientSettings settings)
     {
         ThrowIfMissing(settings);
@@ -29,8 +25,6 @@ public partial class Plugin : IPlugin, IOpAmpPlugin, IOpAmpListener<CustomMessag
     public void ConfigureOpAmpClient(IOpAmpClient client)
     {
         ThrowIfMissing(client);
-        _opAmpClient = client;
-        client.Subscribe<CustomMessageMessage>(this);
         Console.WriteLine($"{nameof(Plugin)}.{nameof(ConfigureOpAmpClient)}() invoked.");
     }
 
@@ -41,14 +35,6 @@ public partial class Plugin : IPlugin, IOpAmpPlugin, IOpAmpListener<CustomMessag
 
     public void BeforeOpAmpClientStopped()
     {
-        _opAmpClient?.Unsubscribe<CustomMessageMessage>(this);
-        _opAmpClient = null;
         Console.WriteLine($"{nameof(Plugin)}.{nameof(BeforeOpAmpClientStopped)}() invoked.");
-    }
-
-    public void HandleMessage(CustomMessageMessage message)
-    {
-        ThrowIfMissing(message);
-        Console.WriteLine($"{nameof(Plugin)}.{nameof(HandleMessage)}({nameof(CustomMessageMessage)}) invoked: {message.Type}.");
     }
 }

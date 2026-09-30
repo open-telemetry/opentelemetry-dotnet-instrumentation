@@ -17,9 +17,8 @@ public interface IOpAmpClient
     /// <typeparam name="T">The OpAMP message type.</typeparam>
     /// <param name="listener">The listener to subscribe.</param>
     /// <remarks>
-    /// Subscribe during <see cref="IOpAmpPlugin.ConfigureOpAmpClient"/> to observe messages from the
-    /// initial server response. Listener callbacks run on the upstream client's dispatch path and
-    /// should return promptly; move longer work to bounded plugin-owned processing.
+    /// Subscribe during <see cref="IOpAmpPlugin.ConfigureOpAmpClient"/> to receive messages from the
+    /// initial server response. Listener callbacks must return promptly.
     /// </remarks>
     void Subscribe<T>(IOpAmpListener<T> listener)
         where T : OpAmpMessage;

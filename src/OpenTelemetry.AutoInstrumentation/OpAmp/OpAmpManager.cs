@@ -22,6 +22,7 @@ internal sealed class OpAmpManager : IDisposable
     private readonly object _pluginLifecycleLock = new();
     private readonly OpAmpClientTransport _clientTransport;
     private readonly IOpAmpPlugin? _plugin;
+    private readonly OpAmpClientSettings _settings;
 
     private Task? _startupTask;
     private int _shutdownStarted;
@@ -30,10 +31,11 @@ internal sealed class OpAmpManager : IDisposable
     private int _forceShutdownRequested;
     private bool _beforeStopCallbackInvoked;
 
-    private OpAmpManager(IOpAmpPlugin? plugin, OpAmpClientTransport clientTransport)
+    private OpAmpManager(IOpAmpPlugin? plugin, OpAmpClientTransport clientTransport, OpAmpClientSettings settings)
     {
         _plugin = plugin;
         _clientTransport = clientTransport;
+        _settings = settings;
     }
 
     public void StartClient()
@@ -86,12 +88,10 @@ internal sealed class OpAmpManager : IDisposable
         [NotNullWhen(true)] out OpAmpManager? manager)
     {
         OpAmpManager? candidate = null;
-        OpAmpClientTransport? clientTransport = null;
         try
         {
             var plugin = SelectPlugin(pluginManager);
-            clientTransport = CreateClientTransport(resources, opAmpSettings, plugin);
-            candidate = new OpAmpManager(plugin, clientTransport);
+            candidate = CreateManager(resources, opAmpSettings, plugin);
             plugin?.ConfigureOpAmpClient(new PluginOpAmpClient(candidate));
             manager = candidate;
             return true;
@@ -105,10 +105,6 @@ internal sealed class OpAmpManager : IDisposable
                 if (candidate != null)
                 {
                     candidate.Dispose();
-                }
-                else
-                {
-                    clientTransport?.Dispose();
                 }
             }
             catch (Exception disposeException)
@@ -193,10 +189,16 @@ internal sealed class OpAmpManager : IDisposable
         return opAmpPlugins[0].Instance;
     }
 
-    private static OpAmpClientTransport CreateClientTransport(Resource resources, OpAmpSettings opAmpSettings, IOpAmpPlugin? plugin)
+    private static OpAmpManager CreateManager(Resource resources, OpAmpSettings opAmpSettings, IOpAmpPlugin? plugin)
     {
-        var client = new OpAmpClient(settings => ConfigureClient(settings, opAmpSettings, resources, plugin));
-        return new OpAmpClientTransport(client);
+        OpAmpClientSettings? configuredSettings = null;
+        var client = new OpAmpClient(settings =>
+        {
+            ConfigureClient(settings, opAmpSettings, resources, plugin);
+            configuredSettings = settings;
+        });
+
+        return new OpAmpManager(plugin, new OpAmpClientTransport(client), configuredSettings!);
     }
 
     private static void ConfigureClient(
@@ -208,11 +210,6 @@ internal sealed class OpAmpManager : IDisposable
         OpAmpClientSettingsConfigurator.ConfigureDefaults(settings, opAmpSettings, resources);
 
         plugin?.ConfigureOpAmpOptions(settings);
-
-        // Do not allow the client to advertise reporting capabilities
-        // that this manager cannot currently fulfill.
-        settings.EffectiveConfigurationReporting.EnableReporting = false;
-        settings.RemoteConfiguration.ReportsRemoteConfigStatus = false;
     }
 
     private async Task StartClientCoreAsync()
@@ -221,6 +218,11 @@ internal sealed class OpAmpManager : IDisposable
 
         try
         {
+            // Do not advertise capabilities that automatic instrumentation cannot fulfill.
+            _settings.EffectiveConfigurationReporting.EnableReporting = false;
+            _settings.RemoteConfiguration.AcceptsRemoteConfig = false;
+            _settings.RemoteConfiguration.ReportsRemoteConfigStatus = false;
+
             await _clientTransport.StartAsync(startupCancellationToken).ConfigureAwait(false);
 
             lock (_pluginLifecycleLock)

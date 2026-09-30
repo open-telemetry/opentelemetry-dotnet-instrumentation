@@ -180,15 +180,15 @@ public class MyOptionsPlugin : IPlugin,
 
 Implement `IOpAmpPlugin` to customize the OpAMP client and observe its
 lifecycle.
-Only the first configured plugin implementing `IOpAmpPlugin` controls OpAMP.
-Additional OpAMP plugins are ignored for OpAMP and named in a warning, but they
-continue to receive ordinary `IPlugin` callbacks and participate through any
-other plugin interfaces they implement. For file-based configuration, entries
-in `plugins` precede entries in `plugins_list`; otherwise list order is used.
+The first configured plugin implementing `IOpAmpPlugin` controls OpAMP. Others
+still participate through their other plugin interfaces. For file-based
+configuration, `plugins` entries precede `plugins_list`; otherwise configured
+list order applies.
 
 > [!NOTE]
 > The OpAMP client is owned by automatic instrumentation. Plugins receive a
 > restricted client interface and cannot start, stop, or dispose the client.
+> Unsupported capabilities are not advertised.
 
 ```csharp
 using OpenTelemetry.AutoInstrumentation.PluginApi;
@@ -209,51 +209,42 @@ public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
 
     public void ConfigureOpAmpOptions(OpAmpClientSettings settings)
     {
-        // Called before the OpAMP client is created.
+        // Configure settings before client creation.
     }
 
     public void ConfigureOpAmpClient(IOpAmpClient client)
     {
-        // Called after client construction and before transport startup.
-        // Register message listeners here and retain the client if needed later.
+        // Subscribe to messages here.
         _client = client;
     }
 
     public void AfterOpAmpClientStarted()
     {
-        // Called after the OpAMP transport starts successfully.
-        // Return promptly; forced cleanup may dispose the client after the shutdown deadline.
+        // Startup completed; connectivity is not guaranteed.
     }
 
     public void BeforeOpAmpClientStopped()
     {
-        // Called before the OpAMP client is stopped.
-        // Return promptly; forced cleanup may dispose the client after the shutdown deadline.
+        // Release resources and unsubscribe here.
     }
 }
 ```
 
-OpAMP initialization calls `ConfigureOpAmpOptions`, constructs the client,
-calls `ConfigureOpAmpClient` on the selected OpAMP plugin, and then invokes the
-ordinary `IPlugin.Initialized` callbacks. The transport starts only after those
-callbacks complete. A listener subscribed in `ConfigureOpAmpClient` therefore
-observes messages in the initial server response.
+Initialization invokes `ConfigureOpAmpOptions`, `ConfigureOpAmpClient`, ordinary
+`IPlugin.Initialized` callbacks, and client startup in that order. Subscribe in
+`ConfigureOpAmpClient` to receive messages from the initial server response.
 
-`AfterOpAmpClientStarted` runs only after successful startup. When startup races
-with shutdown, the callback runs only if startup wins, and during graceful
-shutdown it completes before `BeforeOpAmpClientStopped` begins.
-`BeforeOpAmpClientStopped` may still run for a successfully prepared client when
-startup fails or is cancelled, so cleanup must not assume the post-start
-callback ran. Use `IOpAmpClient.Unsubscribe` to remove listeners acquired during
-client configuration. During graceful shutdown, `BeforeOpAmpClientStopped`
-completes before the client is disposed. If either lifecycle callback does not
-complete before the loader's shutdown deadline, forced cleanup disposes the
-client independently and may overlap that callback. Both callbacks must return
-promptly and tolerate client operations failing after the deadline.
+`AfterOpAmpClientStarted` means the client start operation completed; it does not
+guarantee connectivity or initial-message delivery. It is skipped if startup
+throws, is cancelled, or loses a race with shutdown. When invoked, it completes
+before `BeforeOpAmpClientStopped` begins.
 
-Automatic instrumentation suppresses tracing around upstream OpAMP transport
-operations so those requests do not produce application spans. Listener
-callbacks run on the upstream dispatch path and should return promptly.
+`BeforeOpAmpClientStopped` may run without `AfterOpAmpClientStarted`. Release
+resources and unsubscribe there. Lifecycle callbacks must return promptly and
+tolerate client disposal during forced shutdown.
+
+OpAMP requests do not produce application spans. Listener callbacks must return
+promptly.
 
 ## Selective sampling
 
