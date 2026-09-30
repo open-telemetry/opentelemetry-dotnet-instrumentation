@@ -61,8 +61,11 @@ bool RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
     ModuleID    currentModuleId  = m_module->GetModuleId();
     mdMethodDef currentMethodDef = m_methodDef;
 
+#ifdef _DEBUG
+    // This callback can run hundreds of times and is rarely useful in release logs.
     Logger::Debug("RejitHandlerModuleMethod::RequestRejitForInlinersInModule for ", "[ModuleInliner=", moduleId,
                   ", ModuleId=", currentModuleId, ", MethodDef=", currentMethodDef, "]");
+#endif
 
     RejitHandler*      handler = m_module->GetHandler();
     ICorProfilerInfo7* pInfo   = handler->GetCorProfilerInfo();

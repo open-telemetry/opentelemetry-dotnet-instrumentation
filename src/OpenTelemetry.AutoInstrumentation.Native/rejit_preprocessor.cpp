@@ -87,7 +87,7 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         const auto caller = GetFunctionInfo(metadataImport, methodDef);
         if (!caller.IsValid())
         {
-            Logger::Warn("    * The caller for the methoddef: ", TokenStr(&methodDef), " is not valid!");
+            Logger::Warn("    * Skipping ", TokenStr(&methodDef), ": the methoddef is not valid!");
             continue;
         }
 
@@ -97,7 +97,8 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         auto hr           = functionInfo.method_signature.TryParse();
         if (FAILED(hr))
         {
-            Logger::Warn("    * The method signature: ", functionInfo.method_signature.str(), " cannot be parsed.");
+            Logger::Warn("    * Skipping ", functionInfo.method_signature.str(),
+                         ": the method signature cannot be parsed.");
             continue;
         }
 
@@ -126,8 +127,9 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
             // instrumentation target
             if (numOfArgs != target_method.signature_types.size() - 1)
             {
-                Logger::Debug("    * The caller for the methoddef: ", caller.name,
-                              " doesn't have the right number of arguments (", numOfArgs, " arguments).");
+                Logger::Info("    * Skipping ", caller.type.name, ".", caller.name,
+                             ": the methoddef doesn't have the right number of arguments (", numOfArgs,
+                             " arguments).");
                 continue;
             }
 
@@ -149,8 +151,8 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
             }
             if (argumentsMismatch)
             {
-                Logger::Debug("    * The caller for the methoddef: ", target_method.method_name,
-                              " doesn't have the right type of arguments.");
+                Logger::Info("    * Skipping ", target_method.method_name,
+                             ": the methoddef doesn't have the right type of arguments.");
                 continue;
             }
         }
@@ -171,8 +173,8 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
                 new ModuleMetadata(metadataImport, metadataEmit, assemblyImport, assemblyEmit, moduleInfo.assembly.name,
                                    moduleInfo.assembly.app_domain_id, pCorAssemblyProperty);
 
-            Logger::Info("ReJIT handler stored metadata for ", moduleInfo.id, " ", moduleInfo.assembly.name,
-                         " AppDomain ", moduleInfo.assembly.app_domain_id, " ", moduleInfo.assembly.app_domain_name);
+            Logger::Debug("ReJIT handler stored metadata for ", moduleInfo.id, " ", moduleInfo.assembly.name,
+                          " AppDomain ", moduleInfo.assembly.app_domain_id, " ", moduleInfo.assembly.app_domain_name);
 
             moduleHandler->SetModuleMetadata(moduleMetadata);
         }
@@ -186,6 +188,9 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         // Store module_id and methodDef to request the ReJIT after analyzing all integrations.
         vtModules.push_back(moduleInfo.id);
         vtMethodDefs.push_back(methodDef);
+
+        Logger::Info("Method enqueued for ReJIT for ", target_method.type.name, ".", target_method.method_name, "(",
+                     (target_method.signature_types.size() - 1), " params).");
 
         Logger::Debug("    * Enqueue for ReJIT [ModuleId=", moduleInfo.id, ", MethodDef=", TokenStr(&methodDef),
                       ", AppDomainId=", moduleHandler->GetModuleMetadata()->app_domain_id,
