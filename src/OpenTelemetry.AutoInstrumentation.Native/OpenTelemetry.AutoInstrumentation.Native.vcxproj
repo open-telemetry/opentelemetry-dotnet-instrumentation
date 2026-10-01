@@ -17,6 +17,22 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64EC">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64EC</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64EC">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64EC</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{91B6272F-5780-4C94-8071-DBBA7B4F67F3}</ProjectGuid>
@@ -57,6 +73,20 @@
     <LinkControlFlowGuard>true</LinkControlFlowGuard>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64' OR '$(Configuration)|$(Platform)'=='Debug|ARM64EC'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64' OR '$(Configuration)|$(Platform)'=='Release|ARM64EC'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <LinkControlFlowGuard>true</LinkControlFlowGuard>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -81,6 +111,19 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>bin\$(Configuration)\x86\static\</OutDir>
     <IntDir>obj\$(Configuration)\x86\static\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64' OR '$(Configuration)|$(Platform)'=='Debug|ARM64EC'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>bin\$(Configuration)\$(Platform)\static\</OutDir>
+    <IntDir>obj\$(Configuration)\$(Platform)\static\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64' OR '$(Configuration)|$(Platform)'=='Release|ARM64EC'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>bin\$(Configuration)\$(Platform)\static\</OutDir>
+    <IntDir>obj\$(Configuration)\$(Platform)\static\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='ARM64EC'">
+    <BuildAsX>true</BuildAsX>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -179,6 +222,53 @@
     <Link>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <CETCompat>true</CETCompat>
+      <DynamicBase>true</DynamicBase>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64' OR '$(Configuration)|$(Platform)'=='Debug|ARM64EC'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <OmitFramePointers>false</OmitFramePointers>
+      <ConformanceMode>true</ConformanceMode>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PreprocessorDefinitions>BIT64;HOST_64BIT;HOST_ARM64;ARM64;_UNICODE;UNICODE;OTEL_AUTO_VERSION_MAJOR=$(OTEL_AUTO_VERSION_MAJOR);OTEL_AUTO_VERSION_MINOR=$(OTEL_AUTO_VERSION_MINOR);OTEL_AUTO_VERSION_PATCH=$(OTEL_AUTO_VERSION_PATCH);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+    <Link>
+      <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64' OR '$(Configuration)|$(Platform)'=='Release|ARM64EC'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <ConformanceMode>true</ConformanceMode>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PreprocessorDefinitions>_TARGET_64BIT;BIT64;HOST_64BIT;HOST_ARM64;ARM64;_UNICODE;UNICODE;OTEL_AUTO_VERSION_MAJOR=$(OTEL_AUTO_VERSION_MAJOR);OTEL_AUTO_VERSION_MINOR=$(OTEL_AUTO_VERSION_MINOR);OTEL_AUTO_VERSION_PATCH=$(OTEL_AUTO_VERSION_PATCH);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+    </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+    <Link>
+      <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <DynamicBase>true</DynamicBase>
     </Link>
   </ItemDefinitionGroup>
