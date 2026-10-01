@@ -20,7 +20,7 @@ internal sealed class OpAmpManager : IDisposable
     private readonly CancellationTokenSource _startupCancellationSource = new();
     private readonly TaskCompletionSource<bool> _forcedShutdownCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly object _pluginLifecycleLock = new();
-    private readonly OpAmpClientTransport _clientTransport;
+    private readonly OpAmpClientProxy _clientProxy;
     private readonly IOpAmpPlugin? _plugin;
     private readonly OpAmpClientSettings _settings;
 
@@ -31,10 +31,10 @@ internal sealed class OpAmpManager : IDisposable
     private int _forceShutdownRequested;
     private bool _beforeStopCallbackInvoked;
 
-    private OpAmpManager(IOpAmpPlugin? plugin, OpAmpClientTransport clientTransport, OpAmpClientSettings settings)
+    private OpAmpManager(IOpAmpPlugin? plugin, OpAmpClientProxy clientProxy, OpAmpClientSettings settings)
     {
         _plugin = plugin;
-        _clientTransport = clientTransport;
+        _clientProxy = clientProxy;
         _settings = settings;
     }
 
@@ -121,7 +121,7 @@ internal sealed class OpAmpManager : IDisposable
     {
         if (Interlocked.Exchange(ref _clientDisposed, 1) == 0)
         {
-            _clientTransport.Dispose();
+            _clientProxy.Dispose();
         }
     }
 
@@ -160,13 +160,13 @@ internal sealed class OpAmpManager : IDisposable
     internal void Subscribe<T>(IOpAmpListener<T> listener)
         where T : OpAmpMessage
     {
-        _clientTransport.Subscribe(listener);
+        _clientProxy.Subscribe(listener);
     }
 
     internal void Unsubscribe<T>(IOpAmpListener<T> listener)
         where T : OpAmpMessage
     {
-        _clientTransport.Unsubscribe(listener);
+        _clientProxy.Unsubscribe(listener);
     }
 
     private static IOpAmpPlugin? SelectPlugin(PluginManager pluginManager)
@@ -198,7 +198,7 @@ internal sealed class OpAmpManager : IDisposable
             configuredSettings = settings;
         });
 
-        return new OpAmpManager(plugin, new OpAmpClientTransport(client), configuredSettings!);
+        return new OpAmpManager(plugin, new OpAmpClientProxy(client), configuredSettings!);
     }
 
     private static void ConfigureClient(
@@ -223,7 +223,7 @@ internal sealed class OpAmpManager : IDisposable
             _settings.RemoteConfiguration.AcceptsRemoteConfig = false;
             _settings.RemoteConfiguration.ReportsRemoteConfigStatus = false;
 
-            await _clientTransport.StartAsync(startupCancellationToken).ConfigureAwait(false);
+            await _clientProxy.StartAsync(startupCancellationToken).ConfigureAwait(false);
 
             lock (_pluginLifecycleLock)
             {
@@ -298,7 +298,7 @@ internal sealed class OpAmpManager : IDisposable
     {
         try
         {
-            await _clientTransport.StopAsync().ConfigureAwait(false);
+            await _clientProxy.StopAsync().ConfigureAwait(false);
         }
         catch (Exception ex)
         {

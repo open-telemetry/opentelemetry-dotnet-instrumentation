@@ -8,11 +8,11 @@ using OpenTelemetry.OpAmp.Client.Messages;
 namespace OpenTelemetry.AutoInstrumentation.OpAmp;
 
 // Owns access to the upstream client and applies instrumentation suppression to transport operations.
-internal sealed class OpAmpClientTransport : IDisposable
+internal sealed class OpAmpClientProxy : IDisposable
 {
     private readonly OpAmpClient _client;
 
-    public OpAmpClientTransport(OpAmpClient client)
+    public OpAmpClientProxy(OpAmpClient client)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
     }
