@@ -86,7 +86,7 @@ public interface IDuckType
     /// <summary>
     /// Gets instance
     /// </summary>
-    object Instance { get; }
+    object? Instance { get; }
 
     /// <summary>
     /// Gets instance Type
