@@ -10,12 +10,16 @@ using System.Runtime.InteropServices;
 
 namespace TestApplication.ContinuousProfiler;
 
-// This is an integration-test-only driver for the native ABI. Production managed host selection and
-// control-plane transport deliberately remain outside this test fixture and this PR.
+// This integration-test-only driver applies ControlPlane configuration directly through the native ABI.
+// It simulates remote configuration at the contract boundary, independently of OpAMP transport.
 internal static class RuntimeSamplerTransitions
 {
-    private const uint CpuSamplingIntervalMilliseconds = 500;
+    private const uint InitialCpuSamplingIntervalMilliseconds = 500;
+    private const uint ReenabledCpuSamplingIntervalMilliseconds = 1000;
     private const int Applied = 0;
+    private const int QuerySucceeded = 0;
+    private const int RejectedInvalidConfiguration = 6;
+    private const uint SeedAuthority = 1;
 #if NET
     private const uint MaxAllocationSamplesPerMinute = 6000;
 #endif
@@ -27,22 +31,50 @@ internal static class RuntimeSamplerTransitions
 
     public static void Run()
     {
-        Apply(CpuSamplingIntervalMilliseconds, GetAllocationSamplesPerMinute(), "enabled");
+        VerifyInitialSeed();
+        Apply(InitialCpuSamplingIntervalMilliseconds, GetAllocationSamplesPerMinute(), "enabled");
+        VerifyInvalidControlPlaneUpdatePreservesState();
         CaptureBeforeDisable();
 
         Apply(0, 0, "disabled");
         CaptureWhileDisabled();
 
-        Apply(CpuSamplingIntervalMilliseconds, GetAllocationSamplesPerMinute(), "re-enabled");
+        Apply(ReenabledCpuSamplingIntervalMilliseconds, GetAllocationSamplesPerMinute(), "re-enabled");
         CaptureAfterReenable();
     }
 
-    private static void Apply(uint cpuSamplingIntervalMilliseconds, uint maxAllocationSamplesPerMinute, string phase)
+    private static void VerifyInitialSeed()
+    {
+        var state = new RuntimeSamplerState
+        {
+            StructureSize = (uint)Marshal.SizeOf<RuntimeSamplerState>(),
+        };
+
+        var result = RuntimeSamplerNative.GetState(ref state);
+        const uint expectedCpuSamplingIntervalMilliseconds = 0;
+        const string expectedState = "disabled";
+        if (result != QuerySucceeded ||
+            state.Authority != SeedAuthority ||
+            state.CommittedConfiguration.CpuSamplingIntervalMilliseconds != expectedCpuSamplingIntervalMilliseconds ||
+            state.CommittedConfiguration.SelectiveThreadSamplingIntervalMilliseconds != 0 ||
+            state.CommittedConfiguration.MaxAllocationSamplesPerMinute != 0)
+        {
+            throw new InvalidOperationException($"Unexpected initial runtime sampler Seed state: {result}.");
+        }
+
+        Console.WriteLine($"Runtime sampler initial Seed verified: {expectedState}.");
+    }
+
+    private static void Apply(
+        uint cpuSamplingIntervalMilliseconds,
+        uint maxAllocationSamplesPerMinute,
+        string phase)
     {
         var configuration = new RuntimeSamplerConfiguration
         {
             StructureSize = (uint)Marshal.SizeOf<RuntimeSamplerConfiguration>(),
             CpuSamplingIntervalMilliseconds = cpuSamplingIntervalMilliseconds,
+            SelectiveThreadSamplingIntervalMilliseconds = 0,
             MaxAllocationSamplesPerMinute = maxAllocationSamplesPerMinute,
         };
         var state = new RuntimeSamplerState
@@ -54,12 +86,40 @@ internal static class RuntimeSamplerTransitions
         if (result != Applied ||
             state.Authority != (uint)RuntimeSamplerAuthority.ControlPlane ||
             state.CommittedConfiguration.CpuSamplingIntervalMilliseconds != cpuSamplingIntervalMilliseconds ||
+            state.CommittedConfiguration.SelectiveThreadSamplingIntervalMilliseconds != 0 ||
             state.CommittedConfiguration.MaxAllocationSamplesPerMinute != maxAllocationSamplesPerMinute)
         {
             throw new InvalidOperationException($"Runtime sampler {phase} transition failed: {result}.");
         }
 
         Console.WriteLine($"Runtime sampler transition applied: {phase}.");
+    }
+
+    private static void VerifyInvalidControlPlaneUpdatePreservesState()
+    {
+        var invalidConfiguration = new RuntimeSamplerConfiguration
+        {
+            StructureSize = (uint)Marshal.SizeOf<RuntimeSamplerConfiguration>(),
+            CpuSamplingIntervalMilliseconds = InitialCpuSamplingIntervalMilliseconds,
+            SelectiveThreadSamplingIntervalMilliseconds = 30,
+            MaxAllocationSamplesPerMinute = GetAllocationSamplesPerMinute(),
+        };
+        var state = new RuntimeSamplerState
+        {
+            StructureSize = (uint)Marshal.SizeOf<RuntimeSamplerState>(),
+        };
+
+        var result = RuntimeSamplerNative.Apply(ref invalidConfiguration, (uint)RuntimeSamplerAuthority.ControlPlane, ref state);
+        if (result != RejectedInvalidConfiguration ||
+            state.Authority != (uint)RuntimeSamplerAuthority.ControlPlane ||
+            state.CommittedConfiguration.CpuSamplingIntervalMilliseconds != InitialCpuSamplingIntervalMilliseconds ||
+            state.CommittedConfiguration.SelectiveThreadSamplingIntervalMilliseconds != 0 ||
+            state.CommittedConfiguration.MaxAllocationSamplesPerMinute != GetAllocationSamplesPerMinute())
+        {
+            throw new InvalidOperationException($"Invalid ControlPlane update changed the last-known-good runtime sampler state: {result}.");
+        }
+
+        Console.WriteLine("Runtime sampler invalid ControlPlane update rejected; last-known-good state preserved.");
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -77,7 +137,8 @@ internal static class RuntimeSamplerTransitions
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void CaptureAfterReenable()
     {
-        KeepCpuBusy(allocate: true);
+        // Leave enough room for a full 1-second CPU cohort on slower CI workers.
+        KeepCpuBusy(allocate: true, durationSeconds: 3);
     }
 
     private static uint GetAllocationSamplesPerMinute()
@@ -89,9 +150,9 @@ internal static class RuntimeSamplerTransitions
 #endif
     }
 
-    private static void KeepCpuBusy(bool allocate = false)
+    private static void KeepCpuBusy(bool allocate = false, int durationSeconds = 2)
     {
-        var deadline = Stopwatch.GetTimestamp() + (Stopwatch.Frequency * 2);
+        var deadline = Stopwatch.GetTimestamp() + (Stopwatch.Frequency * durationSeconds);
         var value = 0u;
         while (Stopwatch.GetTimestamp() < deadline)
         {
@@ -124,6 +185,13 @@ internal static class RuntimeSamplerTransitions
                 : ApplyNonWindows(ref configuration, authority, ref state);
         }
 
+        public static int GetState(ref RuntimeSamplerState state)
+        {
+            return RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? GetStateWindows(ref state)
+                : GetStateNonWindows(ref state);
+        }
+
 #if NET
         private static IntPtr ImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
         {
@@ -153,17 +221,25 @@ internal static class RuntimeSamplerTransitions
 #endif
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", EntryPoint = "ApplyContinuousProfilerConfiguration")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", EntryPoint = "ApplyContinuousProfilerConfiguration", CallingConvention = CallingConvention.Winapi)]
         private static extern int ApplyWindows(
             ref RuntimeSamplerConfiguration configuration,
             uint authority,
             ref RuntimeSamplerState state);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native", EntryPoint = "ApplyContinuousProfilerConfiguration")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native", EntryPoint = "ApplyContinuousProfilerConfiguration", CallingConvention = CallingConvention.Winapi)]
         private static extern int ApplyNonWindows(
             ref RuntimeSamplerConfiguration configuration,
             uint authority,
             ref RuntimeSamplerState state);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", EntryPoint = "GetContinuousProfilerState", CallingConvention = CallingConvention.Winapi)]
+        private static extern int GetStateWindows(ref RuntimeSamplerState state);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native", EntryPoint = "GetContinuousProfilerState", CallingConvention = CallingConvention.Winapi)]
+        private static extern int GetStateNonWindows(ref RuntimeSamplerState state);
     }
 }

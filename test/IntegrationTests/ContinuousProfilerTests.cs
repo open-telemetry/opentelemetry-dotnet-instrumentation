@@ -118,7 +118,7 @@ public class ContinuousProfilerTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ExportThreadSamplesAcrossRuntimeSamplerTransitions()
+    public void ExportThreadSamplesAcrossControlPlaneConfigurationChanges()
     {
         EnableBytecodeInstrumentation();
         using var collector = new MockProfilesCollector(Output);
@@ -127,16 +127,15 @@ public class ContinuousProfilerTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
         SetEnvironmentVariable("OTEL_TEST_RUNTIME_SAMPLER_TRANSITIONS", "true");
 
-        collector.Expect(profileData => ContainsFunction(profileData, "RuntimeSamplerTransitions.CaptureBeforeDisable"));
-        collector.Expect(profileData => ContainsFunction(profileData, "RuntimeSamplerTransitions.CaptureAfterReenable"));
+        // The test application applies ControlPlane snapshots through the native contract, simulating remote
+        // configuration independently of its transport. The Seed starts disabled, then the snapshots enable,
+        // disable, and re-enable sampling with a different period.
+        collector.Expect(profileData => ContainsFunctionWithPeriod(profileData, "RuntimeSamplerTransitions.CaptureBeforeDisable", 500_000_000));
+        collector.Expect(profileData => ContainsFunctionWithPeriod(profileData, "RuntimeSamplerTransitions.CaptureAfterReenable", 1_000_000_000));
 
-        // Disable is deliberately lazy: samples admitted before the Apply may still publish, so this test verifies
-        // the committed disabled state in the test application rather than asserting an immediate absence of exports.
-        var (standardOutput, _, _) = RunTestApplication();
-
-        Assert.Contains("Runtime sampler transition applied: enabled.", standardOutput, StringComparison.Ordinal);
-        Assert.Contains("Runtime sampler transition applied: disabled.", standardOutput, StringComparison.Ordinal);
-        Assert.Contains("Runtime sampler transition applied: re-enabled.", standardOutput, StringComparison.Ordinal);
+        // Disable is deliberately lazy: samples admitted before the Apply may still publish. The application
+        // checks the committed disabled state and throws if any transition or invalid-update check fails.
+        RunTestApplication();
         collector.AssertExpectations();
     }
 
@@ -265,10 +264,10 @@ public class ContinuousProfilerTests : TestHelper
         return false;
     }
 
-    private static bool ContainsFunction(ExportProfilesServiceRequest profileData, string functionName)
+    private static bool ContainsFunctionWithPeriod(ExportProfilesServiceRequest profileData, string functionName, long period)
     {
         return profileData.ResourceProfiles.Any(resourceProfiles => resourceProfiles.ScopeProfiles.Any(scopeProfile =>
-            scopeProfile.Profiles.Any(profile => profile.Samples.Any(sample =>
+            scopeProfile.Profiles.Any(profile => profile.Period == period && profile.Samples.Any(sample =>
             {
                 var stackIndex = sample.StackIndex;
                 return stackIndex > 0 &&

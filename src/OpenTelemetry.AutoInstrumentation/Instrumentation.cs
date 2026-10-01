@@ -8,8 +8,6 @@ using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
-using OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling;
-using OpenTelemetry.AutoInstrumentation.PluginApi.SelectiveSampling;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Logs;
@@ -25,6 +23,7 @@ internal static class Instrumentation
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
     private static readonly LazyInstrumentationLoader LazyInstrumentationLoader = new();
+    private static readonly ContinuousProfilerManager ContinuousProfiler = new(() => Volatile.Read(ref _isExiting) != 0);
 
     private static readonly Lazy<LoggerProvider?> LoggerProviderFactory = new(InitializeLoggerProvider, true);
 
@@ -36,13 +35,6 @@ internal static class Instrumentation
     private static MeterProvider? _meterProvider;
 
     private static PluginManager? _pluginManager;
-
-    private static SampleExporter? _sampleExporter;
-    private static SampleExporterBuilder? _sampleExporterBuilder;
-
-#if NETFRAMEWORK
-    private static CanaryThreadManager? _canaryThreadManager;
-#endif
 
     internal static LoggerProvider? LoggerProvider
     {
@@ -117,7 +109,7 @@ internal static class Instrumentation
 
             if (profilerEnabled)
             {
-                TryInitializeContinuousProfiling();
+                ContinuousProfiler.Initialize(_pluginManager!);
             }
             else
             {
@@ -234,141 +226,6 @@ internal static class Instrumentation
 
         // Notify plugins all initialization is done
         _pluginManager.Initialized();
-    }
-
-    private static void TryInitializeContinuousProfiling()
-    {
-        try
-        {
-            InitializeSampling();
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Failed to initialize continuous profiling.");
-        }
-    }
-
-    private static void InitializeSampling()
-    {
-        var config = _pluginManager!.GetFirstContinuousProfilerConfiguration();
-        var threadSamplingEnabled = config.ThreadSamplingEnabled;
-        var allocationSamplingEnabled = config.AllocationSamplingEnabled;
-        Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {config.ThreadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {config.MaxMemorySamplesPerMinute}, export interval: {config.ExportInterval}, export timeout: {config.ExportTimeout}, continuous profiler exporter: {config.Exporter?.GetType()}");
-
-        if (threadSamplingEnabled || allocationSamplingEnabled)
-        {
-            if (config.Exporter == null)
-            {
-                Logger.Warning("Continuous profiler exporter is not configured. Feature will not be enabled.");
-                return;
-            }
-
-            if (!TryInitializeContinuousSamplingExport(config.Exporter, config.ThreadSamplingEnabled, config.AllocationSamplingEnabled, config.ExportInterval, config.ExportTimeout))
-            {
-                return;
-            }
-        }
-
-        uint selectiveSamplingInterval = 0;
-        var selectiveSamplingConfig = _pluginManager.GetFirstSelectiveSamplingConfiguration();
-        if (selectiveSamplingConfig != null)
-        {
-            if (selectiveSamplingConfig.SamplingInterval == 0 ||
-                selectiveSamplingConfig.ExportInterval <= TimeSpan.Zero ||
-                selectiveSamplingConfig.ExportTimeout <= TimeSpan.Zero ||
-                selectiveSamplingConfig.Exporter == null)
-            {
-                Logger.Warning("Invalid selective sampling configuration. Feature will not be enabled.");
-            }
-            else
-            {
-                Logger.Debug(
-                    $"Selective sampling configuration: sampling interval: {selectiveSamplingConfig.SamplingInterval}, export interval: {selectiveSamplingConfig.ExportInterval}, export timeout: {selectiveSamplingConfig.ExportTimeout}, samples exporter: {selectiveSamplingConfig.Exporter.GetType()}");
-                selectiveSamplingInterval = selectiveSamplingConfig.SamplingInterval;
-                if (!TryInitializeSelectedThreadSamplingExport(selectiveSamplingConfig))
-                {
-                    return;
-                }
-            }
-        }
-
-        if (!threadSamplingEnabled && !allocationSamplingEnabled && selectiveSamplingConfig == null)
-        {
-            // No sampling requested.
-            return;
-        }
-
-        var selectiveSamplingEnabled = selectiveSamplingInterval != 0;
-
-        if (threadSamplingEnabled && selectiveSamplingEnabled)
-        {
-            if (config.ThreadSamplingInterval <= selectiveSamplingInterval)
-            {
-                Logger.Warning($"Continuous sampling interval must be higher than selective sampling interval. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {config.ThreadSamplingInterval}");
-                return;
-            }
-
-            if (config.ThreadSamplingInterval % selectiveSamplingInterval != 0)
-            {
-                Logger.Warning($"Continuous sampling interval must be a multiple of selective sampling interval. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {config.ThreadSamplingInterval}");
-                return;
-            }
-        }
-
-        NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, config.ThreadSamplingInterval, allocationSamplingEnabled, config.MaxMemorySamplesPerMinute, selectiveSamplingInterval);
-#if NETFRAMEWORK
-        // On .NET Framework, we need a dedicated canary thread for seeded stack walking
-        _canaryThreadManager = new CanaryThreadManager();
-        if (!_canaryThreadManager.Start(TimeSpan.FromSeconds(5)))
-        {
-            Logger.Error("Failed to start canary thread. Continuous profiling will not be enabled.");
-            _canaryThreadManager.Dispose();
-            _canaryThreadManager = null;
-            return;
-        }
-
-        Logger.Information("Canary thread started successfully for .NET Framework profiling.");
-#endif
-        _sampleExporter = _sampleExporterBuilder?.Build();
-    }
-
-    private static bool TryInitializeSelectedThreadSamplingExport(SelectiveSamplerConfiguration configuration)
-    {
-        InitializeBufferProcessing(configuration.ExportInterval, configuration.ExportTimeout);
-
-        _sampleExporterBuilder?.AddHandler(SampleType.SelectedThreads, configuration.Exporter!.ExportSelectedThreadSamples, configuration.ExportTimeout);
-        return true;
-    }
-
-    private static bool TryInitializeContinuousSamplingExport(
-        IContinuousProfilerExporter exporter,
-        bool threadSamplingEnabled,
-        bool allocationSamplingEnabled,
-        TimeSpan exportInterval,
-        TimeSpan exportTimeout)
-    {
-        InitializeBufferProcessing(exportInterval, exportTimeout);
-
-        if (threadSamplingEnabled)
-        {
-            _sampleExporterBuilder?.AddHandler(SampleType.Continuous, exporter.ExportThreadSamples, exportTimeout);
-        }
-
-        if (allocationSamplingEnabled)
-        {
-            _sampleExporterBuilder?.AddHandler(SampleType.Allocation, exporter.ExportAllocationSamples, exportTimeout);
-        }
-
-        return true;
-    }
-
-    private static void InitializeBufferProcessing(TimeSpan exportInterval, TimeSpan exportTimeout)
-    {
-        _sampleExporterBuilder ??= new SampleExporterBuilder();
-
-        _sampleExporterBuilder
-            .SetExportInterval(exportInterval)
-            .SetExportTimeout(exportTimeout);
     }
 
     private static LoggerProvider? InitializeLoggerProvider()
@@ -581,11 +438,7 @@ internal static class Instrumentation
             OpAmpHelper.StopOpAmpClientIfRunning(_pluginManager);
 
             LazyInstrumentationLoader?.Dispose();
-            _sampleExporter?.Dispose();
-
-#if NETFRAMEWORK
-            _canaryThreadManager?.Dispose();
-#endif
+            ContinuousProfiler.Dispose();
 
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();

@@ -296,6 +296,14 @@ public class MyContinuousProfilerPlugin : IPlugin, IContinuousProfilerPlugin
 ```
 
 `Exporter` must implement `IContinuousProfilerExporter`.
+Its `ExportThreadSamples(byte[], int, uint, CancellationToken)` method receives
+the CPU sampling interval in milliseconds for each native batch. Use that
+interval to set the exported profile period. Existing exporters must update
+their `ExportThreadSamples` implementation to accept the interval.
+
+An exporter and a nonzero CPU interval or allocation limit prepare the
+corresponding managed handler even when its `Enabled` setting is false. Native
+sampling remains disabled until a runtime configuration enables that feature.
 
 ## Supported Options
 

@@ -25,7 +25,7 @@ internal sealed class JsonConsoleExporter : ISelectiveSamplerExporter, IContinuo
         WriteToConsole(samples);
     }
 
-    public void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken)
+    public void ExportThreadSamples(byte[] buffer, int read, uint samplingInterval, CancellationToken cancellationToken)
     {
         var samples = _sampleNativeFormatParser.ParseThreadSamples(buffer, read);
         WriteToConsole(samples ?? []);
