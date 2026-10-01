@@ -1144,7 +1144,7 @@ void CorProfiler::InternalAddInstrumentation(
     WCHAR* id, CallTargetDefinition* items, int size, bool isDerived, bool isInterface)
 {
     WSTRING definitionsId = WSTRING(id);
-    auto definitions = definitions_ids.Get();
+    auto    definitions   = definitions_ids.Get();
 
     if (definitions->find(definitionsId) != definitions->end())
     {
@@ -1238,8 +1238,10 @@ void CorProfiler::InternalAddInstrumentation(
     }
 }
 
-int CorProfiler::RegisterCallTargetDefinitions(WCHAR* id, CallTargetDefinition2* items, int size,
-                                                std::uint32_t enabledCategories)
+int CorProfiler::RegisterCallTargetDefinitions(WCHAR*                 id,
+                                               CallTargetDefinition2* items,
+                                               int                    size,
+                                               std::uint32_t          enabledCategories)
 {
     auto _ = trace::Stats::Instance()->InitializeProfilerMeasure();
     if (id == nullptr || size < 0 || (size > 0 && items == nullptr))
@@ -1249,7 +1251,7 @@ int CorProfiler::RegisterCallTargetDefinitions(WCHAR* id, CallTargetDefinition2*
     }
 
     const WSTRING definitionsId(id);
-    auto definitions = definitions_ids.Get();
+    auto          definitions = definitions_ids.Get();
     if (definitions->find(definitionsId) != definitions->end())
     {
         Logger::Info("RegisterCallTargetDefinitions: Id already processed.");
@@ -1295,10 +1297,11 @@ int CorProfiler::RegisterCallTargetDefinitions(WCHAR* id, CallTargetDefinition2*
 
         const Version minVersion(current.targetMinimumMajor, current.targetMinimumMinor, current.targetMinimumPatch, 0);
         const Version maxVersion(current.targetMaximumMajor, current.targetMaximumMinor, current.targetMaximumPatch, 0);
-        integrationDefinitions.emplace_back(
-            MethodReference(targetAssembly, targetType, targetMethod, minVersion, maxVersion, signatureTypes),
-            TypeReference(integrationAssembly, integrationType, {}, {}), current.GetIsDerived(),
-            current.GetIsInterface(), true, current.categories, enabledCategories);
+        integrationDefinitions.emplace_back(MethodReference(targetAssembly, targetType, targetMethod, minVersion,
+                                                            maxVersion, signatureTypes),
+                                            TypeReference(integrationAssembly, integrationType, {}, {}),
+                                            current.GetIsDerived(), current.GetIsInterface(), true, current.categories,
+                                            enabledCategories);
     }
 
     auto modules = module_ids.Get();
@@ -1312,7 +1315,7 @@ int CorProfiler::RegisterCallTargetDefinitions(WCHAR* id, CallTargetDefinition2*
     if (!integrationDefinitions.empty())
     {
         auto promise = std::make_shared<std::promise<ULONG>>();
-        auto future = promise->get_future();
+        auto future  = promise->get_future();
         tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(modules.Ref(), integrationDefinitions,
                                                                              promise);
         if (future.wait_for(100ms) == std::future_status::timeout)
@@ -1457,7 +1460,7 @@ void CorProfiler::InitializeTraceMethods(WCHAR* id,
                                          WCHAR* configuration_string_ptr)
 {
     WSTRING definitionsId = WSTRING(id);
-    auto definitions = definitions_ids.Get();
+    auto    definitions   = definitions_ids.Get();
 
     if (definitions->find(definitionsId) != definitions->end())
     {
@@ -2159,7 +2162,7 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
     }
 
     MemberResolver resolver(module_metadata.metadata_import, metadata_emit);
-    mdAssemblyRef corlib_ref = mdTokenNil;
+    mdAssemblyRef  corlib_ref = mdTokenNil;
     if (module_metadata.assemblyName != mscorlib_assemblyName)
     {
         hr = GetCorLibAssemblyRef(module_metadata.assembly_emit, corAssemblyProperty, &corlib_ref);
@@ -2179,8 +2182,7 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
     }
 
     COR_SIGNATURE current_domain_signature[7] = {IMAGE_CEE_CS_CALLCONV_DEFAULT, 0, ELEMENT_TYPE_CLASS};
-    ULONG current_domain_signature_length =
-        3 + CorSigCompressToken(appdomain_type_token, &current_domain_signature[3]);
+    ULONG current_domain_signature_length = 3 + CorSigCompressToken(appdomain_type_token, &current_domain_signature[3]);
     mdToken get_current_domain_token;
     hr = resolver.GetMemberRefOrDef(appdomain_type_token, WStr("get_CurrentDomain"), current_domain_signature,
                                     current_domain_signature_length, &get_current_domain_token);
@@ -2191,7 +2193,7 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
     }
 
     COR_SIGNATURE is_homogenous_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 0, ELEMENT_TYPE_BOOLEAN};
-    mdToken get_is_homogenous_token;
+    mdToken       get_is_homogenous_token;
     hr = resolver.GetMemberRefOrDef(appdomain_type_token, WStr("get_IsHomogenous"), is_homogenous_signature,
                                     sizeof(is_homogenous_signature), &get_is_homogenous_token);
     if (FAILED(hr))
@@ -2201,7 +2203,7 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
     }
 
     COR_SIGNATURE is_fully_trusted_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 0, ELEMENT_TYPE_BOOLEAN};
-    mdToken get_is_fully_trusted_token;
+    mdToken       get_is_fully_trusted_token;
     hr = resolver.GetMemberRefOrDef(appdomain_type_token, WStr("get_IsFullyTrusted"), is_fully_trusted_signature,
                                     sizeof(is_fully_trusted_signature), &get_is_fully_trusted_token);
     if (FAILED(hr))
@@ -2235,8 +2237,8 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
     rewriter_wrapper.CallMember(get_is_fully_trusted_token, true);
     ILInstr* skip_loader_if_not_fully_trusted = rewriter_wrapper.CreateInstr(CEE_BRFALSE_S);
     rewriter_wrapper.CallMember(ret_method_token, false);
-    ILInstr* after_loader = rewriter_wrapper.NOP();
-    skip_loader_if_not_homogenous->m_pTarget = after_loader;
+    ILInstr* after_loader                       = rewriter_wrapper.NOP();
+    skip_loader_if_not_homogenous->m_pTarget    = after_loader;
     skip_loader_if_not_fully_trusted->m_pTarget = after_loader;
 
     hr = rewriter.Export();
@@ -3279,7 +3281,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
 
         ILInstr* load_assembly_target = rewriter_wrapper.CreateInstr(CEE_LDSFLD);
         load_assembly_target->m_Arg32 = assembly_field_token;
-        load_assembly->m_pTarget = load_assembly_target;
+        load_assembly->m_pTarget      = load_assembly_target;
         rewriter_wrapper.LoadStr(load_helper_token);
         rewriter_wrapper.CallMember(assembly_create_instance_member_ref, true);
         rewriter_wrapper.Pop();
@@ -3375,7 +3377,7 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
 
         ILInstr* invoke_fixer_target = rewriter_wrapper.CreateInstr(CEE_LDSFLD);
         invoke_fixer_target->m_Arg32 = app_domain_setup_fixer_field_token;
-        invoke_fixer->m_pTarget = invoke_fixer_target;
+        invoke_fixer->m_pTarget      = invoke_fixer_target;
         rewriter_wrapper.LoadArgument(0);
         rewriter_wrapper.CreateInstr(CEE_LDIND_REF);
         rewriter_wrapper.CallMember(system_action_of_system_app_domain_setup_invoke_token, true);
@@ -3863,8 +3865,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCachedFunctionSearchStarted(FunctionID
     auto modulesOpt = module_ids.TryGet();
     if (!modulesOpt.has_value())
     {
-        Logger::Error("JITCachedFunctionSearchStarted: Failed to acquire the lock for the module ids collection for functionId ",
-                      functionId);
+        Logger::Error(
+            "JITCachedFunctionSearchStarted: Failed to acquire the lock for the module ids collection for functionId ",
+            functionId);
         return S_OK;
     }
 

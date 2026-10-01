@@ -210,8 +210,8 @@ void TracerTokens::AddAdditionalLocals(COR_SIGNATURE (&signatureBuffer)[500],
  * PUBLIC
  **/
 
-TracerTokens::TracerTokens(ModuleMetadata* module_metadata_ptr, const WSTRING& bytecode_instrumentation_name) :
-    CallTargetTokens(module_metadata_ptr, bytecode_instrumentation_name)
+TracerTokens::TracerTokens(ModuleMetadata* module_metadata_ptr, const WSTRING& bytecode_instrumentation_name)
+    : CallTargetTokens(module_metadata_ptr, bytecode_instrumentation_name)
 {
     for (int i = 0; i < FASTPATH_COUNT; i++)
     {

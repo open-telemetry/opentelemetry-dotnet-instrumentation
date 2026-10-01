@@ -198,8 +198,8 @@ TEST_F(CLRHelperTest, ReturnsEmptyForCircularTypeSpec)
         }
     }
 
-    COR_SIGNATURE signature[8] = {ELEMENT_TYPE_GENERICINST, ELEMENT_TYPE_CLASS};
-    const auto compressed_length = CorSigCompressToken(next_type_spec, &signature[2]);
+    COR_SIGNATURE signature[8]       = {ELEMENT_TYPE_GENERICINST, ELEMENT_TYPE_CLASS};
+    const auto    compressed_length  = CorSigCompressToken(next_type_spec, &signature[2]);
     signature[2 + compressed_length] = 1;
     signature[3 + compressed_length] = ELEMENT_TYPE_I4;
 

@@ -835,9 +835,8 @@ void CallTargetTokens::AddAdditionalLocals(COR_SIGNATURE (&signatureBuffer)[500]
 {
 }
 
-CallTargetTokens::CallTargetTokens(ModuleMetadata* moduleMetadataPtr, const WSTRING& bytecodeInstrumentationName) :
-    module_metadata_ptr(moduleMetadataPtr),
-    bytecode_instrumentation_name(bytecodeInstrumentationName)
+CallTargetTokens::CallTargetTokens(ModuleMetadata* moduleMetadataPtr, const WSTRING& bytecodeInstrumentationName)
+    : module_metadata_ptr(moduleMetadataPtr), bytecode_instrumentation_name(bytecodeInstrumentationName)
 {
 }
 /**

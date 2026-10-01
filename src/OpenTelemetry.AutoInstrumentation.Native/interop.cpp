@@ -74,8 +74,10 @@ EXTERN_C VOID STDAPICALLTYPE AddInterfaceInstrumentations(WCHAR* id, trace::Call
     trace::profiler->AddInterfaceInstrumentations(id, items, size);
 }
 
-EXTERN_C int STDAPICALLTYPE RegisterCallTargetDefinitions(WCHAR* id, trace::CallTargetDefinition2* items, int size,
-                                                           std::uint32_t enabledCategories)
+EXTERN_C int STDAPICALLTYPE RegisterCallTargetDefinitions(WCHAR*                        id,
+                                                          trace::CallTargetDefinition2* items,
+                                                          int                           size,
+                                                          std::uint32_t                 enabledCategories)
 {
     if (trace::profiler == nullptr)
     {
@@ -106,8 +108,8 @@ EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamp
         }
 
         trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
-                                                    allocationSamplingEnabled, maxMemorySamplesPerMinute,
-                                                    selectedThreadSamplingInterval);
+                                                     allocationSamplingEnabled, maxMemorySamplesPerMinute,
+                                                     selectedThreadSamplingInterval);
     }
     catch (...)
     {
@@ -188,7 +190,7 @@ EXTERN_C VOID STDAPICALLTYPE InitializeTraceMethods(WCHAR* id,
     }
 
     trace::profiler->InitializeTraceMethods(id, integration_assembly_name_ptr, integration_type_name_ptr,
-                                           configuration_string_ptr);
+                                            configuration_string_ptr);
 }
 
 #ifndef _WIN32

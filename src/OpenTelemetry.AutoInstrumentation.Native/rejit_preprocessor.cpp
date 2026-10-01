@@ -14,7 +14,7 @@ namespace trace
 
 // RejitPreprocessor
 template <class RejitRequestDefinition>
-RejitPreprocessor<RejitRequestDefinition>::RejitPreprocessor(CorProfiler*                         corProfiler,
+RejitPreprocessor<RejitRequestDefinition>::RejitPreprocessor(CorProfiler*                        corProfiler,
                                                              std::shared_ptr<RejitHandler>       rejit_handler,
                                                              std::shared_ptr<RejitWorkOffloader> work_offloader)
     : m_corProfiler(corProfiler), m_rejit_handler(std::move(rejit_handler)), m_work_offloader(std::move(work_offloader))
@@ -128,8 +128,7 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
             if (numOfArgs != target_method.signature_types.size() - 1)
             {
                 Logger::Info("    * Skipping ", caller.type.name, ".", caller.name,
-                             ": the methoddef doesn't have the right number of arguments (", numOfArgs,
-                             " arguments).");
+                             ": the methoddef doesn't have the right number of arguments (", numOfArgs, " arguments).");
                 continue;
             }
 
@@ -609,8 +608,8 @@ const std::unique_ptr<RejitHandlerModuleMethod> TracerRejitPreprocessor::CreateM
     const FunctionInfo&          functionInfo,
     const IntegrationDefinition& integrationDefinition)
 {
-    return std::make_unique<TracerRejitHandlerModuleMethod>(
-        methodDef, module, functionInfo, integrationDefinition, std::make_unique<TracerMethodRewriter>(m_corProfiler));
+    return std::make_unique<TracerRejitHandlerModuleMethod>(methodDef, module, functionInfo, integrationDefinition,
+                                                            std::make_unique<TracerMethodRewriter>(m_corProfiler));
 }
 
 template class RejitPreprocessor<IntegrationDefinition>;

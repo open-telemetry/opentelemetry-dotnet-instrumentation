@@ -13,9 +13,9 @@ namespace trace
 // RejitHandlerModuleMethod
 //
 
-RejitHandlerModuleMethod::RejitHandlerModuleMethod(mdMethodDef         methodDef,
-                                                   RejitHandlerModule* module,
-                                                   const FunctionInfo& functionInfo,
+RejitHandlerModuleMethod::RejitHandlerModuleMethod(mdMethodDef                     methodDef,
+                                                   RejitHandlerModule*             module,
+                                                   const FunctionInfo&             functionInfo,
                                                    std::unique_ptr<MethodRewriter> methodRewriter)
     : m_methodRewriter(std::move(methodRewriter))
     , m_methodDef(methodDef)
@@ -135,10 +135,10 @@ MethodRewriter* RejitHandlerModuleMethod::GetMethodRewriter()
 // TracerRejitHandlerModuleMethod
 //
 
-TracerRejitHandlerModuleMethod::TracerRejitHandlerModuleMethod(mdMethodDef                  methodDef,
-                                                               RejitHandlerModule*          module,
-                                                               const FunctionInfo&          functionInfo,
-                                                               const IntegrationDefinition& integrationDefinition,
+TracerRejitHandlerModuleMethod::TracerRejitHandlerModuleMethod(mdMethodDef                     methodDef,
+                                                               RejitHandlerModule*             module,
+                                                               const FunctionInfo&             functionInfo,
+                                                               const IntegrationDefinition&    integrationDefinition,
                                                                std::unique_ptr<MethodRewriter> methodRewriter)
     : RejitHandlerModuleMethod(methodDef, module, functionInfo, std::move(methodRewriter))
     , m_integrationDefinition(std::make_unique<IntegrationDefinition>(integrationDefinition))

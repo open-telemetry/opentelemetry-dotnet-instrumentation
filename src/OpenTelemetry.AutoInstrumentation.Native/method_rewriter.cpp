@@ -69,7 +69,8 @@ namespace trace
 /// <param name="methodHandler">Method ReJIT handler representation</param>
 /// <param name="pFunctionControl">Function control for the current ReJIT callback</param>
 /// <returns>Result of the rewriting</returns>
-HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler,
+HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler,
+                                      RejitHandlerModuleMethod*    methodHandler,
                                       ICorProfilerFunctionControl* pFunctionControl)
 {
     /*  ===============================
@@ -103,13 +104,12 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     auto _ = trace::Stats::Instance()->CallTargetRewriterCallbackMeasure();
 
-    ModuleID               module_id              = moduleHandler->GetModuleId();
-    ModuleMetadata&        module_metadata        = *moduleHandler->GetModuleMetadata();
-    FunctionInfo*          caller                 = methodHandler->GetFunctionInfo();
-    TracerTokens* tracerTokens =
-        module_metadata.GetTracerTokens(m_corProfiler->GetBytecodeInstrumentationAssembly());
-    mdToken                function_token         = caller->id;
-    TypeSignature          retFuncArg             = caller->method_signature.GetReturnValue();
+    ModuleID        module_id       = moduleHandler->GetModuleId();
+    ModuleMetadata& module_metadata = *moduleHandler->GetModuleMetadata();
+    FunctionInfo*   caller          = methodHandler->GetFunctionInfo();
+    TracerTokens*   tracerTokens = module_metadata.GetTracerTokens(m_corProfiler->GetBytecodeInstrumentationAssembly());
+    mdToken         function_token                = caller->id;
+    TypeSignature   retFuncArg                    = caller->method_signature.GetReturnValue();
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
     bool                   is_integration_method =
         integration_definition->target_method.type.assembly.name != tracemethodintegration_assemblyname;
@@ -127,7 +127,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     // *** Get reference to the integration type
     mdTypeRef integration_type_ref = mdTypeRefNil;
-    if (!m_corProfiler->GetIntegrationTypeRef(module_metadata, module_id, *integration_definition, integration_type_ref))
+    if (!m_corProfiler->GetIntegrationTypeRef(module_metadata, module_id, *integration_definition,
+                                              integration_type_ref))
     {
         Logger::Warn("*** CallTarget_RewriterCallback() skipping method: Integration Type Ref cannot be found for ",
                      " token=", function_token, " caller_name=", caller->type.name, ".", caller->name, "()");
@@ -169,7 +170,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     if (IsDumpILRewriteEnabled())
     {
         original_code = m_corProfiler->GetILCodes("*** CallTarget_RewriterCallback(): Original Code: ", &rewriter,
-                                                *caller, module_metadata.metadata_import);
+                                                  *caller, module_metadata.metadata_import);
     }
 
     // *** Create the rewriter wrapper helper
@@ -698,7 +699,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     {
         Logger::Info(original_code);
         Logger::Info(m_corProfiler->GetILCodes("*** Rewriter(): Modified Code: ", &rewriter, *caller,
-                                             module_metadata.metadata_import));
+                                               module_metadata.metadata_import));
     }
 
     hr = rewriter.Export();

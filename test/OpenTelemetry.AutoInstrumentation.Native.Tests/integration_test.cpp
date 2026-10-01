@@ -28,9 +28,9 @@ TEST(IntegrationTest, CallTargetDefinition2PreservesV1Prefix)
 
 TEST(IntegrationTest, SharedCallTargetRemainsEnabledWhileOneCategoryIsEnabled)
 {
-    MethodReference target(WStr("TargetAssembly"), WStr("TargetType"), WStr("TargetMethod"), Version(1, 0, 0, 0),
-                           Version(2, 0, 0, 0), {});
-    TypeReference integration(WStr("IntegrationAssembly"), WStr("IntegrationType"), {}, {});
+    MethodReference       target(WStr("TargetAssembly"), WStr("TargetType"), WStr("TargetMethod"), Version(1, 0, 0, 0),
+                                 Version(2, 0, 0, 0), {});
+    TypeReference         integration(WStr("IntegrationAssembly"), WStr("IntegrationType"), {}, {});
     IntegrationDefinition traceEnabled(target, integration, false, false, true, 3, 1);
     IntegrationDefinition metricEnabled(target, integration, false, false, true, 3, 2);
     IntegrationDefinition unrelatedCategoryEnabled(target, integration, false, false, true, 3, 4);

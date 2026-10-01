@@ -226,9 +226,9 @@ TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdTo
     bool                      type_valueType = false;
     bool                      type_isGeneric = false;
 
-    HRESULT hr = E_FAIL;
-    auto token = token_;
-    mdTypeSpec outer_type_spec = mdTypeSpecNil;
+    HRESULT           hr              = E_FAIL;
+    auto              token           = token_;
+    mdTypeSpec        outer_type_spec = mdTypeSpecNil;
     std::set<mdToken> processed;
 
     while (token != mdTokenNil)
@@ -310,9 +310,11 @@ TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdTo
             type_isGeneric          = idxFromRight == 1 || idxFromRight == 2;
         }
 
-        return {token, type_name_string, outer_type_spec,
-                outer_type_spec != mdTypeSpecNil ? mdtTypeSpec : token_type,
-                extendsInfo, type_valueType, type_isGeneric, parentTypeInfo, parent_token};
+        return {token,           type_name_string,
+                outer_type_spec, outer_type_spec != mdTypeSpecNil ? mdtTypeSpec : token_type,
+                extendsInfo,     type_valueType,
+                type_isGeneric,  parentTypeInfo,
+                parent_token};
     }
 
     return {};
