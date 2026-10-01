@@ -46,7 +46,7 @@ public class RuntimeSamplerTransitionPlugin : BasePlugin, IContinuousProfilerPlu
             // their native producers.
             AllocationSamplingEnabled = false,
             MaxMemorySamplesPerMinute = maxMemorySamplesPerMinute,
-            ExportInterval = TimeSpan.FromSeconds(1),
+            ExportInterval = TimeSpan.FromMilliseconds(250),
             ExportTimeout = TimeSpan.FromMilliseconds(5000),
             Exporter = new OtlpOverHttpExporter(new SampleNativeFormatParser())
         };
