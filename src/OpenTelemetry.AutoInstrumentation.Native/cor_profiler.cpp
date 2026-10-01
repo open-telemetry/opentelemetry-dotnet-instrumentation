@@ -2948,179 +2948,51 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
 
         rewriter_void.SetTkLocalVarSig(locals_signature_token);
 
-        ILInstr* pFirstInstr = rewriter_void.GetILList()->m_pNext;
-        ILInstr* pNewInstr   = NULL;
+        ILRewriterWrapper rewriter_wrapper(&rewriter_void);
+        rewriter_wrapper.SetILPosition(rewriter_void.GetILList()->m_pNext);
 
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDLOCA_S;
-        pNewInstr->m_Arg32  = 0;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        rewriter_wrapper.LoadLocalAddress(0);
+        rewriter_wrapper.LoadLocalAddress(1);
+        rewriter_wrapper.LoadLocalAddress(2);
+        rewriter_wrapper.LoadLocalAddress(3);
+        rewriter_wrapper.CallMember(pinvoke_method_def, false);
 
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDLOCA_S;
-        pNewInstr->m_Arg32  = 1;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        rewriter_wrapper.LoadLocal(1);
+        rewriter_wrapper.CreateInstr(CEE_NEWARR)->m_Arg32 = byte_type_token;
+        rewriter_wrapper.StLocal(4);
 
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDLOCA_S;
-        pNewInstr->m_Arg32  = 2;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        rewriter_wrapper.LoadLocal(0);
+        rewriter_wrapper.LoadLocal(4);
+        rewriter_wrapper.LoadInt32(0);
+        rewriter_wrapper.LoadLocal(1);
+        rewriter_wrapper.CallMember(marshal_copy_token, false);
 
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDLOCA_S;
-        pNewInstr->m_Arg32  = 3;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        rewriter_wrapper.LoadLocal(3);
+        rewriter_wrapper.CreateInstr(CEE_NEWARR)->m_Arg32 = byte_type_token;
+        rewriter_wrapper.StLocal(5);
 
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_CALL;
-        pNewInstr->m_Arg32  = pinvoke_method_def;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        rewriter_wrapper.LoadLocal(2);
+        rewriter_wrapper.LoadLocal(5);
+        rewriter_wrapper.LoadInt32(0);
+        rewriter_wrapper.LoadLocal(3);
+        rewriter_wrapper.CallMember(marshal_copy_token, false);
 
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDLOC_1;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        rewriter_wrapper.LoadLocal(4);
+        rewriter_wrapper.LoadLocal(5);
+        rewriter_wrapper.CallMember(system_reflection_assembly_load_token, false);
+        rewriter_wrapper.CreateInstr(CEE_STSFLD)->m_Arg32 = assembly_field_token;
 
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_NEWARR;
-        pNewInstr->m_Arg32  = byte_type_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_STLOC_S;
-        pNewInstr->m_Arg8   = 4;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDLOC_0;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDLOC_S;
-        pNewInstr->m_Arg8   = 4;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDC_I4_0;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDLOC_1;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_CALL;
-        pNewInstr->m_Arg32  = marshal_copy_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDLOC_3;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_NEWARR;
-        pNewInstr->m_Arg32  = byte_type_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_STLOC_S;
-        pNewInstr->m_Arg8   = 5;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDLOC_2;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDLOC_S;
-        pNewInstr->m_Arg8   = 5;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDC_I4_0;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDLOC_3;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_CALL;
-        pNewInstr->m_Arg32  = marshal_copy_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDLOC_S;
-        pNewInstr->m_Arg8   = 4;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDLOC_S;
-        pNewInstr->m_Arg8   = 5;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_CALL;
-        pNewInstr->m_Arg32  = system_reflection_assembly_load_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_STSFLD;
-        pNewInstr->m_Arg32  = assembly_field_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDSFLD;
-        pNewInstr->m_Arg32  = assembly_field_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDSTR;
-        pNewInstr->m_Arg32  = config_updater_class_name_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_CALLVIRT;
-        pNewInstr->m_Arg32  = system_reflection_assembly_get_type_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDSTR;
-        pNewInstr->m_Arg32  = config_updater_method_name_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_CALLVIRT;
-        pNewInstr->m_Arg32  = system_type_get_method_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDTOKEN;
-        pNewInstr->m_Arg32  = system_action_of_system_app_domain_setup_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_CALL;
-        pNewInstr->m_Arg32  = system_type_get_type_from_handle_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_CALLVIRT;
-        pNewInstr->m_Arg32  = system_reflection_method_info_create_delegate_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_CASTCLASS;
-        pNewInstr->m_Arg32  = system_action_of_system_app_domain_setup_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_STSFLD;
-        pNewInstr->m_Arg32  = app_domain_setup_fixer_field_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_RET;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        rewriter_wrapper.CreateInstr(CEE_LDSFLD)->m_Arg32 = assembly_field_token;
+        rewriter_wrapper.LoadStr(config_updater_class_name_token);
+        rewriter_wrapper.CallMember(system_reflection_assembly_get_type_token, true);
+        rewriter_wrapper.LoadStr(config_updater_method_name_token);
+        rewriter_wrapper.CallMember(system_type_get_method_token, true);
+        rewriter_wrapper.LoadToken(system_action_of_system_app_domain_setup_token);
+        rewriter_wrapper.CallMember(system_type_get_type_from_handle_token, false);
+        rewriter_wrapper.CallMember(system_reflection_method_info_create_delegate_token, true);
+        rewriter_wrapper.Cast(system_action_of_system_app_domain_setup_token);
+        rewriter_wrapper.CreateInstr(CEE_STSFLD)->m_Arg32 = app_domain_setup_fixer_field_token;
+        rewriter_wrapper.Return();
 
         if (IsDumpILRewriteEnabled())
         {
@@ -3189,45 +3061,16 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         ILRewriter rewriter_already_loaded(this->info_, nullptr, module_id, already_loaded_method_token);
         rewriter_already_loaded.InitializeTiny();
 
-        ILInstr* pALFirstInstr = rewriter_already_loaded.GetILList()->m_pNext;
-        ILInstr* pALNewInstr   = nullptr;
+        ILRewriterWrapper rewriter_wrapper(&rewriter_already_loaded);
+        rewriter_wrapper.SetILPosition(rewriter_already_loaded.GetILList()->m_pNext);
 
-        // ldsflda _isAssemblyLoaded : Load the address of the "_isAssemblyLoaded" static var
-        pALNewInstr           = rewriter_already_loaded.NewILInstr();
-        pALNewInstr->m_opcode = CEE_LDSFLDA;
-        pALNewInstr->m_Arg32  = isAssemblyLoadedFieldToken;
-        rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
-
-        // ldc.i4.1 : Load the constant 1 (int) to the stack
-        pALNewInstr           = rewriter_already_loaded.NewILInstr();
-        pALNewInstr->m_opcode = CEE_LDC_I4_1;
-        rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
-
-        // ldc.i4.0 : Load the constant 0 (int) to the stack
-        pALNewInstr           = rewriter_already_loaded.NewILInstr();
-        pALNewInstr->m_opcode = CEE_LDC_I4_0;
-        rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
-
-        // call int Interlocked.CompareExchange(ref int, int, int) method
-        pALNewInstr           = rewriter_already_loaded.NewILInstr();
-        pALNewInstr->m_opcode = CEE_CALL;
-        pALNewInstr->m_Arg32  = interlocked_compare_member_ref;
-        rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
-
-        // ldc.i4.1 : Load the constant 1 (int) to the stack
-        pALNewInstr           = rewriter_already_loaded.NewILInstr();
-        pALNewInstr->m_opcode = CEE_LDC_I4_1;
-        rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
-
-        // ceq : Compare equality from two values from the stack
-        pALNewInstr           = rewriter_already_loaded.NewILInstr();
-        pALNewInstr->m_opcode = CEE_CEQ;
-        rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
-
-        // ret : Return the value of the comparison
-        pALNewInstr           = rewriter_already_loaded.NewILInstr();
-        pALNewInstr->m_opcode = CEE_RET;
-        rewriter_already_loaded.InsertBefore(pALFirstInstr, pALNewInstr);
+        rewriter_wrapper.LoadFieldAddress(isAssemblyLoadedFieldToken, true);
+        rewriter_wrapper.LoadInt32(1);
+        rewriter_wrapper.LoadInt32(0);
+        rewriter_wrapper.CallMember(interlocked_compare_member_ref, false);
+        rewriter_wrapper.LoadInt32(1);
+        rewriter_wrapper.CreateInstr(CEE_CEQ);
+        rewriter_wrapper.Return();
 
         hr = rewriter_already_loaded.Export();
         if (FAILED(hr))
@@ -3287,46 +3130,20 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         ILRewriter rewriter_void(this->info_, nullptr, module_id, *init_method);
         rewriter_void.InitializeTiny();
 
-        ILInstr* pFirstInstr = rewriter_void.GetILList()->m_pNext;
-        ILInstr* pNewInstr   = nullptr;
+        ILRewriterWrapper rewriter_wrapper(&rewriter_void);
+        rewriter_wrapper.SetILPosition(rewriter_void.GetILList()->m_pNext);
 
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_CALL;
-        pNewInstr->m_Arg32  = already_loaded_method_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        rewriter_wrapper.CallMember(already_loaded_method_token, false);
+        ILInstr* load_assembly = rewriter_wrapper.CreateInstr(CEE_BRFALSE_S);
+        rewriter_wrapper.Return();
 
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_BRFALSE_S;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-        ILInstr* pBranchFalseInstr = pNewInstr;
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_RET;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDSFLD;
-        pNewInstr->m_Arg32  = assembly_field_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-        pBranchFalseInstr->m_pTarget = pNewInstr;
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDSTR;
-        pNewInstr->m_Arg32  = load_helper_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_CALLVIRT;
-        pNewInstr->m_Arg32  = assembly_create_instance_member_ref;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_POP;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_RET;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        ILInstr* load_assembly_target = rewriter_wrapper.CreateInstr(CEE_LDSFLD);
+        load_assembly_target->m_Arg32 = assembly_field_token;
+        load_assembly->m_pTarget = load_assembly_target;
+        rewriter_wrapper.LoadStr(load_helper_token);
+        rewriter_wrapper.CallMember(assembly_create_instance_member_ref, true);
+        rewriter_wrapper.Pop();
+        rewriter_wrapper.Return();
 
         if (IsDumpILRewriteEnabled())
         {
@@ -3405,57 +3222,24 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
         ILRewriter rewriter_void(this->info_, nullptr, module_id, *patch_app_domain_setup_method);
         rewriter_void.InitializeTiny();
 
-        ILInstr* pFirstInstr = rewriter_void.GetILList()->m_pNext;
-        ILInstr* pNewInstr   = NULL;
+        ILRewriterWrapper rewriter_wrapper(&rewriter_void);
+        rewriter_wrapper.SetILPosition(rewriter_void.GetILList()->m_pNext);
 
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDARG_0;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        rewriter_wrapper.LoadArgument(0);
+        rewriter_wrapper.CreateInstr(CEE_LDIND_REF);
+        ILInstr* invoke_fixer = rewriter_wrapper.CreateInstr(CEE_BRTRUE_S);
 
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDIND_REF;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        rewriter_wrapper.LoadArgument(0);
+        rewriter_wrapper.CreateInstr(CEE_NEWOBJ)->m_Arg32 = system_app_domain_setup_ctor_token;
+        rewriter_wrapper.CreateInstr(CEE_STIND_REF);
 
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_BRTRUE_S;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-        ILInstr* branch_source = pNewInstr;
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDARG_0;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_NEWOBJ;
-        pNewInstr->m_Arg32  = system_app_domain_setup_ctor_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_STIND_REF;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDSFLD;
-        pNewInstr->m_Arg32  = app_domain_setup_fixer_field_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-        branch_source->m_pTarget = pNewInstr;
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDARG_0;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_LDIND_REF;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_CALLVIRT;
-        pNewInstr->m_Arg32  = system_action_of_system_app_domain_setup_invoke_token;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
-
-        pNewInstr           = rewriter_void.NewILInstr();
-        pNewInstr->m_opcode = CEE_RET;
-        rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+        ILInstr* invoke_fixer_target = rewriter_wrapper.CreateInstr(CEE_LDSFLD);
+        invoke_fixer_target->m_Arg32 = app_domain_setup_fixer_field_token;
+        invoke_fixer->m_pTarget = invoke_fixer_target;
+        rewriter_wrapper.LoadArgument(0);
+        rewriter_wrapper.CreateInstr(CEE_LDIND_REF);
+        rewriter_wrapper.CallMember(system_action_of_system_app_domain_setup_invoke_token, true);
+        rewriter_wrapper.Return();
 
         if (IsDumpILRewriteEnabled())
         {
