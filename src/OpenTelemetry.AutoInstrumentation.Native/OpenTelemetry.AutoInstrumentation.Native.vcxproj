@@ -242,6 +242,8 @@
     <ClInclude Include="suspension_guards.h" />
     <ClInclude Include="thread_suspend.h" />
     <ClInclude Include="tracer_tokens.h" />
+    <ClInclude Include="type_name_assembly_redirection_rewriter.h" />
+    <ClInclude Include="unsafe_accessor_type_attribute_updater.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="version.h" />
   </ItemGroup>
@@ -281,6 +283,8 @@
     <ClCompile Include="suspension_guards.cpp" />
     <ClCompile Include="thread_suspend.cpp" />
     <ClCompile Include="tracer_tokens.cpp" />
+    <ClCompile Include="type_name_assembly_redirection_rewriter.cpp" />
+    <ClCompile Include="unsafe_accessor_type_attribute_updater.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>
