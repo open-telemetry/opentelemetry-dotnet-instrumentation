@@ -4,6 +4,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 
 namespace OpenTelemetry.AutoInstrumentation;
 
@@ -76,21 +77,39 @@ internal static class NativeMethods
     }
 #endif
 
-    public static void ConfigureNativeContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval)
+    public static RuntimeSamplerApplyResult ApplyContinuousProfilerConfiguration(
+        RuntimeSamplerConfiguration configuration,
+        RuntimeSamplerAuthority authority,
+        out RuntimeSamplerState state)
     {
-        if (IsWindows)
+        configuration.StructureSize = RuntimeSamplerConfiguration.Size;
+        state = RuntimeSamplerState.Create();
+
+        try
         {
-            Windows.ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, selectedThreadSamplingInterval);
+            return IsWindows
+                ? Windows.ApplyContinuousProfilerConfiguration(ref configuration, authority, ref state)
+                : NonWindows.ApplyContinuousProfilerConfiguration(ref configuration, authority, ref state);
         }
-        else
+        catch (EntryPointNotFoundException ex)
         {
-            NonWindows.ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, selectedThreadSamplingInterval);
+            throw new NotSupportedException("Continuous profiling requires a native profiler with runtime sampler configuration support.", ex);
         }
     }
 
-    public static int ContinuousProfilerReadThreadSamples(int len, byte[] buf)
+    public static RuntimeSamplerStateQueryResult GetContinuousProfilerState(out RuntimeSamplerState state)
     {
-        return IsWindows ? Windows.ContinuousProfilerReadThreadSamples(len, buf) : NonWindows.ContinuousProfilerReadThreadSamples(len, buf);
+        state = RuntimeSamplerState.Create();
+        return IsWindows
+            ? Windows.GetContinuousProfilerState(ref state)
+            : NonWindows.GetContinuousProfilerState(ref state);
+    }
+
+    public static int ContinuousProfilerReadThreadSamples(int len, byte[] buf, out uint samplingInterval)
+    {
+        return IsWindows
+            ? Windows.ContinuousProfilerReadThreadSamplesV2(len, buf, out samplingInterval)
+            : NonWindows.ContinuousProfilerReadThreadSamplesV2(len, buf, out samplingInterval);
     }
 
 #if NET
@@ -240,12 +259,19 @@ internal static class NativeMethods
 #endif
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-        public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval);
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Winapi)]
+        public static extern RuntimeSamplerApplyResult ApplyContinuousProfilerConfiguration(
+            ref RuntimeSamplerConfiguration configuration,
+            RuntimeSamplerAuthority authority,
+            ref RuntimeSamplerState state);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-        public static extern int ContinuousProfilerReadThreadSamples(int len, byte[] buf);
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Winapi)]
+        public static extern RuntimeSamplerStateQueryResult GetContinuousProfilerState(ref RuntimeSamplerState state);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Winapi)]
+        public static extern int ContinuousProfilerReadThreadSamplesV2(int len, byte[] buf, out uint samplingInterval);
 
 #if NET
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
@@ -296,12 +322,19 @@ internal static class NativeMethods
 #endif
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
-        public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute, uint selectedThreadSamplingInterval);
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native", CallingConvention = CallingConvention.Winapi)]
+        public static extern RuntimeSamplerApplyResult ApplyContinuousProfilerConfiguration(
+            ref RuntimeSamplerConfiguration configuration,
+            RuntimeSamplerAuthority authority,
+            ref RuntimeSamplerState state);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
-        public static extern int ContinuousProfilerReadThreadSamples(int len, byte[] buf);
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native", CallingConvention = CallingConvention.Winapi)]
+        public static extern RuntimeSamplerStateQueryResult GetContinuousProfilerState(ref RuntimeSamplerState state);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native", CallingConvention = CallingConvention.Winapi)]
+        public static extern int ContinuousProfilerReadThreadSamplesV2(int len, byte[] buf, out uint samplingInterval);
 
 #if NET
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]

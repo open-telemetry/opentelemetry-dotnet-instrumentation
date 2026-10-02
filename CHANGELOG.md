@@ -11,6 +11,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- **Breaking change:** `IContinuousProfilerExporter.ExportThreadSamples` now
+  requires the CPU sampling interval for each batch as a `uint` argument in
+  milliseconds.
+
 #### Dependency updates
 
 - Following packages updated
