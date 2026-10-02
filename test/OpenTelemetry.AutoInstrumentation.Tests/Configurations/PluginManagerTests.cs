@@ -19,6 +19,23 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 public class PluginManagerTests
 {
     [Fact]
+    public void PluginOrderIsPreservedAndDuplicateTypesAreInstantiatedOnce()
+    {
+        var firstPluginTypeName = typeof(MockPlugin).AssemblyQualifiedName!;
+        var secondPluginTypeName = typeof(SecondMockPlugin).AssemblyQualifiedName!;
+        var settings = new PluginsSettings();
+        settings.Plugins.Add(firstPluginTypeName);
+        settings.Plugins.Add(secondPluginTypeName);
+        settings.Plugins.Add(firstPluginTypeName);
+
+        var pluginManager = new PluginManager(settings);
+
+        Assert.Equal(
+            [typeof(MockPlugin), typeof(SecondMockPlugin)],
+            pluginManager.Plugins.Select(plugin => plugin.Type));
+    }
+
+    [Fact]
     public void MissingAssembly()
     {
         var pluginAssemblyQualifiedName = "Missing.Assembly.PluginType, Missing.Assembly";
@@ -366,6 +383,14 @@ public class PluginManagerTests
             builder.AddAttributes(attributes);
             return builder;
         }
+    }
+
+#pragma warning disable CA1515 // Consider making public types internal. Needed for plugin purposes.
+#pragma warning disable CA1034 // Nested types should not be visible. It is used only for test purposes.
+    public class SecondMockPlugin : MockPlugin
+#pragma warning restore CA1034 // Nested types should not be visible. It is used only for test purposes.
+#pragma warning restore CA1515 // Consider making public types internal. Needed for plugin purposes.
+    {
     }
 
 #pragma warning disable CA1515 // Consider making public types internal. Needed for plugin purposes.

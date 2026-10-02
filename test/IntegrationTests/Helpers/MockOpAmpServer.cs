@@ -20,14 +20,16 @@ internal sealed class MockOpAmpServer : IDisposable
 {
     private readonly ITestOutputHelper _output;
     private readonly TestHttpServer _listener;
+    private readonly string _host;
 
     private readonly List<Expectation> _expectations = new();
     private readonly BlockingCollection<AgentToServer> _frames = new(10); // bounded to avoid memory leak
     private readonly List<NameValueCollection> _receivedHeaders = [];
 
-    public MockOpAmpServer(ITestOutputHelper output, string host = "localhost")
+    public MockOpAmpServer(ITestOutputHelper output, string host = "127.0.0.1")
     {
         _output = output;
+        _host = host;
 #if NETFRAMEWORK
         _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/opamp/");
 #else
@@ -39,6 +41,8 @@ internal sealed class MockOpAmpServer : IDisposable
     /// Gets the TCP port that this collector is listening on.
     /// </summary>
     public int Port { get => _listener.Port; }
+
+    public string Endpoint => $"http://{_host}:{Port}/v1/opamp";
 
     public void Expect(Func<AgentToServer, bool>? predicate = null, string? description = null)
     {
