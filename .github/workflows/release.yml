@@ -220,6 +220,7 @@ jobs:
     if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
     runs-on: ubuntu-26.04
     needs: [ create-release ]
+    environment: release
     permissions:
       contents: read # for actions/checkout and actions/download-artifact
       id-token: write # for NuGet trusted publishing
