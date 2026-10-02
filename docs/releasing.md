@@ -48,6 +48,9 @@
    After you've pushed the git tag, a `release` GitHub workflow starts.
    This will create a draft release with uploaded artifacts, then publish the
    NuGet packages (`.nupkg`) and corresponding symbol packages (`.snupkg`).
+   Once all package and symbol uploads succeed, it publishes the GitHub release.
+   Stable versions are marked as latest. Tags with any prerelease suffix
+   are marked as prereleases and are not marked as latest.
    The draft description contains the changelog entry matching the tag, excluding
    the version heading, the Unreleased section, and earlier releases. A missing
    or empty entry stops the workflow before NuGet publishing.
@@ -56,13 +59,8 @@
    If NuGet publishing fails, the GitHub release remains a draft. Fix the cause
    and re-run the failed jobs. Packages already uploaded are skipped.
 
-1. Publish a release in GitHub:
-
-   - Use draft created by `release` GitHub workflow.
-
-   After you've publish the release, a `release-publish` GitHub workflow starts.
-
-1. Check the status of [the `release-publish` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/release-publish.yml).
+   After publishing the GitHub release, `release` validates the installers.
+   Check these jobs in the same workflow run.
 
 1. For a stable release, update the version in:
 
