@@ -10,6 +10,8 @@
 
 1. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
    Remove empty sections for the version being released.
+   The release description is generated from this entry. Its heading must use
+   the release tag (for example, `## [v1.18.0](...)`).
 
 1. Stable release only! Update `PublicAPI.Shipped.txt` based on corresponding `PublicAPI.Unshipped.txt`.
 
@@ -46,6 +48,9 @@
    After you've pushed the git tag, a `release` GitHub workflow starts.
    This will create a draft release with uploaded artifacts, then publish the
    NuGet packages (`.nupkg`) and corresponding symbol packages (`.snupkg`).
+   The draft description contains the changelog entry matching the tag, excluding
+   the version heading, the Unreleased section, and earlier releases. A missing
+   or empty entry stops the workflow before NuGet publishing.
 
 1. Check the status of [the `release` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/release.yml).
    If NuGet publishing fails, the GitHub release remains a draft. Fix the cause
@@ -54,7 +59,6 @@
 1. Publish a release in GitHub:
 
    - Use draft created by `release` GitHub workflow.
-   - Use the [CHANGELOG.md](../CHANGELOG.md) content in the description.
 
    After you've publish the release, a `release-publish` GitHub workflow starts.
 
