@@ -44,7 +44,12 @@
    ```
 
    After you've pushed the git tag, a `release` GitHub workflow starts.
-   This will create draft release with uploaded artifacts.
+   This will create a draft release with uploaded artifacts, then publish the
+   NuGet packages (`.nupkg`) and corresponding symbol packages (`.snupkg`).
+
+1. Check the status of [the `release` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/release.yml).
+   If NuGet publishing fails, the GitHub release remains a draft. Fix the cause
+   and re-run the failed jobs. Packages already uploaded are skipped.
 
 1. Publish a release in GitHub:
 
@@ -54,12 +59,6 @@
    After you've publish the release, a `release-publish` GitHub workflow starts.
 
 1. Check the status of [the `release-publish` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/release-publish.yml).
-
-1. If the `release-publish` GitHub workflow succeeds, publish the NuGet packages:
-    1. Unzip `opentelemetry-dotnet-instrumentation-nuget-packages.zip` to a local
-    folder.
-    1. Upload and publish the packages (`.nupkg`)
-       and corresponding symbol packages (`.snupkg`) to nuget.org.
 
 1. For a stable release, update the version in:
 
