@@ -6,6 +6,7 @@
 #include "corhlpr.h"
 #include <corprof.h>
 #include <algorithm>
+#include <optional>
 #include <string>
 #include <typeinfo>
 
@@ -1304,28 +1305,31 @@ int CorProfiler::RegisterCallTargetDefinitions(WCHAR*                 id,
                                             enabledCategories);
     }
 
-    auto modules = module_ids.Get();
-    definitions->emplace(definitionsId);
-    integration_definitions_.reserve(integration_definitions_.size() + integrationDefinitions.size());
-    for (const auto& integration : integrationDefinitions)
+    std::optional<std::future<ULONG>> rejit_future;
     {
-        integration_definitions_.push_back(integration);
+        auto modules = module_ids.Get();
+        definitions->emplace(definitionsId);
+        integration_definitions_.reserve(integration_definitions_.size() + integrationDefinitions.size());
+        for (const auto& integration : integrationDefinitions)
+        {
+            integration_definitions_.push_back(integration);
+        }
+
+        if (!integrationDefinitions.empty())
+        {
+            auto promise = std::make_shared<std::promise<ULONG>>();
+            rejit_future = promise->get_future();
+            tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(modules.Ref(), integrationDefinitions,
+                                                                                 promise);
+        }
     }
 
-    if (!integrationDefinitions.empty())
+    if (rejit_future.has_value())
     {
-        auto promise = std::make_shared<std::promise<ULONG>>();
-        auto future  = promise->get_future();
-        tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(modules.Ref(), integrationDefinitions,
-                                                                             promise);
-        if (future.wait_for(100ms) == std::future_status::timeout)
-        {
-            Logger::Warn("Timeout while waiting for V2 ReJIT requests. ReJIT will continue asynchronously.");
-        }
-        else
-        {
-            Logger::Debug("RegisterCallTargetDefinitions: Total number of ReJIT requested: ", future.get());
-        }
+        // IIS must request ReJIT for the pre-start method before the loader returns.
+        // Do not hold the module lock while waiting, since CLR callbacks can access module_ids.
+        const auto numReJITs = rejit_future->get();
+        Logger::Debug("RegisterCallTargetDefinitions: Total number of ReJIT requested: ", numReJITs);
     }
 
     Logger::Info("RegisterCallTargetDefinitions: Total integrations in profiler: ", integration_definitions_.size());
