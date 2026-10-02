@@ -1,7 +1,7 @@
 FROM ubuntu:16.04@sha256:1f1a2d56de1d604801a9671f301190704c25d604a416f59e03c04f5c6ffee0d6
 
-# renovate: datasource=deb depName=clang-5.0
-ARG CLANG_5_VERSION=1:5.0.2~svn328729-1~exp1~20180509124008.99
+# renovate: datasource=deb depName=clang-12
+ARG CLANG_12_VERSION=1:12.0.0~++20210319082646+4990141a4366-1~exp1~20210319193401.61
 # renovate: datasource=deb depName=g++-9
 ARG GXX_9_VERSION=9.4.0-1ubuntu1~16.04
 ARG UBUNTU_TOOLCHAIN_R_FINGERPRINT=C8EC952E2A0E1FBDC5090F6A2C277A0A352154E5
@@ -20,11 +20,11 @@ RUN apt-get update && \
 
 # Install newer clang
 RUN curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor -o /usr/share/keyrings/llvm-archive-keyring.gpg && \
-    echo 'deb [signed-by=/usr/share/keyrings/llvm-archive-keyring.gpg] https://apt.llvm.org/xenial/ llvm-toolchain-xenial-5.0 main' | tee /etc/apt/sources.list.d/llvm.list >/dev/null && \
+    echo 'deb [signed-by=/usr/share/keyrings/llvm-archive-keyring.gpg] https://apt.llvm.org/xenial/ llvm-toolchain-xenial-12 main' | tee /etc/apt/sources.list.d/llvm.list >/dev/null && \
     apt-get update && \
-    apt-get install -y clang-5.0="${CLANG_5_VERSION}" && \
-    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-5.0 1000 && \
-    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-5.0 1000 && \
+    apt-get install -y clang-12="${CLANG_12_VERSION}" && \
+    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-12 1000 && \
+    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-12 1000 && \
     update-alternatives --config clang && \
     update-alternatives --config clang++
 

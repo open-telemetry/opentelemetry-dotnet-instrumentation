@@ -110,6 +110,7 @@ namespace System.Text.RegularExpressions.Generated
 
     /// <summary>Custom <see cref="Regex"/>-derived type for the GetEnvVarRegex method.</summary>
     [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.42015")]
+    [SkipLocalsInit]
     file sealed class GetEnvVarRegex_0 : Regex
     {
         /// <summary>Cached, thread-safe singleton instance.</summary>
@@ -391,6 +392,7 @@ namespace System.Text.RegularExpressions.Generated
     
     /// <summary>Custom <see cref="Regex"/>-derived type for the DataSourceRegex method.</summary>
     [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.42015")]
+    [SkipLocalsInit]
     file sealed class DataSourceRegex_1 : Regex
     {
         /// <summary>Cached, thread-safe singleton instance.</summary>
@@ -1115,6 +1117,7 @@ namespace System.Text.RegularExpressions.Generated
     
     /// <summary>Custom <see cref="Regex"/>-derived type for the NamedPipeRegex method.</summary>
     [GeneratedCodeAttribute("System.Text.RegularExpressions.Generator", "8.0.14.42015")]
+    [SkipLocalsInit]
     file sealed class NamedPipeRegex_2 : Regex
     {
         /// <summary>Cached, thread-safe singleton instance.</summary>

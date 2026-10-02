@@ -64,12 +64,12 @@
     },
     {
       customType: "regex",
-      description: ["Update Ubuntu 16.04 clang package version ARG in Dockerfiles"],
+      description: ["Update Ubuntu 16.04 Clang package version ARG in Dockerfiles"],
       managerFilePatterns: ["/^docker/ubuntu1604\\.dockerfile$/"],
       matchStrings: [
-        "# renovate:\\s*datasource=(?<datasource>deb)\\s+depName=(?<depName>clang-5\\.0)\\s*\\r?\\n\\s*ARG\\s+[A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)",
+        "# renovate:\\s*datasource=(?<datasource>deb)\\s+depName=(?<depName>clang-12)\\s*\\r?\\n\\s*ARG\\s+[A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)",
       ],
-      registryUrlTemplate: "https://apt.llvm.org/xenial?suite=llvm-toolchain-xenial-5.0&components=main&binaryArch=amd64",
+      registryUrlTemplate: "https://apt.llvm.org/xenial?suite=llvm-toolchain-xenial-12&components=main&binaryArch=amd64",
       versioningTemplate: "deb",
     },
     {

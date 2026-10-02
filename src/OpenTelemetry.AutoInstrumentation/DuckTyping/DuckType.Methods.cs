@@ -996,6 +996,14 @@ internal static partial class DuckType
             Func<Type, Type, bool> needsDuckChainingFunc,
             Func<LazyILGenerator, Type, Type, Type> addDuckChainIlFunc)
         {
+            var isValueWithType = false;
+            var originalOuterMethodReturnType = outerMethodReturnType;
+            if (outerMethodReturnType.IsGenericType && outerMethodReturnType.GetGenericTypeDefinition() == typeof(ValueWithType<>))
+            {
+                outerMethodReturnType = outerMethodReturnType.GenericTypeArguments[0];
+                isValueWithType = true;
+            }
+
             // Check if the target method returns something
 
             if ((innerMethodReturnType == typeof(void) && outerMethodReturnType != typeof(void))
@@ -1022,6 +1030,13 @@ internal static partial class DuckType
                 }
             }
 
+            if (isValueWithType)
+            {
+                il.Emit(OpCodes.Ldtoken, innerMethodReturnType);
+                il.EmitCall(OpCodes.Call, GetTypeFromHandleMethodInfo, null!);
+                il.EmitCall(OpCodes.Call, originalOuterMethodReturnType.GetMethod("Create", BindingFlags.Static | BindingFlags.Public)!, null!);
+            }
+
             il.Emit(OpCodes.Ret);
             il.Flush();
             return true;
@@ -1032,10 +1047,9 @@ internal static partial class DuckType
 
         internal static Type AddIlToDuckChain(LazyILGenerator il, Type genericType, Type fromType)
         {
-            MethodInfo? getProxyMethodInfo;
             if (fromType.IsValueType)
             {
-                getProxyMethodInfo = typeof(CreateCache<>)
+                var getProxyMethodInfo = typeof(CreateCache<>)
                                     .MakeGenericType(genericType)
                                     .GetMethod("CreateFrom")?
                                     .MakeGenericMethod(fromType);
@@ -1044,10 +1058,41 @@ internal static partial class DuckType
                 {
                     DuckTypeException.Throw($"CreateCache<{genericType}>.CreateFrom<{fromType}>() cannot be found!");
                 }
+
+                il.Emit(OpCodes.Call, getProxyMethodInfo);
+            }
+            else if (genericType.IsGenericType && genericType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                var innerType = genericType.GenericTypeArguments[0];
+                var getProxyMethodInfo = typeof(CreateCache<>)
+                                        .MakeGenericType(innerType)
+                                        .GetMethod("Create");
+
+                if (getProxyMethodInfo is null)
+                {
+                    DuckTypeException.Throw($"CreateCache<{innerType}>.Create() cannot be found!");
+                }
+
+                var local = il.DeclareLocal(genericType)!;
+                var instanceIsNotNull = il.DefineLabel();
+                var returnValue = il.DefineLabel();
+
+                il.Emit(OpCodes.Dup);
+                il.Emit(OpCodes.Brtrue_S, instanceIsNotNull);
+                il.Emit(OpCodes.Pop);
+                il.Emit(OpCodes.Ldloca_S, local);
+                il.Emit(OpCodes.Initobj, genericType);
+                il.Emit(OpCodes.Ldloc, local);
+                il.Emit(OpCodes.Br_S, returnValue);
+
+                il.MarkLabel(instanceIsNotNull);
+                il.Emit(OpCodes.Call, getProxyMethodInfo);
+                il.Emit(OpCodes.Newobj, genericType.GetConstructors()[0]);
+                il.MarkLabel(returnValue);
             }
             else
             {
-                getProxyMethodInfo = typeof(CreateCache<>)
+                var getProxyMethodInfo = typeof(CreateCache<>)
                                     .MakeGenericType(genericType)
                                     .GetMethod("Create");
 
@@ -1055,9 +1100,10 @@ internal static partial class DuckType
                 {
                     DuckTypeException.Throw($"CreateCache<{genericType}>.Create() cannot be found!");
                 }
+
+                il.Emit(OpCodes.Call, getProxyMethodInfo);
             }
 
-            il.Emit(OpCodes.Call, getProxyMethodInfo);
             return genericType;
         }
 

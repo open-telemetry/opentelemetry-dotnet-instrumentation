@@ -97,7 +97,7 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 # ******************************************************
 
 # Sets compiler options
-add_compile_options(-std=c++17 -fPIC -fms-extensions -fvisibility=hidden)
+add_compile_options(-std=c++20 -fPIC -fms-extensions -fvisibility=hidden)
 add_compile_options(-DPAL_STDCPP_COMPAT -DPLATFORM_UNIX -DUNICODE)
 add_compile_options(-Wno-invalid-noreturn -Wno-macro-redefined)
 
@@ -288,3 +288,7 @@ set_target_properties(${TARGET_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Define linker libraries
 target_link_libraries(${TARGET_NAME} "OpenTelemetry.AutoInstrumentation.Native.static")
+
+if (ISLINUX)
+    target_link_libraries(${TARGET_NAME} -Wl,--build-id)
+endif()
