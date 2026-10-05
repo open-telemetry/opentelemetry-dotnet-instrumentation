@@ -118,7 +118,7 @@ public class ContinuousProfilerTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ExportThreadSamplesAcrossControlPlaneConfigurationChanges()
+    public async Task ExportThreadSamplesAcrossControlPlaneConfigurationChanges()
     {
         EnableBytecodeInstrumentation();
         using var collector = new MockProfilesCollector(Output);
@@ -135,8 +135,11 @@ public class ContinuousProfilerTests : TestHelper
 
         // Disable is deliberately lazy: samples admitted before the Apply may still publish. The application
         // checks the committed disabled state and throws if any transition or invalid-update check fails.
-        RunTestApplication();
-        collector.AssertExpectations();
+        // Consume profiles while the application runs so allocation batches cannot fill the collector's bounded
+        // queue and block the exporter before it reads the re-enabled CPU samples.
+        await Task.WhenAll(
+            Task.Run(() => RunTestApplication()),
+            Task.Run(() => collector.AssertExpectations()));
     }
 
     private static bool ExpectCollected(ICollection<ExportProfilesServiceRequest> c)
