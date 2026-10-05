@@ -13,7 +13,16 @@ ConsoleHelper.WriteSplashScreen(args);
 
 var endpointConfiguration = new EndpointConfiguration("TestApplication.NServiceBus");
 
-var learningTransport = new LearningTransport { StorageDirectory = Path.GetTempPath() };
+// Framework and package version tests can run concurrently with the same endpoint name.
+// Give each application its own storage so another process cannot consume its messages.
+var storageDirectory = Path.Combine(Path.GetTempPath(), "otel-nservicebus-tests", Guid.NewGuid().ToString("N"));
+Directory.CreateDirectory(storageDirectory);
+
+using var currentProcess = Process.GetCurrentProcess();
+Console.WriteLine($"Process ID: {currentProcess.Id}");
+Console.WriteLine($"LearningTransport storage directory: {storageDirectory}");
+
+var learningTransport = new LearningTransport { StorageDirectory = storageDirectory };
 endpointConfiguration.UseTransport(learningTransport);
 endpointConfiguration.UseSerialization<XmlSerializer>();
 
@@ -50,9 +59,9 @@ try
         Console.WriteLine("LONG_RUNNING is true, waiting for process to be killed...");
 
 #if NET
-        await Process.GetCurrentProcess().WaitForExitAsync().ConfigureAwait(false);
+        await currentProcess.WaitForExitAsync().ConfigureAwait(false);
 #else
-        Process.GetCurrentProcess().WaitForExit();
+        currentProcess.WaitForExit();
 #endif
     }
 }

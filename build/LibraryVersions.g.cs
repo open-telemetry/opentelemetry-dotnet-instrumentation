@@ -67,7 +67,7 @@ public static partial class LibraryVersion
             "TestApplication.Log4NetBridge",
             [
                 new("3.3.0"),
-                new("3.4.0"),
+                new("3.5.0"),
             ]
         },
         {
@@ -83,7 +83,7 @@ public static partial class LibraryVersion
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),
-                new("8.5.10"),
+                new("8.5.11"),
             ]
         },
         {
@@ -91,7 +91,7 @@ public static partial class LibraryVersion
             [
                 new("5.2.3"),
                 new("6.1.5"),
-                new("7.1.0"),
+                new("7.1.1"),
             ]
         },
         {
