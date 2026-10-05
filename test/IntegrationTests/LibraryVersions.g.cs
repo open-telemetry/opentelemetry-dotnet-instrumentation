@@ -23,7 +23,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "12.22.2",
-                "12.30.0",
+                "12.29.2",
 #endif
             ];
             return theoryData;
