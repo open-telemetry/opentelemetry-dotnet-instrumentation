@@ -33,6 +33,7 @@ jobs:
 
   create-release:
     name: Create GitHub release
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
     runs-on: ubuntu-26.04
     needs: [ build-windows, build, build-nuget-packages ]
     permissions:
@@ -47,6 +48,34 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: Prepare release notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          awk -v tag="${GITHUB_REF_NAME}" '
+            /^## \[/ {
+              if (in_release) {
+                exit
+              }
+              if (index($0, "## [" tag "]") == 1) {
+                in_release = 1
+                found = 1
+              }
+              next
+            }
+            in_release { print }
+            END {
+              if (!found) {
+                print "No changelog entry found for " tag > "/dev/stderr"
+                exit 1
+              }
+            }
+          ' CHANGELOG.md > release-notes.md
+          if ! grep -q '[^[:space:]]' release-notes.md; then
+            echo "The changelog entry for ${GITHUB_REF_NAME} is empty." >&2
+            exit 1
+          fi
 
       - name: Download artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -82,7 +111,7 @@ jobs:
           done
 
       - name: Generate SBOM from release ZIPs
-        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
           output-file: ./sbom.spdx.json
           path: ${{ runner.temp }}/sbom-source
@@ -179,8 +208,279 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
           gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" --verify-tag --draft
+          --notes-file release-notes.md
           ./*.zip
           ./otel-dotnet-auto-install.sh
           ./OpenTelemetry.DotNet.Auto.psm1
           ./checksums.txt
           ./sbom.spdx.json
+
+  publish-nuget:
+    name: Publish NuGet packages
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    runs-on: ubuntu-26.04
+    needs: [ create-release ]
+    environment: release
+    permissions:
+      contents: read # for actions/checkout and actions/download-artifact
+      id-token: write # for NuGet trusted publishing
+    timeout-minutes: 10
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: $/.github/actions/setup-dotnet
+
+      - name: Download NuGet packages
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: bin-nuget-packages
+          path: bin-nuget-packages
+
+      - name: NuGet log in
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        id: nuget-login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Publish packages and symbols
+        shell: bash
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+        run: |
+          set -euo pipefail
+          dotnet nuget push "./bin-nuget-packages/*.nupkg" --no-symbols --skip-duplicate \
+            --api-key "${NUGET_API_KEY}" --source https://api.nuget.org/v3/index.json
+
+          # Push symbols separately so a retry also recovers from a failed symbol upload.
+          for package in ./bin-nuget-packages/*.snupkg; do
+            if [[ -f "${package}" ]]; then
+              dotnet nuget push "${package}" --skip-duplicate \
+                --api-key "${NUGET_API_KEY}" --source https://api.nuget.org/v3/index.json
+            fi
+          done
+
+  publish-release:
+    name: Publish GitHub release
+    runs-on: ubuntu-26.04
+    needs: [ publish-nuget ]
+    permissions:
+      contents: write # for publishing the draft GitHub release
+    timeout-minutes: 5
+    steps:
+
+      - name: Publish GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # A hyphen before build metadata marks any SemVer prerelease suffix.
+          if [[ "${GITHUB_REF_NAME%%+*}" == *-* ]]; then
+            gh release edit "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" \
+              --draft=false --prerelease=true --latest=false
+          else
+            gh release edit "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" \
+              --draft=false --prerelease=false --latest=true
+          fi
+
+  validate-release-powershell:
+    needs: [ publish-release ]
+    name: Run PowerShell script on ${{ matrix.machine }}
+    permissions:
+      attestations: read # for gh attestation verify
+      contents: read # for actions/checkout and gh release verify-asset
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - machine: windows-2022
+          - machine: windows-2025
+    runs-on: ${{ matrix.machine }}
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: $/.github/actions/setup-dotnet
+
+      - name: Test the PowerShell module instructions from README.md
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY_NAME: ${{ github.repository }}
+          RELEASE_TAG_NAME: ${{ github.ref_name }}
+        run: |
+          mkdir testapp
+          cd testapp
+          Set-Content Directory.Build.props '<Project />'
+          dotnet new console
+          dotnet publish -f net10.0 -c Release
+          $module_url = "https://github.com/$env:GITHUB_REPOSITORY_NAME/releases/download/$env:RELEASE_TAG_NAME/OpenTelemetry.DotNet.Auto.psm1"
+          $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
+          $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\*"
+          Invoke-WebRequest -Uri $module_url -OutFile $dl_path
+          gh release verify-asset $env:RELEASE_TAG_NAME $dl_path --repo $env:GITHUB_REPOSITORY_NAME
+          if ($LASTEXITCODE -ne 0) { throw "GitHub release verification failed for the PowerShell module." }
+          gh attestation verify $dl_path `
+            --repo $env:GITHUB_REPOSITORY_NAME `
+            --signer-workflow "$env:GITHUB_REPOSITORY_NAME/.github/workflows/release.yml" `
+            --source-ref "refs/tags/$env:RELEASE_TAG_NAME"
+          if ($LASTEXITCODE -ne 0) { throw "GitHub artifact attestation verification failed for the PowerShell module." }
+          Import-Module $dl_path
+          Install-OpenTelemetryCore -ErrorAction Stop
+          $install_dir = Get-OpenTelemetryInstallDirectory
+          Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
+          ./bin/Release/net10.0/publish/testapp
+          if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
+          if (-not (Test-Path $log_path)) { throw "Log file does not exist. Instrumentation test failed." }
+          Remove-Item $log_path
+          Unregister-OpenTelemetryForCurrentSession
+          ./bin/Release/net10.0/publish/testapp
+          if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
+          if (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
+          Uninstall-OpenTelemetryCore
+          if (Test-Path $install_dir) { throw "Core files exist. Core uninstall failed." }
+
+  validate-release-shell:
+    needs: [ publish-release ]
+    name: Run shell scripts on ${{ matrix.machine }}
+    permissions:
+      attestations: read # for gh attestation verify
+      contents: read # for actions/checkout and gh release verify-asset
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - machine: windows-2022
+            log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
+          - machine: windows-2025
+            log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
+          - machine: ubuntu-22.04
+            log-dir: "/var/log/opentelemetry/dotnet"
+          - machine: macos-14
+            log-dir: "/var/log/opentelemetry/dotnet"
+          - machine: ubuntu-22.04-arm
+            log-dir: "/var/log/opentelemetry/dotnet"
+    runs-on: ${{ matrix.machine }}
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: $/.github/actions/setup-dotnet
+
+      - name: Install MacOS CoreUtils
+        if: ${{ runner.os == 'macOS' }}
+        run: brew install coreutils
+
+      - name: Create test directory
+        if: ${{ runner.os != 'Windows' }}
+        run: sudo mkdir -p "${LOG_DIRECTORY}" && sudo chmod a+rwx "${LOG_DIRECTORY}"  # the instrumented process has no permissions to create log dir
+        env:
+          LOG_DIRECTORY: ${{ matrix.log-dir }}
+
+      - name: Test the Shell scripts from README.md
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY_NAME: ${{ github.repository }}
+          RELEASE_TAG_NAME: ${{ github.ref_name }}
+          GITHUB_COMMIT_SHA: ${{ github.sha }}
+          LOG_DIRECTORY: ${{ matrix.log-dir }}
+        run: |
+          set -e
+          mkdir testapp
+          cd testapp
+          echo "<Project />" > Directory.Build.props
+          dotnet new console
+          dotnet publish -f net10.0 -c Release
+          curl -sSfL "https://github.com/${GITHUB_REPOSITORY_NAME}/releases/download/${RELEASE_TAG_NAME}/otel-dotnet-auto-install.sh" -O
+          gh release verify-asset "${RELEASE_TAG_NAME}" ./otel-dotnet-auto-install.sh --repo "${GITHUB_REPOSITORY_NAME}"
+          gh attestation verify ./otel-dotnet-auto-install.sh \
+            --repo "${GITHUB_REPOSITORY_NAME}" \
+            --signer-workflow "${GITHUB_REPOSITORY_NAME}/.github/workflows/release.yml" \
+            --source-ref "refs/tags/${RELEASE_TAG_NAME}"
+          sh ./otel-dotnet-auto-install.sh
+            test "$(ls -A "$HOME/.otel-dotnet-auto")"
+          curl -sSfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY_NAME}/${GITHUB_COMMIT_SHA}/instrument.sh" -O
+          . ./instrument.sh
+          ./bin/Release/net10.0/publish/testapp
+            test "$(ls -A "${LOG_DIRECTORY}" )"
+
+  validate-release-container:
+    needs: [ publish-release ]
+    name: Run shell scripts in Docker container on ${{ matrix.machine }}
+    permissions:
+      attestations: read # for gh attestation verify
+      contents: read # for actions/checkout and gh release verify-asset
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # renovate: datasource=github-runners depType=github-runner
+          - machine: ubuntu-26.04
+            base-image: alpine
+            net-version: net10.0
+          # renovate: datasource=github-runners depType=github-runner
+          - machine: ubuntu-26.04-arm
+            base-image: alpine
+            net-version: net10.0
+    runs-on: ${{ matrix.machine }}
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Test the Shell scripts from README.md in Docker container
+        env:
+          BASE_IMAGE: ${{ matrix.base-image }}
+          GH_TOKEN: ${{ github.token }}
+          NET_VERSION: ${{ matrix.net-version }}
+          GITHUB_REPOSITORY_NAME: ${{ github.repository }}
+          RELEASE_TAG_NAME: ${{ github.ref_name }}
+          GITHUB_COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -e
+          installer_path="${RUNNER_TEMP}/otel-dotnet-auto-install.sh"
+          curl -sSfL "https://github.com/${GITHUB_REPOSITORY_NAME}/releases/download/${RELEASE_TAG_NAME}/otel-dotnet-auto-install.sh" -o "${installer_path}"
+          gh release verify-asset "${RELEASE_TAG_NAME}" "${installer_path}" --repo "${GITHUB_REPOSITORY_NAME}"
+          gh attestation verify "${installer_path}" \
+            --repo "${GITHUB_REPOSITORY_NAME}" \
+            --signer-workflow "${GITHUB_REPOSITORY_NAME}/.github/workflows/release.yml" \
+            --source-ref "refs/tags/${RELEASE_TAG_NAME}"
+          docker build -t mybuildimage -f "./docker/${BASE_IMAGE}.dockerfile" .
+          docker run --rm \
+            -e "NET_VERSION=${NET_VERSION}" \
+            -e "GITHUB_REPOSITORY_NAME=${GITHUB_REPOSITORY_NAME}" \
+            -e "RELEASE_TAG_NAME=${RELEASE_TAG_NAME}" \
+            -e "GITHUB_COMMIT_SHA=${GITHUB_COMMIT_SHA}" \
+            -v "${installer_path}:/tmp/otel-dotnet-auto-install.sh:ro" \
+            -i mybuildimage /bin/sh <<'EOF'
+            set -e
+            mkdir testapp
+            cd testapp
+            echo '<Project />' > Directory.Build.props
+            dotnet new console
+            dotnet publish -f "${NET_VERSION}" -c Release
+            cp /tmp/otel-dotnet-auto-install.sh ./otel-dotnet-auto-install.sh
+            # Archive verification is exercised by the hosted-runner job; the minimal test image does not include GitHub CLI.
+            SKIP_RELEASE_VERIFICATION=true sh ./otel-dotnet-auto-install.sh
+              test "$(ls -A "$HOME/.otel-dotnet-auto")"
+            curl -sSfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY_NAME}/${GITHUB_COMMIT_SHA}/instrument.sh" -O
+            . ./instrument.sh
+            ./bin/Release/${NET_VERSION}/publish/testapp
+              test "$(ls -A /var/log/opentelemetry/dotnet )"
+          EOF
