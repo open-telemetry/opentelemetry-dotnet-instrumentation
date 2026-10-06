@@ -19,14 +19,14 @@ public static partial class LibraryVersion
             "TestApplication.Azure",
             [
                 new("12.22.2"),
-                new("12.26.0"),
+                new("12.29.2"),
             ]
         },
         {
             "TestApplication.Elasticsearch",
             [
                 new("8.15.10"),
-                new("9.5.2"),
+                new("9.5.3"),
             ]
         },
         {
@@ -91,7 +91,7 @@ public static partial class LibraryVersion
             [
                 new("5.2.3"),
                 new("6.1.5"),
-                new("7.1.0"),
+                new("7.1.1"),
             ]
         },
         {
