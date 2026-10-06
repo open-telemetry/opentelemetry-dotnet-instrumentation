@@ -25,21 +25,16 @@ internal static class OpAmpLoader
                 throw new InvalidOperationException("OpAMP is already enabled");
             }
 
-            OpAmpManager? manager = null;
-            try
+#pragma warning disable CA2000 // Candidates are registered or disposed by the bounded shutdown worker.
+            if (OpAmpManager.TryCreate(resources, opAmpSettings, pluginManager, out var manager))
             {
-                if (!OpAmpManager.TryCreate(resources, opAmpSettings, pluginManager, out manager))
-                {
-                    return;
-                }
-
                 _opAmpManager = manager;
-                manager = null;
             }
-            finally
+            else if (manager != null)
             {
-                manager?.Dispose();
+                StopManager(manager, ShutdownTimeout);
             }
+#pragma warning restore CA2000
         }
     }
 
@@ -80,25 +75,18 @@ internal static class OpAmpLoader
             return;
         }
 
+        StopManager(manager, shutdownTimeout);
+    }
+
+    private static void StopManager(OpAmpManager manager, TimeSpan shutdownTimeout)
+    {
         Task? stopTask = null;
         try
         {
-            var timeoutTask = Task.Delay(shutdownTimeout);
             stopTask = manager.StopOpAmpClientAsync();
-            var completedTaskIndex = Task.WaitAny(stopTask, timeoutTask);
 
-            if (completedTaskIndex == 0)
-            {
-                try
-                {
-                    stopTask.GetAwaiter().GetResult();
-                }
-                finally
-                {
-                    manager.Dispose();
-                }
-            }
-            else
+            // A timed wait does not require a thread-pool timer to enforce the deadline.
+            if (!stopTask.Wait(shutdownTimeout))
             {
                 Logger.Warning("OpAmp client did not stop within the shutdown timeout. Forced cleanup will continue in the background.");
                 ContinueForcedCleanup(manager, stopTask);

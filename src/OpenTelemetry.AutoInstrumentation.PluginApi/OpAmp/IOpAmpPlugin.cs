@@ -49,8 +49,8 @@ public interface IOpAmpPlugin
     /// </summary>
     /// <remarks>
     /// This callback may run without <see cref="AfterOpAmpClientStarted"/>. Release resources acquired
-    /// during <see cref="ConfigureOpAmpClient"/> here. During graceful shutdown, it completes before
-    /// the client is disposed.
+    /// during <see cref="ConfigureOpAmpClient"/> here, including when that callback throws.
+    /// During graceful cleanup, it completes before the client is disposed.
     /// </remarks>
     void BeforeOpAmpClientStopped();
 }

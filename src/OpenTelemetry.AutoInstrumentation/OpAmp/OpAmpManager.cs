@@ -46,7 +46,9 @@ internal sealed class OpAmpManager : IDisposable
             return;
         }
 
-        _startupTask = StartClientCoreAsync();
+        var startupToken = _startupCancellationSource.Token;
+        // Even synchronously completing startup must not run plugin callbacks under the loader lock.
+        _startupTask = Task.Run(() => StartClientCoreAsync(startupToken));
     }
 
     public Task StopOpAmpClientAsync()
@@ -87,32 +89,17 @@ internal sealed class OpAmpManager : IDisposable
         PluginManager pluginManager,
         [NotNullWhen(true)] out OpAmpManager? manager)
     {
-        OpAmpManager? candidate = null;
+        manager = null;
         try
         {
             var plugin = SelectPlugin(pluginManager);
-            candidate = CreateManager(resources, opAmpSettings, plugin);
-            plugin?.ConfigureOpAmpClient(new PluginOpAmpClient(candidate));
-            manager = candidate;
+            manager = CreateManager(resources, opAmpSettings, plugin);
+            plugin?.ConfigureOpAmpClient(new PluginOpAmpClient(manager));
             return true;
         }
         catch (Exception ex)
         {
             Logger.Error(ex, "An error occurred while initializing the OpAmp client.");
-
-            try
-            {
-                if (candidate != null)
-                {
-                    candidate.Dispose();
-                }
-            }
-            catch (Exception disposeException)
-            {
-                Logger.Error(disposeException, "An error occurred while disposing an OpAmp client after initialization failed.");
-            }
-
-            manager = null;
             return false;
         }
     }
@@ -212,10 +199,8 @@ internal sealed class OpAmpManager : IDisposable
         plugin?.ConfigureOpAmpOptions(settings);
     }
 
-    private async Task StartClientCoreAsync()
+    private async Task StartClientCoreAsync(CancellationToken startupCancellationToken)
     {
-        var startupCancellationToken = _startupCancellationSource.Token;
-
         try
         {
             // Do not advertise capabilities that automatic instrumentation cannot fulfill.
@@ -254,43 +239,36 @@ internal sealed class OpAmpManager : IDisposable
 
     private async Task StopOpAmpClientCoreAsync()
     {
-        var startupTask = _startupTask;
-
-        // The lifecycle lock serializes this callback with the post-start callback. If startup
-        // has not claimed activation, _shutdownStarted prevents it from doing so afterward.
-        InvokeBeforeStopCallback();
-        CancelStartup();
-
-        if (startupTask != null)
-        {
-            try
-            {
-                await startupTask.ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, "An error occurred while completing OpAmp startup during shutdown.");
-            }
-        }
-
-        if (startupTask == null || Volatile.Read(ref _forceShutdownRequested) != 0)
-        {
-            DisposeClientSafely();
-            return;
-        }
-
-        await StopTransportSafelyAsync().ConfigureAwait(false);
-    }
-
-    private void DisposeClientSafely()
-    {
         try
         {
-            ForceDisposeClient();
+            var startupTask = _startupTask;
+
+            // The lifecycle lock serializes this callback with the post-start callback. If startup
+            // has not claimed activation, _shutdownStarted prevents it from doing so afterward.
+            InvokeBeforeStopCallback();
+            CancelStartup();
+
+            if (startupTask != null)
+            {
+                try
+                {
+                    await startupTask.ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "An error occurred while completing OpAmp startup during shutdown.");
+                }
+            }
+
+            if (startupTask != null && Volatile.Read(ref _forceShutdownRequested) == 0)
+            {
+                await StopTransportSafelyAsync().ConfigureAwait(false);
+            }
         }
-        catch (Exception ex)
+        finally
         {
-            Logger.Error(ex, "An error occurred while disposing the OpAmp client.");
+            // Disposal is part of the operation covered by the loader's shutdown deadline.
+            Dispose();
         }
     }
 

@@ -93,6 +93,115 @@ public class OpAmpLoaderTests
         Assert.Equal(1, plugin.BeforeStopCallbackCount);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FailedConfigurationCleansUpPlugin(bool throwBeforeStop)
+    {
+        var pluginSettings = new PluginsSettings();
+        pluginSettings.Plugins.Add(typeof(RecordingOpAmpPlugin).AssemblyQualifiedName!);
+        var pluginManager = new PluginManager(pluginSettings);
+        var plugin = Assert.IsType<RecordingOpAmpPlugin>(Assert.Single(pluginManager.Plugins).Instance);
+        plugin.ConfigureClientAction = () => throw new InvalidOperationException("Plugin configuration failed.");
+        if (throwBeforeStop)
+        {
+            plugin.BeforeStoppedAction = () => throw new InvalidOperationException("Plugin cleanup failed.");
+        }
+
+        try
+        {
+            OpAmpLoader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
+
+            Assert.Equal(
+                [
+                    nameof(RecordingOpAmpPlugin.ConfigureOpAmpClient),
+                    nameof(RecordingOpAmpPlugin.BeforeOpAmpClientStopped)
+                ],
+                plugin.Events);
+            Assert.True(plugin.HandlerDisposed.IsCompleted);
+        }
+        finally
+        {
+            OpAmpLoader.StopOpAmpClientIfRunning();
+        }
+    }
+
+    [Fact]
+    public async Task StartupReturnsDuringBlockedAfterStartCallback()
+    {
+        using var releaseAfterStarted = new ManualResetEventSlim();
+        var pluginSettings = new PluginsSettings();
+        pluginSettings.Plugins.Add(typeof(RecordingOpAmpPlugin).AssemblyQualifiedName!);
+        var pluginManager = new PluginManager(pluginSettings);
+        var plugin = Assert.IsType<RecordingOpAmpPlugin>(Assert.Single(pluginManager.Plugins).Instance);
+        plugin.AfterStartedAction = releaseAfterStarted.Wait;
+        Task? loaderStartTask = null;
+
+        try
+        {
+            OpAmpLoader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
+            loaderStartTask = Task.Factory.StartNew(
+                OpAmpLoader.StartOpAmpClient,
+                CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
+
+            await AssertCompletes(plugin.AfterStarted);
+            await AssertCompletes(loaderStartTask);
+        }
+        finally
+        {
+            releaseAfterStarted.Set();
+            if (loaderStartTask != null)
+            {
+                await AssertCompletes(loaderStartTask);
+            }
+
+            OpAmpLoader.StopOpAmpClientIfRunning();
+        }
+    }
+
+    [Fact]
+    public async Task ShutdownDeadlineIncludesBlockingHandlerDisposal()
+    {
+        using var releaseHandlerDisposal = new ManualResetEventSlim();
+        var handlerDisposalEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var pluginSettings = new PluginsSettings();
+        pluginSettings.Plugins.Add(typeof(RecordingOpAmpPlugin).AssemblyQualifiedName!);
+        var pluginManager = new PluginManager(pluginSettings);
+        var plugin = Assert.IsType<RecordingOpAmpPlugin>(Assert.Single(pluginManager.Plugins).Instance);
+        plugin.HandlerDisposalAction = () =>
+        {
+            handlerDisposalEntered.TrySetResult(true);
+            releaseHandlerDisposal.Wait();
+        };
+        Task? loaderStopTask = null;
+
+        try
+        {
+            OpAmpLoader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
+            OpAmpLoader.StartOpAmpClient();
+            await AssertCompletes(plugin.AfterStarted);
+
+            loaderStopTask = Task.Run(() => OpAmpLoader.StopOpAmpClientIfRunning(LoaderShutdownTimeout));
+            await AssertCompletes(handlerDisposalEntered.Task);
+            await AssertCompletes(loaderStopTask);
+            Assert.False(plugin.HandlerDisposed.IsCompleted);
+        }
+        finally
+        {
+            releaseHandlerDisposal.Set();
+            if (loaderStopTask != null)
+            {
+                await AssertCompletes(loaderStopTask);
+            }
+
+            OpAmpLoader.StopOpAmpClientIfRunning();
+        }
+
+        await AssertCompletes(plugin.HandlerDisposed);
+    }
+
     private static async Task AssertCompletes(Task task)
     {
         var completedTask = await Task.WhenAny(task, Task.Delay(TestTimeout)).ConfigureAwait(false);
@@ -109,8 +218,19 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
 
     private readonly ConcurrentQueue<string> _events = new();
     private readonly TaskCompletionSource<bool> _afterStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly TaskCompletionSource<bool> _handlerDisposed = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     internal Task AfterStarted => _afterStarted.Task;
+
+    internal Task HandlerDisposed => _handlerDisposed.Task;
+
+    internal Action? ConfigureClientAction { get; set; }
+
+    internal Action? BeforeStoppedAction { get; set; }
+
+    internal Action? AfterStartedAction { get; set; }
+
+    internal Action? HandlerDisposalAction { get; set; }
 
     internal OpAmpClientSettings? ConfiguredSettings { get; private set; }
 
@@ -144,7 +264,7 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
         settings.RemoteConfiguration.ReportsRemoteConfigStatus = true;
         settings.Heartbeat.IsEnabled = false;
         settings.InstanceUid = TestInstanceUid;
-        settings.HttpClientFactory = () => new HttpClient(new RecordingHttpMessageHandler());
+        settings.HttpClientFactory = () => new HttpClient(new RecordingHttpMessageHandler(this));
     }
 
     public void ConfigureOpAmpClient(IOpAmpClient client)
@@ -159,17 +279,20 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
 #endif
 
         _events.Enqueue(nameof(ConfigureOpAmpClient));
+        ConfigureClientAction?.Invoke();
     }
 
     public void AfterOpAmpClientStarted()
     {
         _events.Enqueue(nameof(AfterOpAmpClientStarted));
         _afterStarted.TrySetResult(true);
+        AfterStartedAction?.Invoke();
     }
 
     public void BeforeOpAmpClientStopped()
     {
         _events.Enqueue(nameof(BeforeOpAmpClientStopped));
+        BeforeStoppedAction?.Invoke();
     }
 
     private static byte[] CreateServerCapabilitiesResponse(Guid instanceUid)
@@ -184,7 +307,7 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
         return stream.ToArray();
     }
 
-    private sealed class RecordingHttpMessageHandler : HttpMessageHandler
+    private sealed class RecordingHttpMessageHandler(RecordingOpAmpPlugin plugin) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
@@ -193,6 +316,20 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
             {
                 Content = new ByteArrayContent(ServerCapabilitiesResponse),
             });
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                plugin.HandlerDisposalAction?.Invoke();
+            }
+
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                plugin._handlerDisposed.TrySetResult(true);
+            }
         }
     }
 }

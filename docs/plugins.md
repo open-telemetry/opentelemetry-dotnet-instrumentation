@@ -233,6 +233,7 @@ public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
 Initialization invokes `ConfigureOpAmpOptions`, `ConfigureOpAmpClient`, ordinary
 `IPlugin.Initialized` callbacks, and client startup in that order. Subscribe in
 `ConfigureOpAmpClient` to receive messages from the initial server response.
+Client startup is asynchronous.
 
 `AfterOpAmpClientStarted` means the client start operation completed; it does not
 guarantee connectivity or initial-message delivery. It is skipped if startup
@@ -240,7 +241,8 @@ throws, is cancelled, or loses a race with shutdown. When invoked, it completes
 before `BeforeOpAmpClientStopped` begins.
 
 `BeforeOpAmpClientStopped` may run without `AfterOpAmpClientStarted`. Release
-resources and unsubscribe there. Lifecycle callbacks must return promptly and
+resources and unsubscribe there, including resources acquired before
+`ConfigureOpAmpClient` throws. Lifecycle callbacks must return promptly and
 tolerate client disposal during forced shutdown.
 
 OpAMP requests do not produce application spans. Listener callbacks must return
