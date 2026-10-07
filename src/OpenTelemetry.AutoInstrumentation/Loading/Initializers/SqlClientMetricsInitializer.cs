@@ -11,8 +11,8 @@ internal sealed class SqlClientMetricsInitializer : SqlClientInitializer
 
     private int _initialized;
 
-    public SqlClientMetricsInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
-        : base(lazyInstrumentationLoader, nameof(SqlClientMetricsInitializer))
+    public SqlClientMetricsInitializer(PluginManager pluginManager)
+        : base(nameof(SqlClientMetricsInitializer))
     {
         _pluginManager = pluginManager;
     }

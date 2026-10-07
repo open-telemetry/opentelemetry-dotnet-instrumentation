@@ -10,13 +10,15 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal static class DelayedInitialization
 {
+    // Registration may immediately initialize instrumentation for assemblies that are already loaded.
+    // Always construct initializers fully before registering them with the loader.
     internal static class Traces
     {
 #if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddAspNet(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            _ = new AspNetInitializer(lazyInstrumentationLoader, pluginManager, tracerSettings);
+            new AspNetInitializer(pluginManager, tracerSettings).Register(lazyInstrumentationLoader);
         }
 #endif
 
@@ -31,7 +33,7 @@ internal static class DelayedInitialization
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddHttpClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            _ = new HttpClientInitializer(lazyInstrumentationLoader, pluginManager, tracerSettings);
+            new HttpClientInitializer(pluginManager, tracerSettings).Register(lazyInstrumentationLoader);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -43,7 +45,7 @@ internal static class DelayedInitialization
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddSqlClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
-            _ = new SqlClientTracerInitializer(lazyInstrumentationLoader, pluginManager);
+            new SqlClientTracerInitializer(pluginManager).Register(lazyInstrumentationLoader);
         }
 
 #if NET
@@ -80,20 +82,20 @@ internal static class DelayedInitialization
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddAspNet(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
-            _ = new AspNetMetricsInitializer(lazyInstrumentationLoader, pluginManager);
+            new AspNetMetricsInitializer(pluginManager).Register(lazyInstrumentationLoader);
         }
 #endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddHttpClient(LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            _ = new HttpClientMetricsInitializer(lazyInstrumentationLoader);
+            new HttpClientMetricsInitializer().Register(lazyInstrumentationLoader);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddSqlClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
-            _ = new SqlClientMetricsInitializer(lazyInstrumentationLoader, pluginManager);
+            new SqlClientMetricsInitializer(pluginManager).Register(lazyInstrumentationLoader);
         }
     }
 }

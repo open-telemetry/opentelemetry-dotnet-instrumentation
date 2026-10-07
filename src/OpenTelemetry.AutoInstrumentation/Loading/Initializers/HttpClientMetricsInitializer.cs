@@ -7,7 +7,7 @@ internal class HttpClientMetricsInitializer
 {
     private int _initialized;
 
-    public HttpClientMetricsInitializer(LazyInstrumentationLoader lazyInstrumentationLoader)
+    public void Register(LazyInstrumentationLoader lazyInstrumentationLoader)
     {
         lazyInstrumentationLoader.Add(new GenericInitializer("System.Net.Http", "HttpClientMetricsInitializer", InitializeOnFirstCall));
 

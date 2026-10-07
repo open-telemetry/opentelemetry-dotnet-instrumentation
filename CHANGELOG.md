@@ -22,6 +22,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- SqlClient tracing initializes correctly when its assemblies are already loaded,
+  including in .NET Framework applications hosted in IIS. Multi-assembly
+  instrumentation initializers are now registered only after construction.
 - Invalid plugin type names no longer stop automatic instrumentation or crash
   .NET Framework applications unless fail-fast is enabled.
 

@@ -20,11 +20,14 @@ internal class HttpClientInitializer
 
     private int _initialized;
 
-    public HttpClientInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
+    public HttpClientInitializer(PluginManager pluginManager, TracerSettings tracerSettings)
     {
         _pluginManager = pluginManager;
         _tracerSettings = tracerSettings;
+    }
 
+    public void Register(LazyInstrumentationLoader lazyInstrumentationLoader)
+    {
         lazyInstrumentationLoader.Add(new GenericInitializer("System.Net.Http", "HttpClientInitializerForSystemNetHttp", InitializeOnFirstCall));
 
 #if NETFRAMEWORK
