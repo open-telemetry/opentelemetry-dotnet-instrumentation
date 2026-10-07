@@ -3,16 +3,16 @@
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
-internal class HttpClientMetricsInitializer
+internal class HttpClientMetricsInitializer : IInstrumentationInitializer
 {
     private int _initialized;
 
     public void Register(LazyInstrumentationLoader lazyInstrumentationLoader)
     {
-        lazyInstrumentationLoader.Add(new GenericInitializer("System.Net.Http", "HttpClientMetricsInitializer", InitializeOnFirstCall));
+        new GenericInitializer("System.Net.Http", "HttpClientMetricsInitializer", InitializeOnFirstCall).Register(lazyInstrumentationLoader);
 
 #if NETFRAMEWORK
-        lazyInstrumentationLoader.Add(new GenericInitializer("System.Net", "HttpClientMetricsInitializerForSystemNet", InitializeOnFirstCall));
+        new GenericInitializer("System.Net", "HttpClientMetricsInitializerForSystemNet", InitializeOnFirstCall).Register(lazyInstrumentationLoader);
 #endif
     }
 

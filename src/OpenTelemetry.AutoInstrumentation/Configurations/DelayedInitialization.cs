@@ -26,7 +26,7 @@ internal static class DelayedInitialization
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddAspNetCore(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            lazyInstrumentationLoader.Add(new AspNetCoreInitializer(pluginManager, tracerSettings));
+            new AspNetCoreInitializer(pluginManager, tracerSettings).Register(lazyInstrumentationLoader);
         }
 #endif
 
@@ -39,7 +39,7 @@ internal static class DelayedInitialization
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddGrpcClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            lazyInstrumentationLoader.Add(new GrpcClientInitializer(pluginManager, tracerSettings));
+            new GrpcClientInitializer(pluginManager, tracerSettings).Register(lazyInstrumentationLoader);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -53,26 +53,26 @@ internal static class DelayedInitialization
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddEntityFrameworkCore(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            lazyInstrumentationLoader.Add(new EntityFrameworkCoreInitializer(pluginManager, tracerSettings));
+            new EntityFrameworkCoreInitializer(pluginManager, tracerSettings).Register(lazyInstrumentationLoader);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddGraphQL(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
         {
-            lazyInstrumentationLoader.Add(new GraphQLInitializer(pluginManager, tracerSettings));
+            new GraphQLInitializer(pluginManager, tracerSettings).Register(lazyInstrumentationLoader);
         }
 #endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddQuartz(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
-            lazyInstrumentationLoader.Add(new QuartzInitializer(pluginManager));
+            new QuartzInitializer(pluginManager).Register(lazyInstrumentationLoader);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddOracleMda(LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
         {
-            lazyInstrumentationLoader.Add(new OracleMdaInitializer(tracerSettings));
+            new OracleMdaInitializer(tracerSettings).Register(lazyInstrumentationLoader);
         }
     }
 

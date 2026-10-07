@@ -3,7 +3,7 @@
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
-internal abstract class SqlClientInitializer
+internal abstract class SqlClientInitializer : IInstrumentationInitializer
 {
     private readonly string _initializerNamePrefix;
 
@@ -14,11 +14,11 @@ internal abstract class SqlClientInitializer
 
     public void Register(LazyInstrumentationLoader lazyInstrumentationLoader)
     {
-        lazyInstrumentationLoader.Add(new GenericInitializer("System.Data.SqlClient", $"{_initializerNamePrefix}ForSystemDataSqlClient", InitializeOnFirstCall));
-        lazyInstrumentationLoader.Add(new GenericInitializer("Microsoft.Data.SqlClient", $"{_initializerNamePrefix}ForMicrosoftDataSqlClient", InitializeOnFirstCall));
+        new GenericInitializer("System.Data.SqlClient", $"{_initializerNamePrefix}ForSystemDataSqlClient", InitializeOnFirstCall).Register(lazyInstrumentationLoader);
+        new GenericInitializer("Microsoft.Data.SqlClient", $"{_initializerNamePrefix}ForMicrosoftDataSqlClient", InitializeOnFirstCall).Register(lazyInstrumentationLoader);
 
 #if NETFRAMEWORK
-        lazyInstrumentationLoader.Add(new GenericInitializer("System.Data", $"{_initializerNamePrefix}ForSystemData", InitializeOnFirstCall));
+        new GenericInitializer("System.Data", $"{_initializerNamePrefix}ForSystemData", InitializeOnFirstCall).Register(lazyInstrumentationLoader);
 #endif
     }
 

@@ -7,7 +7,7 @@ using OpenTelemetry.AutoInstrumentation.Plugins;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
-internal sealed class AspNetMetricsInitializer
+internal sealed class AspNetMetricsInitializer : IInstrumentationInitializer
 {
     private readonly PluginManager _pluginManager;
     private int _initialized;
@@ -19,9 +19,9 @@ internal sealed class AspNetMetricsInitializer
 
     public void Register(LazyInstrumentationLoader lazyInstrumentationLoader)
     {
-        lazyInstrumentationLoader.Add(new AspNetDirectInitializer(InitializeOnFirstCall, "AspNetDirectInitializerForMetrics"));
-        lazyInstrumentationLoader.Add(new AspNetMvcInitializer(InitializeOnFirstCall, "AspNetMvcInitializerForMetrics"));
-        lazyInstrumentationLoader.Add(new AspNetWebApiInitializer(InitializeOnFirstCall, "AspNetWebApiInitializerForMetrics"));
+        new AspNetDirectInitializer(InitializeOnFirstCall, "AspNetDirectInitializerForMetrics").Register(lazyInstrumentationLoader);
+        new AspNetMvcInitializer(InitializeOnFirstCall, "AspNetMvcInitializerForMetrics").Register(lazyInstrumentationLoader);
+        new AspNetWebApiInitializer(InitializeOnFirstCall, "AspNetWebApiInitializerForMetrics").Register(lazyInstrumentationLoader);
     }
 
     private void InitializeOnFirstCall(ILifespanManager lifespanManager)

@@ -24,12 +24,12 @@ public class DelayedInitializationTests
         PreloadAssembly(instrumentation);
         var (pluginManager, plugin) = CreatePluginManager();
 
-        Action<LazyInstrumentationLoader> register = instrumentation switch
+        IInstrumentationInitializer initializer = instrumentation switch
         {
-            "SqlClient" => new SqlClientTracerInitializer(pluginManager).Register,
-            "HttpClient" => new HttpClientInitializer(pluginManager, new TracerSettings()).Register,
+            "SqlClient" => new SqlClientTracerInitializer(pluginManager),
+            "HttpClient" => new HttpClientInitializer(pluginManager, new TracerSettings()),
 #if NETFRAMEWORK
-            "AspNet" => new AspNetInitializer(pluginManager, new TracerSettings()).Register,
+            "AspNet" => new AspNetInitializer(pluginManager, new TracerSettings()),
 #endif
             _ => throw new ArgumentException("Unsupported instrumentation.", nameof(instrumentation))
         };
@@ -37,8 +37,8 @@ public class DelayedInitializationTests
         Assert.Equal(0, plugin.TracesConfigured);
 
         using var loader = new LazyInstrumentationLoader();
-        register(loader);
-        register(loader);
+        initializer.Register(loader);
+        initializer.Register(loader);
 
         Assert.Equal(1, plugin.TracesConfigured);
     }
