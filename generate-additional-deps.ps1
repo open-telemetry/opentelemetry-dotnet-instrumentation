@@ -38,15 +38,11 @@ if (-not (Test-Path -LiteralPath $sourceShared -PathType Container)) {
 
 $outputFullPath = [System.IO.Path]::GetFullPath($OutputPath)
 $destinationAdditionalDeps = Join-Path $outputFullPath 'AdditionalDeps'
-$destinationShared = Join-Path $destinationAdditionalDeps 'shared'
 $destinationStore = Join-Path $outputFullPath 'store'
 
-New-Item -ItemType Directory -Force -Path $outputFullPath | Out-Null
-New-Item -ItemType Directory -Force -Path $destinationAdditionalDeps | Out-Null
-
+[System.IO.Directory]::CreateDirectory((Get-ExtendedFileSystemPath $destinationAdditionalDeps)) | Out-Null
 if (-not [string]::Equals($sourceAdditionalDeps, $destinationAdditionalDeps, [System.StringComparison]::OrdinalIgnoreCase)) {
-    New-Item -ItemType Directory -Force -Path $destinationShared | Out-Null
-    Copy-Item -Path (Join-Path $sourceShared '*') -Destination $destinationShared -Recurse -Force
+    Copy-Item -LiteralPath $sourceShared -Destination $destinationAdditionalDeps -Recurse -Force
 }
 
 foreach ($line in Get-Content -LiteralPath $copyPlanPath) {
@@ -68,7 +64,7 @@ foreach ($line in Get-Content -LiteralPath $copyPlanPath) {
     }
 
     $destinationPath = Join-Path $destinationStore $storeRelativePath
-    $destinationDirectory = Split-Path -Parent $destinationPath
+    $destinationDirectory = [System.IO.Path]::GetDirectoryName($destinationPath)
     [System.IO.Directory]::CreateDirectory((Get-ExtendedFileSystemPath $destinationDirectory)) | Out-Null
     [System.IO.File]::Copy(
         (Get-ExtendedFileSystemPath $sourcePath),

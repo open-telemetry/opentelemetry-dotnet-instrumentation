@@ -149,7 +149,7 @@ see [Using the OpenTelemetry.AutoInstrumentation NuGet packages](./using-the-nug
 
 For framework-dependent standalone .NET deployments where automatic assembly
 redirection cannot resolve a conflict or must be disabled, use the
-[AdditionalDeps fallback](./assembly-conflict-resolution.md#last-resort-dotnet_additional_deps-and-the-runtime-store).
+[AdditionalDeps fallback](./assembly-conflict-resolution.md#additionaldeps-and-shared-store-workaround).
 
 Alternatively, you can handle the dependency versions conflicts by
 updating the instrumented application's project references

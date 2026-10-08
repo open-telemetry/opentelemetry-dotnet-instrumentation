@@ -85,7 +85,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
         collector.AssertExpectations();
     }
 
-#if !NETFRAMEWORK
+#if NET
     [Theory]
     [Trait("Category", "EndToEnd")]
 #if NET8_0
