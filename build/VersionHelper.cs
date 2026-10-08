@@ -5,6 +5,11 @@ public static class VersionHelper
     static Lazy<string> Version = new Lazy<string>(() =>
         typeof(VersionHelper).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion);
 
+    public static string GetInformationalVersion()
+    {
+        return Version.Value;
+    }
+
     public static string GetVersion()
     {
         return Version.Value.Split('+')[0];
