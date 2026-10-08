@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Logging;
-using OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling;
-using OpenTelemetry.AutoInstrumentation.PluginApi.SelectiveSampling;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 
 namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
@@ -21,7 +19,6 @@ internal sealed class ContinuousProfilerManager : IDisposable
     private readonly object _lifecycleLock = new();
     private readonly Func<bool> _isExiting;
     private SampleExporter? _sampleExporter;
-    private SampleExporterBuilder? _sampleExporterBuilder;
 
 #if NETFRAMEWORK
     private CanaryThreadManager? _canaryThreadManager;
@@ -104,18 +101,18 @@ internal sealed class ContinuousProfilerManager : IDisposable
     }
 
     internal static bool TryCreateSeedConfiguration(
-        bool threadSamplingEnabled,
+        bool cpuEnabledInSeed,
         uint threadSamplingInterval,
-        bool selectiveSamplingEnabled,
+        bool selectiveEnabledInSeed,
         uint selectiveSamplingInterval,
-        bool allocationSamplingEnabled,
+        bool allocationEnabledInSeed,
         uint maxMemorySamplesPerMinute,
         out RuntimeSamplerConfiguration configuration)
     {
         configuration = new RuntimeSamplerConfiguration(
-            threadSamplingEnabled ? threadSamplingInterval : 0,
-            selectiveSamplingEnabled ? selectiveSamplingInterval : 0,
-            allocationSamplingEnabled ? maxMemorySamplesPerMinute : 0);
+            cpuEnabledInSeed ? threadSamplingInterval : 0,
+            selectiveEnabledInSeed ? selectiveSamplingInterval : 0,
+            allocationEnabledInSeed ? maxMemorySamplesPerMinute : 0);
         return configuration.IsValid;
     }
 
@@ -132,13 +129,13 @@ internal sealed class ContinuousProfilerManager : IDisposable
 
     internal static bool CanExportCommittedConfiguration(
         RuntimeSamplerConfiguration configuration,
-        bool threadSamplingPrepared,
-        bool selectiveSamplingPrepared,
-        bool allocationSamplingPrepared)
+        bool cpuExportPrepared,
+        bool selectiveExportPrepared,
+        bool allocationExportPrepared)
     {
-        return (configuration.CpuSamplingIntervalMilliseconds == 0 || threadSamplingPrepared) &&
-               (configuration.SelectiveThreadSamplingIntervalMilliseconds == 0 || selectiveSamplingPrepared) &&
-               (configuration.MaxAllocationSamplesPerMinute == 0 || allocationSamplingPrepared);
+        return (configuration.CpuSamplingIntervalMilliseconds == 0 || cpuExportPrepared) &&
+               (configuration.SelectiveThreadSamplingIntervalMilliseconds == 0 || selectiveExportPrepared) &&
+               (configuration.MaxAllocationSamplesPerMinute == 0 || allocationExportPrepared);
     }
 
 #if NETFRAMEWORK
@@ -150,30 +147,30 @@ internal sealed class ContinuousProfilerManager : IDisposable
     }
 #endif
 
-    private void InitializeSampling(PluginManager pluginManager)
+    private static SamplingStartupPlan? EvaluateConfiguration(PluginManager pluginManager)
     {
         var config = pluginManager.GetFirstContinuousProfilerConfiguration();
         Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {config.ThreadSamplingEnabled}, thread sampling interval: {config.ThreadSamplingInterval}, allocation sampling enabled: {config.AllocationSamplingEnabled}, max memory samples per minute: {config.MaxMemorySamplesPerMinute}, export interval: {config.ExportInterval}, export timeout: {config.ExportTimeout}, continuous profiler exporter: {config.Exporter?.GetType()}");
 
-        var (threadSamplingEnabled, threadSamplingPrepared) = GetEffectiveSamplingConfiguration(
+        var (cpuEnabledInSeed, cpuExportPrepared) = GetEffectiveSamplingConfiguration(
             config.ThreadSamplingEnabled,
             config.ThreadSamplingInterval,
             config.ExportInterval,
             config.ExportTimeout,
             config.Exporter != null);
-        var (allocationSamplingEnabled, allocationSamplingPrepared) = GetEffectiveAllocationSamplingConfiguration(
+        var (allocationEnabledInSeed, allocationExportPrepared) = GetEffectiveAllocationSamplingConfiguration(
             config.AllocationSamplingEnabled,
             config.MaxMemorySamplesPerMinute,
             config.ExportInterval,
             config.ExportTimeout,
             config.Exporter != null);
 
-        if (config.ThreadSamplingEnabled && !threadSamplingPrepared)
+        if (config.ThreadSamplingEnabled && !cpuExportPrepared)
         {
             Logger.Warning("Invalid continuous profiler thread sampling configuration. Thread sampling will not be enabled.");
         }
 
-        if (config.AllocationSamplingEnabled && !allocationSamplingPrepared)
+        if (config.AllocationSamplingEnabled && !allocationExportPrepared)
         {
 #if NETFRAMEWORK
             Logger.Warning("Continuous profiler allocation sampling is not supported on .NET Framework. Allocation sampling will not be enabled.");
@@ -182,25 +179,25 @@ internal sealed class ContinuousProfilerManager : IDisposable
 #endif
         }
 
-        var selectiveSamplingEnabled = false;
-        var selectiveSamplingPrepared = false;
+        var selectiveEnabledInSeed = false;
+        var selectiveExportPrepared = false;
         uint selectiveSamplingInterval = 0;
         var selectiveSamplingConfig = pluginManager.GetFirstSelectiveSamplingConfiguration();
         if (selectiveSamplingConfig != null)
         {
-            (selectiveSamplingEnabled, selectiveSamplingPrepared) = GetEffectiveSamplingConfiguration(
+            (selectiveEnabledInSeed, selectiveExportPrepared) = GetEffectiveSamplingConfiguration(
                 true,
                 selectiveSamplingConfig.SamplingInterval,
                 selectiveSamplingConfig.ExportInterval,
                 selectiveSamplingConfig.ExportTimeout,
                 selectiveSamplingConfig.Exporter != null);
 
-            if (!selectiveSamplingPrepared)
+            if (!selectiveExportPrepared)
             {
                 Logger.Warning("Invalid selective sampling configuration. Selective sampling will not be enabled.");
             }
 
-            if (selectiveSamplingPrepared)
+            if (selectiveExportPrepared)
             {
                 Logger.Debug(
                     $"Selective sampling configuration: sampling interval: {selectiveSamplingConfig.SamplingInterval}, export interval: {selectiveSamplingConfig.ExportInterval}, export timeout: {selectiveSamplingConfig.ExportTimeout}, samples exporter: {selectiveSamplingConfig.Exporter!.GetType()}");
@@ -209,70 +206,93 @@ internal sealed class ContinuousProfilerManager : IDisposable
         }
 
         if (!TryCreateSeedConfiguration(
-                threadSamplingEnabled,
+                cpuEnabledInSeed,
                 config.ThreadSamplingInterval,
-                selectiveSamplingEnabled,
+                selectiveEnabledInSeed,
                 selectiveSamplingInterval,
-                allocationSamplingEnabled,
+                allocationEnabledInSeed,
                 config.MaxMemorySamplesPerMinute,
                 out var seedConfiguration))
         {
             Logger.Warning($"Continuous profiler configuration is invalid. Selective sampling interval: {selectiveSamplingInterval}, continuous sampling interval: {config.ThreadSamplingInterval}. The complete Seed will not be applied.");
+            return null;
+        }
+
+        return new SamplingStartupPlan(
+            seedConfiguration,
+            cpuExportPrepared,
+            selectiveExportPrepared,
+            allocationExportPrepared,
+            config,
+            selectiveSamplingConfig);
+    }
+
+    private static void AddSelectiveHandler(SampleExporterBuilder builder, SamplingStartupPlan plan)
+    {
+        builder.SetExportTimeout(plan.SelectiveExportTimeout);
+        builder.AddHandler(SampleType.SelectedThreads, plan.SelectiveExporter!.ExportSelectedThreadSamples, plan.SelectiveExportInterval, plan.SelectiveExportTimeout);
+    }
+
+    private static void AddContinuousHandlers(SampleExporterBuilder builder, SamplingStartupPlan plan)
+    {
+        builder.SetExportTimeout(plan.ContinuousExportTimeout);
+        var exporter = plan.ContinuousExporter!;
+
+        if (plan.CpuExportPrepared)
+        {
+            builder.AddHandler(SampleType.Continuous, exporter.ExportThreadSamples, plan.ContinuousExportInterval, plan.ContinuousExportTimeout);
+        }
+
+        if (plan.AllocationExportPrepared)
+        {
+            builder.AddHandler(SampleType.Allocation, exporter.ExportAllocationSamples, plan.ContinuousExportInterval, plan.ContinuousExportTimeout);
+        }
+    }
+
+    private void InitializeSampling(PluginManager pluginManager)
+    {
+        var plan = EvaluateConfiguration(pluginManager);
+        if (plan == null || !plan.HasPreparedExports)
+        {
             return;
         }
 
-        if (threadSamplingPrepared || allocationSamplingPrepared)
+        var builder = new SampleExporterBuilder();
+        if (plan.CpuExportPrepared || plan.AllocationExportPrepared)
         {
-            if (!TryInitializeContinuousSamplingExport(
-                    config.Exporter!,
-                    threadSamplingPrepared,
-                    allocationSamplingPrepared,
-                    config.ExportInterval,
-                    config.ExportTimeout))
-            {
-                return;
-            }
+            AddContinuousHandlers(builder, plan);
         }
 
-        if (selectiveSamplingPrepared && !TryInitializeSelectedThreadSamplingExport(selectiveSamplingConfig!))
+        if (plan.SelectiveExportPrepared)
         {
-            return;
+            AddSelectiveHandler(builder, plan);
         }
 
-        if (!threadSamplingPrepared && !allocationSamplingPrepared && !selectiveSamplingPrepared)
-        {
-            // No sampling or export pipeline requested.
-            return;
-        }
-
-        SampleExporter? sampleExporter = null;
+        SampleExporter? candidateExporter = null;
         try
         {
 #pragma warning disable CA2000 // Ownership transfers to _sampleExporter; finally disposes unpublished exporters.
-            sampleExporter = _sampleExporterBuilder!.Build();
+            candidateExporter = builder.Build();
 #pragma warning restore CA2000
 #if NETFRAMEWORK
             // Apply enables native thread callbacks. Create the canary afterwards, including when a later
             // ControlPlane update enables thread sampling after an all-disabled Seed.
-            sampleExporter.Start(
+            candidateExporter.Start(
                 EnsureNetFrameworkCanaryThread,
                 CanaryStatePollingInterval,
                 CreateReaderMutexName(),
-                () => CanReadCurrentConfiguration(
-                    threadSamplingPrepared,
-                    selectiveSamplingPrepared,
-                    allocationSamplingPrepared));
+                () => CanReadCurrentConfiguration(plan));
 #else
-            sampleExporter.Start();
+            candidateExporter.Start();
 #endif
-            if (!sampleExporter.WaitForReaderThreadStart(ReaderThreadStartupTimeout))
+            if (!candidateExporter.WaitForReaderThreadStart(ReaderThreadStartupTimeout))
             {
                 Logger.Error("Continuous profiler reader thread did not start.");
                 return;
             }
 
             var result = NativeMethods.ApplyContinuousProfilerConfiguration(
-                seedConfiguration,
+                plan.Seed,
                 RuntimeSamplerAuthority.Seed,
                 out var state);
 
@@ -287,11 +307,7 @@ internal sealed class ContinuousProfilerManager : IDisposable
             }
 
 #if NET
-            if (!CanExportCommittedConfiguration(
-                    state.CommittedConfiguration,
-                    threadSamplingPrepared,
-                    selectiveSamplingPrepared,
-                    allocationSamplingPrepared))
+            if (!plan.CanExport(state.CommittedConfiguration))
             {
                 Logger.Warning("No exporter is configured for part of the committed continuous profiler configuration. Samples from those native producers will not be exported.");
             }
@@ -304,22 +320,20 @@ internal sealed class ContinuousProfilerManager : IDisposable
                     return;
                 }
 
-                sampleExporter.Activate();
-                _sampleExporter = sampleExporter;
-                sampleExporter = null;
+                candidateExporter.Activate();
+                _sampleExporter = candidateExporter;
+                // Clearing the candidate marks the transfer of ownership to this manager.
+                candidateExporter = null;
             }
         }
         finally
         {
-            sampleExporter?.Dispose();
+            candidateExporter?.Dispose();
         }
     }
 
 #if NETFRAMEWORK
-    private bool CanReadCurrentConfiguration(
-        bool threadSamplingPrepared,
-        bool selectiveSamplingPrepared,
-        bool allocationSamplingPrepared)
+    private bool CanReadCurrentConfiguration(SamplingStartupPlan plan)
     {
         if (_isExiting())
         {
@@ -328,11 +342,7 @@ internal sealed class ContinuousProfilerManager : IDisposable
 
         var result = NativeMethods.GetContinuousProfilerState(out var state);
         var compatible = result == RuntimeSamplerStateQueryResult.Succeeded &&
-                         CanExportCommittedConfiguration(
-                             state.CommittedConfiguration,
-                             threadSamplingPrepared,
-                             selectiveSamplingPrepared,
-                             allocationSamplingPrepared);
+                         plan.CanExport(state.CommittedConfiguration);
 
         if (!compatible && _readerConfigurationCompatible)
         {
@@ -425,41 +435,4 @@ internal sealed class ContinuousProfilerManager : IDisposable
         }
     }
 #endif
-
-    private bool TryInitializeSelectedThreadSamplingExport(SelectiveSamplerConfiguration configuration)
-    {
-        InitializeBufferProcessing(configuration.ExportTimeout);
-
-        _sampleExporterBuilder?.AddHandler(SampleType.SelectedThreads, configuration.Exporter!.ExportSelectedThreadSamples, configuration.ExportInterval, configuration.ExportTimeout);
-        return true;
-    }
-
-    private bool TryInitializeContinuousSamplingExport(
-        IContinuousProfilerExporter exporter,
-        bool threadSamplingPrepared,
-        bool allocationSamplingPrepared,
-        TimeSpan exportInterval,
-        TimeSpan exportTimeout)
-    {
-        InitializeBufferProcessing(exportTimeout);
-
-        if (threadSamplingPrepared)
-        {
-            _sampleExporterBuilder?.AddHandler(SampleType.Continuous, exporter.ExportThreadSamples, exportInterval, exportTimeout);
-        }
-
-        if (allocationSamplingPrepared)
-        {
-            _sampleExporterBuilder?.AddHandler(SampleType.Allocation, exporter.ExportAllocationSamples, exportInterval, exportTimeout);
-        }
-
-        return true;
-    }
-
-    private void InitializeBufferProcessing(TimeSpan exportTimeout)
-    {
-        _sampleExporterBuilder ??= new SampleExporterBuilder();
-
-        _sampleExporterBuilder.SetExportTimeout(exportTimeout);
-    }
 }
