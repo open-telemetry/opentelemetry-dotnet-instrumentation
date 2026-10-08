@@ -1,6 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if _WINDOWS
+using System.Diagnostics;
+#endif
 using System.Runtime.InteropServices;
 using IntegrationTests.Helpers;
 
@@ -8,6 +11,27 @@ namespace IntegrationTests;
 
 public class BuildTests
 {
+#if _WINDOWS
+    [Fact]
+    public void NativeAndManagedLibrariesHaveSameProductVersion()
+    {
+        var distributionFolder = EnvironmentHelper.GetNukeBuildOutput();
+        var nativePath = Path.Combine(
+            distributionFolder,
+            EnvironmentTools.GetClrProfilerDirectoryName(),
+            "OpenTelemetry.AutoInstrumentation.Native.dll");
+        var managedPath = Path.Combine(
+            distributionFolder,
+            EnvironmentHelper.IsCoreClr() ? "net" : "netfx",
+            "OpenTelemetry.AutoInstrumentation.dll");
+        var nativeVersion = FileVersionInfo.GetVersionInfo(nativePath);
+        var managedVersion = FileVersionInfo.GetVersionInfo(managedPath);
+
+        Assert.NotNull(managedVersion.ProductVersion);
+        Assert.Equal(managedVersion.ProductVersion, nativeVersion.ProductVersion);
+    }
+#endif
+
     [Fact]
     public Task DistributionStructure()
     {
