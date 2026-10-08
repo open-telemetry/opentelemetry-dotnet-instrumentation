@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Globalization;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Trace.V1;
@@ -10,20 +11,22 @@ namespace IntegrationTests;
 [Collection(KafkaCollectionFixture.Name)]
 public class KafkaTests : TestHelper
 {
-    private const string MessagingPublishOperationAttributeValue = "publish";
+    private const string MessagingSendOperationAttributeValue = "send";
     private const string MessagingReceiveOperationAttributeValue = "receive";
     private const string MessagingSystemAttributeName = "messaging.system";
-    private const string MessagingOperationAttributeName = "messaging.operation";
+    private const string MessagingOperationNameAttributeName = "messaging.operation.name";
+    private const string MessagingOperationTypeAttributeName = "messaging.operation.type";
     private const string MessagingDestinationAttributeName = "messaging.destination.name";
-    private const string MessagingClientIdAttributeName = "messaging.client_id";
+    private const string MessagingClientIdAttributeName = "messaging.client.id";
+    private const string MessagingConsumerGroupNameAttributeName = "messaging.consumer.group.name";
+    private const string MessagingDestinationPartitionIdAttributeName = "messaging.destination.partition.id";
 
     private const string KafkaMessageSystemAttributeValue = "kafka";
-    private const string KafkaConsumerGroupAttributeName = "messaging.kafka.consumer.group";
     private const string KafkaMessageKeyAttributeName = "messaging.kafka.message.key";
     private const string KafkaMessageKeyAttributeValue = "testkey";
-    private const string KafkaDestinationPartitionAttributeName = "messaging.kafka.destination.partition";
-    private const string KafkaMessageOffsetAttributeName = "messaging.kafka.message.offset";
+    private const string KafkaOffsetAttributeName = "messaging.kafka.offset";
     private const string KafkaMessageTombstoneAttributeName = "messaging.kafka.message.tombstone";
+    private const string KafkaSchemaUrl = "https://opentelemetry.io/schemas/1.44.0";
     private const string KafkaInstrumentationScopeName = "OpenTelemetry.AutoInstrumentation.Kafka";
     private const string KafkaProducerClientIdAttributeValue = "rdkafka#producer-1";
     private const string KafkaConsumerClientIdAttributeValue = "rdkafka#consumer-2";
@@ -53,9 +56,9 @@ public class KafkaTests : TestHelper
         SetExporter(collector);
 
         // Failed produce attempts made before topic is created.
-        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateResultProcessingProduceExceptionSpan(span, topicName), "Failed Produce attempt with delivery handler set.");
-        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProduceExceptionSpan(span, topicName), "Failed Produce attempt without delivery handler set.");
-        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateResultProcessingProduceExceptionSpan(span, topicName), "Failed ProduceAsync attempt.");
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateResultProcessingProduceExceptionSpan(span, topicName), "Failed Produce attempt with delivery handler set.", schemaUrl: KafkaSchemaUrl);
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProduceExceptionSpan(span, topicName), "Failed Produce attempt without delivery handler set.", schemaUrl: KafkaSchemaUrl);
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateResultProcessingProduceExceptionSpan(span, topicName), "Failed ProduceAsync attempt.", schemaUrl: KafkaSchemaUrl);
 
         if (packageVersion.Length == 0 || Version.Parse(packageVersion) != new Version(1, 4, 0))
         {
@@ -64,21 +67,22 @@ public class KafkaTests : TestHelper
                 KafkaInstrumentationScopeName,
                 VersionHelper.AutoInstrumentationVersion,
                 span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumeExceptionSpan(span, topicName),
-                "Failed Consume attempt.");
+                "Failed Consume attempt.",
+                schemaUrl: KafkaSchemaUrl);
         }
 
         // Successful produce attempts after topic was created with admin client.
-        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, 0), "Successful ProduceAsync attempt.");
-        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, -1), "Successful Produce attempt without delivery handler set.");
-        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, 0), "Successful Produce attempt with delivery handler set.");
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, 0), "Successful ProduceAsync attempt.", schemaUrl: KafkaSchemaUrl);
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, -1), "Successful Produce attempt without delivery handler set.", schemaUrl: KafkaSchemaUrl);
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, 0), "Successful Produce attempt with delivery handler set.", schemaUrl: KafkaSchemaUrl);
 
         // Successful produce attempt after topic was created for tombstones.
-        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, -1, true), "Successful sync Publish attempt with a tombstone.");
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProducerSpan(span, topicName, -1, true), "Successful sync Publish attempt with a tombstone.", schemaUrl: KafkaSchemaUrl);
 
         // Successful consume attempts.
-        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 0), "First successful Consume attempt.");
-        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 1), "Second successful Consume attempt.");
-        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 2), "Third successful Consume attempt.");
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 0), "First successful Consume attempt.", schemaUrl: KafkaSchemaUrl);
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 1), "Second successful Consume attempt.", schemaUrl: KafkaSchemaUrl);
+        collector.Expect(KafkaInstrumentationScopeName, VersionHelper.AutoInstrumentationVersion, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumerSpan(span, topicName, 2), "Third successful Consume attempt.", schemaUrl: KafkaSchemaUrl);
 
         collector.ExpectCollected(collection => ValidatePropagation(collection, topicName));
         EnableBytecodeInstrumentation();
@@ -138,8 +142,8 @@ public class KafkaTests : TestHelper
 
     private static bool ValidateConsumerSpan(Span span, string topicName, int messageOffset, string? expectedMessageKey = KafkaMessageKeyAttributeValue)
     {
-        var kafkaMessageOffset = span.Attributes.SingleOrDefault(kv => kv.Key == KafkaMessageOffsetAttributeName)?.Value.IntValue;
-        var consumerGroupId = span.Attributes.Single(kv => kv.Key == KafkaConsumerGroupAttributeName).Value.StringValue;
+        var kafkaMessageOffset = span.Attributes.SingleOrDefault(kv => kv.Key == KafkaOffsetAttributeName)?.Value.IntValue;
+        var consumerGroupId = span.Attributes.Single(kv => kv.Key == MessagingConsumerGroupNameAttributeName).Value.StringValue;
         return ValidateCommonAttributes(span.Attributes, topicName, KafkaConsumerClientIdAttributeValue, MessagingReceiveOperationAttributeValue, 0, expectedMessageKey) &&
                kafkaMessageOffset == messageOffset &&
                consumerGroupId == GetConsumerGroupIdAttributeValue(topicName);
@@ -147,19 +151,19 @@ public class KafkaTests : TestHelper
 
     private static bool ValidateBasicProduceExceptionSpan(Span span, string topicName)
     {
-        return ValidateCommonAttributes(span.Attributes, topicName, KafkaProducerClientIdAttributeValue, MessagingPublishOperationAttributeValue, -1, KafkaMessageKeyAttributeValue) &&
+        return ValidateCommonAttributes(span.Attributes, topicName, KafkaProducerClientIdAttributeValue, MessagingSendOperationAttributeValue, -1, KafkaMessageKeyAttributeValue) &&
                span.Status.Code == Status.Types.StatusCode.Error;
     }
 
     private static bool ValidateProduceExceptionSpan(Span span, string topicName)
     {
-        return ValidateBasicProduceExceptionSpan(span, topicName) && span.Attributes.All(kv => kv.Key != KafkaMessageOffsetAttributeName);
+        return ValidateBasicProduceExceptionSpan(span, topicName) && span.Attributes.All(kv => kv.Key != KafkaOffsetAttributeName);
     }
 
     private static bool ValidateResultProcessingProduceExceptionSpan(Span span, string topicName)
     {
         // DeliveryResult processing results in offset being set.
-        var offset = span.Attributes.SingleOrDefault(kv => kv.Key == KafkaMessageOffsetAttributeName)?.Value.IntValue;
+        var offset = span.Attributes.SingleOrDefault(kv => kv.Key == KafkaOffsetAttributeName)?.Value.IntValue;
         return ValidateBasicProduceExceptionSpan(span, topicName) &&
                offset == InvalidOffset;
     }
@@ -168,7 +172,7 @@ public class KafkaTests : TestHelper
     {
         var isTombstone = span.Attributes.Single(kv => kv.Key == KafkaMessageTombstoneAttributeName).Value.BoolValue;
 
-        return ValidateCommonAttributes(span.Attributes, topicName, KafkaProducerClientIdAttributeValue, MessagingPublishOperationAttributeValue, partition, KafkaMessageKeyAttributeValue) &&
+        return ValidateCommonAttributes(span.Attributes, topicName, KafkaProducerClientIdAttributeValue, MessagingSendOperationAttributeValue, partition, KafkaMessageKeyAttributeValue) &&
                isTombstone == tombstoneExpected &&
                span.Status is null;
     }
@@ -177,32 +181,34 @@ public class KafkaTests : TestHelper
     {
         var messagingDestinationName = attributes.SingleOrDefault(kv => kv.Key == MessagingDestinationAttributeName)?.Value.StringValue;
         var kafkaMessageKey = attributes.SingleOrDefault(kv => kv.Key == KafkaMessageKeyAttributeName)?.Value.StringValue;
-        var kafkaPartition = attributes.SingleOrDefault(kv => kv.Key == KafkaDestinationPartitionAttributeName)?.Value.IntValue;
+        var destinationPartitionId = attributes.SingleOrDefault(kv => kv.Key == MessagingDestinationPartitionIdAttributeName)?.Value.StringValue;
 
         return ValidateBasicSpanAttributes(attributes, clientId, operationName) &&
                messagingDestinationName == topicName &&
                kafkaMessageKey == expectedMessageKey &&
-               kafkaPartition == partition;
+               destinationPartitionId == partition.ToString(CultureInfo.InvariantCulture);
     }
 
     private static bool ValidateBasicSpanAttributes(IReadOnlyCollection<KeyValue> attributes, string clientId, string operationName)
     {
         var messagingSystem = attributes.Single(kv => kv.Key == MessagingSystemAttributeName).Value.StringValue;
-        var messagingOperation = attributes.Single(kv => kv.Key == MessagingOperationAttributeName).Value.StringValue;
+        var messagingOperationName = attributes.Single(kv => kv.Key == MessagingOperationNameAttributeName).Value.StringValue;
+        var messagingOperationType = attributes.Single(kv => kv.Key == MessagingOperationTypeAttributeName).Value.StringValue;
         var messagingClientId = attributes.Single(kv => kv.Key == MessagingClientIdAttributeName).Value.StringValue;
 
         return messagingSystem == KafkaMessageSystemAttributeValue &&
-               messagingOperation == operationName &&
+               messagingOperationName == operationName &&
+               messagingOperationType == operationName &&
                messagingClientId == clientId;
     }
 
     private static bool ValidatePropagation(ICollection<MockSpansCollector.Collected> collectedSpans, string topicName)
     {
-        var expectedReceiveOperationName = $"{topicName} {MessagingReceiveOperationAttributeValue}";
-        var expectedPublishOperationName = $"{topicName} {MessagingPublishOperationAttributeValue}";
+        var expectedReceiveOperationName = $"{MessagingReceiveOperationAttributeValue} {topicName}";
+        var expectedSendOperationName = $"{MessagingSendOperationAttributeValue} {topicName}";
         var producerSpans = collectedSpans
             .Where(span =>
-                span.Span.Name == expectedPublishOperationName &&
+                span.Span.Name == expectedSendOperationName &&
                 !span.Span.Attributes.Single(attr => attr.Key == KafkaMessageTombstoneAttributeName).Value.BoolValue &&
                 span.Span.Status is null);
 
