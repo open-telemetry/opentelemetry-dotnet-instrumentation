@@ -95,14 +95,6 @@ std::vector<mdToken> FindAttributeConstructors(const ComPtr<IMetaDataImport2>& m
     return constructors;
 }
 
-bool HasCustomAttribute(const ComPtr<IMetaDataImport2>& metadata_import, mdToken owner, const WCHAR* attribute_name)
-{
-    // GetCustomAttributeByName requires output parameters even though existence is all the caller needs.
-    const void* unused_blob      = nullptr;
-    ULONG       unused_blob_size = 0;
-    return metadata_import->GetCustomAttributeByName(owner, attribute_name, &unused_blob, &unused_blob_size) == S_OK;
-}
-
 } // namespace
 
 bool HasUnsafeAccessorTypeAttribute(const ComPtr<IMetaDataImport2>& metadata_import)
@@ -246,7 +238,8 @@ void UpdateUnsafeAccessorTypeAttributes(const ModuleMetadata&                   
         // [UnsafeAccessorType] attribute can occur by itself in metadata, but only its pairing with [UnsafeAccessor]
         // makes the parameter or return value part of a JIT-level unsafe-accessor declaration.
         // Leave unrelated metadata untouched even though it could be rewritten safely.
-        if (!HasCustomAttribute(metadata_import, method, unsafe_accessor_attribute_name.c_str()))
+        if (metadata_import->GetCustomAttributeByName(method, unsafe_accessor_attribute_name.c_str(), nullptr,
+                                                      nullptr) != S_OK)
         {
             continue;
         }
