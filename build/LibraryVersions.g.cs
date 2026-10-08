@@ -209,7 +209,7 @@ public static partial class LibraryVersion
             [
                 new("1.8.2"),
                 new("1.9.2"),
-                new("2.15.1"),
+                new("2.16.0"),
             ]
         },
         {
