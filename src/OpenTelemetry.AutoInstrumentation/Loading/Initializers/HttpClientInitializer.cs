@@ -13,22 +13,25 @@ using OpenTelemetry.AutoInstrumentation.Plugins;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
-internal class HttpClientInitializer
+internal class HttpClientInitializer : IInstrumentationInitializer
 {
     private readonly PluginManager _pluginManager;
     private readonly TracerSettings _tracerSettings;
 
     private int _initialized;
 
-    public HttpClientInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
+    public HttpClientInitializer(PluginManager pluginManager, TracerSettings tracerSettings)
     {
         _pluginManager = pluginManager;
         _tracerSettings = tracerSettings;
+    }
 
-        lazyInstrumentationLoader.Add(new GenericInitializer("System.Net.Http", "HttpClientInitializerForSystemNetHttp", InitializeOnFirstCall));
+    public void Register(LazyInstrumentationLoader lazyInstrumentationLoader)
+    {
+        new GenericInitializer("System.Net.Http", "HttpClientInitializerForSystemNetHttp", InitializeOnFirstCall).Register(lazyInstrumentationLoader);
 
 #if NETFRAMEWORK
-        lazyInstrumentationLoader.Add(new GenericInitializer("System.Net", "HttpClientInitializerForSystemNet", InitializeOnFirstCall));
+        new GenericInitializer("System.Net", "HttpClientInitializerForSystemNet", InitializeOnFirstCall).Register(lazyInstrumentationLoader);
 #endif
     }
 

@@ -4,6 +4,7 @@
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Xunit.SkippableFact" />
     <PackageReference Include="log4net" />
+    <PackageReference Include="System.Data.SqlClient" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " />
     <PackageReference Include="Microsoft.Build" Condition=" '$(TargetFramework)' == 'net10.0' " />
   </ItemGroup>
 

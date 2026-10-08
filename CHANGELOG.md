@@ -14,6 +14,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - **Breaking change:** `IContinuousProfilerExporter.ExportThreadSamples` now
   requires the CPU sampling interval for each batch as a `uint` argument in
   milliseconds.
+- Reworked the experimental OpAMP plugin lifecycle with pre-start listener
+  registration and manager-owned client lifetime. Only the first configured
+  `IOpAmpPlugin` controls OpAMP. Hardened OpAMP startup and cleanup, including
+  after plugin configuration failure. See the
+  [OpAMP plugin documentation](./docs/plugins.md#opamp).
 
 #### Dependency updates
 
@@ -26,6 +31,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fix missing or incomplete SqlClient traces when `System.Data`,
+  `System.Data.SqlClient`, or `Microsoft.Data.SqlClient` is already loaded at
+  startup, including in .NET Framework applications hosted in IIS.
 - Invalid plugin type names no longer stop automatic instrumentation or crash
   .NET Framework applications unless fail-fast is enabled.
 

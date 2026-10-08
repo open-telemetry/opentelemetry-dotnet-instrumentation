@@ -39,7 +39,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.15.10",
-                "9.5.2",
+                "9.5.3",
 #endif
             ];
             return theoryData;
@@ -357,12 +357,12 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "3.6.0",
-                "3.22.0",
+                "3.22.3",
 #if NET10_0
                 "4.0.0",
 #endif
 #if NET10_0
-                "4.2.2",
+                "4.3.0",
 #endif
 #endif
             ];

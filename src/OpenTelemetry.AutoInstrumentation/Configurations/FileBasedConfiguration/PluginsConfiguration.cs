@@ -21,15 +21,16 @@ internal class PluginsConfiguration
 
     public List<string> ParsePlugins()
     {
-        var uniquePlugins = new HashSet<string>();
+        var uniquePlugins = new HashSet<string>(StringComparer.Ordinal);
+        var plugins = new List<string>();
 
         if (Plugins != null)
         {
             foreach (var plugin in Plugins)
             {
-                if (!string.IsNullOrWhiteSpace(plugin))
+                if (!string.IsNullOrWhiteSpace(plugin) && uniquePlugins.Add(plugin.Trim()))
                 {
-                    uniquePlugins.Add(plugin.Trim());
+                    plugins.Add(plugin.Trim());
                 }
             }
         }
@@ -38,10 +39,14 @@ internal class PluginsConfiguration
         {
             foreach (var plugin in PluginsList!.Split(Constants.ConfigurationValues.DotNetQualifiedNameSeparator))
             {
-                uniquePlugins.Add(plugin.Trim());
+                var trimmedPlugin = plugin.Trim();
+                if (uniquePlugins.Add(trimmedPlugin))
+                {
+                    plugins.Add(trimmedPlugin);
+                }
             }
         }
 
-        return [.. uniquePlugins];
+        return plugins;
     }
 }

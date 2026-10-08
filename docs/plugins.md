@@ -180,22 +180,25 @@ public class MyOptionsPlugin : IPlugin,
 
 Implement `IOpAmpPlugin` to customize the OpAMP client and observe its
 lifecycle.
-OpAMP methods are called on every configured plugin implementing `IOpAmpPlugin`.
+The first configured plugin implementing `IOpAmpPlugin` controls OpAMP. Others
+still participate through their other plugin interfaces. For file-based
+configuration, `plugins` entries precede `plugins_list`; otherwise configured
+list order applies.
 
 > [!NOTE]
-> `OpenTelemetry.OpAmp.Client` 0.7.0-alpha.1 queues outgoing messages. The
-> `Send*Async` methods available in 0.6.0-alpha.1 were replaced by corresponding
-> `Send*` methods. Call `FlushAsync` when the plugin must wait until the outgoing
-> queue is empty.
+> The OpAMP client is owned by automatic instrumentation. Plugins receive a
+> restricted client interface and cannot start, stop, or dispose the client.
+> Unsupported capabilities are not advertised.
 
 ```csharp
 using OpenTelemetry.AutoInstrumentation.PluginApi;
 using OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
-using OpenTelemetry.OpAmp.Client;
 using OpenTelemetry.OpAmp.Client.Settings;
 
 public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
 {
+    private IOpAmpClient? _client;
+
     public void Initializing()
     {
     }
@@ -206,21 +209,44 @@ public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
 
     public void ConfigureOpAmpOptions(OpAmpClientSettings settings)
     {
-        // Called before the OpAMP client is created.
+        // Configure settings before client creation.
     }
 
-    public void AfterOpAmpClientStarted(OpAmpClient client)
+    public void ConfigureOpAmpClient(IOpAmpClient client)
     {
-        // Called after the OpAMP client is created and started.
+        // Subscribe to messages here.
+        _client = client;
+    }
+
+    public void AfterOpAmpClientStarted()
+    {
+        // Startup completed; connectivity is not guaranteed.
     }
 
     public void BeforeOpAmpClientStopped()
     {
-        // Called before the OpAMP client is stopped.
-        // Avoid long-running work during application shutdown.
+        // Release resources and unsubscribe here.
     }
 }
 ```
+
+Initialization invokes `ConfigureOpAmpOptions`, `ConfigureOpAmpClient`, ordinary
+`IPlugin.Initialized` callbacks, and client startup in that order. Subscribe in
+`ConfigureOpAmpClient` to receive messages from the initial server response.
+Client startup is asynchronous.
+
+`AfterOpAmpClientStarted` means the client start operation completed; it does not
+guarantee connectivity or initial-message delivery. It is skipped if startup
+throws, is cancelled, or loses a race with shutdown. When invoked, it completes
+before `BeforeOpAmpClientStopped` begins.
+
+`BeforeOpAmpClientStopped` may run without `AfterOpAmpClientStarted`. Release
+resources and unsubscribe there, including resources acquired before
+`ConfigureOpAmpClient` throws. Lifecycle callbacks must return promptly and
+tolerate client disposal during forced shutdown.
+
+OpAMP requests do not produce application spans. Listener callbacks must return
+promptly.
 
 ## Selective sampling
 
