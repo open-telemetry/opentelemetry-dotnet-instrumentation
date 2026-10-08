@@ -28,6 +28,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fix missing or incomplete SqlClient traces when `System.Data`,
+  `System.Data.SqlClient`, or `Microsoft.Data.SqlClient` is already loaded at
+  startup, including in .NET Framework applications hosted in IIS.
 - Invalid plugin type names no longer stop automatic instrumentation or crash
   .NET Framework applications unless fail-fast is enabled.
 
