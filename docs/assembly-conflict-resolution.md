@@ -293,9 +293,10 @@ This makes the runtime aware of those dependencies before the application and
 instrumentation begin loading assemblies.
 
 Standalone distributions ship build-time-generated dependency contexts and
-scripts that materialize the required shared-store directory structure from
-assemblies already present in the distribution. Choose a dedicated, writable
-output directory and run the script before starting the application:
+scripts that materialize both host-facing directory structures from the
+contexts and assemblies already present in the distribution. Choose a
+dedicated, writable output directory and run the script before starting the
+application:
 
 ```sh
 "$OTEL_DOTNET_AUTO_HOME/generate-additional-deps.sh" \

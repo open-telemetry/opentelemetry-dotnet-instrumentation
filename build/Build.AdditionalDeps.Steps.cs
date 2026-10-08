@@ -13,17 +13,16 @@ using static Nuke.Common.EnvironmentInfo;
 /// <remarks>
 /// <c>DOTNET_ADDITIONAL_DEPS</c> adds the instrumentation package dependencies to the application's host
 /// dependency graph, and <c>DOTNET_SHARED_STORE</c> supplies the runtime assets declared by that graph. This
-/// target writes one package-only dependency context per supported runtime and a source-to-store copy plan to
-/// tracer-home. The shipped setup scripts use that metadata to create the shared store only when the fallback
-/// is needed.
+/// target stages one package-only dependency context per supported runtime and a file-to-file copy plan in
+/// tracer-home. The shipped setup scripts use the plan to create both host-facing directories only when the
+/// fallback is needed.
 /// </remarks>
 partial class Build
 {
     private const string AdditionalDepsFileName = "OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json";
     private const string SharedFrameworkName = "Microsoft.NETCore.App";
-    private AbsolutePath AdditionalDepsDirectory => TracerHomeDirectory / "AdditionalDeps";
-    private AbsolutePath StoreSharedFrameworkDirectory => AdditionalDepsDirectory / "shared" / SharedFrameworkName;
-    private AbsolutePath SharedStoreCopyPlanFilePath => AdditionalDepsDirectory / "shared-store-copy-plan.txt";
+    private AbsolutePath AdditionalDepsContextsDirectory => TracerHomeDirectory / "additional-deps-contexts";
+    private AbsolutePath AdditionalDepsCopyPlanFilePath => TracerHomeDirectory / "additional-deps-copy-plan.txt";
 
     private IEnumerable<TargetFramework> AdditionalDepsTargetFrameworks => TargetFrameworksForPublish.ExceptNetFramework();
 
@@ -38,11 +37,11 @@ partial class Build
 
     Target PrepareAdditionalDeps => _ => _
         .Unlisted()
-        .Description("Prepares AdditionalDeps contexts and the shared-store copy plan from tracer-home.")
+        .Description("Stages AdditionalDeps contexts and the setup copy plan in tracer-home.")
         .DependsOn(PublishManagedProfiler)
         .Executes(() =>
         {
-            AdditionalDepsDirectory.CreateOrCleanDirectory();
+            AdditionalDepsContextsDirectory.CreateOrCleanDirectory();
 
             // Assemblies project built as part of PublishManagedProfiler already produces the
             // SDK dependency contexts for the package dependencies shipped with the standalone distribution.
@@ -60,11 +59,11 @@ partial class Build
                 GenerateAdditionalDepsContext(targetFramework, depsJsonPath, copyLines);
             }
 
-            WriteSharedStoreCopyPlan(copyLines);
+            WriteAdditionalDepsCopyPlan(copyLines);
         });
 
     /// <summary>
-    /// Creates AdditionalDeps deps.json context file and appends its shared-store copy lines.
+    /// Stages an AdditionalDeps context and appends its context and shared-store copy lines.
     /// </summary>
     private void GenerateAdditionalDepsContext(TargetFramework targetFramework, AbsolutePath depsJsonPath, HashSet<string> copyLines)
     {
@@ -147,7 +146,16 @@ partial class Build
             }
         }
 
-        WriteAdditionalDepsContext(targetFramework, dependencyContext);
+        // save context file to staging folder in tracer home: e.g. tracer-home/additional-deps-contexts/net8.0.deps.json
+        // it will be copied by the script
+        var contextFile = AdditionalDepsContextsDirectory / $"{targetFramework}.deps.json";
+        WriteAdditionalDepsContext(contextFile, dependencyContext);
+        var sharedFrameworkVersion = targetFramework.SharedFrameworkVersion
+                                     ?? throw new InvalidOperationException(
+                                         $"Target framework '{targetFramework}' does not have a shared-framework version.");
+        var contextSource = Path.GetRelativePath(TracerHomeDirectory, contextFile).Replace('\\', '/');
+        var contextDestination = $"AdditionalDeps/shared/{SharedFrameworkName}/{sharedFrameworkVersion}/{AdditionalDepsFileName}";
+        copyLines.Add($"{contextSource}|{contextDestination}");
     }
 
     /// <summary>
@@ -175,9 +183,9 @@ partial class Build
 
             foreach (var architecture in AdditionalDepsArchitectures)
             {
-                // The .NET store layout is <architecture>/<TFM>/<NuGet package path>/<logical runtime dll path>.
-                // For example above: x64/net8.0/Example.Package/1.2.3/lib/net8.0/Example.Package.dll.
-                var storeRelativePath = $"{architecture.ToString().ToLowerInvariant()}/{targetFramework}/{packagePath}/{dllPath}";
+                // The output store layout is store/<architecture>/<TFM>/<NuGet package path>/<logical runtime dll path>.
+                // For example above: store/x64/net8.0/Example.Package/1.2.3/lib/net8.0/Example.Package.dll.
+                var storeRelativePath = $"store/{architecture.ToString().ToLowerInvariant()}/{targetFramework}/{packagePath}/{dllPath}";
                 copyLines.Add($"{sourceRelativePath}|{storeRelativePath}");
             }
         }
@@ -236,31 +244,24 @@ partial class Build
     }
 
     /// <summary>
-    /// Writes one package-only dependency context in the layout consumed by DOTNET_ADDITIONAL_DEPS.
+    /// Writes one package-only dependency context outside the layout consumed by DOTNET_ADDITIONAL_DEPS.
     /// </summary>
-    private void WriteAdditionalDepsContext(TargetFramework targetFramework, JsonObject dependencyContext)
+    private void WriteAdditionalDepsContext(AbsolutePath contextFile, JsonObject dependencyContext)
     {
-        var sharedFrameworkVersion = targetFramework.SharedFrameworkVersion
-                                     ?? throw new InvalidOperationException(
-                                         $"Target framework '{targetFramework}' does not have a shared-framework version.");
-
-        var frameworkDirectory = StoreSharedFrameworkDirectory / sharedFrameworkVersion.ToString();
-        frameworkDirectory.CreateDirectory();
-
         File.WriteAllText(
-            frameworkDirectory / AdditionalDepsFileName,
+            contextFile,
             dependencyContext.ToJsonString(new JsonSerializerOptions { WriteIndented = true }),
             new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
     }
 
     /// <summary>
-    /// Writes the source-to-store copy plan shared by all generated AdditionalDeps contexts.
+    /// Writes the source-to-output copy plan for every staged context and shared-store asset.
     /// </summary>
-    private void WriteSharedStoreCopyPlan(IEnumerable<string> copyLines)
+    private void WriteAdditionalDepsCopyPlan(IEnumerable<string> copyLines)
     {
         // Every row is one complete copy. LF lets the POSIX script read a Windows-built plan without a trailing CR.
         File.WriteAllText(
-            SharedStoreCopyPlanFilePath,
+            AdditionalDepsCopyPlanFilePath,
             string.Join('\n', copyLines.OrderBy(line => line, StringComparer.OrdinalIgnoreCase)) + '\n',
             new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
     }

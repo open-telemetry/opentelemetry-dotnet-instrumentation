@@ -45,16 +45,10 @@ if [ -z "$output_path" ]; then
 fi
 
 script_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
-copy_plan_path="$script_dir/AdditionalDeps/shared-store-copy-plan.txt"
-source_additional_deps="$script_dir/AdditionalDeps"
+copy_plan_path="$script_dir/additional-deps-copy-plan.txt"
 
 if [ ! -f "$copy_plan_path" ]; then
   echo "AdditionalDeps copy plan was not found: $copy_plan_path" >&2
-  exit 1
-fi
-
-if [ ! -d "$source_additional_deps/shared" ]; then
-  echo "AdditionalDeps dependency contexts were not found: $source_additional_deps/shared" >&2
   exit 1
 fi
 
@@ -63,19 +57,13 @@ output_path=$(CDPATH='' cd -- "$output_path" && pwd)
 destination_additional_deps="$output_path/AdditionalDeps"
 destination_store="$output_path/store"
 
-mkdir -p "$destination_additional_deps"
-if [ "$source_additional_deps" != "$destination_additional_deps" ]; then
-  mkdir -p "$destination_additional_deps/shared"
-  cp -R "$source_additional_deps/shared/." "$destination_additional_deps/shared/"
-fi
-
-while IFS='|' read -r source_relative_path store_relative_path extra_field; do
-  if [ -z "$source_relative_path" ] || [ -z "$store_relative_path" ] || [ -n "$extra_field" ]; then
+while IFS='|' read -r source_relative_path destination_relative_path extra_field; do
+  if [ -z "$source_relative_path" ] || [ -z "$destination_relative_path" ] || [ -n "$extra_field" ]; then
     echo 'Invalid entry in AdditionalDeps copy plan.' >&2
     exit 1
   fi
 
-  for path_part in "$source_relative_path" "$store_relative_path"; do
+  for path_part in "$source_relative_path" "$destination_relative_path"; do
     case "$path_part" in
       /*|..|../*|*/..|*/../*)
         echo 'AdditionalDeps copy plan contains an unsafe path.' >&2
@@ -90,7 +78,7 @@ while IFS='|' read -r source_relative_path store_relative_path extra_field; do
     exit 1
   fi
 
-  destination_path="$destination_store/$store_relative_path"
+  destination_path="$output_path/$destination_relative_path"
   mkdir -p "$(dirname -- "$destination_path")"
   cp "$source_path" "$destination_path"
 done < "$copy_plan_path"
