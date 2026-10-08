@@ -25,7 +25,7 @@ public class OpAmpTests : TestHelper
         using var server = new MockOpAmpServer(Output);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_ENABLED", "true");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_SERVER_URL", $"http://localhost:{server.Port}/v1/opamp");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_SERVER_URL", server.Endpoint);
         SetEnvironmentVariable(
             "OTEL_RESOURCE_ATTRIBUTES",
             "opamp.test=true,service.namespace=my-namespace");
@@ -62,7 +62,7 @@ public class OpAmpTests : TestHelper
 
         SetExporter(collector);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_ENABLED", "true");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_SERVER_URL", $"http://localhost:{server.Port}/v1/opamp");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_SERVER_URL", server.Endpoint);
 
 #if NET
         collector.Expect(
