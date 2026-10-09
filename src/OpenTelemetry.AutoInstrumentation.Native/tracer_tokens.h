@@ -35,13 +35,13 @@ protected:
                              ULONG& signatureSize) override;
 
 public:
-    TracerTokens(ModuleMetadata* module_metadata_ptr);
+    TracerTokens(ModuleMetadata* module_metadata_ptr, const WSTRING& bytecode_instrumentation_name);
 
     int GetAdditionalLocalsCount() override;
 
     HRESULT WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
                              const std::vector<TypeSignature>& methodArguments,
-                             const bool ignoreByRefInstrumentation, ILInstr** instruction);
+                             bool ignoreByRefInstrumentation, ILInstr** instruction);
 
     HRESULT WriteEndVoidReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
                                         const TypeInfo* currentType, ILInstr** instruction);

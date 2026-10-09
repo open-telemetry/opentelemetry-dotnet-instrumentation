@@ -3,6 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 
@@ -42,15 +43,9 @@ internal static class DuckTypeExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool TryDuckCast<T>(this object? instance, [NotNullWhen(true)] out T? value)
     {
-        if (instance is null)
+        if (instance is not null && DuckType.CreateCache<T>.GetProxy(instance.GetType()) is { Success: true } proxyResult)
         {
-            DuckTypeTargetObjectInstanceIsNull.Throw();
-        }
-
-        DuckType.CreateTypeResult proxyResult = DuckType.CreateCache<T>.GetProxy(instance.GetType());
-        if (proxyResult.Success)
-        {
-            value = proxyResult.CreateInstance<T>(instance)!;
+            value = proxyResult.CreateInstance<T>(instance);
             return true;
         }
 
@@ -66,21 +61,17 @@ internal static class DuckTypeExtensions
     /// <param name="value">Ducktype instance</param>
     /// <returns>true if the object instance was ducktyped; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool TryDuckCast(this object? instance, Type? targetType, [NotNullWhen(true)] out object? value)
+    public static bool TryDuckCast(this object? instance, Type targetType, [NotNullWhen(true)] out object? value)
     {
-        if (instance is null)
+        if (targetType is null)
         {
-            DuckTypeTargetObjectInstanceIsNull.Throw();
+            ThrowHelper.ThrowArgumentNullException(nameof(targetType));
         }
 
-        if (targetType != null)
+        if (instance is not null && DuckType.GetOrCreateProxyType(targetType, instance.GetType()) is { Success: true } proxyResult)
         {
-            DuckType.CreateTypeResult proxyResult = DuckType.GetOrCreateProxyType(targetType, instance.GetType());
-            if (proxyResult.Success)
-            {
-                value = proxyResult.CreateInstance(instance);
-                return true;
-            }
+            value = proxyResult.CreateInstance(instance);
+            return true;
         }
 
         value = default;
@@ -97,13 +88,7 @@ internal static class DuckTypeExtensions
     public static T? DuckAs<T>(this object? instance)
         where T : class
     {
-        if (instance is null)
-        {
-            DuckTypeTargetObjectInstanceIsNull.Throw();
-        }
-
-        DuckType.CreateTypeResult proxyResult = DuckType.CreateCache<T>.GetProxy(instance.GetType());
-        if (proxyResult.Success)
+        if (instance is not null && DuckType.CreateCache<T>.GetProxy(instance.GetType()) is { Success: true } proxyResult)
         {
             return proxyResult.CreateInstance<T>(instance);
         }
@@ -118,20 +103,16 @@ internal static class DuckTypeExtensions
     /// <param name="targetType">Target type</param>
     /// <returns>DuckType instance</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static object? DuckAs(this object? instance, Type? targetType)
+    public static object? DuckAs(this object? instance, Type targetType)
     {
-        if (instance is null)
+        if (targetType is null)
         {
-            DuckTypeTargetObjectInstanceIsNull.Throw();
+            ThrowHelper.ThrowArgumentNullException(nameof(targetType));
         }
 
-        if (targetType != null)
+        if (instance is not null && DuckType.GetOrCreateProxyType(targetType, instance.GetType()) is { Success: true } proxyResult)
         {
-            DuckType.CreateTypeResult proxyResult = DuckType.GetOrCreateProxyType(targetType, instance.GetType());
-            if (proxyResult.Success)
-            {
-                return proxyResult.CreateInstance(instance);
-            }
+            return proxyResult.CreateInstance(instance);
         }
 
         return null;
@@ -146,12 +127,7 @@ internal static class DuckTypeExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool DuckIs<T>(this object? instance)
     {
-        if (instance is null)
-        {
-            DuckTypeTargetObjectInstanceIsNull.Throw();
-        }
-
-        return DuckType.CanCreate<T>(instance);
+        return instance is not null && DuckType.CanCreate<T>(instance);
     }
 
     /// <summary>
@@ -161,19 +137,14 @@ internal static class DuckTypeExtensions
     /// <param name="targetType">Duck type</param>
     /// <returns>true if the proxy can be created; otherwise, false</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool DuckIs(this object? instance, Type? targetType)
+    public static bool DuckIs(this object? instance, Type targetType)
     {
-        if (instance is null)
+        if (targetType is null)
         {
-            DuckTypeTargetObjectInstanceIsNull.Throw();
+            ThrowHelper.ThrowArgumentNullException(nameof(targetType));
         }
 
-        if (targetType != null)
-        {
-            return DuckType.CanCreate(targetType, instance);
-        }
-
-        return false;
+        return instance is not null && DuckType.CanCreate(targetType, instance);
     }
 
     /// <summary>
@@ -197,21 +168,17 @@ internal static class DuckTypeExtensions
     /// <param name="value">The Ducktype instance</param>
     /// <returns>true if the object instance was ducktyped; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool TryDuckImplement(this object? instance, Type? typeToDeriveFrom, [NotNullWhen(true)] out object? value)
+    public static bool TryDuckImplement(this object? instance, Type typeToDeriveFrom, [NotNullWhen(true)] out object? value)
     {
-        if (instance is null)
+        if (typeToDeriveFrom is null)
         {
-            DuckTypeTargetObjectInstanceIsNull.Throw();
+            ThrowHelper.ThrowArgumentNullException(nameof(typeToDeriveFrom));
         }
 
-        if (typeToDeriveFrom != null)
+        if (instance is not null && DuckType.GetOrCreateReverseProxyType(typeToDeriveFrom, instance.GetType()) is { Success: true } proxyResult)
         {
-            DuckType.CreateTypeResult proxyResult = DuckType.GetOrCreateReverseProxyType(typeToDeriveFrom, instance.GetType());
-            if (proxyResult.Success)
-            {
-                value = proxyResult.CreateInstance(instance);
-                return true;
-            }
+            value = proxyResult.CreateInstance(instance);
+            return true;
         }
 
         value = default;

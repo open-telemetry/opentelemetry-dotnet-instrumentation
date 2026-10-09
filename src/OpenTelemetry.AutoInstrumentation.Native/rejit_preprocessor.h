@@ -14,6 +14,7 @@
 
 namespace trace
 {
+class CorProfiler;
 class RejitHandler;
 class RejitWorkOffloader;
 class RejitHandlerModuleMethod;
@@ -30,10 +31,11 @@ private:
     void ProcessTypeDefForRejit(const RejitRequestDefinition& definition, ComPtr<IMetaDataImport2>& metadataImport,
                            ComPtr<IMetaDataEmit2>& metadataEmit, ComPtr<IMetaDataAssemblyImport>& assemblyImport,
                            ComPtr<IMetaDataAssemblyEmit>& assemblyEmit, const ModuleInfo& moduleInfo,
-                           const mdTypeDef typeDef, std::vector<ModuleID>& vtModules,
+                           mdTypeDef typeDef, std::vector<ModuleID>& vtModules,
                            std::vector<mdMethodDef>& vtMethodDefs);
 
 protected:
+    CorProfiler* m_corProfiler;
     std::shared_ptr<RejitHandler> m_rejit_handler = nullptr;
     std::shared_ptr<RejitWorkOffloader> m_work_offloader = nullptr;
 
@@ -41,13 +43,15 @@ protected:
     virtual const bool GetIsDerived(const RejitRequestDefinition& definition) = 0;
     virtual const bool GetIsInterface(const RejitRequestDefinition& definition) = 0;
     virtual const bool GetIsExactSignatureMatch(const RejitRequestDefinition& definition) = 0;
-    virtual const std::unique_ptr<RejitHandlerModuleMethod> CreateMethod(const mdMethodDef methodDef,
+    virtual const bool GetIsEnabled(const RejitRequestDefinition& definition) = 0;
+    virtual const std::unique_ptr<RejitHandlerModuleMethod> CreateMethod(mdMethodDef methodDef,
                                                                          RejitHandlerModule* module,
                                                                          const FunctionInfo& functionInfo,
                                                                          const RejitRequestDefinition& definition) = 0;
 
 public:
-    RejitPreprocessor(std::shared_ptr<RejitHandler> rejit_handler, std::shared_ptr<RejitWorkOffloader> work_offloader);
+    RejitPreprocessor(CorProfiler* corProfiler, std::shared_ptr<RejitHandler> rejit_handler,
+                      std::shared_ptr<RejitWorkOffloader> work_offloader);
 
     ULONG RequestRejitForLoadedModules(const std::vector<ModuleID>& modules,
                                        const std::vector<RejitRequestDefinition>& requests,
@@ -71,8 +75,9 @@ protected:
     const bool GetIsDerived(const IntegrationDefinition& definition) final;
     const bool GetIsInterface(const IntegrationDefinition& definition) final;
     const bool GetIsExactSignatureMatch(const IntegrationDefinition& definition) final;
+    const bool GetIsEnabled(const IntegrationDefinition& definition) final;
     const std::unique_ptr<RejitHandlerModuleMethod>
-    CreateMethod(const mdMethodDef methodDef, RejitHandlerModule* module, const FunctionInfo& functionInfo,
+    CreateMethod(mdMethodDef methodDef, RejitHandlerModule* module, const FunctionInfo& functionInfo,
                  const IntegrationDefinition& integrationDefinition) final;
 };
 

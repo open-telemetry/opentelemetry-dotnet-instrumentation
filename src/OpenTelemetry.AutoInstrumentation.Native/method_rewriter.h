@@ -8,6 +8,7 @@
 
 #include "util.h"
 #include "cor.h"
+#include "corprof.h"
 
 struct ILInstr;
 class ILRewriterWrapper;
@@ -17,25 +18,38 @@ namespace trace
     // forward declarations
     class RejitHandlerModule;
     class RejitHandlerModuleMethod;
+    class CorProfiler;
 
 class MethodRewriter
 {
+protected:
+    CorProfiler* m_corProfiler;
+
 public:
-    virtual HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler) = 0;
+    explicit MethodRewriter(CorProfiler* corProfiler) : m_corProfiler(corProfiler)
+    {
+    }
+
+    virtual HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler,
+                            ICorProfilerFunctionControl* pFunctionControl) = 0;
+
+    virtual ~MethodRewriter() = default;
 };
 
 
-class TracerMethodRewriter : public MethodRewriter, public Singleton<TracerMethodRewriter>
+class TracerMethodRewriter : public MethodRewriter
 {
-    friend class Singleton<TracerMethodRewriter>;
-    
 private:
-    TracerMethodRewriter(){}
-    ILInstr* CreateFilterForException(ILRewriterWrapper* rewriter, mdTypeRef exceptionTypeRef,
-                                      mdTypeRef bubbleUpExceptionTypeRef, ULONG exceptionValueIndex) const;
+    static ILInstr* CreateFilterForException(ILRewriterWrapper* rewriter, mdTypeRef exceptionTypeRef,
+                                             mdTypeRef bubbleUpExceptionTypeRef, ULONG exceptionValueIndex);
 
 public:
-    HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler) override;
+    explicit TracerMethodRewriter(CorProfiler* corProfiler) : MethodRewriter(corProfiler)
+    {
+    }
+
+    HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler,
+                    ICorProfilerFunctionControl* pFunctionControl) override;
 };
 
 } // namespace trace

@@ -77,4 +77,52 @@ public class NServiceBusTests : TestHelper
             process?.Kill();
         }
     }
+
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [MemberData(nameof(LibraryVersion.NServiceBus), MemberType = typeof(LibraryVersion))]
+    public void SubmitsTracesAndMetricsWithSharedCallTarget(string packageVersion)
+    {
+        using var spans = new MockSpansCollector(Output);
+        using var metrics = new MockMetricsCollector(Output);
+        SetExporter(spans);
+        SetExporter(metrics);
+        SetFileBasedExporter(spans);
+        SetFileBasedExporter(metrics);
+
+        spans.Expect("NServiceBus.Core");
+#if NET
+        if (string.IsNullOrEmpty(packageVersion) || Version.Parse(packageVersion) >= new Version(9, 1))
+        {
+            metrics.Expect("NServiceBus.Core.Pipeline.Incoming");
+        }
+        else
+        {
+            metrics.Expect("NServiceBus.Core");
+        }
+#else
+        metrics.Expect("NServiceBus.Core");
+#endif
+
+        SetEnvironmentVariable("LONG_RUNNING", "true");
+        SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "100");
+
+        using var process = StartTestApplication(new TestSettings
+        {
+#if NET462
+            Framework = "net472",
+#endif
+            PackageVersion = packageVersion
+        });
+
+        try
+        {
+            spans.AssertExpectations();
+            metrics.AssertExpectations();
+        }
+        finally
+        {
+            process?.Kill();
+        }
+    }
 }

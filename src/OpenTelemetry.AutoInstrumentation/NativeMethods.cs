@@ -12,6 +12,18 @@ internal static class NativeMethods
 {
     private static readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
+    public static int RegisterCallTargetDefinitions(string id, NativeCallTargetDefinition2[] methodArrays, uint enabledCategories)
+    {
+        if (methodArrays is null || methodArrays.Length == 0)
+        {
+            return 0;
+        }
+
+        return IsWindows
+            ? Windows.RegisterCallTargetDefinitions(id, methodArrays, methodArrays.Length, enabledCategories)
+            : NonWindows.RegisterCallTargetDefinitions(id, methodArrays, methodArrays.Length, enabledCategories);
+    }
+
     public static void AddInstrumentations(string id, NativeCallTargetDefinition[] methodArrays)
     {
         if (methodArrays is null || methodArrays.Length == 0)
@@ -242,6 +254,10 @@ internal static class NativeMethods
     {
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern int RegisterCallTargetDefinitions([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition2[] methodArrays, int size, uint enabledCategories);
+
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void AddInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
@@ -303,6 +319,10 @@ internal static class NativeMethods
     // assume .NET Core if not running on Windows
     private static class NonWindows
     {
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern int RegisterCallTargetDefinitions([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition2[] methodArrays, int size, uint enabledCategories);
+
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void AddInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);

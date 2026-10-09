@@ -830,16 +830,16 @@ internal class IntegrationMapper
         ilWriter.Emit(OpCodes.Newobj, proxyTypeCtor);
     }
 
-    private static TTo UnwrapReturnValue<TFrom, TTo>(TFrom returnValue)
+    private static TTo? UnwrapReturnValue<TFrom, TTo>(TFrom returnValue)
         where TFrom : IDuckType
     {
-        return (TTo)returnValue.Instance;
+        return (TTo?)returnValue.Instance;
     }
 
-    private static async Task<TTo> UnwrapTaskReturnValue<TFrom, TTo>(Task<TFrom> returnValue, bool preserveContext)
+    private static async Task<TTo?> UnwrapTaskReturnValue<TFrom, TTo>(Task<TFrom> returnValue, bool preserveContext)
         where TFrom : IDuckType
     {
-        return (TTo)(await returnValue.ConfigureAwait(preserveContext)).Instance;
+        return (TTo?)(await returnValue.ConfigureAwait(preserveContext)).Instance;
     }
 
     private static void WriteIntValue(ILGenerator il, int value)

@@ -14,9 +14,10 @@ namespace trace
 
 // RejitPreprocessor
 template <class RejitRequestDefinition>
-RejitPreprocessor<RejitRequestDefinition>::RejitPreprocessor(std::shared_ptr<RejitHandler>       rejit_handler,
+RejitPreprocessor<RejitRequestDefinition>::RejitPreprocessor(CorProfiler*                        corProfiler,
+                                                             std::shared_ptr<RejitHandler>       rejit_handler,
                                                              std::shared_ptr<RejitWorkOffloader> work_offloader)
-    : m_rejit_handler(std::move(rejit_handler)), m_work_offloader(std::move(work_offloader))
+    : m_corProfiler(corProfiler), m_rejit_handler(std::move(rejit_handler)), m_work_offloader(std::move(work_offloader))
 {
 }
 
@@ -62,18 +63,19 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
     auto corProfilerInfo      = m_rejit_handler->GetCorProfilerInfo();
     auto pCorAssemblyProperty = m_rejit_handler->GetCorAssemblyProperty();
 
-    auto enumIterator = enumMethods.begin();
-    auto combinedEnd  = iterate_explicit_interface_methods ? enumExplicitInterfaceMethods.end() : enumMethods.end();
-    for (; enumIterator != combinedEnd; enumIterator = ++enumIterator)
+    auto enumIterator = iterate_explicit_interface_methods ? enumExplicitInterfaceMethods.begin() : enumMethods.begin();
+    auto iteratorEnd  = enumMethods.end();
+    auto explicitMode = iterate_explicit_interface_methods;
+    for (; enumIterator != iteratorEnd; enumIterator = ++enumIterator)
     {
-        // When interface methods are being iterated and we reach the end of the regular method search,
-        // switch over to the explicit interface method search
-        if (iterate_explicit_interface_methods && !(enumIterator != enumMethods.end()))
+        // The runtime chooses an explicit implementation before a same-named regular method.
+        if (iterate_explicit_interface_methods && !(enumIterator != enumExplicitInterfaceMethods.end()))
         {
-            enumIterator = enumExplicitInterfaceMethods.begin();
+            enumIterator = enumMethods.begin();
+            explicitMode = false;
 
             // Immediately exit if the second enumerator has 0 entries
-            if (!(enumIterator != combinedEnd))
+            if (!(enumIterator != iteratorEnd))
             {
                 break;
             }
@@ -85,7 +87,7 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         const auto caller = GetFunctionInfo(metadataImport, methodDef);
         if (!caller.IsValid())
         {
-            Logger::Warn("    * The caller for the methoddef: ", TokenStr(&methodDef), " is not valid!");
+            Logger::Warn("    * Skipping ", TokenStr(&methodDef), ": the methoddef is not valid!");
             continue;
         }
 
@@ -95,7 +97,8 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         auto hr           = functionInfo.method_signature.TryParse();
         if (FAILED(hr))
         {
-            Logger::Warn("    * The method signature: ", functionInfo.method_signature.str(), " cannot be parsed.");
+            Logger::Warn("    * Skipping ", functionInfo.method_signature.str(),
+                         ": the method signature cannot be parsed.");
             continue;
         }
 
@@ -124,8 +127,8 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
             // instrumentation target
             if (numOfArgs != target_method.signature_types.size() - 1)
             {
-                Logger::Debug("    * The caller for the methoddef: ", caller.name,
-                              " doesn't have the right number of arguments (", numOfArgs, " arguments).");
+                Logger::Info("    * Skipping ", caller.type.name, ".", caller.name,
+                             ": the methoddef doesn't have the right number of arguments (", numOfArgs, " arguments).");
                 continue;
             }
 
@@ -147,8 +150,8 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
             }
             if (argumentsMismatch)
             {
-                Logger::Debug("    * The caller for the methoddef: ", target_method.method_name,
-                              " doesn't have the right type of arguments.");
+                Logger::Info("    * Skipping ", target_method.method_name,
+                             ": the methoddef doesn't have the right type of arguments.");
                 continue;
             }
         }
@@ -169,8 +172,8 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
                 new ModuleMetadata(metadataImport, metadataEmit, assemblyImport, assemblyEmit, moduleInfo.assembly.name,
                                    moduleInfo.assembly.app_domain_id, pCorAssemblyProperty);
 
-            Logger::Info("ReJIT handler stored metadata for ", moduleInfo.id, " ", moduleInfo.assembly.name,
-                         " AppDomain ", moduleInfo.assembly.app_domain_id, " ", moduleInfo.assembly.app_domain_name);
+            Logger::Debug("ReJIT handler stored metadata for ", moduleInfo.id, " ", moduleInfo.assembly.name,
+                          " AppDomain ", moduleInfo.assembly.app_domain_id, " ", moduleInfo.assembly.app_domain_name);
 
             moduleHandler->SetModuleMetadata(moduleMetadata);
         }
@@ -185,10 +188,20 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         vtModules.push_back(moduleInfo.id);
         vtMethodDefs.push_back(methodDef);
 
+        Logger::Info("Method enqueued for ReJIT for ", target_method.type.name, ".", target_method.method_name, "(",
+                     (target_method.signature_types.size() - 1), " params).");
+
         Logger::Debug("    * Enqueue for ReJIT [ModuleId=", moduleInfo.id, ", MethodDef=", TokenStr(&methodDef),
                       ", AppDomainId=", moduleHandler->GetModuleMetadata()->app_domain_id,
                       ", Assembly=", moduleHandler->GetModuleMetadata()->assemblyName, ", Type=", caller.type.name,
                       ", Method=", caller.name, "(", numOfArgs, " params), Signature=", caller.signature.str(), "]");
+
+        if (explicitMode)
+        {
+            Logger::Debug("    * Explicit interface implementation found, skipping regular methods for ",
+                          caller.type.name, ".", caller.name);
+            break;
+        }
     }
 }
 
@@ -228,6 +241,11 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
 
         for (const RejitRequestDefinition& definition : definitions)
         {
+            if (!GetIsEnabled(definition))
+            {
+                continue;
+            }
+
             const auto target_method = GetTargetMethod(definition);
             const auto is_derived    = GetIsDerived(definition);
             const auto is_interface  = GetIsInterface(definition);
@@ -579,13 +597,19 @@ const bool TracerRejitPreprocessor::GetIsExactSignatureMatch(const IntegrationDe
     return integrationDefinition.is_exact_signature_match;
 }
 
+const bool TracerRejitPreprocessor::GetIsEnabled(const IntegrationDefinition& integrationDefinition)
+{
+    return integrationDefinition.GetEnabled();
+}
+
 const std::unique_ptr<RejitHandlerModuleMethod> TracerRejitPreprocessor::CreateMethod(
     const mdMethodDef            methodDef,
     RejitHandlerModule*          module,
     const FunctionInfo&          functionInfo,
     const IntegrationDefinition& integrationDefinition)
 {
-    return std::make_unique<TracerRejitHandlerModuleMethod>(methodDef, module, functionInfo, integrationDefinition);
+    return std::make_unique<TracerRejitHandlerModuleMethod>(methodDef, module, functionInfo, integrationDefinition,
+                                                            std::make_unique<TracerMethodRewriter>(m_corProfiler));
 }
 
 template class RejitPreprocessor<IntegrationDefinition>;

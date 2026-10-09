@@ -3,3 +3,10 @@ OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetBubbleUpException.CallTar
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetBubbleUpException.CallTargetBubbleUpException(string! message) -> void
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetBubbleUpException.CallTargetBubbleUpException(string! message, System.Exception! innerException) -> void
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetBubbleUpException.CallTargetBubbleUpException(System.Runtime.Serialization.SerializationInfo! info, System.Runtime.Serialization.StreamingContext context) -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Instance.get -> object?
+*REMOVED*OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Instance.get -> object!
+OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>
+OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.ValueWithType() -> void
+readonly OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Value -> TProxy?
+readonly OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Type -> System.Type!
+static OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Create(TProxy? value, System.Type! type) -> OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>

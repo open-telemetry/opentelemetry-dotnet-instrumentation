@@ -13,12 +13,13 @@ namespace trace
 // RejitHandlerModuleMethod
 //
 
-RejitHandlerModuleMethod::RejitHandlerModuleMethod(mdMethodDef         methodDef,
-                                                   RejitHandlerModule* module,
-                                                   const FunctionInfo& functionInfo)
-    : m_methodDef(methodDef)
+RejitHandlerModuleMethod::RejitHandlerModuleMethod(mdMethodDef                     methodDef,
+                                                   RejitHandlerModule*             module,
+                                                   const FunctionInfo&             functionInfo,
+                                                   std::unique_ptr<MethodRewriter> methodRewriter)
+    : m_methodRewriter(std::move(methodRewriter))
+    , m_methodDef(methodDef)
     , m_module(module)
-    , m_pFunctionControl(nullptr)
     , m_functionInfo(std::make_unique<FunctionInfo>(functionInfo))
 {
 }
@@ -31,16 +32,6 @@ mdMethodDef RejitHandlerModuleMethod::GetMethodDef()
 RejitHandlerModule* RejitHandlerModuleMethod::GetModule()
 {
     return m_module;
-}
-
-ICorProfilerFunctionControl* RejitHandlerModuleMethod::GetFunctionControl()
-{
-    return m_pFunctionControl;
-}
-
-void RejitHandlerModuleMethod::SetFunctionControl(ICorProfilerFunctionControl* pFunctionControl)
-{
-    m_pFunctionControl = pFunctionControl;
 }
 
 FunctionInfo* RejitHandlerModuleMethod::GetFunctionInfo()
@@ -59,8 +50,11 @@ bool RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
     ModuleID    currentModuleId  = m_module->GetModuleId();
     mdMethodDef currentMethodDef = m_methodDef;
 
+#ifdef _DEBUG
+    // This callback can run hundreds of times and is rarely useful in release logs.
     Logger::Debug("RejitHandlerModuleMethod::RequestRejitForInlinersInModule for ", "[ModuleInliner=", moduleId,
                   ", ModuleId=", currentModuleId, ", MethodDef=", currentMethodDef, "]");
+#endif
 
     RejitHandler*      handler = m_module->GetHandler();
     ICorProfilerInfo7* pInfo   = handler->GetCorProfilerInfo();
@@ -132,15 +126,21 @@ bool RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
     return false;
 }
 
+MethodRewriter* RejitHandlerModuleMethod::GetMethodRewriter()
+{
+    return m_methodRewriter.get();
+}
+
 //
 // TracerRejitHandlerModuleMethod
 //
 
-TracerRejitHandlerModuleMethod::TracerRejitHandlerModuleMethod(mdMethodDef                  methodDef,
-                                                               RejitHandlerModule*          module,
-                                                               const FunctionInfo&          functionInfo,
-                                                               const IntegrationDefinition& integrationDefinition)
-    : RejitHandlerModuleMethod(methodDef, module, functionInfo)
+TracerRejitHandlerModuleMethod::TracerRejitHandlerModuleMethod(mdMethodDef                     methodDef,
+                                                               RejitHandlerModule*             module,
+                                                               const FunctionInfo&             functionInfo,
+                                                               const IntegrationDefinition&    integrationDefinition,
+                                                               std::unique_ptr<MethodRewriter> methodRewriter)
+    : RejitHandlerModuleMethod(methodDef, module, functionInfo, std::move(methodRewriter))
     , m_integrationDefinition(std::make_unique<IntegrationDefinition>(integrationDefinition))
 {
 }
@@ -148,11 +148,6 @@ TracerRejitHandlerModuleMethod::TracerRejitHandlerModuleMethod(mdMethodDef      
 IntegrationDefinition* TracerRejitHandlerModuleMethod::GetIntegrationDefinition()
 {
     return m_integrationDefinition.get();
-}
-
-MethodRewriter* TracerRejitHandlerModuleMethod::GetMethodRewriter()
-{
-    return TracerMethodRewriter::Instance();
 }
 
 //
@@ -478,8 +473,6 @@ HRESULT RejitHandler::NotifyReJITParameters(ModuleID                     moduleI
         return S_FALSE;
     }
 
-    methodHandler->SetFunctionControl(pFunctionControl);
-
     if (methodHandler->GetMethodDef() == mdMethodDefNil)
     {
         Logger::Warn("NotifyReJITCompilationStarted: mdMethodDef is missing for "
@@ -488,7 +481,7 @@ HRESULT RejitHandler::NotifyReJITParameters(ModuleID                     moduleI
         return S_FALSE;
     }
 
-    if (methodHandler->GetFunctionControl() == nullptr)
+    if (pFunctionControl == nullptr)
     {
         Logger::Warn("NotifyReJITCompilationStarted: ICorProfilerFunctionControl is missing "
                      "for "
@@ -531,7 +524,7 @@ HRESULT RejitHandler::NotifyReJITParameters(ModuleID                     moduleI
         return S_FALSE;
     }
 
-    return rewriter->Rewrite(moduleHandler, methodHandler);
+    return rewriter->Rewrite(moduleHandler, methodHandler, pFunctionControl);
 }
 
 HRESULT RejitHandler::NotifyReJITCompilationStarted(FunctionID functionId, ReJITID rejitId)
