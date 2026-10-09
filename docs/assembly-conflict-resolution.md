@@ -160,13 +160,13 @@ controlled by a version map compiled into the native profiler (see
 and
 [`assembly_redirection_netfx.h`](../src/OpenTelemetry.AutoInstrumentation.Native/assembly_redirection_netfx.h)).
 
-On .NET 10 and later, the profiler also rewrites assembly qualifiers of type
-names stored in `UnsafeAccessorType` attributes, including qualifiers nested in
-generic arguments, when those assemblies appear in the same version map. It
-considers only parameter and return-value attributes whose declaring method
-also has `UnsafeAccessor`, because that pairing is what gives
-`UnsafeAccessorType` its native-reflection meaning. A missing or lower `Version`
-is raised to the mapped version; an equal or higher version is preserved.
+On .NET 10 and later, the profiler also redirects assembly-qualified type names
+stored in `UnsafeAccessorTypeAttribute` metadata when those assemblies appear
+in the same version map. It considers only parameter and return-value attributes
+whose declaring method also has `UnsafeAccessorAttribute`, because that pairing
+is what gives `UnsafeAccessorTypeAttribute` its native-reflection meaning. A
+missing or lower `Version` is raised to the mapped version; an equal or higher
+version is preserved.
 
 > **NOTE**: On .NET, the instrumentation ships the baseline versions of its
 > dependencies for each target framework (for example, for `net8.0` the
@@ -374,11 +374,13 @@ This can happen in the following scenarios:
   `AssemblyLoadContext.Default.LoadFromAssemblyPath` or `Assembly.LoadFrom`
   to load an assembly into the Default ALC.
 
-- **StartupHook-only: `UnsafeAccessorType` reflection (.NET 10+)**: Code uses
-  `UnsafeAccessorType` attributes in assemblies loaded in the Default ALC;
-  in this case, types bind to the requesting assembly's load context.
-  Once the runtime resolves a type for an `UnsafeAccessor` method in the
-  Default ALC, it cannot interact with a different version loaded elsewhere.
+- **StartupHook-only: `UnsafeAccessorTypeAttribute` reflection (.NET 10+)**:
+  Code uses `UnsafeAccessorTypeAttribute` metadata in assemblies loaded in the
+  Default ALC; in this case, types bind to the requesting assembly's load
+  context.
+  Once the runtime resolves a type for a method annotated with
+  `UnsafeAccessorAttribute` in the Default ALC, it cannot interact with a
+  different version loaded elsewhere.
   StartupHook-only deployment cannot rewrite this metadata because the native
   profiler is not attached.
 
@@ -426,13 +428,16 @@ architectures.
 
 ### Native profiler: conflicting version ordering
 
-The native profiler establishes redirection targets as modules load. This
-applies to both `AssemblyRef` entries and assembly-qualified type names in
-`UnsafeAccessorType` attributes. Once metadata has been rewritten to a target
-version, a later request for a **higher** version cannot change that target
-retroactively. The profiler leaves the later request unchanged and logs the
-conflict. Runtime assembly resolution may still satisfy the request, for
-example when the higher version is available in the TPA list.
+The native profiler establishes `AssemblyRef` redirection targets as modules
+load. Once an `AssemblyRef` has been rewritten to a target version, a later
+request for a **higher** version cannot change that target retroactively. The
+profiler leaves the later request unchanged and logs the conflict. Runtime
+assembly resolution may still satisfy the request, for example when the higher
+version is available in the TPA list.
+
+`UnsafeAccessorTypeAttribute` metadata is redirected only when its assembly
+qualifier has a missing or lower version; equal or higher versions are left
+unchanged.
 
 ### Unexpected resolution request for a higher version than available
 
