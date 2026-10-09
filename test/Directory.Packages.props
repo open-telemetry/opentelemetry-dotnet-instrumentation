@@ -45,7 +45,7 @@
     <PackageVersion Include="Oracle.ManagedDataAccess" Version="23.26.301" />
     <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.26.301" />
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
-    <PackageVersion Include="Quartz" Version="4.3.0" />
+    <PackageVersion Include="Quartz" Version="4.4.0" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.22.4" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.22.4" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
@@ -66,7 +66,7 @@
     <PackageVersion Include="System.ServiceModel.Primitives" Version="10.0.652802" />
     <PackageVersion Include="System.Text.Json" Version="10.0.12" />
     <PackageVersion Include="System.ValueTuple" Version="4.6.2" />
-    <PackageVersion Include="Testcontainers" Version="4.15.0" />
+    <PackageVersion Include="Testcontainers" Version="4.16.0" />
     <PackageVersion Include="Verify.Xunit" Version="31.12.5" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
