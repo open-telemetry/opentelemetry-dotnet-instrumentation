@@ -43,6 +43,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   startup, including in .NET Framework applications hosted in IIS.
 - Invalid plugin type names no longer stop automatic instrumentation or crash
   .NET Framework applications unless fail-fast is enabled.
+- Redirect outer assembly-qualified type names in `UnsafeAccessorType`
+  attributes when native profiler assembly redirection is enabled on .NET 10
+  and later.
 
 ## [v1.17.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.17.0)
 
@@ -133,9 +136,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   version `3.3.0`+ for .NET only.
 - Handle YAML null values consistently in file-based configuration and
   distinguish them from quoted empty strings.
-- Redirect outer assembly-qualified type names in `UnsafeAccessorType`
-  attributes when native profiler assembly redirection is enabled on .NET 10
-  and later.
 - Allow an empty `opamp/development` section in file-based configuration to
   enable the OpAMP client with default settings.
 - Prevent the shell installer from using a predictable path for temporary
