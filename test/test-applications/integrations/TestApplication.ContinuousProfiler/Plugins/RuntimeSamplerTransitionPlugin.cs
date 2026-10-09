@@ -31,18 +31,24 @@ public class RuntimeSamplerTransitionPlugin : BasePlugin, IContinuousProfilerPlu
     public ContinuousProfilerConfiguration GetFirstContinuousProfilerConfiguration()
     {
         var threadSamplingInterval = 500u;
+        const bool threadSamplingEnabled = false;
+#if NET
+        const uint maxMemorySamplesPerMinute = 6000;
+#else
+        const uint maxMemorySamplesPerMinute = 0;
+#endif
 
         return new ContinuousProfilerConfiguration
         {
-            ThreadSamplingEnabled = true,
+            ThreadSamplingEnabled = threadSamplingEnabled,
             ThreadSamplingInterval = threadSamplingInterval,
-            // Seed CPU sampling keeps the legacy managed exporter available. The test-only snapshot activates
-            // allocation sampling so its EventPipe lifecycle is exercised by the dynamic path.
+            // Non-zero disabled settings prepare both managed pipelines before the ControlPlane snapshot enables
+            // their native producers.
             AllocationSamplingEnabled = false,
-            MaxMemorySamplesPerMinute = 0,
+            MaxMemorySamplesPerMinute = maxMemorySamplesPerMinute,
             ExportInterval = TimeSpan.FromMilliseconds(250),
             ExportTimeout = TimeSpan.FromMilliseconds(5000),
-            Exporter = new OtlpOverHttpExporter(TimeSpan.FromMilliseconds(threadSamplingInterval), new SampleNativeFormatParser())
+            Exporter = new OtlpOverHttpExporter(new SampleNativeFormatParser())
         };
     }
 }

@@ -4,7 +4,7 @@ OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling.ContinuousProfil
 OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling.ContinuousProfilerConfiguration.ContinuousProfilerConfiguration() -> void
 OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling.IContinuousProfilerExporter
 OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling.IContinuousProfilerExporter.ExportAllocationSamples(byte[]! buffer, int read, System.Threading.CancellationToken cancellationToken) -> void
-OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling.IContinuousProfilerExporter.ExportThreadSamples(byte[]! buffer, int read, System.Threading.CancellationToken cancellationToken) -> void
+OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling.IContinuousProfilerExporter.ExportThreadSamples(byte[]! buffer, int read, uint samplingInterval, System.Threading.CancellationToken cancellationToken) -> void
 OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling.IContinuousProfilerPlugin
 OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling.IContinuousProfilerPlugin.GetFirstContinuousProfilerConfiguration() -> OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling.ContinuousProfilerConfiguration!
 OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling.ContinuousProfilerConfiguration.Exporter.get -> OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling.IContinuousProfilerExporter?
