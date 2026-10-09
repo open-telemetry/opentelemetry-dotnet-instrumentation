@@ -15,7 +15,6 @@
 #include <vector>
 
 #include "ascii_string_utils.h"
-#include "logger.h"
 #include "string_utils.h"
 #include "type_name_assembly_reference_parser.h"
 
@@ -83,15 +82,14 @@ bool TryRewriteTypeNameAssemblyRedirections(const std::string_view              
         return false;
     }
 
-    using RedirectIterator = decltype(assembly_redirects.begin());
-    struct ResolvedReference
+    struct Edit
     {
-        const ParsedAssemblyReference* reference;
-        RedirectIterator               redirect;
-        ASSEMBLYMETADATA               parsed_version{};
+        size_t      begin;
+        size_t      end;
+        std::string value;
+        WSTRING     assembly_name;
     };
-    std::vector<ResolvedReference> resolved_references;
-    resolved_references.reserve(references.size());
+    std::vector<Edit> edits;
     for (const auto& reference : references)
     {
         ASSEMBLYMETADATA parsed_version{};
@@ -109,88 +107,26 @@ bool TryRewriteTypeNameAssemblyRedirections(const std::string_view              
         }
         if (redirect != assembly_redirects.end())
         {
-            resolved_references.push_back({&reference, redirect, parsed_version});
-        }
-    }
-
-    // First establish the final target for every assembly. Delay committing a raised target until every reference in
-    // this attribute has been considered, so repeated references use the highest requested version consistently.
-    std::vector<RedirectIterator> raised_redirects;
-    for (const auto& resolved_reference : resolved_references)
-    {
-        const auto& reference = *resolved_reference.reference;
-        const auto  redirect  = resolved_reference.redirect;
-        if (!reference.version_span)
-        {
-            continue;
-        }
-
-        const auto version_comparison = redirect->second.CompareToAssemblyVersion(resolved_reference.parsed_version);
-        if (version_comparison >= 0)
-        {
-            continue;
-        }
-
-        // Never lower a requested version. Before any redirect is committed, let this higher request raise the shared
-        // target; afterward, changing it could disagree with metadata already rewritten.
-        if (redirect->second.ulRedirectionCount == 0)
-        {
-            Logger::Info("UnsafeAccessorTypeAttributeUpdater: redirection update for [", redirect->first,
-                         "] to_version=", AssemblyVersionStr(resolved_reference.parsed_version),
-                         " previous_version_redirection=", redirect->second.VersionStr());
-            redirect->second.usMajorVersion   = resolved_reference.parsed_version.usMajorVersion;
-            redirect->second.usMinorVersion   = resolved_reference.parsed_version.usMinorVersion;
-            redirect->second.usBuildNumber    = resolved_reference.parsed_version.usBuildNumber;
-            redirect->second.usRevisionNumber = resolved_reference.parsed_version.usRevisionNumber;
-            if (std::find(raised_redirects.begin(), raised_redirects.end(), redirect) == raised_redirects.end())
+            if (reference.version_span && redirect->second.CompareToAssemblyVersion(parsed_version) <= 0)
             {
-                raised_redirects.push_back(redirect);
+                // Preserve equal or higher requests. In particular, do not redirect a higher application request
+                // downward to the profiler's configured version.
+                continue;
             }
-        }
-        else
-        {
-            // Match AssemblyRef redirection: once an earlier reference has fixed the target, never lower a later
-            // higher request. Leave it unchanged and let the runtime handle the incompatible versions.
-            Logger::Error("UnsafeAccessorTypeAttributeUpdater: assembly [", redirect->first,
-                          "] version=", AssemblyVersionStr(resolved_reference.parsed_version),
-                          " is higher than an earlier applied redirection to version=", redirect->second.VersionStr());
-        }
-    }
-    for (const auto redirect : raised_redirects)
-    {
-        // As with AssemblyRef redirection, an unchanged higher reference commits the promoted target even when this
-        // function has no lower qualifier to rewrite.
-        redirect->second.ulRedirectionCount++;
-    }
 
-    struct Edit
-    {
-        size_t      begin;
-        size_t      end;
-        std::string value;
-        WSTRING     assembly_name;
-    };
-    std::vector<Edit> edits;
-    for (const auto& resolved_reference : resolved_references)
-    {
-        const auto& reference = *resolved_reference.reference;
-        const auto  redirect  = resolved_reference.redirect;
-        if (reference.version_span && redirect->second.CompareToAssemblyVersion(resolved_reference.parsed_version) <= 0)
-        {
-            continue;
-        }
-
-        const auto target_version = ToString(redirect->second.VersionStr());
-        if (!reference.version_span)
-        {
-            // An explicit version prevents a lower TPA copy from binding before the managed resolver can participate.
-            edits.push_back({reference.insert_version_at, reference.insert_version_at, ", Version=" + target_version,
-                             redirect->first});
-        }
-        else
-        {
-            edits.push_back(
-                {reference.version_span->begin, reference.version_span->end, target_version, redirect->first});
+            const auto target_version = ToString(redirect->second.VersionStr());
+            if (!reference.version_span)
+            {
+                // An explicit version prevents a lower TPA copy from binding before the managed resolver can
+                // participate.
+                edits.push_back({reference.insert_version_at, reference.insert_version_at,
+                                 ", Version=" + target_version, redirect->first});
+            }
+            else
+            {
+                edits.push_back(
+                    {reference.version_span->begin, reference.version_span->end, target_version, redirect->first});
+            }
         }
     }
 

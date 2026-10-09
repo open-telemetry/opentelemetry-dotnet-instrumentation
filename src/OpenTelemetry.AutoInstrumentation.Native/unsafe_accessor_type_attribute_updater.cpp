@@ -178,8 +178,8 @@ void UpdateUnsafeAccessorTypeAttributes(const ModuleMetadata&                   
             const auto redirect = assembly_redirects.find(redirected_assembly_name);
             if (redirect != assembly_redirects.end())
             {
-                // Commit state only after metadata mutation succeeds; later higher requests must know a previous
-                // reference has already been rewritten.
+                // Record only metadata that was actually changed, so the shared map cannot later select a different
+                // target than the version already written into this attribute.
                 redirect->second.ulRedirectionCount++;
             }
         }

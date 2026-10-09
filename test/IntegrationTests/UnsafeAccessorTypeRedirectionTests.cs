@@ -17,7 +17,7 @@ public class UnsafeAccessorTypeRedirectionTests(ITestOutputHelper output)
     : TestHelper("UnsafeAccessorTypeRedirection", output)
 {
     /// <summary>
-    /// Verifies that the native profiler adds a missing version, promotes a lower version, and preserves equal or
+    /// Verifies that the native profiler adds a missing version, rewrites a lower version, and preserves equal or
     /// higher versions in complete unsafe-accessor declarations.
     /// </summary>
     /// <param name="assemblyName">The assembly name embedded in the attribute.</param>
