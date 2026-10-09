@@ -1,7 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using NSubstitute;
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
+using OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.ContinuousProfiler;
 
@@ -10,37 +12,34 @@ public class ManagedProfilerLifecycleTests
     [Fact]
     public void ValidDisabledConfigurationPreparesPipeline()
     {
-        var exportConfigurationValid = ContinuousProfilerManager.IsExportConfigurationValid(
-            TimeSpan.FromSeconds(1),
-            TimeSpan.FromSeconds(1),
-            true);
-        var configuration = ContinuousProfilerManager.GetEffectiveSamplingConfiguration(
-            false,
-            100,
-            exportConfigurationValid);
+        var configuration = CreateContinuousConfiguration();
+        var plan = ContinuousProfilerManager.EvaluateConfiguration(configuration, null);
 
-        Assert.False(configuration.Enabled);
-        Assert.True(configuration.Prepared);
+        Assert.NotNull(plan);
+        Assert.False(plan.Seed.AnyFeatureEnabled);
+        Assert.True(plan.CpuExportPrepared);
+        Assert.True(plan.HasPreparedExports);
     }
 
     [Fact]
     public void AllocationSamplingPreparationIsPlatformAware()
     {
-        var exportConfigurationValid = ContinuousProfilerManager.IsExportConfigurationValid(
-            TimeSpan.FromSeconds(1),
-            TimeSpan.FromSeconds(1),
-            true);
-        var configuration = ContinuousProfilerManager.GetEffectiveAllocationSamplingConfiguration(
-            true,
-            100,
-            exportConfigurationValid);
+        var configuration = CreateContinuousConfiguration();
+        configuration.ThreadSamplingInterval = 0;
+        configuration.AllocationSamplingEnabled = true;
+        configuration.MaxMemorySamplesPerMinute = 100;
+        var plan = ContinuousProfilerManager.EvaluateConfiguration(configuration, null);
+
+        Assert.NotNull(plan);
 
 #if NET
-        Assert.True(configuration.Enabled);
-        Assert.True(configuration.Prepared);
+        Assert.Equal(100u, plan.Seed.MaxAllocationSamplesPerMinute);
+        Assert.True(plan.AllocationExportPrepared);
+        Assert.True(plan.HasPreparedExports);
 #else
-        Assert.False(configuration.Enabled);
-        Assert.False(configuration.Prepared);
+        Assert.Equal(0u, plan.Seed.MaxAllocationSamplesPerMinute);
+        Assert.False(plan.AllocationExportPrepared);
+        Assert.False(plan.HasPreparedExports);
 #endif
     }
 
@@ -55,17 +54,22 @@ public class ManagedProfilerLifecycleTests
         int exportTimeoutMilliseconds,
         bool exporterConfigured)
     {
-        var exportConfigurationValid = ContinuousProfilerManager.IsExportConfigurationValid(
-            TimeSpan.FromMilliseconds(exportIntervalMilliseconds),
-            TimeSpan.FromMilliseconds(exportTimeoutMilliseconds),
-            exporterConfigured);
-        var configuration = ContinuousProfilerManager.GetEffectiveSamplingConfiguration(
-            true,
-            samplingInterval,
-            exportConfigurationValid);
+        var configuration = CreateContinuousConfiguration();
+        configuration.ThreadSamplingEnabled = true;
+        configuration.ThreadSamplingInterval = samplingInterval;
+        configuration.ExportInterval = TimeSpan.FromMilliseconds(exportIntervalMilliseconds);
+        configuration.ExportTimeout = TimeSpan.FromMilliseconds(exportTimeoutMilliseconds);
+        if (!exporterConfigured)
+        {
+            configuration.Exporter = null;
+        }
 
-        Assert.False(configuration.Enabled);
-        Assert.False(configuration.Prepared);
+        var plan = ContinuousProfilerManager.EvaluateConfiguration(configuration, null);
+
+        Assert.NotNull(plan);
+        Assert.False(plan.Seed.AnyFeatureEnabled);
+        Assert.False(plan.CpuExportPrepared);
+        Assert.False(plan.HasPreparedExports);
     }
 
     [Fact]
@@ -300,6 +304,17 @@ public class ManagedProfilerLifecycleTests
 
         Assert.True(activeExported.Wait(TimeSpan.FromSeconds(2)));
         Assert.Equal(0, Volatile.Read(ref preparedReadCount));
+    }
+
+    private static ContinuousProfilerConfiguration CreateContinuousConfiguration()
+    {
+        return new ContinuousProfilerConfiguration
+        {
+            ThreadSamplingInterval = 100,
+            ExportInterval = TimeSpan.FromSeconds(1),
+            ExportTimeout = TimeSpan.FromSeconds(1),
+            Exporter = Substitute.For<IContinuousProfilerExporter>()
+        };
     }
 
     private static BufferProcessor CreateBufferProcessor(ManualResetEventSlim readAttempted)
