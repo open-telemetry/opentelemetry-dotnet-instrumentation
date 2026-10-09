@@ -65,18 +65,22 @@ internal sealed class ContinuousProfilerManager : IDisposable
 #endif
     }
 
-    internal static (bool Enabled, bool Prepared) GetEffectiveSamplingConfiguration(
-        bool enabled,
-        uint samplingInterval,
+    internal static bool IsExportConfigurationValid(
         TimeSpan exportInterval,
         TimeSpan exportTimeout,
         bool exporterConfigured)
     {
-        var prepared =
-            samplingInterval != 0 &&
-            exportInterval > TimeSpan.Zero &&
-            exportTimeout > TimeSpan.Zero &&
-            exporterConfigured;
+        return exportInterval > TimeSpan.Zero &&
+               exportTimeout > TimeSpan.Zero &&
+               exporterConfigured;
+    }
+
+    internal static (bool Enabled, bool Prepared) GetEffectiveSamplingConfiguration(
+        bool enabled,
+        uint samplingInterval,
+        bool exportConfigurationValid)
+    {
+        var prepared = exportConfigurationValid && samplingInterval != 0;
 
         return (enabled && prepared, prepared);
     }
@@ -84,17 +88,12 @@ internal sealed class ContinuousProfilerManager : IDisposable
     internal static (bool Enabled, bool Prepared) GetEffectiveAllocationSamplingConfiguration(
         bool enabled,
         uint maxMemorySamplesPerMinute,
-        TimeSpan exportInterval,
-        TimeSpan exportTimeout,
-        bool exporterConfigured)
+        bool exportConfigurationValid)
     {
 #if NET
-        return GetEffectiveSamplingConfiguration(
-            enabled,
-            maxMemorySamplesPerMinute,
-            exportInterval,
-            exportTimeout,
-            exporterConfigured);
+        var prepared = exportConfigurationValid && maxMemorySamplesPerMinute != 0;
+
+        return (enabled && prepared, prepared);
 #else
         return (false, false);
 #endif
@@ -152,18 +151,18 @@ internal sealed class ContinuousProfilerManager : IDisposable
         var config = pluginManager.GetFirstContinuousProfilerConfiguration();
         Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {config.ThreadSamplingEnabled}, thread sampling interval: {config.ThreadSamplingInterval}, allocation sampling enabled: {config.AllocationSamplingEnabled}, max memory samples per minute: {config.MaxMemorySamplesPerMinute}, export interval: {config.ExportInterval}, export timeout: {config.ExportTimeout}, continuous profiler exporter: {config.Exporter?.GetType()}");
 
+        var exportConfigurationValid = IsExportConfigurationValid(
+            config.ExportInterval,
+            config.ExportTimeout,
+            config.Exporter != null);
         var (cpuEnabledInSeed, cpuExportPrepared) = GetEffectiveSamplingConfiguration(
             config.ThreadSamplingEnabled,
             config.ThreadSamplingInterval,
-            config.ExportInterval,
-            config.ExportTimeout,
-            config.Exporter != null);
+            exportConfigurationValid);
         var (allocationEnabledInSeed, allocationExportPrepared) = GetEffectiveAllocationSamplingConfiguration(
             config.AllocationSamplingEnabled,
             config.MaxMemorySamplesPerMinute,
-            config.ExportInterval,
-            config.ExportTimeout,
-            config.Exporter != null);
+            exportConfigurationValid);
 
         if (config.ThreadSamplingEnabled && !cpuExportPrepared)
         {
@@ -185,12 +184,14 @@ internal sealed class ContinuousProfilerManager : IDisposable
         var selectiveSamplingConfig = pluginManager.GetFirstSelectiveSamplingConfiguration();
         if (selectiveSamplingConfig != null)
         {
-            (selectiveEnabledInSeed, selectiveExportPrepared) = GetEffectiveSamplingConfiguration(
-                true,
-                selectiveSamplingConfig.SamplingInterval,
+            var selectiveExportConfigurationValid = IsExportConfigurationValid(
                 selectiveSamplingConfig.ExportInterval,
                 selectiveSamplingConfig.ExportTimeout,
                 selectiveSamplingConfig.Exporter != null);
+            (selectiveEnabledInSeed, selectiveExportPrepared) = GetEffectiveSamplingConfiguration(
+                true,
+                selectiveSamplingConfig.SamplingInterval,
+                selectiveExportConfigurationValid);
 
             if (!selectiveExportPrepared)
             {

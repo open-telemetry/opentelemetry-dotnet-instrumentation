@@ -10,12 +10,14 @@ public class ManagedProfilerLifecycleTests
     [Fact]
     public void ValidDisabledConfigurationPreparesPipeline()
     {
-        var configuration = ContinuousProfilerManager.GetEffectiveSamplingConfiguration(
-            false,
-            100,
+        var exportConfigurationValid = ContinuousProfilerManager.IsExportConfigurationValid(
             TimeSpan.FromSeconds(1),
             TimeSpan.FromSeconds(1),
             true);
+        var configuration = ContinuousProfilerManager.GetEffectiveSamplingConfiguration(
+            false,
+            100,
+            exportConfigurationValid);
 
         Assert.False(configuration.Enabled);
         Assert.True(configuration.Prepared);
@@ -24,12 +26,14 @@ public class ManagedProfilerLifecycleTests
     [Fact]
     public void AllocationSamplingPreparationIsPlatformAware()
     {
-        var configuration = ContinuousProfilerManager.GetEffectiveAllocationSamplingConfiguration(
-            true,
-            100,
+        var exportConfigurationValid = ContinuousProfilerManager.IsExportConfigurationValid(
             TimeSpan.FromSeconds(1),
             TimeSpan.FromSeconds(1),
             true);
+        var configuration = ContinuousProfilerManager.GetEffectiveAllocationSamplingConfiguration(
+            true,
+            100,
+            exportConfigurationValid);
 
 #if NET
         Assert.True(configuration.Enabled);
@@ -51,12 +55,14 @@ public class ManagedProfilerLifecycleTests
         int exportTimeoutMilliseconds,
         bool exporterConfigured)
     {
-        var configuration = ContinuousProfilerManager.GetEffectiveSamplingConfiguration(
-            true,
-            samplingInterval,
+        var exportConfigurationValid = ContinuousProfilerManager.IsExportConfigurationValid(
             TimeSpan.FromMilliseconds(exportIntervalMilliseconds),
             TimeSpan.FromMilliseconds(exportTimeoutMilliseconds),
             exporterConfigured);
+        var configuration = ContinuousProfilerManager.GetEffectiveSamplingConfiguration(
+            true,
+            samplingInterval,
+            exportConfigurationValid);
 
         Assert.False(configuration.Enabled);
         Assert.False(configuration.Prepared);
