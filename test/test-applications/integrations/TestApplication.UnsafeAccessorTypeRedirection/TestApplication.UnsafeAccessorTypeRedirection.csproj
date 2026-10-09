@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+    <UnsafeAccessorAssemblyName Condition="'$(UnsafeAccessorAssemblyName)' == ''">Some.Assembly.Name</UnsafeAccessorAssemblyName>
+    <UnsafeAccessorComplete Condition="'$(UnsafeAccessorComplete)' == ''">true</UnsafeAccessorComplete>
+    <DefineConstants Condition="'$(UnsafeAccessorComplete)' == 'true'">$(DefineConstants);COMPLETE_UNSAFE_ACCESSOR</DefineConstants>
+    <!-- The incomplete variant intentionally declares an extern method without an implementation attribute. -->
+    <NoWarn Condition="'$(UnsafeAccessorComplete)' != 'true'">$(NoWarn);CS0626</NoWarn>
+  </PropertyGroup>
+
+  <Target Name="GenerateUnsafeAccessorBuildSettings" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <_UnsafeAccessorVersionSuffix Condition="'$(UnsafeAccessorAssemblyVersion)' != ''">, Version=$(UnsafeAccessorAssemblyVersion)</_UnsafeAccessorVersionSuffix>
+      <_UnsafeAccessorBuildSettingsFile>$(IntermediateOutputPath)UnsafeAccessorBuildSettings.g.cs</_UnsafeAccessorBuildSettingsFile>
+    </PropertyGroup>
+    <!-- Generate the compile-time constant required by UnsafeAccessorTypeAttribute from the test build properties. -->
+    <ItemGroup>
+      <_UnsafeAccessorBuildSettingsLine Include="// &lt;auto-generated /&gt;" />
+      <_UnsafeAccessorBuildSettingsLine Include="internal static class UnsafeAccessorBuildSettings" />
+      <_UnsafeAccessorBuildSettingsLine Include="{" />
+      <_UnsafeAccessorBuildSettingsLine Include="    internal const string TypeName = &quot;Some.Type, $(UnsafeAccessorAssemblyName)$(_UnsafeAccessorVersionSuffix)&quot;%3B" />
+      <_UnsafeAccessorBuildSettingsLine Include="}" />
+      <Compile Include="$(_UnsafeAccessorBuildSettingsFile)" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(_UnsafeAccessorBuildSettingsFile)" Lines="@(_UnsafeAccessorBuildSettingsLine)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+</Project>
