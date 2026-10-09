@@ -23,6 +23,10 @@ class ModuleMetadata;
 const size_t kNameMaxSize = 1024;
 const ULONG kEnumeratorMax = 256;
 
+// Runtime-async methods are marked with MethodImplOptions.Async. Keep the value local until the
+// vendored CoreCLR headers expose miAsync.
+constexpr DWORD kRuntimeAsyncMethodImplFlag = 0x2000;
+
 const auto SystemBoolean = WStr("System.Boolean");
 const auto SystemChar = WStr("System.Char");
 const auto SystemByte = WStr("System.Byte");
@@ -533,15 +537,17 @@ struct FunctionInfo
     const MethodSignature signature;
     const MethodSignature function_spec_signature;
     const mdToken method_def_id;
+    const DWORD method_impl_flags;
     FunctionMethodSignature method_signature;
+    TypeSignature effective_return_type{};
 
-    FunctionInfo() : id(0), name(EmptyWStr), type({}), is_generic(false), method_def_id(0), method_signature({})
+    FunctionInfo() : id(0), name(EmptyWStr), type({}), is_generic(false), method_def_id(0), method_impl_flags(0), method_signature({})
     {
     }
 
     FunctionInfo(mdToken id, const WSTRING& name, const TypeInfo& type, const MethodSignature& signature,
                  const MethodSignature& function_spec_signature, mdToken method_def_id,
-                 const FunctionMethodSignature& method_signature) :
+                 const FunctionMethodSignature& method_signature, DWORD method_impl_flags = 0) :
         id(id),
         name(name),
         type(type),
@@ -549,18 +555,20 @@ struct FunctionInfo
         signature(signature),
         function_spec_signature(function_spec_signature),
         method_def_id(method_def_id),
+        method_impl_flags(method_impl_flags),
         method_signature(method_signature)
     {
     }
 
     FunctionInfo(mdToken id, const WSTRING& name, const TypeInfo& type, const MethodSignature& signature,
-                 const FunctionMethodSignature& method_signature) :
+                 const FunctionMethodSignature& method_signature, DWORD method_impl_flags = 0) :
         id(id),
         name(name),
         type(type),
         is_generic(false),
         signature(signature),
         method_def_id(0),
+        method_impl_flags(method_impl_flags),
         method_signature(method_signature)
     {
     }
@@ -568,6 +576,26 @@ struct FunctionInfo
     bool IsValid() const
     {
         return id != 0;
+    }
+
+    bool IsRuntimeAsync() const
+    {
+        return (method_impl_flags & kRuntimeAsyncMethodImplFlag) != 0;
+    }
+
+    TypeSignature GetDeclaredReturnType() const
+    {
+        return method_signature.GetReturnValue();
+    }
+
+    TypeSignature GetEffectiveReturnType() const
+    {
+        return effective_return_type;
+    }
+
+    void SetEffectiveReturnType(const TypeSignature& return_type)
+    {
+        effective_return_type = return_type;
     }
 };
 
@@ -628,6 +656,10 @@ AssemblyMetadata GetReferencedAssemblyMetadata(const ComPtr<IMetaDataAssemblyImp
 
 FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdToken& token);
 
+bool TryGetRuntimeAsyncResultType(const TypeSignature& runtime_async_return_type,
+                                  const ComPtr<IMetaDataImport2>& metadata_import,
+                                  TypeSignature* result_type);
+
 ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id);
 
 TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdToken& token);
@@ -652,7 +684,6 @@ bool ParseTypeDefOrRefEncoded(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd, uns
     PTR CustomMod* Type
     FNPTR MethodDefSig
     FNPTR MethodRefSig
-    ARRAY Type ArrayShape
     SZARRAY CustomMod+ Type (but we do support SZARRAY Type)
  */
 bool ParseType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd);
