@@ -13,12 +13,12 @@ public class TargetFramework : Enumeration
     private TargetFramework(string value)
     {
         Value = value;
-        OutputFolder = value switch
+        (OutputFolder, SharedFrameworkVersion) = value switch
         {
-            _ when value.StartsWith("net") && value.Contains('.') => OutputFolderNet,
-            // with the right order this check can be simplieid to just check for "net" prefix, but keep it explicit for clarity
-            _ when value.StartsWith("net") && !value.Contains('.') => OutputFolderNetFramework,
-            _ => string.Empty
+            _ when value.StartsWith("net") && value.Contains('.') =>
+                (OutputFolderNet, Version.TryParse(value["net".Length..], out var version) ? new Version(version.Major, version.Minor, 0) : throw new InvalidOperationException($"Cannot extract shared framework version from {value}")),
+            _ when value.StartsWith("net") && !value.Contains('.') => (OutputFolderNetFramework, null),
+            _ => (string.Empty, null)
         };
     }
 
@@ -32,6 +32,15 @@ public class TargetFramework : Enumeration
     public static readonly TargetFramework NET10_0 = new("net10.0");
 
     public string OutputFolder { get; private init; }
+
+    /// <summary>
+    /// Gets the requested shared-framework version represented by a modern .NET target framework.
+    /// </summary>
+    /// <remarks>
+    /// This is unavailable for .NET Framework target frameworks because they do not use the
+    /// Microsoft.NETCore.App directory layout consumed by DOTNET_ADDITIONAL_DEPS.
+    /// </remarks>
+    public Version SharedFrameworkVersion { get; private init; }
 
     // should be in version order
     public static readonly TargetFramework[] NetFramework = [
