@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/string_utils.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/unsafe_accessor_type_attribute_blob_rewriter.h"
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/unsafe_accessor_type_attribute_updater.h"
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/type_name_assembly_redirection_rewriter.h"
 
