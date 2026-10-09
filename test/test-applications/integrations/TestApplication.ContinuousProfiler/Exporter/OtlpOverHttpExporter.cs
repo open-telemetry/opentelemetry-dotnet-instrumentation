@@ -21,21 +21,15 @@ internal sealed class OtlpOverHttpExporter : IContinuousProfilerExporter, IDispo
 
     private readonly string _endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") + "/v1development/profiles";
     private readonly HttpClient _httpClient = new();
-    private readonly long cpuPeriod;
 
     private readonly SampleNativeFormatParser _parser;
 
-    public OtlpOverHttpExporter(TimeSpan cpuPeriod, SampleNativeFormatParser parser)
+    public OtlpOverHttpExporter(SampleNativeFormatParser parser)
     {
         _parser = parser;
-#if NET
-        this.cpuPeriod = (long)cpuPeriod.TotalNanoseconds;
-#else
-        this.cpuPeriod = cpuPeriod.Ticks * 100L; // convert to nanoseconds
-#endif
     }
 
-    public void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken)
+    public void ExportThreadSamples(byte[] buffer, int read, uint samplingInterval, CancellationToken cancellationToken)
     {
         var threadSamples = _parser.ParseThreadSamples(buffer, read);
 
@@ -47,7 +41,8 @@ internal sealed class OtlpOverHttpExporter : IContinuousProfilerExporter, IDispo
         try
         {
             var timestampNanoseconds = threadSamples[0].TimestampNanoseconds; // all items in the batch have same timestamp
-            var extendedPprofBuilder = new ExtendedPprofBuilder("samples", "count", "cpu", "nanoseconds", cpuPeriod, timestampNanoseconds);
+            var samplingIntervalNanoseconds = samplingInterval * 1_000_000L;
+            var extendedPprofBuilder = new ExtendedPprofBuilder("samples", "count", "cpu", "nanoseconds", samplingIntervalNanoseconds, timestampNanoseconds);
 
             for (var i = 0; i < threadSamples.Count; i++)
             {
