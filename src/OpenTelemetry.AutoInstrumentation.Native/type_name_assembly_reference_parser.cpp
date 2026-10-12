@@ -175,18 +175,18 @@ bool TryGetNextQualifierPart(const std::string_view value, Span& remaining, Span
 // exhaust the profiler's native stack; 64 is well above practical generic nesting.
 constexpr size_t max_generic_nesting_depth = 64;
 
-// ParseType and ParseTypeArguments call each other, so declare ParseType before defining ParseTypeArguments.
-bool ParseType(std::string_view                      type_name,
-               Span                                  type,
-               size_t                                generic_nesting_depth,
-               std::vector<ParsedAssemblyReference>& references);
+// The type and generic-argument collectors call each other, so declare the type collector first.
+bool CollectTypeAssemblyReferences(std::string_view                      type_name,
+                                   Span                                  type,
+                                   size_t                                generic_nesting_depth,
+                                   std::vector<ParsedAssemblyReference>& references);
 
-// For Outer`2[[First, First.Assembly],Second], the arguments span covers "[First, First.Assembly],Second". ParseType
-// recursively records First.Assembly; Second is unqualified, so there is no assembly to record for it.
-bool ParseTypeArguments(const std::string_view                type_name,
-                        Span                                  arguments,
-                        const size_t                          generic_nesting_depth,
-                        std::vector<ParsedAssemblyReference>& references)
+// For Outer`2[[First, First.Assembly],Second], the arguments span covers "[First, First.Assembly],Second".
+// Recursing into each argument records First.Assembly; Second is unqualified, so there is no assembly to record for it.
+bool CollectGenericTypeArgumentAssemblyReferences(const std::string_view                type_name,
+                                                  Span                                  arguments,
+                                                  const size_t                          generic_nesting_depth,
+                                                  std::vector<ParsedAssemblyReference>& references)
 {
     while (!arguments.Empty())
     {
@@ -215,7 +215,7 @@ bool ParseTypeArguments(const std::string_view                type_name,
             argument = {argument.begin + 1, *closing_bracket};
         }
 
-        if (!ParseType(type_name, argument, generic_nesting_depth, references))
+        if (!CollectTypeAssemblyReferences(type_name, argument, generic_nesting_depth, references))
         {
             return false;
         }
@@ -281,10 +281,10 @@ bool ParseAssemblyQualification(const std::string_view                type_name,
 // Example:
 // Outer`1[[Inner, Inner.Assembly, Version=1.0.0.0]], Outer.Assembly, Version=2.0.0.0
 // recursively records Inner.Assembly at 1.0.0.0, then records Outer.Assembly at 2.0.0.0.
-bool ParseType(const std::string_view                type_name,
-               Span                                  type,
-               const size_t                          generic_nesting_depth,
-               std::vector<ParsedAssemblyReference>& references)
+bool CollectTypeAssemblyReferences(const std::string_view                type_name,
+                                   Span                                  type,
+                                   const size_t                          generic_nesting_depth,
+                                   std::vector<ParsedAssemblyReference>& references)
 {
     type = Span::Trimmed(type_name, type);
     if (type.Empty())
@@ -315,11 +315,11 @@ bool ParseType(const std::string_view                type_name,
                 break;
             case '[':
             {
-                // Match the argument list, then split it; ParseTypeArguments calls ParseType for each argument.
+                // Match the argument list, then recursively collect each argument's assembly references.
                 const auto closing_bracket = FindClosingBracket(type_name, position, type_name_end);
                 if (!closing_bracket || generic_nesting_depth == max_generic_nesting_depth ||
-                    !ParseTypeArguments(type_name, {position + 1, *closing_bracket}, generic_nesting_depth + 1,
-                                        references))
+                    !CollectGenericTypeArgumentAssemblyReferences(type_name, {position + 1, *closing_bracket},
+                                                                  generic_nesting_depth + 1, references))
                 {
                     return false;
                 }
@@ -346,7 +346,7 @@ bool ParseType(const std::string_view                type_name,
 bool ParseTypeNameAssemblyReferences(const std::string_view type_name, std::vector<ParsedAssemblyReference>& references)
 {
     references.clear();
-    if (!ParseType(type_name, {0, type_name.size()}, 0, references))
+    if (!CollectTypeAssemblyReferences(type_name, {0, type_name.size()}, 0, references))
     {
         references.clear();
         return false;
