@@ -65,9 +65,7 @@ internal sealed class OpAmpManager : IDisposable
             return Task.CompletedTask;
         }
 
-        _effectiveConfigReporter?.Stop();
-
-        // Cancellation propagation and plugin callbacks may block synchronously.
+        // Reporter submission, cancellation propagation and plugin callbacks may block synchronously.
         return Task.Run(StopOpAmpClientCoreAsync);
     }
 
@@ -257,6 +255,7 @@ internal sealed class OpAmpManager : IDisposable
     {
         try
         {
+            _effectiveConfigReporter?.Stop();
             var startupTask = _startupTask;
 
             // The lifecycle lock serializes this callback with the post-start callback. If startup

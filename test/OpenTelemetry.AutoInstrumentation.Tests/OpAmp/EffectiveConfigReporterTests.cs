@@ -295,6 +295,57 @@ public class EffectiveConfigReporterTests
         Assert.Empty(_reportSender.FullStateReports);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task CapabilityChangesAreSerializedWithSubmission(bool fullState)
+    {
+        _reporter.HandleServerCapabilities(ServerCapabilities);
+        await AssertCompletes(_reporter.WaitForIdleAsync());
+
+        using var releaseSend = new ManualResetEventSlim();
+        var sendEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var capabilitiesStarted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _reportSender.BeforeSend = () =>
+        {
+            sendEntered.TrySetResult(true);
+            releaseSend.Wait();
+        };
+
+        var capabilitiesTask = Task.Run(async () =>
+        {
+            if (fullState)
+            {
+                _reporter.ReportFullState();
+            }
+            else
+            {
+                _reporter.NotifyEffectiveConfigChanged();
+            }
+
+            await sendEntered.Task.ConfigureAwait(false);
+            capabilitiesStarted.TrySetResult(true);
+            _reporter.HandleServerCapabilities(ServerSentCapabilities.AcceptsStatus);
+        });
+        try
+        {
+            await AssertCompletes(capabilitiesStarted.Task);
+            // Give the callback time to complete if submission is not serialized.
+            Assert.NotSame(
+                capabilitiesTask,
+                await Task.WhenAny(capabilitiesTask, Task.Delay(TimeSpan.FromMilliseconds(100))));
+        }
+        finally
+        {
+            releaseSend.Set();
+            await AssertCompletes(capabilitiesTask);
+            await AssertCompletes(_reporter.WaitForIdleAsync());
+        }
+
+        Assert.Equal(fullState ? 1 : 2, _reportSender.EffectiveConfigReports.Count);
+        Assert.Equal(fullState ? 1 : 0, _reportSender.FullStateReports.Count);
+    }
+
     private static async Task AssertCompletes(Task task)
     {
         Assert.Same(task, await Task.WhenAny(task, Task.Delay(TestTimeout)).ConfigureAwait(false));
@@ -320,6 +371,8 @@ public class EffectiveConfigReporterTests
 
         public bool FailEffectiveConfigSend { get; set; }
 
+        public Action? BeforeSend { get; set; }
+
         public void SendEffectiveConfig(IReadOnlyCollection<EffectiveConfigFile> files)
         {
             if (FailEffectiveConfigSend)
@@ -327,11 +380,13 @@ public class EffectiveConfigReporterTests
                 throw new InvalidOperationException("Cannot queue configuration.");
             }
 
+            BeforeSend?.Invoke();
             EffectiveConfigReports.Add(files);
         }
 
         public void SendFullStateReport(FullStateReport report)
         {
+            BeforeSend?.Invoke();
             FullStateReports.Add(report);
         }
     }

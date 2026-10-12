@@ -118,7 +118,7 @@ internal sealed class EffectiveConfigReporter : IOpAmpListener<ServerCapabilitie
         }
     }
 
-    // Called under _workLock; plugin callbacks and submissions run outside it.
+    // Called under _workLock; plugin getters run outside it.
     private void RequestReport(ReportingRequests requests)
     {
         if (_stopped)
@@ -192,15 +192,16 @@ internal sealed class EffectiveConfigReporter : IOpAmpListener<ServerCapabilitie
                     RequestReport(requests);
                     return;
                 }
-            }
 
-            if (fullState)
-            {
-                _reportSender.SendFullStateReport(new FullStateReport { EffectiveConfigFiles = files });
-            }
-            else
-            {
-                _reportSender.SendEffectiveConfig(files!);
+                // Serialize validation and SDK queueing with capability changes and shutdown.
+                if (fullState)
+                {
+                    _reportSender.SendFullStateReport(new FullStateReport { EffectiveConfigFiles = files });
+                }
+                else
+                {
+                    _reportSender.SendEffectiveConfig(files!);
+                }
             }
         }
         catch (Exception ex)
