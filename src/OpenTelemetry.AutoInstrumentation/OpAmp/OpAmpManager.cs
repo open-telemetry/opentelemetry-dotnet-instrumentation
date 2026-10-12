@@ -23,6 +23,7 @@ internal sealed class OpAmpManager : IDisposable
     private readonly OpAmpClientProxy _clientProxy;
     private readonly IOpAmpPlugin? _plugin;
     private readonly OpAmpClientSettings _settings;
+    private readonly EffectiveConfigReporter? _effectiveConfigReporter;
 
     private Task? _startupTask;
     private int _shutdownStarted;
@@ -36,6 +37,12 @@ internal sealed class OpAmpManager : IDisposable
         _plugin = plugin;
         _clientProxy = clientProxy;
         _settings = settings;
+        if (plugin is IProvideEffectiveConfig effectiveConfigPlugin && settings.EffectiveConfigurationReporting.EnableReporting)
+        {
+            _effectiveConfigReporter = new EffectiveConfigReporter(effectiveConfigPlugin, clientProxy);
+            clientProxy.Subscribe<ServerCapabilitiesMessage>(_effectiveConfigReporter);
+            clientProxy.Subscribe<FlagsMessage>(_effectiveConfigReporter);
+        }
     }
 
     public void StartClient()
@@ -58,6 +65,8 @@ internal sealed class OpAmpManager : IDisposable
             return Task.CompletedTask;
         }
 
+        _effectiveConfigReporter?.Stop();
+
         // Cancellation propagation and plugin callbacks may block synchronously.
         return Task.Run(StopOpAmpClientCoreAsync);
     }
@@ -71,6 +80,7 @@ internal sealed class OpAmpManager : IDisposable
             return;
         }
 
+        _effectiveConfigReporter?.Stop();
         CancelStartup();
 
         try
@@ -106,6 +116,7 @@ internal sealed class OpAmpManager : IDisposable
 
     internal void ForceDisposeClient()
     {
+        _effectiveConfigReporter?.Stop();
         if (Interlocked.Exchange(ref _clientDisposed, 1) == 0)
         {
             _clientProxy.Dispose();
@@ -148,6 +159,11 @@ internal sealed class OpAmpManager : IDisposable
         where T : OpAmpMessage
     {
         _clientProxy.Subscribe(listener);
+    }
+
+    internal void NotifyEffectiveConfigChanged()
+    {
+        _effectiveConfigReporter?.NotifyEffectiveConfigChanged();
     }
 
     internal void Unsubscribe<T>(IOpAmpListener<T> listener)
@@ -204,7 +220,7 @@ internal sealed class OpAmpManager : IDisposable
         try
         {
             // Do not advertise capabilities that automatic instrumentation cannot fulfill.
-            _settings.EffectiveConfigurationReporting.EnableReporting = false;
+            _settings.EffectiveConfigurationReporting.EnableReporting = _effectiveConfigReporter != null;
             _settings.RemoteConfiguration.AcceptsRemoteConfig = false;
             _settings.RemoteConfiguration.ReportsRemoteConfigStatus = false;
 

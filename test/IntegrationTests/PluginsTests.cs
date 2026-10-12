@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using IntegrationTests.Helpers;
+using OpAmp.Proto.V1;
 
 namespace IntegrationTests;
 
@@ -134,14 +135,15 @@ public class PluginsTests : TestHelper
         const string ignoredPluginType = pluginTypePrefix + ignoredPlugin;
         const string selectedPluginName = selectedPluginType + pluginAssemblySuffix;
         const string ignoredPluginName = ignoredPluginType + pluginAssemblySuffix;
-        using var server = new MockOpAmpServer(Output);
+        using var server = new MockOpAmpServer(Output, capabilities: ServerCapabilities.AcceptsStatus | ServerCapabilities.AcceptsEffectiveConfig);
+        server.Expect(frame => frame.AgentDescription != null && (frame.Capabilities & (ulong)AgentCapabilities.ReportsEffectiveConfig) == 0, "Does not advertise reporting for an ignored provider");
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", $"{selectedPluginName}:{ignoredPluginName}");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_ENABLED", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_SERVER_URL", server.Endpoint);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
 
-        var (standardOutput, _, _) = RunTestApplication();
+        var standardOutput = RunOpAmpTestApplication(server);
         var outputLines = standardOutput.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
 
         Assert.Contains($"{selectedPlugin}.Initializing() invoked.", outputLines);
@@ -154,21 +156,32 @@ public class PluginsTests : TestHelper
         Assert.DoesNotContain($"{ignoredPlugin}.ConfigureOpAmpOptions() invoked.", outputLines);
         Assert.DoesNotContain($"{ignoredPlugin}.ConfigureOpAmpClient() invoked.", outputLines);
         Assert.DoesNotContain($"{ignoredPlugin}.BeforeOpAmpClientStopped() invoked.", outputLines);
+        Assert.DoesNotContain($"{ignoredPlugin}.GetEffectiveConfig() invoked.", outputLines);
         Assert.Contains("Multiple OpAMP plugins are configured.", standardOutput, StringComparison.Ordinal);
         Assert.Contains($"Using '{selectedPluginType}'", standardOutput, StringComparison.Ordinal);
         Assert.Contains(ignoredPluginType, standardOutput, StringComparison.Ordinal);
+    }
+
+    private static bool HasEffectiveConfig(AgentToServer frame, string content)
+    {
+        return frame.EffectiveConfig?.ConfigMap?.ConfigMap.TryGetValue("config.yaml", out var file) == true &&
+               file.ContentType == "text/yaml" && file.Body.ToStringUtf8() == content;
     }
 
     private void AssertOpAmpPluginConfigurationAndShutdown(Action configureOpAmp)
     {
         const int maxPendingCustomMessages = 123;
         const int maxPendingCustomMessageBytes = 456;
-        using var server = new MockOpAmpServer(Output);
+        using var server = new MockOpAmpServer(Output, capabilities: ServerCapabilities.AcceptsStatus | ServerCapabilities.AcceptsEffectiveConfig);
+
+        server.Expect(frame => (frame.Capabilities & (ulong)AgentCapabilities.ReportsEffectiveConfig) != 0, "Advertises effective configuration reporting");
+        // Startup can complete before server capabilities are dispatched, so assert the latest configuration.
+        server.Expect(frame => HasEffectiveConfig(frame, "updated: true"), "Reports changed effective configuration");
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_SERVER_URL", server.Endpoint);
         configureOpAmp();
 
-        var (standardOutput, _, _) = RunTestApplication();
+        var standardOutput = RunOpAmpTestApplication(server);
 
         Assert.Contains("Plugin.ConfigureOpAmpOptions() invoked.", standardOutput, StringComparison.Ordinal);
         Assert.Contains($"MaxPendingCustomMessages: {maxPendingCustomMessages}", standardOutput, StringComparison.Ordinal);
@@ -182,5 +195,34 @@ public class PluginsTests : TestHelper
 
         Assert.True(configureClientIndex < initializedIndex);
         Assert.True(initializedIndex < beforeStopIndex);
+    }
+
+    private string RunOpAmpTestApplication(MockOpAmpServer server)
+    {
+        var timeout = TimeSpan.FromSeconds(10);
+        using var process = StartTestApplication(new TestSettings { Arguments = "--wait-for-release", RedirectStandardInput = true });
+        Assert.NotNull(process);
+        using var output = new ProcessHelper(process);
+
+        try
+        {
+            server.AssertExpectations(timeout);
+        }
+        finally
+        {
+            // Closing stdin releases the app after delivery is verified, including when an assertion fails.
+            process.StandardInput.Close();
+
+            if (!process.WaitForExit((int)timeout.TotalMilliseconds))
+            {
+                process.Kill();
+                Assert.True(process.WaitForExit((int)timeout.TotalMilliseconds), "Test application did not exit after being killed.");
+            }
+
+            Output.WriteResult(output);
+        }
+
+        Assert.Equal(0, process.ExitCode);
+        return output.StandardOutput;
     }
 }

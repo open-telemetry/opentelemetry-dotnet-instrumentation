@@ -7,6 +7,8 @@ internal sealed class TestSettings
 {
     public string? Arguments { get; set; }
 
+    public bool RedirectStandardInput { get; set; }
+
     public string PackageVersion { get; set; } = string.Empty;
 
     public string Framework { get; set; } = string.Empty;

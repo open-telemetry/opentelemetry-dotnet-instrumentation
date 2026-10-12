@@ -23,6 +23,7 @@ OpenTelemetry.AutoInstrumentation.PluginApi.IPlugin
 OpenTelemetry.AutoInstrumentation.PluginApi.IPlugin.Initialized() -> void
 OpenTelemetry.AutoInstrumentation.PluginApi.IPlugin.Initializing() -> void
 OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp.IOpAmpClient
+OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp.IOpAmpClient.NotifyEffectiveConfigChanged() -> void
 OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp.IOpAmpClient.Subscribe<T>(OpenTelemetry.OpAmp.Client.Listeners.IOpAmpListener<T!>! listener) -> void
 OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp.IOpAmpClient.Unsubscribe<T>(OpenTelemetry.OpAmp.Client.Listeners.IOpAmpListener<T!>! listener) -> void
 OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp.IOpAmpPlugin
@@ -30,6 +31,8 @@ OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp.IOpAmpPlugin.AfterOpAmpClientS
 OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp.IOpAmpPlugin.BeforeOpAmpClientStopped() -> void
 OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp.IOpAmpPlugin.ConfigureOpAmpClient(OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp.IOpAmpClient! client) -> void
 OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp.IOpAmpPlugin.ConfigureOpAmpOptions(OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings! settings) -> void
+OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp.IProvideEffectiveConfig
+OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp.IProvideEffectiveConfig.GetEffectiveConfig() -> System.Collections.Generic.IReadOnlyCollection<OpenTelemetry.OpAmp.Client.Messages.EffectiveConfigFile!>!
 OpenTelemetry.AutoInstrumentation.PluginApi.SelectiveSampling.ISelectiveSamplerExporter
 OpenTelemetry.AutoInstrumentation.PluginApi.SelectiveSampling.ISelectiveSamplerExporter.ExportSelectedThreadSamples(byte[]! buffer, int read, System.Threading.CancellationToken cancellationToken) -> void
 OpenTelemetry.AutoInstrumentation.PluginApi.SelectiveSampling.ISelectiveSamplerPlugin

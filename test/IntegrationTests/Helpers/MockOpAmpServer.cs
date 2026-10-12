@@ -21,15 +21,17 @@ internal sealed class MockOpAmpServer : IDisposable
     private readonly ITestOutputHelper _output;
     private readonly TestHttpServer _listener;
     private readonly string _host;
+    private readonly ServerCapabilities _capabilities;
 
     private readonly List<Expectation> _expectations = new();
     private readonly BlockingCollection<AgentToServer> _frames = new(10); // bounded to avoid memory leak
     private readonly List<NameValueCollection> _receivedHeaders = [];
 
-    public MockOpAmpServer(ITestOutputHelper output, string host = "127.0.0.1")
+    public MockOpAmpServer(ITestOutputHelper output, string host = "127.0.0.1", ServerCapabilities capabilities = default)
     {
         _output = output;
         _host = host;
+        _capabilities = capabilities;
 #if NETFRAMEWORK
         _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/opamp/");
 #else
@@ -155,12 +157,13 @@ internal sealed class MockOpAmpServer : IDisposable
         Assert.Fail(message.ToString());
     }
 
-    private static byte[] GenerateResponse(AgentToServer frame)
+    private static byte[] GenerateResponse(AgentToServer frame, ServerCapabilities capabilities)
     {
         var content = "This is a mock server frame for testing purposes.";
         var responseFrame = new ServerToAgent
         {
             InstanceUid = frame.InstanceUid,
+            Capabilities = (ulong)capabilities,
             CustomMessage = new CustomMessage()
             {
                 Data = ByteString.CopyFromUtf8(content),
@@ -185,7 +188,7 @@ internal sealed class MockOpAmpServer : IDisposable
 
         _receivedHeaders.Add(headersCopy);
 
-        var response = GenerateResponse(frame);
+        var response = GenerateResponse(frame, _capabilities);
 
         ctx.Response.StatusCode = (int)HttpStatusCode.OK;
         ctx.Response.ContentType = "application/x-protobuf";
@@ -247,7 +250,7 @@ internal sealed class MockOpAmpServer : IDisposable
 
         _receivedHeaders.Add(headersCopy);
 
-        var response = GenerateResponse(frame);
+        var response = GenerateResponse(frame, _capabilities);
 
         ctx.Response.StatusCode = (int)HttpStatusCode.OK;
         ctx.Response.ContentType = "application/x-protobuf";

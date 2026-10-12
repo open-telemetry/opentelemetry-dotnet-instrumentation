@@ -248,6 +248,34 @@ tolerate client disposal during forced shutdown.
 OpAMP requests do not produce application spans. Listener callbacks must return
 promptly.
 
+### Effective configuration reporting
+
+The selected OpAMP plugin can implement `IProvideEffectiveConfig` and set
+`settings.EffectiveConfigurationReporting.EnableReporting = true` in
+`ConfigureOpAmpOptions`. Reporting is disabled when the selected plugin does not
+provide this interface or does not enable the setting.
+
+Implement `GetEffectiveConfig()` to return the complete current configuration as
+an `IReadOnlyCollection<EffectiveConfigFile>`. File names must be unique.
+An empty collection reports an empty configuration. Contents are transmitted
+without redaction, so the plugin is responsible for removing sensitive values.
+
+Retain the client passed to `ConfigureOpAmpClient` and call
+`client.NotifyEffectiveConfigChanged()` after publishing configuration changes.
+Reporting requires server support. Notifications return without waiting for the
+getter or delivery, and pending notifications may be coalesced. Automatic
+instrumentation also requests configuration when reporting becomes available or
+the server requests full state; these reads do not require a notification.
+
+Getter calls run on a background thread and are serialized, but may overlap
+plugin lifecycle callbacks and configuration updates. Publish configuration
+safely across threads and return a stable snapshot, including its buffers.
+The getter should return promptly. Getter and reporting failures are logged;
+a later notification can attempt reporting again.
+
+Notifications do not guarantee delivery during shutdown. A getter already
+running may overlap plugin cleanup.
+
 ## Selective sampling
 
 Implement `ISelectiveSamplerPlugin` to provide selective sampling configuration.
