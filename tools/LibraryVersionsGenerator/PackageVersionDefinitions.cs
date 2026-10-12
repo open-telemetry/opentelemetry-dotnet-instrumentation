@@ -360,9 +360,7 @@ internal static class PackageVersionDefinitions
         new()
         {
             IntegrationName = "UnsafeAccessorTypeRedirection",
-            // The existing generator contract requires it, but explicit build variants never read it.
-            // Use an obvious sentinel
-            NugetPackageName = "NotUsed",
+            NugetPackageName = "Microsoft.Extensions.DependencyInjection.Abstractions",
             TestApplicationName = "TestApplication.UnsafeAccessorTypeRedirection",
             Versions =
             [
@@ -373,6 +371,7 @@ internal static class PackageVersionDefinitions
                     buildProperties: new Dictionary<string, string>
                     {
                         ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorPackageVersion"] = "10.0.0",
                         ["UnsafeAccessorComplete"] = "true"
                     }),
                 new(
@@ -383,6 +382,7 @@ internal static class PackageVersionDefinitions
                     {
                         ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
                         ["UnsafeAccessorAssemblyVersion"] = "9.0.0.0",
+                        ["UnsafeAccessorPackageVersion"] = "9.0.0",
                         ["UnsafeAccessorComplete"] = "true"
                     }),
                 new(
@@ -393,6 +393,7 @@ internal static class PackageVersionDefinitions
                     {
                         ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
                         ["UnsafeAccessorAssemblyVersion"] = "10.0.0.0",
+                        ["UnsafeAccessorPackageVersion"] = "10.0.0",
                         ["UnsafeAccessorComplete"] = "true"
                     }),
                 new(
@@ -403,6 +404,7 @@ internal static class PackageVersionDefinitions
                     {
                         ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
                         ["UnsafeAccessorAssemblyVersion"] = "11.0.0.0",
+                        ["UnsafeAccessorPackageVersion"] = "11.0.0-rc.1.26425.128",
                         ["UnsafeAccessorComplete"] = "true"
                     }),
                 new(
@@ -413,6 +415,7 @@ internal static class PackageVersionDefinitions
                     {
                         ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
                         ["UnsafeAccessorAssemblyVersion"] = "1.0.0.0",
+                        ["UnsafeAccessorPackageVersion"] = "10.0.0",
                         ["UnsafeAccessorComplete"] = "false"
                     })
             ]

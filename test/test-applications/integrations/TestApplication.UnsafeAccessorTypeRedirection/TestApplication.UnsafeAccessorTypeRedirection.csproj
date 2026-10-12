@@ -8,6 +8,12 @@
     <NoWarn Condition="'$(UnsafeAccessorComplete)' != 'true'">$(NoWarn);CS0626</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+      <VersionOverride Condition="'$(UnsafeAccessorPackageVersion)' != ''">$(UnsafeAccessorPackageVersion)</VersionOverride>
+    </PackageReference>
+  </ItemGroup>
+
   <Target Name="GenerateUnsafeAccessorBuildSettings" BeforeTargets="CoreCompile">
     <PropertyGroup>
       <_UnsafeAccessorVersionSuffix Condition="'$(UnsafeAccessorAssemblyVersion)' != ''">, Version=$(UnsafeAccessorAssemblyVersion)</_UnsafeAccessorVersionSuffix>
@@ -18,7 +24,7 @@
       <_UnsafeAccessorBuildSettingsLine Include="// &lt;auto-generated /&gt;" />
       <_UnsafeAccessorBuildSettingsLine Include="internal static class UnsafeAccessorBuildSettings" />
       <_UnsafeAccessorBuildSettingsLine Include="{" />
-      <_UnsafeAccessorBuildSettingsLine Include="    internal const string TypeName = &quot;Some.Type, $(UnsafeAccessorAssemblyName)$(_UnsafeAccessorVersionSuffix)&quot;%3B" />
+      <_UnsafeAccessorBuildSettingsLine Include="    internal const string TypeName = &quot;Microsoft.Extensions.DependencyInjection.ServiceCollection, $(UnsafeAccessorAssemblyName)$(_UnsafeAccessorVersionSuffix)&quot;%3B" />
       <_UnsafeAccessorBuildSettingsLine Include="}" />
       <Compile Include="$(_UnsafeAccessorBuildSettingsFile)" />
     </ItemGroup>
