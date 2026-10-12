@@ -78,7 +78,7 @@ internal sealed class OpAmpManager : IDisposable
             return;
         }
 
-        _effectiveConfigReporter?.Stop();
+        _effectiveConfigReporter?.ForceStop();
         CancelStartup();
 
         try
@@ -114,7 +114,7 @@ internal sealed class OpAmpManager : IDisposable
 
     internal void ForceDisposeClient()
     {
-        _effectiveConfigReporter?.Stop();
+        _effectiveConfigReporter?.ForceStop();
         if (Interlocked.Exchange(ref _clientDisposed, 1) == 0)
         {
             _clientProxy.Dispose();
@@ -128,8 +128,8 @@ internal sealed class OpAmpManager : IDisposable
             return _forcedShutdownCompletion.Task;
         }
 
-        // Forced disposal must not wait for lifecycle callbacks or startup cancellation because
-        // either can execute plugin-controlled code after the loader's shutdown deadline.
+        // Reach client disposal without waiting for the reporter, lifecycle callbacks or startup
+        // cancellation, any of which may be stalled after the loader's shutdown deadline.
         _ = Task.Factory.StartNew(
             () =>
             {

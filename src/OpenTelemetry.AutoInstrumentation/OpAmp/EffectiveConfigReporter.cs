@@ -15,13 +15,15 @@ internal sealed class EffectiveConfigReporter : IOpAmpListener<ServerCapabilitie
     private readonly IOpAmpReportSender _reportSender;
     private readonly object _workLock = new();
 
-    // Protected by _workLock: pending work, scheduling, server support and shutdown.
+    // Protected by _workLock: pending work, scheduling and server support.
     private Task _drainTask = Task.CompletedTask;
     private ReportingRequests _pendingRequests;
     private bool _drainScheduled;
     private bool _serverAcceptsEffectiveConfig;
-    private bool _stopped;
     private int _effectiveConfigSupportRevision;
+
+    // Forced shutdown also sets this flag without acquiring _workLock.
+    private volatile bool _stopped;
 
     public EffectiveConfigReporter(IProvideEffectiveConfig plugin, IOpAmpReportSender reportSender)
     {
@@ -39,6 +41,11 @@ internal sealed class EffectiveConfigReporter : IOpAmpListener<ServerCapabilitie
 
     public void NotifyEffectiveConfigChanged()
     {
+        if (_stopped)
+        {
+            return;
+        }
+
         lock (_workLock)
         {
             if (_serverAcceptsEffectiveConfig)
@@ -64,7 +71,7 @@ internal sealed class EffectiveConfigReporter : IOpAmpListener<ServerCapabilitie
     public void HandleServerCapabilities(ServerSentCapabilities capabilities)
     {
         // OpAMP defines zero capabilities as unspecified; retain previously advertised support.
-        if (capabilities == ServerSentCapabilities.None)
+        if (_stopped || capabilities == ServerSentCapabilities.None)
         {
             return;
         }
@@ -94,6 +101,11 @@ internal sealed class EffectiveConfigReporter : IOpAmpListener<ServerCapabilitie
 
     public void ReportFullState()
     {
+        if (_stopped)
+        {
+            return;
+        }
+
         lock (_workLock)
         {
             RequestReport(ReportingRequests.FullState);
@@ -102,12 +114,23 @@ internal sealed class EffectiveConfigReporter : IOpAmpListener<ServerCapabilitie
 
     public void Stop()
     {
+        if (_stopped)
+        {
+            return;
+        }
+
         lock (_workLock)
         {
             // Shutdown discards pending work without waiting for a running plugin getter.
             _stopped = true;
             _pendingRequests = ReportingRequests.None;
         }
+    }
+
+    internal void ForceStop()
+    {
+        // Reach client disposal without waiting for a submission holding _workLock.
+        _stopped = true;
     }
 
     internal Task WaitForIdleAsync()
@@ -146,6 +169,7 @@ internal sealed class EffectiveConfigReporter : IOpAmpListener<ServerCapabilitie
             {
                 if (_stopped || _pendingRequests == ReportingRequests.None)
                 {
+                    _pendingRequests = ReportingRequests.None;
                     _drainScheduled = false;
                     return;
                 }
@@ -193,7 +217,7 @@ internal sealed class EffectiveConfigReporter : IOpAmpListener<ServerCapabilitie
                     return;
                 }
 
-                // Serialize validation and SDK queueing with capability changes and shutdown.
+                // Serialize validation and SDK queueing with capability changes and graceful shutdown.
                 if (fullState)
                 {
                     _reportSender.SendFullStateReport(new FullStateReport { EffectiveConfigFiles = files });

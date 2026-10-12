@@ -295,6 +295,56 @@ public class EffectiveConfigReporterTests
         Assert.Empty(_reportSender.FullStateReports);
     }
 
+    [Fact]
+    public async Task ForcedShutdownReturnsDuringBlockedSubmissionAndDiscardsPendingWork()
+    {
+        using var releaseGetter = new ManualResetEventSlim();
+        using var releaseSend = new ManualResetEventSlim();
+        var getterEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var sendEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _plugin.ReadConfig = _ =>
+        {
+            getterEntered.TrySetResult(true);
+            releaseGetter.Wait();
+            return CreateConfig("initial");
+        };
+        _reportSender.BeforeSend = () =>
+        {
+            sendEntered.TrySetResult(true);
+            releaseSend.Wait();
+        };
+
+        var forceStopTask = Task.Run(async () =>
+        {
+            _reporter.HandleServerCapabilities(ServerCapabilities);
+            await getterEntered.Task.ConfigureAwait(false);
+            _reporter.ReportFullState();
+            releaseGetter.Set();
+            await sendEntered.Task.ConfigureAwait(false);
+            _reporter.ForceStop();
+            _reporter.NotifyEffectiveConfigChanged();
+            _reporter.ReportFullState();
+            _reporter.HandleServerCapabilities(ServerSentCapabilities.AcceptsStatus);
+            _reporter.Stop();
+        });
+        try
+        {
+            await AssertCompletes(forceStopTask);
+            Assert.Empty(_reportSender.EffectiveConfigReports);
+        }
+        finally
+        {
+            releaseGetter.Set();
+            releaseSend.Set();
+            await AssertCompletes(forceStopTask);
+            await AssertCompletes(_reporter.WaitForIdleAsync());
+        }
+
+        Assert.Equal(1, _plugin.GetterCalls);
+        Assert.Single(_reportSender.EffectiveConfigReports);
+        Assert.Empty(_reportSender.FullStateReports);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
