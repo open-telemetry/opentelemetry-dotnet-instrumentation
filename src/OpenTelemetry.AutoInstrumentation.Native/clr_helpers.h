@@ -152,11 +152,41 @@ static Enumerator<mdTypeDef> EnumTypeDefs(const ComPtr<IMetaDataImport2>& metada
         [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
 }
 
+static Enumerator<mdMethodDef> EnumMethods(const ComPtr<IMetaDataImport2>& metadata_import, mdTypeDef type)
+{
+    return Enumerator<mdMethodDef>(
+        [metadata_import, type](HCORENUM* ptr, mdMethodDef arr[], ULONG max, ULONG* cnt) -> HRESULT {
+            return metadata_import->EnumMethods(ptr, type, arr, max, cnt);
+        },
+        [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
+}
+
 static Enumerator<mdTypeRef> EnumTypeRefs(const ComPtr<IMetaDataImport2>& metadata_import)
 {
     return Enumerator<mdTypeRef>(
         [metadata_import](HCORENUM* ptr, mdTypeRef arr[], ULONG max, ULONG* cnt) -> HRESULT {
             return metadata_import->EnumTypeRefs(ptr, arr, max, cnt);
+        },
+        [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
+}
+
+static Enumerator<mdMemberRef> EnumMemberRefs(const ComPtr<IMetaDataImport2>& metadata_import, mdToken parent)
+{
+    return Enumerator<mdMemberRef>(
+        [metadata_import, parent](HCORENUM* ptr, mdMemberRef arr[], ULONG max, ULONG* cnt) -> HRESULT {
+            return metadata_import->EnumMemberRefs(ptr, parent, arr, max, cnt);
+        },
+        [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
+}
+
+static Enumerator<mdCustomAttribute> EnumCustomAttributes(const ComPtr<IMetaDataImport2>& metadata_import,
+                                                          mdToken parent      = mdTokenNil,
+                                                          mdToken constructor = mdTokenNil)
+{
+    return Enumerator<mdCustomAttribute>(
+        [metadata_import, parent, constructor](HCORENUM* ptr, mdCustomAttribute arr[], ULONG max,
+                                               ULONG* cnt) -> HRESULT {
+            return metadata_import->EnumCustomAttributes(ptr, parent, constructor, arr, max, cnt);
         },
         [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
 }
