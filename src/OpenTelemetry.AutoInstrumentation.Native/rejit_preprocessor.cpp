@@ -306,41 +306,10 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
             }
         }
 
-        auto is_exact_signature_match = GetIsExactSignatureMatch(definition);
-
-        if (is_exact_signature_match)
+        if (GetIsExactSignatureMatch(definition) &&
+            !CheckExactSignatureMatch(metadataImport, functionInfo, target_method))
         {
-            // Compare if the current mdMethodDef contains the same number of arguments as the
-            // instrumentation target
-            if (numOfArgs != target_method.signature_types.size() - 1)
-            {
-                Logger::Info("    * Skipping ", caller.type.name, ".", caller.name,
-                             ": the methoddef doesn't have the right number of arguments (", numOfArgs, " arguments).");
-                continue;
-            }
-
-            // Compare each mdMethodDef argument type to the instrumentation target
-            bool        argumentsMismatch = false;
-            const auto& methodArguments   = functionInfo.method_signature.GetMethodArguments();
-
-            Logger::Debug("    * Comparing signature for method: ", caller.type.name, ".", caller.name);
-            for (unsigned int i = 0; i < numOfArgs; i++)
-            {
-                const auto argumentTypeName            = methodArguments[i].GetTypeTokName(metadataImport);
-                const auto integrationArgumentTypeName = target_method.signature_types[i + 1];
-                Logger::Debug("        -> ", argumentTypeName, " = ", integrationArgumentTypeName);
-                if (argumentTypeName != integrationArgumentTypeName && integrationArgumentTypeName != WStr("_"))
-                {
-                    argumentsMismatch = true;
-                    break;
-                }
-            }
-            if (argumentsMismatch)
-            {
-                Logger::Info("    * Skipping ", target_method.method_name,
-                             ": the methoddef doesn't have the right type of arguments.");
-                continue;
-            }
+            continue;
         }
 
         // As we are in the right method, we gather all information we need and stored it in to the
@@ -766,6 +735,48 @@ void RejitPreprocessor<RejitRequestDefinition>::EnqueueRequestRejitForLoadedModu
 
     // Enqueue
     m_work_offloader->Enqueue(std::make_unique<RejitWorkItem>(std::move(action)));
+}
+
+template <class RejitRequestDefinition>
+bool RejitPreprocessor<RejitRequestDefinition>::CheckExactSignatureMatch(ComPtr<IMetaDataImport2>& metadataImport,
+                                                                         const FunctionInfo&       functionInfo,
+                                                                         const MethodReference&    targetMethod)
+{
+    const auto numOfArgs = functionInfo.method_signature.NumberOfArguments();
+
+    // Compare if the current mdMethodDef contains the same number of arguments as the
+    // instrumentation target
+    if (numOfArgs != targetMethod.signature_types.size() - 1)
+    {
+        Logger::Info("    * Skipping ", functionInfo.type.name, ".", functionInfo.name,
+                     ": the methoddef doesn't have the right number of arguments (", numOfArgs, " arguments).");
+        return false;
+    }
+
+    // Compare each mdMethodDef argument type to the instrumentation target
+    bool        argumentsMismatch = false;
+    const auto& methodArguments   = functionInfo.method_signature.GetMethodArguments();
+
+    Logger::Debug("    * Comparing signature for method: ", functionInfo.type.name, ".", functionInfo.name);
+    for (unsigned int i = 0; i < numOfArgs; i++)
+    {
+        const auto argumentTypeName            = methodArguments[i].GetTypeTokName(metadataImport);
+        const auto integrationArgumentTypeName = targetMethod.signature_types[i + 1];
+        Logger::Debug("        -> ", argumentTypeName, " = ", integrationArgumentTypeName);
+        if (argumentTypeName != integrationArgumentTypeName && integrationArgumentTypeName != WStr("_"))
+        {
+            argumentsMismatch = true;
+            break;
+        }
+    }
+    if (argumentsMismatch)
+    {
+        Logger::Info("    * Skipping ", targetMethod.method_name,
+                     ": the methoddef doesn't have the right type of arguments.");
+        return false;
+    }
+
+    return true;
 }
 
 template class RejitPreprocessor<IntegrationDefinition>;

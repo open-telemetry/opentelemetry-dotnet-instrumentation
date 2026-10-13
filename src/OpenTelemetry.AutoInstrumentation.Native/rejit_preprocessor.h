@@ -80,6 +80,8 @@ protected:
     virtual const bool GetIsInterface(const RejitRequestDefinition& definition) = 0;
     virtual const bool GetIsExactSignatureMatch(const RejitRequestDefinition& definition) = 0;
     virtual const bool GetIsEnabled(const RejitRequestDefinition& definition) = 0;
+    virtual bool CheckExactSignatureMatch(ComPtr<IMetaDataImport2>& metadataImport, const FunctionInfo& functionInfo,
+                                          const MethodReference& targetMethod);
     virtual const std::unique_ptr<RejitHandlerModuleMethod> CreateMethod(mdMethodDef methodDef,
                                                                          RejitHandlerModule* module,
                                                                          const FunctionInfo& functionInfo,
