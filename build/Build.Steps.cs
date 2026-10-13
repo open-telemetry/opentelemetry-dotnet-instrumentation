@@ -19,6 +19,10 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
 {
+    private const string InstrumentSh = "instrument.sh";
+    private const string AdditionalDepsSh = "generate-additional-deps.sh";
+    private const string AdditionalDepsPs1 = "generate-additional-deps.ps1";
+
     [Solution("OpenTelemetry.AutoInstrumentation.sln")] readonly Solution Solution;
 
     AbsolutePath OutputDirectory => RootDirectory / "bin";
@@ -463,15 +467,17 @@ partial class Build
                 .SetProjectFile(generatorTool));
         });
 
-    Target CopyInstrumentScripts => _ => _
+    Target CopyScripts => _ => _
         .Unlisted()
         .After(Clean)
         .After(CreateRequiredDirectories)
         .Executes(() =>
         {
-            var source = RootDirectory / "instrument.sh";
             var dest = TracerHomeDirectory;
-            source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
+            foreach (var script in new[] { InstrumentSh, AdditionalDepsSh, AdditionalDepsPs1 })
+            {
+                (RootDirectory / script).CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
+            }
         });
 
     Target CopyLegalFiles => _ => _

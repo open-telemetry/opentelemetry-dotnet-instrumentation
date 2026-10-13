@@ -1,6 +1,12 @@
 ﻿[
   /LICENSE,
   /VERSION,
+  /additional-deps-contexts/net10.0.deps.json,
+  /additional-deps-contexts/net8.0.deps.json,
+  /additional-deps-contexts/net9.0.deps.json,
+  /additional-deps-copy-plan.txt,
+  /generate-additional-deps.ps1,
+  /generate-additional-deps.sh,
   /instrument.sh,
   /net/Google.Protobuf.dll,
   /net/OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper.dll,

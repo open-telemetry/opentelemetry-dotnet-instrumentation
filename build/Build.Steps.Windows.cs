@@ -44,6 +44,7 @@ partial class Build
                     .SetProperty("OTEL_AUTO_VERSION_MAJOR", major)
                     .SetProperty("OTEL_AUTO_VERSION_MINOR", minor)
                     .SetProperty("OTEL_AUTO_VERSION_PATCH", patch)
+                    .SetProperty("OTEL_AUTO_PRODUCT_VERSION", VersionHelper.GetInformationalVersion())
                     .CombineWith(platforms, (m, platform) => m
                         .SetTargetPlatform(platform)));
             }

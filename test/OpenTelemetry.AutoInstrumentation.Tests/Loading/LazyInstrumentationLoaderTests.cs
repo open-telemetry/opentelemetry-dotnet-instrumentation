@@ -18,11 +18,11 @@ public class LazyInstrumentationLoaderTests
 #pragma warning restore CA2000 // Dispose objects before losing scope. It should be handled by LazyInstrumentationLoader.
         using (var loader = new LazyInstrumentationLoader())
         {
-            loader.Add(initializer1); // Before loading the assembly
+            initializer1.Register(loader); // Before loading the assembly
 
             CreateDummyAssembly(); // Creates and loads assembly dynamically. This should trigger also assembly load event.
 
-            loader.Add(initializer2); // After loading the assembly
+            initializer2.Register(loader); // After loading the assembly
         }
 
         Assert.True(initializer1.Initialized, "First initializer should be called");

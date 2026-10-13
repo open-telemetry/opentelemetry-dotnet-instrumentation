@@ -3,7 +3,6 @@
 
 using OpenTelemetry.AutoInstrumentation.PluginApi;
 using OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
-using OpenTelemetry.OpAmp.Client;
 using OpenTelemetry.OpAmp.Client.Settings;
 
 namespace TestApplication.Plugins;
@@ -23,7 +22,13 @@ public partial class Plugin : IPlugin, IOpAmpPlugin
         Console.WriteLine($"{nameof(settings.MaxPendingCustomMessageBytes)}: {settings.MaxPendingCustomMessageBytes}");
     }
 
-    public void AfterOpAmpClientStarted(OpAmpClient client)
+    public void ConfigureOpAmpClient(IOpAmpClient client)
+    {
+        ThrowIfMissing(client);
+        Console.WriteLine($"{nameof(Plugin)}.{nameof(ConfigureOpAmpClient)}() invoked.");
+    }
+
+    public void AfterOpAmpClientStarted()
     {
         Console.WriteLine($"{nameof(Plugin)}.{nameof(AfterOpAmpClientStarted)}() invoked.");
     }

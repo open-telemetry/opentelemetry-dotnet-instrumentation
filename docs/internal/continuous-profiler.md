@@ -34,6 +34,22 @@ configuration or lifecycle state. Repeated Seeds report that process startup
 was already committed, while a Seed arriving after ControlPlane authority is
 ignored as lower authority.
 
+Managed startup translates the plugin configuration into a complete Seed and
+sets up the configured exporter. Each CPU batch carries the sampling interval
+used to produce it. The managed reader passes that interval to the exporter.
+On .NET Framework, each AppDomain tracks its Activity context. Prepared readers
+share a process-wide mutex, so one AppDomain consumes native buffers at a time.
+Readers take and retain the mutex only while they have exporters for every
+currently enabled native sampler. A reader releases it when a runtime update
+makes its exporters incompatible, allowing a compatible AppDomain to take over.
+Takeover after AppDomain unload also requires a compatible exporter. A canary
+thread supports periodic stack capture in the active reader's AppDomain.
+
+The managed reader requires the native runtime sampler configuration and V2
+thread-sample exports. An older native profiler cannot report the committed
+configuration or the sampling interval of each batch, so managed profiling
+initialization fails instead of publishing an unverified period.
+
 Interop callers must initialize
 `RuntimeSamplerConfiguration.structureSize` to
 `sizeof(RuntimeSamplerConfiguration)` (16 bytes) and
@@ -423,16 +439,17 @@ the first one will be used. Other will be ignored.
 
 ### Exporter contract
 
-Two methods has to be implemented by Exporter
+Exporters implement `IContinuousProfilerExporter`:
 
 ```csharp
-public void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken);
+public void ExportThreadSamples(byte[] buffer, int read, uint samplingInterval, CancellationToken cancellationToken);
 public void ExportAllocationSamples(byte[] buffer, int read, CancellationToken cancellationToken);
 ```
 
-Both accept buffer produced by the native code, the length of filled
-data, and cancellation token.
-The Exporter is responsible both for parsing this buffer and exporting it.
+The interval is in milliseconds and belongs to that exact native batch. Use it
+for the exported profile period, since runtime configuration may change between
+batches. Both methods receive the native buffer, its filled length, and a
+cancellation token. The exporter parses the buffer and exports the data.
 
 Example: [`OtlpOverHttpExporter`](../../test/test-applications/integrations/TestApplication.ContinuousProfiler/Exporter/OtlpOverHttpExporter.cs).
 

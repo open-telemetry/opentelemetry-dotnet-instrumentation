@@ -11,8 +11,8 @@ internal sealed class SqlClientTracerInitializer : SqlClientInitializer
 
     private int _initialized;
 
-    public SqlClientTracerInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
-        : base(lazyInstrumentationLoader, nameof(SqlClientTracerInitializer))
+    public SqlClientTracerInitializer(PluginManager pluginManager)
+        : base(nameof(SqlClientTracerInitializer))
     {
         _pluginManager = pluginManager;
     }

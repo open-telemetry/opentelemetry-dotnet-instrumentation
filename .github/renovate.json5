@@ -6,6 +6,7 @@
   dependencyDashboard: false,
   extends: [
     "config:best-practices",
+    "customManagers:githubActionsVersions",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
   labels: ["dependencies"],
