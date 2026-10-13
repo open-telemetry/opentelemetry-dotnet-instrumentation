@@ -166,7 +166,8 @@ const WSTRING& TracerTokens::GetCallTargetRefStructType()
 
 HRESULT TracerTokens::EnsureBaseCalltargetTokens()
 {
-    auto hr = CallTargetTokens::EnsureBaseCalltargetTokens();
+    std::lock_guard<std::recursive_mutex> guard(metadata_mutex);
+    auto                                  hr = CallTargetTokens::EnsureBaseCalltargetTokens();
     if (FAILED(hr))
     {
         return hr;

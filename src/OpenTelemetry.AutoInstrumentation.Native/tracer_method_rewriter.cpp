@@ -434,7 +434,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
 
     // *** BeginMethod exception handling clause
     EHClause beginMethodExClause{};
-    if (m_corProfiler->call_target_bubble_up_exception_available)
+    if (beginMethodFilter != nullptr)
     {
         beginMethodExClause.m_Flags         = COR_ILEXCEPTION_CLAUSE_FILTER;
         beginMethodExClause.m_pTryBegin     = firstInstruction;
@@ -585,7 +585,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     // *** EndMethod exception filter
     ILInstr* endMethodFilter          = nullptr;
     ILInstr* endMethodCatchFirstInstr = nullptr;
-    if (m_corProfiler->call_target_bubble_up_exception_available)
+    if (m_corProfiler->call_target_bubble_up_exception_available && bubbleup_exception_typeref != mdTypeRefNil)
     {
         endMethodFilter =
             CreateFilterForException(&reWriterWrapper, tracerTokens->GetExceptionTypeRef(),
@@ -602,7 +602,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
 
     // *** EndMethod exception handling clause
     EHClause endMethodExClause{};
-    if (m_corProfiler->call_target_bubble_up_exception_available)
+    if (endMethodFilter != nullptr)
     {
         endMethodExClause.m_Flags         = COR_ILEXCEPTION_CLAUSE_FILTER;
         endMethodExClause.m_pTryBegin     = endMethodTryStartInstr;

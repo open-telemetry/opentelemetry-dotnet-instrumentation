@@ -32,7 +32,6 @@ class CallTargetTokens
 private:
     ModuleMetadata* module_metadata_ptr = nullptr;
     const WSTRING   bytecode_instrumentation_name;
-    std::mutex metadata_mutex;
 
     // CorLib tokens
     std::atomic<mdAssemblyRef> corLibAssemblyRef{mdAssemblyRefNil};
@@ -65,6 +64,7 @@ private:
                                                const TypeInfo* currentType, ILInstr** instruction);
 
 protected:
+    std::recursive_mutex metadata_mutex;
     // CallTarget tokens
     std::atomic<mdAssemblyRef> profilerAssemblyRef{mdAssemblyRefNil};
 
