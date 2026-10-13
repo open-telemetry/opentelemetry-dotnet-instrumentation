@@ -34,6 +34,23 @@ public class Command
         Thread.Yield();
     }
 
+#if NET
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public void UseSpan(Span<int> value)
+    {
+        value[0]++;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public void UseReadOnlySpan(ReadOnlySpan<int> value) => Console.WriteLine(value[0]);
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public void UseByRefSpan(ref Span<int> value)
+    {
+        value[0]++;
+    }
+#endif
+
     public void InstrumentationTargetMissingBytecodeInstrumentationType()
     {
         Thread.Sleep(0); // Just to have some call to outside code.

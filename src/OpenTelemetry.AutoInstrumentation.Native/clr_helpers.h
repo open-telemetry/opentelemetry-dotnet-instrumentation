@@ -18,6 +18,25 @@
 
 namespace trace
 {
+class ModuleMetadataBase
+{
+public:
+    const ComPtr<IMetaDataImport2>        metadata_import{};
+    const ComPtr<IMetaDataEmit2>          metadata_emit{};
+    const ComPtr<IMetaDataAssemblyImport> assembly_import{};
+    const ComPtr<IMetaDataAssemblyEmit>   assembly_emit{};
+
+    ModuleMetadataBase(ComPtr<IMetaDataImport2>        metadata_import,
+                       ComPtr<IMetaDataEmit2>          metadata_emit,
+                       ComPtr<IMetaDataAssemblyImport> assembly_import,
+                       ComPtr<IMetaDataAssemblyEmit>   assembly_emit)
+        : metadata_import(metadata_import)
+        , metadata_emit(metadata_emit)
+        , assembly_import(assembly_import)
+        , assembly_emit(assembly_emit)
+    {
+    }
+};
 class ModuleMetadata;
 
 const size_t kNameMaxSize = 1024;
@@ -435,7 +454,7 @@ struct TypeSignature
     ULONG offset;
     ULONG length;
     PCCOR_SIGNATURE pbBase;
-    mdToken GetTypeTok(ComPtr<IMetaDataEmit2>& pEmit, mdAssemblyRef corLibRef) const;
+    mdToken GetTypeTok(const ComPtr<IMetaDataEmit2>& pEmit, mdAssemblyRef corLibRef) const;
     WSTRING GetTypeTokName(ComPtr<IMetaDataImport2>& pImport) const;
     std::tuple<unsigned, int> GetElementTypeAndFlags() const;
     ULONG GetSignature(PCCOR_SIGNATURE& data) const;
@@ -671,6 +690,56 @@ bool ParseParamOrLocal(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd);
 // RetType ::= CustomMod* ( VOID | TYPEDBYREF | [BYREF] Type )
 // CustomMod* TYPEDBYREF we don't support
 bool ParseRetType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd);
+struct GenericTypeProps
+{
+private:
+    PCCOR_SIGNATURE pbBase;
+    ULONG           len;
+
+public:
+    unsigned char SpecElementType = 0;  // Element type of the TypeSpec. e.g GENERICINST, VAR, MVAR, SZARRAY etc.
+    mdToken OpenTypeToken = mdTokenNil; // Token of the open generic type, can be TypeDef or TypeRef. In any case except
+                                        // CLASS or VALUETYPE, this will be mdTokenNil.
+    unsigned char GenericElementType =
+        0; // Element type of the generic type, can be any valid element type. e.g. OBJECT, CLASS, VALUETYPE etc.
+    unsigned ParamsCount       = 0; // Number of generic type args. e.g. GenericClass<T,V> params count will be 2.
+    unsigned IndexOfFirstParam = 0; // Index (the offset in signature) of the first generic parameter type.
+    unsigned ParamPosition     = 0; // For VAR and MVAR will be the number in the generic type parameters.
+    std::vector<std::tuple<PCCOR_SIGNATURE, ULONG, unsigned char>> ParamsSignature; // Collection of tuple(signature,
+                                                                                    // length) for each generic
+                                                                                    // parameter type.
+
+    GenericTypeProps(PCCOR_SIGNATURE pb, ULONG len) : pbBase(pb), len(len) {}
+
+    HRESULT TryParse();
+};
+
+HRESULT IsByRefLike(const ComPtr<IMetaDataImport2>& metadataImport,
+                    mdTypeDef                       typeDefToken,
+                    bool&                           hasByRefLikeAttribute);
+HRESULT ResolveTypeInternal(ICorProfilerInfo4*           info,
+                            const std::vector<ModuleID>& loadedModules,
+                            const std::vector<WCHAR>&    refTypeName,
+                            mdToken                      parentToken,
+                            const WSTRING&               resolutionScopeName,
+                            mdTypeDef&                   resolvedTypeDefToken,
+                            ComPtr<IMetaDataImport2>&    resolvedMetadataImport);
+HRESULT ResolveType(ICorProfilerInfo4*                     info,
+                    const ComPtr<IMetaDataImport2>&        metadataImport,
+                    const ComPtr<IMetaDataAssemblyImport>& assemblyImport,
+                    mdTypeRef                              typeRefToken,
+                    mdTypeDef&                             resolvedTypeDefToken,
+                    ComPtr<IMetaDataImport2>&              resolvedMetadataImport);
+HRESULT IsTypeByRefLike(ICorProfilerInfo4*        info,
+                        const ModuleMetadataBase& metadata,
+                        const TypeSignature&      signature,
+                        const mdAssemblyRef&      corLibAssemblyRef,
+                        bool&                     isByRefLike);
+HRESULT IsTypeTokenByRefLike(ICorProfilerInfo4*        info,
+                             const ModuleMetadataBase& metadata,
+                             mdToken                   token,
+                             bool&                     isByRefLike);
+
 } // namespace trace
 
 #endif // OTEL_CLR_PROFILER_CLR_HELPERS_H_

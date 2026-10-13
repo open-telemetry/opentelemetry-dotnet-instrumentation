@@ -105,6 +105,9 @@ public class NoCodeTests : TestHelper
         collector.ExpectNoCode("Span-NestedValueType");
         collector.ExpectNoCode("Span-GenericParentNestedReferenceType");
         collector.ExpectNoCode("Span-GenericParentNestedValueType");
+        collector.ExpectNoCode("Span-RefStructValue");
+        collector.ExpectNoCode("Span-ByRefStructValue");
+        collector.ExpectNoCode("Span-MixedRefStructValues");
 
         // Dynamic attribute tests - extracting values from method parameters
         List<KeyValue> processOrderAttributes =

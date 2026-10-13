@@ -331,4 +331,14 @@ public static class CallTargetInvoker
     /// <returns>Default value of T</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T? GetDefaultValue<T>() => default;
+
+    /// <summary>
+    /// Creates a CallTarget container for a ref struct during a synchronous callback.
+    /// </summary>
+    /// <param name="refStructPointer">The pointer to the ref struct on the caller's stack.</param>
+    /// <param name="refStructTypeHandle">The runtime type handle of the ref struct.</param>
+    /// <returns>The ref struct container.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static unsafe CallTargetRefStruct CreateRefStruct(void* refStructPointer, RuntimeTypeHandle refStructTypeHandle)
+        => CallTargetRefStruct.Create(refStructPointer, refStructTypeHandle);
 }

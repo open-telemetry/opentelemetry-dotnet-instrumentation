@@ -107,7 +107,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     ModuleID        module_id       = moduleHandler->GetModuleId();
     ModuleMetadata& module_metadata = *moduleHandler->GetModuleMetadata();
     FunctionInfo*   caller          = methodHandler->GetFunctionInfo();
-    TracerTokens*   tracerTokens = module_metadata.GetTracerTokens(m_corProfiler->GetBytecodeInstrumentationAssembly());
+    TracerTokens*   tracerTokens = module_metadata.GetTracerTokens(m_corProfiler->GetBytecodeInstrumentationAssembly(), m_corProfiler->info_);
     mdToken         function_token                = caller->id;
     TypeSignature   retFuncArg                    = caller->method_signature.GetReturnValue();
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
@@ -182,13 +182,13 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     ULONG              exceptionIndex        = static_cast<ULONG>(ULONG_MAX);
     ULONG              callTargetReturnIndex = static_cast<ULONG>(ULONG_MAX);
     ULONG              returnValueIndex      = static_cast<ULONG>(ULONG_MAX);
-    std::vector<ULONG> additionalLocalIndices(tracerTokens->GetAdditionalLocalsCount());
+    std::vector<ULONG> additionalLocalIndices(tracerTokens->GetAdditionalLocalsCount(methodArguments));
     mdToken            callTargetStateToken  = mdTokenNil;
     mdToken            exceptionToken        = mdTokenNil;
     mdToken            callTargetReturnToken = mdTokenNil;
     ILInstr*           firstInstruction      = nullptr;
     auto               returnType            = caller->method_signature.GetReturnValue();
-    hr = tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, &returnType, &callTargetStateIndex,
+    hr = tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, &returnType, &methodArguments, &callTargetStateIndex,
                                                    &exceptionIndex, &callTargetReturnIndex, &returnValueIndex,
                                                    &callTargetStateToken, &exceptionToken, &callTargetReturnToken,
                                                    &firstInstruction, additionalLocalIndices);
@@ -204,6 +204,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
 
     ULONG beginMethodExceptionIndex = additionalLocalIndices[0];
     ULONG endMethodExceptionIndex   = additionalLocalIndices[1];
+    const auto refStructIndexes          = additionalLocalIndices.data() + 2;
 
     // ***
     // BEGIN METHOD PART
@@ -266,6 +267,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     // *** Load the method arguments to the stack
     if (is_integration_method)
     {
+        int structRefCount = 0;
         if (numArgs < FASTPATH_COUNT)
         {
             // Load the arguments directly (FastPath)
@@ -281,6 +283,16 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
                     else
                     {
                         reWriterWrapper.LoadArgumentRef(i + (isStatic ? 0 : 1));
+                    }
+                    bool isByRefLike = false;
+                    if (SUCCEEDED(IsTypeByRefLike(m_corProfiler->info_, module_metadata, methodArguments[i],
+                                                  tracerTokens->GetCorLibAssemblyRef(), isByRefLike)) &&
+                        isByRefLike)
+                    {
+                        const auto argumentToken =
+                            methodArguments[i].GetTypeTok(metaEmit, tracerTokens->GetCorLibAssemblyRef());
+                        IfFailRet(tracerTokens->WriteRefStructCall(&reWriterWrapper, argumentToken,
+                                                                   refStructIndexes[structRefCount++]));
                     }
                 }
                 else

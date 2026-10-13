@@ -23,6 +23,12 @@ internal static class Program
         VerifyBubbleUpException(command.BubbleUpOnEnd, nameof(Command.BubbleUpOnEnd), expectedWrapped: true);
         command.WrapBubbleUpExceptions = false;
         command.IgnoreRegularIntegrationException();
+#if NET
+        Span<int> span = stackalloc int[] { 40 };
+        command.UseSpan(span);
+        command.UseReadOnlySpan(span);
+        command.UseByRefSpan(ref span);
+#endif
         Console.WriteLine("Regular integration exception was swallowed.");
         command.InstrumentationTargetMissingBytecodeInstrumentationType();
         command.InstrumentationTargetMissingBytecodeInstrumentationMethod();

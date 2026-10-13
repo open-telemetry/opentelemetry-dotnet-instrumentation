@@ -52,7 +52,9 @@ private:
     mdMemberRef GetCallTargetReturnValueDefaultMemberRef(mdTypeSpec callTargetReturnTypeSpec);
     mdMethodSpec GetCallTargetDefaultValueMethodSpec(const TypeSignature* methodArgument);
 
-    HRESULT ModifyLocalSig(ILRewriter* reWriter, TypeSignature* methodReturnValue, ULONG* callTargetStateIndex,
+    HRESULT ModifyLocalSig(ILRewriter* reWriter, TypeSignature* methodReturnValue,
+                           const std::vector<TypeSignature>* methodTypeArguments,
+                           ULONG* callTargetStateIndex,
                            ULONG* exceptionIndex, ULONG* callTargetReturnIndex, ULONG* returnValueIndex,
                            mdToken* callTargetStateToken, mdToken* exceptionToken, mdToken* callTargetReturnToken,
                            std::vector<ULONG>& additionalLocalIndices);
@@ -73,6 +75,7 @@ protected:
     mdTypeRef  callTargetStateTypeRef         = mdTypeRefNil;
     mdTypeRef  callTargetReturnVoidTypeRef    = mdTypeRefNil;
     mdTypeRef  callTargetReturnTypeRef        = mdTypeRefNil;
+    mdTypeRef  callTargetRefStructTypeRef     = mdTypeRefNil;
     mdTypeRef  exTypeRef                      = mdTypeRefNil;
 
     ModuleMetadata* GetMetadata();
@@ -83,13 +86,16 @@ protected:
     virtual const WSTRING& GetCallTargetStateType()         = 0;
     virtual const WSTRING& GetCallTargetReturnType()        = 0;
     virtual const WSTRING& GetCallTargetReturnGenericType() = 0;
-    virtual void AddAdditionalLocals(COR_SIGNATURE (&signatureBuffer)[500], ULONG& signatureOffset,
+    virtual const WSTRING& GetCallTargetRefStructType()     = 0;
+    virtual void AddAdditionalLocals(TypeSignature*                    methodReturnValue,
+                                               const std::vector<TypeSignature>* methodTypeArguments,
+                                               COR_SIGNATURE (&signatureBuffer)[500], ULONG& signatureOffset,
                                      ULONG& signatureSize);
 
     CallTargetTokens(ModuleMetadata* moduleMetadataPtr, const WSTRING& bytecodeInstrumentationName);
 
 public:
-    virtual int GetAdditionalLocalsCount();
+    virtual int GetAdditionalLocalsCount(const std::vector<TypeSignature>& methodTypeArguments);
 
     mdTypeRef GetObjectTypeRef();
     mdTypeRef GetExceptionTypeRef();
@@ -99,6 +105,7 @@ public:
     mdToken GetCurrentTypeRef(const TypeInfo* currentType, bool& isValueType);
 
     HRESULT ModifyLocalSigAndInitialize(void* rewriterWrapperPtr, TypeSignature* methodReturnType,
+                                        const std::vector<TypeSignature>* methodTypeArguments,
                                         ULONG* callTargetStateIndex, ULONG* exceptionIndex,
                                         ULONG* callTargetReturnIndex, ULONG* returnValueIndex,
                                         mdToken* callTargetStateToken, mdToken* exceptionToken,
