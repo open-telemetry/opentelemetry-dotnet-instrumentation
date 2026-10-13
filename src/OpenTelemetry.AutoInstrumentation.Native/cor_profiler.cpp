@@ -1763,6 +1763,13 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
             return S_OK;
         }
 
+        // Costura must finish resolving embedded assemblies before loading instrumentation.
+        if (caller.type.name == WStr("Costura.AssemblyLoader"))
+        {
+            Logger::Debug("JITCompilationStarted: Skipping loader injection in Costura.AssemblyLoader.");
+            return S_OK;
+        }
+
         bool domain_neutral_assembly = runtime_information_.is_desktop() && corlib_module_loaded &&
                                        module_metadata->app_domain_id == corlib_app_domain_id;
         Logger::Info("JITCompilationStarted: Startup hook registered in function_id=", function_id,
