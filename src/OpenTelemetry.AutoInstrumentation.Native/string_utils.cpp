@@ -47,16 +47,16 @@ std::string ToString(const WCHAR* wstr, std::size_t nbChars)
     if (nbChars == 0)
         return std::string();
 
-    std::string tmpStr(tmp_buffer_size, 0);
-    int         size_needed =
-        WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, &tmpStr[0], tmp_buffer_size, nullptr, nullptr);
-    if (size_needed < tmp_buffer_size)
+    char tmpStr[tmp_buffer_size];
+    int  charsWritten = WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, tmpStr, tmp_buffer_size, nullptr, nullptr);
+    if (charsWritten < tmp_buffer_size && charsWritten != 0)
     {
-        return tmpStr.substr(0, size_needed);
+        return std::string(tmpStr, charsWritten);
     }
 
-    std::string strTo(size_needed, 0);
-    WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, &strTo[0], size_needed, nullptr, nullptr);
+    const auto  sizeNeeded = WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, nullptr, 0, nullptr, nullptr);
+    std::string strTo(sizeNeeded, 0);
+    WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, strTo.data(), sizeNeeded, nullptr, nullptr);
     return strTo;
 #else
     // WCHAR is UTF-16 on non-Windows platforms in the CoreCLR PAL.
@@ -86,15 +86,16 @@ WSTRING ToWSTRING(const std::string& str)
     if (str.empty())
         return std::wstring();
 
-    std::wstring tmpStr(tmp_buffer_size, 0);
-    int          size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &tmpStr[0], tmp_buffer_size);
-    if (size_needed < tmp_buffer_size)
+    WCHAR tmpStr[tmp_buffer_size];
+    int   charsWritten = MultiByteToWideChar(CP_UTF8, 0, str.data(), (int)str.size(), tmpStr, tmp_buffer_size);
+    if (charsWritten < tmp_buffer_size && charsWritten != 0)
     {
-        return tmpStr.substr(0, size_needed);
+        return WSTRING(tmpStr, charsWritten);
     }
 
-    std::wstring wstrTo(size_needed, 0);
-    MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
+    const auto sizeNeeded = MultiByteToWideChar(CP_UTF8, 0, str.data(), (int)str.size(), nullptr, 0);
+    WSTRING    wstrTo(sizeNeeded, 0);
+    MultiByteToWideChar(CP_UTF8, 0, str.data(), (int)str.size(), wstrTo.data(), sizeNeeded);
     return wstrTo;
 #else
     auto ustr = miniutf::to_utf16(str);
