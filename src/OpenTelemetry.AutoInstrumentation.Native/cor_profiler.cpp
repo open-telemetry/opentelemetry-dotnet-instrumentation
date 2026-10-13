@@ -3842,11 +3842,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ReJITError(ModuleID    moduleId,
                                                   FunctionID  functionId,
                                                   HRESULT     hrStatus)
 {
-    if (!is_attached_)
-    {
-        Logger::Warn("ReJITError: [functionId: ", functionId, ", moduleId: ", moduleId, ", methodId: ", methodId,
-                     ", hrStatus: ", HResultStr(hrStatus), "]");
-    }
+    Logger::Warn("ReJITError: [functionId: ", functionId, ", moduleId: ", moduleId, ", methodId: ", methodId,
+                 ", hrStatus: ", HResultStr(hrStatus), "]");
 
     return S_OK;
 }
