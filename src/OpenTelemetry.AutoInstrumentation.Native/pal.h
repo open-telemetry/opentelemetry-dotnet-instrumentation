@@ -33,6 +33,22 @@ namespace trace
 {
 
 template <class TLoggerPolicy>
+inline std::filesystem::path GetDefaultLogDirectory()
+{
+#ifdef _WIN32
+    std::filesystem::path program_data_path = GetEnvironmentValue(WStr("PROGRAMDATA"));
+    if (program_data_path.empty())
+    {
+        program_data_path = WStr(R"(C:\ProgramData)");
+    }
+
+    return program_data_path / TLoggerPolicy::folder_path;
+#else
+    return WStr("/var/log/opentelemetry/dotnet/");
+#endif
+}
+
+template <class TLoggerPolicy>
 inline WSTRING GetOpenTelemetryLogFilePath(const std::string& file_name_suffix)
 {
     const auto file_name = TLoggerPolicy::file_name + file_name_suffix + ".log";
@@ -43,20 +59,8 @@ inline WSTRING GetOpenTelemetryLogFilePath(const std::string& file_name_suffix)
     {
         return PATH_TO_WSTRING(directory / file_name);
     }
-#ifdef _WIN32
-    std::filesystem::path program_data_path;
-    program_data_path = GetEnvironmentValue(WStr("PROGRAMDATA"));
 
-    if (program_data_path.empty())
-    {
-        program_data_path = WStr(R"(C:\ProgramData)");
-    }
-
-    return PATH_TO_WSTRING(program_data_path / TLoggerPolicy::folder_path  / file_name);
-#else
-    std::filesystem::path program_data_path = WStr("/var/log/opentelemetry/dotnet/");
-    return PATH_TO_WSTRING(program_data_path / file_name);
-#endif
+    return PATH_TO_WSTRING(GetDefaultLogDirectory<TLoggerPolicy>() / file_name);
 }
 
 inline WSTRING GetCurrentProcessName()

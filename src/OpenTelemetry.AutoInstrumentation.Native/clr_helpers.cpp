@@ -213,7 +213,7 @@ ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id)
     return {module_id, WSTRING(module_path), GetAssemblyInfo(info, assembly_id), module_flags};
 }
 
-TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdToken& token)
+TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdToken& token_)
 {
     mdToken                   parent_token      = mdTokenNil;
     std::shared_ptr<TypeInfo> parentTypeInfo    = nullptr;
@@ -226,79 +226,98 @@ TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdTo
     bool                      type_valueType = false;
     bool                      type_isGeneric = false;
 
-    HRESULT    hr         = E_FAIL;
-    const auto token_type = TypeFromToken(token);
+    HRESULT           hr              = E_FAIL;
+    auto              token           = token_;
+    mdTypeSpec        outer_type_spec = mdTypeSpecNil;
+    std::set<mdToken> processed;
 
-    switch (token_type)
+    while (token != mdTokenNil)
     {
-        case mdtTypeDef:
-            hr = metadata_import->GetTypeDefProps(token, type_name, kNameMaxSize, &type_name_len, &type_flags,
-                                                  &type_extends);
-
-            metadata_import->GetNestedClassProps(token, &parent_type_token);
-            if (parent_type_token != mdTokenNil)
-            {
-                parentTypeInfo = std::make_shared<TypeInfo>(GetTypeInfo(metadata_import, parent_type_token));
-            }
-
-            if (type_extends != mdTokenNil)
-            {
-                extendsInfo = std::make_shared<TypeInfo>(GetTypeInfo(metadata_import, type_extends));
-                type_valueType =
-                    extendsInfo->name == WStr("System.ValueType") || extendsInfo->name == WStr("System.Enum");
-            }
-            break;
-        case mdtTypeRef:
-            hr = metadata_import->GetTypeRefProps(token, &parent_token, type_name, kNameMaxSize, &type_name_len);
-            break;
-        case mdtTypeSpec:
+        const auto token_type = TypeFromToken(token);
+        switch (token_type)
         {
-            PCCOR_SIGNATURE signature{};
-            ULONG           signature_length{};
+            case mdtTypeDef:
+                hr = metadata_import->GetTypeDefProps(token, type_name, kNameMaxSize, &type_name_len, &type_flags,
+                                                      &type_extends);
 
-            hr = metadata_import->GetTypeSpecFromToken(token, &signature, &signature_length);
+                metadata_import->GetNestedClassProps(token, &parent_type_token);
+                if (parent_type_token != mdTokenNil)
+                {
+                    parentTypeInfo = std::make_shared<TypeInfo>(GetTypeInfo(metadata_import, parent_type_token));
+                }
 
-            if (FAILED(hr) || signature_length < 3)
+                if (type_extends != mdTokenNil)
+                {
+                    extendsInfo = std::make_shared<TypeInfo>(GetTypeInfo(metadata_import, type_extends));
+                    type_valueType =
+                        extendsInfo->name == WStr("System.ValueType") || extendsInfo->name == WStr("System.Enum");
+                }
+                break;
+            case mdtTypeRef:
+                hr = metadata_import->GetTypeRefProps(token, &parent_token, type_name, kNameMaxSize, &type_name_len);
+                break;
+            case mdtTypeSpec:
             {
-                return {};
-            }
+                PCCOR_SIGNATURE signature{};
+                ULONG           signature_length{};
 
-            if (signature[0] & ELEMENT_TYPE_GENERICINST)
-            {
-                mdToken type_token;
-                CorSigUncompressToken(&signature[2], &type_token);
-                const auto baseType = GetTypeInfo(metadata_import, type_token);
-                return {baseType.id,        baseType.name,        token,
-                        token_type,         baseType.extend_from, baseType.valueType,
-                        baseType.isGeneric, baseType.parent_type, baseType.scopeToken};
+                hr = metadata_import->GetTypeSpecFromToken(token, &signature, &signature_length);
+                if (FAILED(hr) || signature_length < 3)
+                {
+                    return {};
+                }
+
+                if (signature[0] & ELEMENT_TYPE_GENERICINST)
+                {
+                    if (!processed.insert(token).second)
+                    {
+                        return {};
+                    }
+
+                    mdToken type_token;
+                    CorSigUncompressToken(&signature[2], &type_token);
+                    if (outer_type_spec == mdTypeSpecNil)
+                    {
+                        outer_type_spec = token;
+                    }
+
+                    token = type_token;
+                    continue;
+                }
             }
+            break;
+            case mdtModuleRef:
+                metadata_import->GetModuleRefProps(token, type_name, kNameMaxSize, &type_name_len);
+                break;
+            case mdtMemberRef:
+                return GetFunctionInfo(metadata_import, token).type;
+                break;
+            case mdtMethodDef:
+                return GetFunctionInfo(metadata_import, token).type;
+                break;
         }
-        break;
-        case mdtModuleRef:
-            metadata_import->GetModuleRefProps(token, type_name, kNameMaxSize, &type_name_len);
-            break;
-        case mdtMemberRef:
-            return GetFunctionInfo(metadata_import, token).type;
-            break;
-        case mdtMethodDef:
-            return GetFunctionInfo(metadata_import, token).type;
-            break;
-    }
-    if (FAILED(hr) || type_name_len == 0)
-    {
-        return {};
+
+        if (FAILED(hr) || type_name_len == 0)
+        {
+            return {};
+        }
+
+        const auto type_name_string    = WSTRING(type_name);
+        const auto generic_token_index = type_name_string.rfind(WStr("`"));
+        if (generic_token_index != std::string::npos)
+        {
+            const auto idxFromRight = type_name_string.length() - generic_token_index - 1;
+            type_isGeneric          = idxFromRight == 1 || idxFromRight == 2;
+        }
+
+        return {token,           type_name_string,
+                outer_type_spec, outer_type_spec != mdTypeSpecNil ? mdtTypeSpec : token_type,
+                extendsInfo,     type_valueType,
+                type_isGeneric,  parentTypeInfo,
+                parent_token};
     }
 
-    const auto type_name_string    = WSTRING(type_name);
-    const auto generic_token_index = type_name_string.rfind(WStr("`"));
-    if (generic_token_index != std::string::npos)
-    {
-        const auto idxFromRight = type_name_string.length() - generic_token_index - 1;
-        type_isGeneric          = idxFromRight == 1 || idxFromRight == 2;
-    }
-
-    return {token,          type_name_string, mdTypeSpecNil,  token_type,  extendsInfo,
-            type_valueType, type_isGeneric,   parentTypeInfo, parent_token};
+    return {};
 }
 
 // Searches for an AssemblyRef whose name and version match exactly.

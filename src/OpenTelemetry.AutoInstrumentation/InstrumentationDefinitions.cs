@@ -7,6 +7,16 @@ internal static partial class InstrumentationDefinitions
 {
     internal static readonly string AssemblyFullName = typeof(InstrumentationDefinitions).Assembly.FullName!;
 
+    internal static SharedPayload GetSharedDefinitions()
+    {
+        return new SharedPayload
+        {
+            // Fixed Id for definitions payload (to avoid loading the same integrations from multiple AppDomains).
+            DefinitionsId = "57D20C392035423F9F58419EDE286903",
+            Definitions = GetSharedDefinitionsArray(),
+        };
+    }
+
     internal static Payload GetAllDefinitions()
     {
         return new Payload
@@ -48,5 +58,12 @@ internal static partial class InstrumentationDefinitions
         public string DefinitionsId { get; set; }
 
         public NativeCallTargetDefinition[] Definitions { get; set; }
+    }
+
+    internal struct SharedPayload
+    {
+        public string DefinitionsId { get; set; }
+
+        public NativeCallTargetDefinition2[] Definitions { get; set; }
     }
 }

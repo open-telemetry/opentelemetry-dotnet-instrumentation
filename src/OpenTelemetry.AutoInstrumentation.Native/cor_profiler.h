@@ -22,6 +22,7 @@
 #include "rejit_preprocessor.h"
 #include "rejit_handler.h"
 #include "runtime_sampler_configuration.h"
+#include "Synchronized.hpp"
 #include <unordered_set>
 #include "clr_helpers.h"
 // Forward declaration
@@ -39,8 +40,7 @@ private:
     RuntimeInformation runtime_information_;
     std::vector<IntegrationDefinition> integration_definitions_;
 
-    std::unordered_set<WSTRING> definitions_ids_;
-    std::mutex definitions_ids_lock_;
+    Synchronized<std::unordered_set<WSTRING>> definitions_ids;
 
     // Startup helper variables
     WSTRING home_path;
@@ -84,8 +84,7 @@ private:
     //
     // Module helper variables
     //
-    std::mutex module_ids_lock_;
-    std::vector<ModuleID> module_ids_;
+    Synchronized<std::vector<ModuleID>> module_ids;
 
     //
     // Methods only for .NET Framework
@@ -99,14 +98,14 @@ private:
     //
     // Loader methods. These are only used on the .NET Framework.
     //
-    HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, const ModuleID module_id, const mdToken function_token, const FunctionInfo& caller, const ModuleMetadata& module_metadata);
-    HRESULT GenerateLoaderMethod(const ModuleID module_id, mdMethodDef* ret_method_token);
+    HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, ModuleID module_id, mdToken function_token, const FunctionInfo& caller, const ModuleMetadata& module_metadata);
+    HRESULT GenerateLoaderMethod(ModuleID module_id, mdMethodDef* ret_method_token);
     HRESULT GenerateLoaderType(const ModuleID module_id,
                                mdTypeDef*     loader_type,
                                mdMethodDef*   init_method,
                                mdMethodDef*   patch_app_domain_setup_method);
     HRESULT ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef patch_app_domain_setup_method);
-    HRESULT AddIISPreStartInitFlags(const ModuleID module_id, const mdToken function_token);
+    HRESULT AddIISPreStartInitFlags(ModuleID module_id, mdToken function_token);
 #endif
 
     //
@@ -124,8 +123,8 @@ private:
     //
     // Helper methods
     //
-    void RewritingPInvokeMaps(const ModuleMetadata& module_metadata, const WSTRING& nativemethods_type_name);
-    HRESULT TryRejitModule(ModuleID module_id);
+    static void RewritingPInvokeMaps(const ModuleMetadata& module_metadata, const WSTRING& nativemethods_type_name);
+    HRESULT TryRejitModule(ModuleID module_id, std::vector<ModuleID>& modules);
     bool GetIntegrationTypeRef(ModuleMetadata& module_metadata, ModuleID module_id,
                                const IntegrationDefinition& integration_definition, mdTypeRef& integration_type_ref);
     bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);
@@ -236,6 +235,8 @@ public:
     void AddInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
     void AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
     void AddInterfaceInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
+    int RegisterCallTargetDefinitions(WCHAR* id, CallTargetDefinition2* items, int size,
+                                      std::uint32_t enabledCategories);
     void InitializeTraceMethods(WCHAR* id,
                                 WCHAR* integration_assembly_name_ptr,
                                 WCHAR* integration_type_name_ptr,

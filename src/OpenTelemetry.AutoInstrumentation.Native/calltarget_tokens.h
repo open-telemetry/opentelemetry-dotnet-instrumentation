@@ -30,6 +30,7 @@ class CallTargetTokens
 {
 private:
     ModuleMetadata* module_metadata_ptr = nullptr;
+    const WSTRING   bytecode_instrumentation_name;
 
     // CorLib tokens
     mdAssemblyRef corLibAssemblyRef = mdAssemblyRefNil;
@@ -85,7 +86,7 @@ protected:
     virtual void AddAdditionalLocals(COR_SIGNATURE (&signatureBuffer)[500], ULONG& signatureOffset,
                                      ULONG& signatureSize);
 
-    CallTargetTokens(ModuleMetadata* moduleMetadataPtr);
+    CallTargetTokens(ModuleMetadata* moduleMetadataPtr, const WSTRING& bytecodeInstrumentationName);
 
 public:
     virtual int GetAdditionalLocalsCount();

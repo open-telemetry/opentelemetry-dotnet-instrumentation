@@ -125,6 +125,8 @@ public class RabbitMqTests : TestHelper
         collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateConsumerSpan(span, "deliver"));
 
         collector.ExpectCollected(collected => ValidatePropagation(collected));
+        collector.ExpectAllCollected(collected =>
+            collected.Count(span => span.Scope.Name == "OpenTelemetry.AutoInstrumentation.RabbitMq") == 10);
 
         EnableBytecodeInstrumentation();
         RunTestApplication(new()

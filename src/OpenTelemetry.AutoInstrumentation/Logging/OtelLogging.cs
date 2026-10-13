@@ -147,6 +147,13 @@ internal static class OtelLogging
         }
     }
 
+    internal static string GetDefaultLogDirectory(bool isWindows)
+    {
+        return isWindows
+            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs")
+            : NixDefaultDirectory;
+    }
+
     private static IOtelLogger CreateLogger(string suffix)
     {
         if (!_configuredLogLevel.HasValue)
@@ -248,16 +255,7 @@ internal static class OtelLogging
 
             if (logDirectory == null)
             {
-                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                {
-                    var windowsDefaultDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");
-                    logDirectory = windowsDefaultDirectory;
-                }
-                else
-                {
-                    // Linux
-                    logDirectory = NixDefaultDirectory;
-                }
+                logDirectory = GetDefaultLogDirectory(Environment.OSVersion.Platform == PlatformID.Win32NT);
             }
 
             logDirectory = CreateDirectoryIfMissing(logDirectory) ?? Path.GetTempPath();
