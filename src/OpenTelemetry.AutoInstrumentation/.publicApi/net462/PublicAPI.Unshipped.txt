@@ -11,3 +11,4 @@ readonly OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Valu
 readonly OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Type -> System.Type!
 static OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Create(TProxy? value, System.Type! type) -> OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>
 static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetBubbleUpException.IsCallTargetBubbleUpException(System.Exception? exception) -> bool
+OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.GetInternalDuckTypedInstance<TReturn>() -> TReturn
