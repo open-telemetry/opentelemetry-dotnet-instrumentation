@@ -334,6 +334,7 @@
     <ClInclude Include="stub_generator.h" />
     <ClInclude Include="suspension_guards.h" />
     <ClInclude Include="thread_suspend.h" />
+    <ClInclude Include="thread_utils.h" />
     <ClInclude Include="tracer_tokens.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="version.h" />
@@ -373,6 +374,7 @@
     <ClCompile Include="stub_generator.cpp" />
     <ClCompile Include="suspension_guards.cpp" />
     <ClCompile Include="thread_suspend.cpp" />
+    <ClCompile Include="thread_utils.cpp" />
     <ClCompile Include="tracer_tokens.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>

@@ -5,6 +5,7 @@
 
 #include "rejit_work_offloader.h"
 #include "logger.h"
+#include "thread_utils.h"
 
 namespace trace
 {
@@ -54,6 +55,7 @@ bool RejitWorkOffloader::WaitForTermination()
 
 void RejitWorkOffloader::EnqueueThreadLoop(RejitWorkOffloader* offloader)
 {
+    Threads::SetNativeThreadName(WStr("OTel_rejit"));
     auto queue        = offloader->m_offloader_queue.get();
     auto profilerInfo = offloader->m_profilerInfo;
 

@@ -220,6 +220,7 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         rejit_handler.cpp
         rejit_preprocessor.cpp
         rejit_work_offloader.cpp
+        thread_utils.cpp
         runtime_sampler_configuration.cpp
         runtime_sampler_service.cpp
         environment_variables_util.cpp
