@@ -351,17 +351,23 @@ TEST_F(CLRHelperTest, FunctionLocalSignatureTryParse)
     }
 }
 
-TEST_F(CLRHelperTest, DoesNotFindDoubleNestedTypeDefsByName)
+TEST_F(CLRHelperTest, FindDoubleNestedTypeDefsByName)
 {
-    std::vector<std::wstring> expected_types = {L"TestApplication.ExampleLibrary.NotARealClass",
-                                                L"TestApplication.ExampleLibrary.FakeClient.Biscuit+Cookie+Raisin"};
+    mdTypeDef  typeDef = mdTypeDefNil;
+    const auto found   = FindTypeDefByName(WStr("TestApplication.ExampleLibrary.FakeClient.Biscuit+Cookie+Raisin"),
+                                           WStr("TestApplication.ExampleLibrary"), metadata_import_, typeDef);
+    EXPECT_TRUE(found);
+    EXPECT_NE(typeDef, mdTypeDefNil);
+}
 
-    for (auto& def : expected_types)
+TEST_F(CLRHelperTest, DoesNotFindMissingNestedTypeDefsByName)
+{
+    for (const auto& name : {WStr("TestApplication.ExampleLibrary.NotARealClass"),
+                             WStr("TestApplication.ExampleLibrary.FakeClient.Biscuit+Cookie+NotARealClass")})
     {
         mdTypeDef typeDef = mdTypeDefNil;
-        auto      found   = FindTypeDefByName(def, L"TestApplication.ExampleLibrary", metadata_import_, typeDef);
-        EXPECT_FALSE(found) << "Failed type is : " << def << std::endl;
-        EXPECT_EQ(typeDef, mdTypeDefNil) << "Failed type is : " << def << std::endl;
+        EXPECT_FALSE(FindTypeDefByName(name, WStr("TestApplication.ExampleLibrary"), metadata_import_, typeDef));
+        EXPECT_EQ(typeDef, mdTypeDefNil);
     }
 }
 
