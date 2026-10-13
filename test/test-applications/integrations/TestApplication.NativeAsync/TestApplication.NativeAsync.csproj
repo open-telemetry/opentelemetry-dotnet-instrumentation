@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <Features>$(Features);runtime-async=on</Features>
+    <EnablePreviewFeatures>true</EnablePreviewFeatures>
+    <!-- Runtime-async lowering uses the preview AsyncHelpers.Await API that this test intentionally exercises. -->
+    <NoWarn>$(NoWarn);CA2252</NoWarn>
+    <!-- AsyncHelpers is evaluation-only; SYSLIB5007 requires explicit suppression to compile runtime-async methods. -->
+    <NoWarn>$(NoWarn);SYSLIB5007</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="config.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <ProjectReference Include="..\dependency-libs\TestLibrary.NativeAsync\TestLibrary.NativeAsync.csproj" />
+  </ItemGroup>
+</Project>
