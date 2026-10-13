@@ -21,6 +21,7 @@
 #include "il_rewriter_wrapper.h"
 #include "stub_generator.h"
 #include "integration.h"
+#include "tracer_integration_definition.h"
 #include "logger.h"
 #include "metadata_builder.h"
 #include "module_metadata.h"

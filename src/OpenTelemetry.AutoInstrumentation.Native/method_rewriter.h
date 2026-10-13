@@ -31,27 +31,11 @@ public:
     }
 
     virtual HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler,
-                            ICorProfilerFunctionControl* pFunctionControl) = 0;
+                            ICorProfilerFunctionControl* pFunctionControl, ICorProfilerInfo* corProfilerInfo) = 0;
 
     virtual ~MethodRewriter() = default;
 };
 
-
-class TracerMethodRewriter : public MethodRewriter
-{
-private:
-    ILInstr* CreateFilterForException(ILRewriterWrapper* rewriter, mdTypeRef exceptionTypeRef,
-                                     mdTypeRef bubbleUpExceptionTypeRef, mdMemberRef containsCallTargetBubbleUpException,
-                                     ULONG exceptionValueIndex);
-
-public:
-    explicit TracerMethodRewriter(CorProfiler* corProfiler) : MethodRewriter(corProfiler)
-    {
-    }
-
-    HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler,
-                    ICorProfilerFunctionControl* pFunctionControl) override;
-};
 
 } // namespace trace
 
