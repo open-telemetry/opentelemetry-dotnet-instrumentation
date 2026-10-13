@@ -7,6 +7,8 @@ namespace TestLibrary.InstrumentationTarget;
 
 public class Command
 {
+    public bool WrapBubbleUpExceptions { get; set; }
+
     [MethodImpl(MethodImplOptions.NoInlining)]
 #pragma warning disable CA1822 // Mark members as static
     public void Execute()

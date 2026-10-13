@@ -858,7 +858,14 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id, std::vector<ModuleID>& m
             RewritingPInvokeMaps(module_metadata, nonwindows_nativemethods_type);
 #endif // _WIN32
 
-            call_target_bubble_up_exception_available = EnsureCallTargetBubbleUpExceptionTypeAvailable(module_metadata);
+            mdTypeDef bubbleUpTypeDef;
+            call_target_bubble_up_exception_available =
+                EnsureCallTargetBubbleUpExceptionTypeAvailable(module_metadata, &bubbleUpTypeDef);
+            if (call_target_bubble_up_exception_available)
+            {
+                call_target_bubble_up_exception_function_available =
+                    EnsureIsCallTargetBubbleUpExceptionFunctionAvailable(module_metadata, bubbleUpTypeDef);
+            }
         }
 
         if (Logger::IsDebugEnabled())
@@ -2137,12 +2144,33 @@ std::string CorProfiler::GetILCodes(const std::string&              title,
     return orig_sstream.str();
 }
 
-bool CorProfiler::EnsureCallTargetBubbleUpExceptionTypeAvailable(const ModuleMetadata& module_metadata)
+bool CorProfiler::IsCallTargetBubbleUpExceptionTypeAvailable() const
 {
-    mdTypeDef  bubbleUpExceptionTypeDef;
+    return call_target_bubble_up_exception_available;
+}
+
+bool CorProfiler::IsCallTargetBubbleUpFunctionAvailable() const
+{
+    return call_target_bubble_up_exception_function_available;
+}
+
+bool CorProfiler::EnsureCallTargetBubbleUpExceptionTypeAvailable(const ModuleMetadata& module_metadata,
+                                                                 mdTypeDef*            typeDef)
+{
     const auto hr = module_metadata.metadata_import->FindTypeDefByName(calltarget_bubble_up_exception_type_name.data(),
-                                                                       mdTokenNil, &bubbleUpExceptionTypeDef);
+                                                                       mdTokenNil, typeDef);
     Logger::Debug("CallTargetBubbleUpException type availability check returned: ", hr);
+    return SUCCEEDED(hr);
+}
+
+bool CorProfiler::EnsureIsCallTargetBubbleUpExceptionFunctionAvailable(const ModuleMetadata& module_metadata,
+                                                                       mdTypeDef             typeDef)
+{
+    mdMethodDef methodDef = mdMethodDefNil;
+    const auto  hr =
+        module_metadata.metadata_import->FindMethod(typeDef, calltarget_bubble_up_exception_function_name.data(),
+                                                    nullptr, 0, &methodDef);
+    Logger::Debug("CallTargetBubbleUpException.IsCallTargetBubbleUpException method found: ", SUCCEEDED(hr));
     return SUCCEEDED(hr);
 }
 

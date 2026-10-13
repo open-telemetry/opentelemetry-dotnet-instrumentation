@@ -40,8 +40,9 @@ public:
 class TracerMethodRewriter : public MethodRewriter
 {
 private:
-    static ILInstr* CreateFilterForException(ILRewriterWrapper* rewriter, mdTypeRef exceptionTypeRef,
-                                             mdTypeRef bubbleUpExceptionTypeRef, ULONG exceptionValueIndex);
+    ILInstr* CreateFilterForException(ILRewriterWrapper* rewriter, mdTypeRef exceptionTypeRef,
+                                     mdTypeRef bubbleUpExceptionTypeRef, mdMemberRef containsCallTargetBubbleUpException,
+                                     ULONG exceptionValueIndex);
 
 public:
     explicit TracerMethodRewriter(CorProfiler* corProfiler) : MethodRewriter(corProfiler)

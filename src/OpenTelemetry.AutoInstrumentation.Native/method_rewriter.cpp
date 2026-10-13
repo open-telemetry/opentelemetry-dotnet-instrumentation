@@ -404,11 +404,13 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     // *** BeginMethod exception filter
     ILInstr* beginMethodFilter          = nullptr;
     ILInstr* beginMethodCatchFirstInstr = nullptr;
-    if (m_corProfiler->call_target_bubble_up_exception_available)
+    const auto bubbleup_exception_typeref = tracerTokens->GetBubbleUpExceptionTypeRef();
+    if (m_corProfiler->call_target_bubble_up_exception_available && bubbleup_exception_typeref != mdTypeRefNil)
     {
         beginMethodFilter =
             CreateFilterForException(&reWriterWrapper, tracerTokens->GetExceptionTypeRef(),
-                                     tracerTokens->GetBubbleUpExceptionTypeRef(), beginMethodExceptionIndex);
+                                     tracerTokens->GetBubbleUpExceptionTypeRef(),
+                                     tracerTokens->GetBubbleUpExceptionFunctionDef(), beginMethodExceptionIndex);
         Logger::Debug("Creating filter for CallTargetBubbleUpException (BeginMethod).");
         beginMethodCatchFirstInstr = reWriterWrapper.Pop();
         reWriterWrapper.LoadLocal(beginMethodExceptionIndex);
@@ -575,7 +577,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     {
         endMethodFilter =
             CreateFilterForException(&reWriterWrapper, tracerTokens->GetExceptionTypeRef(),
-                                     tracerTokens->GetBubbleUpExceptionTypeRef(), endMethodExceptionIndex);
+                                     tracerTokens->GetBubbleUpExceptionTypeRef(),
+                                     tracerTokens->GetBubbleUpExceptionFunctionDef(), endMethodExceptionIndex);
         Logger::Debug("Creating filter for CallTargetBubbleUpException (EndMethod).");
         endMethodCatchFirstInstr = reWriterWrapper.Pop();
         reWriterWrapper.LoadLocal(endMethodExceptionIndex);
@@ -721,6 +724,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
 ILInstr* TracerMethodRewriter::CreateFilterForException(ILRewriterWrapper* rewriter,
                                                         mdTypeRef          exceptionTypeRef,
                                                         mdTypeRef          bubbleUpExceptionTypeRef,
+                                                        mdMemberRef        containsCallTargetBubbleUpException,
                                                         ULONG              exceptionValueIndex)
 {
     ILInstr* filter = rewriter->CreateInstr(CEE_ISINST);
@@ -732,12 +736,20 @@ ILInstr* TracerMethodRewriter::CreateFilterForException(ILRewriterWrapper* rewri
     ILInstr* endNotException = rewriter->CreateInstr(CEE_BR_S);
 
     ILInstr* storeException = rewriter->StLocal(exceptionValueIndex);
-    rewriter->LoadLocal(exceptionValueIndex);
-    ILInstr* testBubbleUp  = rewriter->CreateInstr(CEE_ISINST);
-    testBubbleUp->m_Arg32  = bubbleUpExceptionTypeRef;
     isException->m_pTarget = storeException;
-    rewriter->LoadNull();
-    rewriter->CreateInstr(CEE_CGT_UN);
+    rewriter->LoadLocal(exceptionValueIndex);
+    if (m_corProfiler->call_target_bubble_up_exception_function_available &&
+        containsCallTargetBubbleUpException != mdMemberRefNil)
+    {
+        rewriter->CallMember(containsCallTargetBubbleUpException, false);
+    }
+    else
+    {
+        ILInstr* testBubbleUp = rewriter->CreateInstr(CEE_ISINST);
+        testBubbleUp->m_Arg32 = bubbleUpExceptionTypeRef;
+        rewriter->LoadNull();
+        rewriter->CreateInstr(CEE_CGT_UN);
+    }
     rewriter->LoadInt32(0);
     rewriter->CreateInstr(CEE_CEQ);
     rewriter->LoadInt32(0);

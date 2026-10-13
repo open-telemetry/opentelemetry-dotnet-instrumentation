@@ -10,3 +10,4 @@ OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.ValueWithType
 readonly OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Value -> TProxy?
 readonly OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Type -> System.Type!
 static OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Create(TProxy? value, System.Type! type) -> OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetBubbleUpException.IsCallTargetBubbleUpException(System.Exception? exception) -> bool

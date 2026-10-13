@@ -21,6 +21,7 @@ private:
     mdMemberRef endVoidMemberRef = mdMemberRefNil;
     mdMemberRef logExceptionRef = mdMemberRefNil;
     mdTypeRef bubbleUpExceptionTypeRef = mdTypeRefNil;
+    mdMemberRef bubbleUpExceptionFunctionRef = mdMemberRefNil;
 
     HRESULT WriteBeginMethodWithArgumentsArray(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
                                                const TypeInfo* currentType, ILInstr** instruction);
@@ -53,6 +54,7 @@ public:
                               ILInstr** instruction);
 
     mdTypeRef GetBubbleUpExceptionTypeRef() const;
+    mdMemberRef GetBubbleUpExceptionFunctionDef() const;
 };
 
 } // namespace trace

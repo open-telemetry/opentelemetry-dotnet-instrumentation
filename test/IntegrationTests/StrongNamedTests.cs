@@ -29,6 +29,8 @@ public class StrongNamedTests : TestHelper
 
         Assert.Contains("Bubble-up exception propagated from BubbleUpOnBegin.", standardOutput, StringComparison.Ordinal);
         Assert.Contains("Bubble-up exception propagated from BubbleUpOnEnd.", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("Wrapped bubble-up exception propagated from BubbleUpOnBegin.", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("Wrapped bubble-up exception propagated from BubbleUpOnEnd.", standardOutput, StringComparison.Ordinal);
         Assert.Contains("Regular integration exception was swallowed.", standardOutput, StringComparison.Ordinal);
 
         // TODO: When native logs are moved to an EventSource implementation check for the log

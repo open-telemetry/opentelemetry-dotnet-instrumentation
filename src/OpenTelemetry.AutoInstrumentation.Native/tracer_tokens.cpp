@@ -9,6 +9,7 @@
 #include "il_rewriter_wrapper.h"
 #include "logger.h"
 #include "module_metadata.h"
+#include "cor_profiler.h"
 
 namespace trace
 {
@@ -164,12 +165,41 @@ HRESULT TracerTokens::EnsureBaseCalltargetTokens()
     }
 
     // The type may be unavailable when a newer native profiler is used with an older managed assembly.
-    if (bubbleUpExceptionTypeRef == mdTypeRefNil)
+    if (profiler->IsCallTargetBubbleUpExceptionTypeAvailable() && bubbleUpExceptionTypeRef == mdTypeRefNil)
     {
         const ModuleMetadata* module_metadata = GetMetadata();
-        module_metadata->metadata_emit->DefineTypeRefByName(profilerAssemblyRef,
-                                                            calltarget_bubble_up_exception_type_name.data(),
-                                                            &bubbleUpExceptionTypeRef);
+        const auto            typeHr =
+            module_metadata->metadata_emit->DefineTypeRefByName(profilerAssemblyRef,
+                                                                calltarget_bubble_up_exception_type_name.data(),
+                                                                &bubbleUpExceptionTypeRef);
+        if (SUCCEEDED(typeHr))
+        {
+            if (profiler->IsCallTargetBubbleUpFunctionAvailable() && bubbleUpExceptionFunctionRef == mdMemberRefNil)
+            {
+                COR_SIGNATURE  createInstanceSig[32];
+                COR_SIGNATURE* sigBuilder = createInstanceSig;
+                sigBuilder += CorSigCompressData(IMAGE_CEE_CS_CALLCONV_DEFAULT, sigBuilder);
+                sigBuilder += CorSigCompressData(1, sigBuilder);
+                sigBuilder += CorSigCompressElementType(ELEMENT_TYPE_BOOLEAN, sigBuilder);
+                sigBuilder += CorSigCompressElementType(ELEMENT_TYPE_CLASS, sigBuilder);
+                sigBuilder += CorSigCompressToken(exTypeRef, sigBuilder);
+
+                const auto memberHr =
+                    module_metadata->metadata_emit->DefineMemberRef(bubbleUpExceptionTypeRef,
+                                                                    calltarget_bubble_up_exception_function_name.data(),
+                                                                    createInstanceSig,
+                                                                    static_cast<ULONG>(sigBuilder - createInstanceSig),
+                                                                    &bubbleUpExceptionFunctionRef);
+                if (FAILED(memberHr))
+                {
+                    bubbleUpExceptionFunctionRef = mdMemberRefNil;
+                }
+            }
+        }
+        else
+        {
+            bubbleUpExceptionTypeRef = mdTypeRefNil;
+        }
     }
 
     return hr;
@@ -768,6 +798,11 @@ HRESULT TracerTokens::WriteLogException(void*           rewriterWrapperPtr,
 mdTypeRef TracerTokens::GetBubbleUpExceptionTypeRef() const
 {
     return bubbleUpExceptionTypeRef;
+}
+
+mdMemberRef TracerTokens::GetBubbleUpExceptionFunctionDef() const
+{
+    return bubbleUpExceptionFunctionRef;
 }
 
 } // namespace trace
