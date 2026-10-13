@@ -33,5 +33,5 @@ public interface IDuckType
     /// Calls ToString() on the instance
     /// </summary>
     /// <returns>ToString result</returns>
-    string ToString();
+    string? ToString();
 }

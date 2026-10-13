@@ -40,7 +40,7 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : 
         }
     }
 
-    public override TReturn? SetContinuation(TTarget instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
+    public override TReturn? SetContinuation(TTarget? instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
     {
         return Resolver.ExecuteCallback(instance, returnValue, exception, in state);
     }
@@ -56,7 +56,7 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : 
             _preserveContext = preserveContext;
         }
 
-        public override TReturn? ExecuteCallback(TTarget instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
+        public override TReturn? ExecuteCallback(TTarget? instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
         {
             if (exception != null)
             {
@@ -70,7 +70,7 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : 
 #pragma warning restore CA2012 // ValueTask is intentionally wrapped back into the instrumented method's return type.
         }
 
-        private async ValueTask ContinuationAction(ValueTask previousValueTask, TTarget target, CallTargetState state)
+        private async ValueTask ContinuationAction(ValueTask previousValueTask, TTarget? target, CallTargetState state)
         {
             try
             {
@@ -118,7 +118,7 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : 
             _preserveContext = preserveContext;
         }
 
-        public override TReturn? ExecuteCallback(TTarget instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
+        public override TReturn? ExecuteCallback(TTarget? instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
         {
             var previousValueTask = returnValue == null ? default : FromTReturn<ValueTask>(returnValue);
 #pragma warning disable CA2012 // ValueTask is intentionally wrapped back into the instrumented method's return type.
@@ -126,7 +126,7 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : 
 #pragma warning restore CA2012 // ValueTask is intentionally wrapped back into the instrumented method's return type.
         }
 
-        private async ValueTask ContinuationAction(ValueTask previousValueTask, TTarget target, CallTargetState state, Exception? exception)
+        private async ValueTask ContinuationAction(ValueTask previousValueTask, TTarget? target, CallTargetState state, Exception? exception)
         {
             if (exception != null)
             {

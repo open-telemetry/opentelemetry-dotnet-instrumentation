@@ -36,10 +36,10 @@ internal static class BeginMethodHandler<TIntegration, TTarget>
         }
     }
 
-    internal delegate CallTargetState InvokeDelegate(TTarget instance);
+    internal delegate CallTargetState InvokeDelegate(TTarget? instance);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static CallTargetState Invoke(TTarget instance)
+    internal static CallTargetState Invoke(TTarget? instance)
     {
         return new CallTargetState(Activity.Current, _invokeDelegate(instance));
     }
