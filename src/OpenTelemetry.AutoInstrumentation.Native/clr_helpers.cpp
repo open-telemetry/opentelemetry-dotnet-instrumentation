@@ -1133,8 +1133,7 @@ HRESULT ResolveTypeInternal(ICorProfilerInfo4*           info,
             continue;
 
         ComPtr<IUnknown> metadata_interfaces;
-        auto             hr = info->GetModuleMetaData(moduleId, ofRead | ofWrite, IID_IMetaDataImport2,
-                                                      metadata_interfaces.GetAddressOf());
+        auto hr = info->GetModuleMetaData(moduleId, ofRead, IID_IMetaDataImport2, metadata_interfaces.GetAddressOf());
         if (FAILED(hr))
         {
             Logger::Warn("[ResolveTypeInternal] GetModuleMetaData has failed with: ", WSTRING(refTypeName.data()));

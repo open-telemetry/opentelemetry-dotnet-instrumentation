@@ -336,8 +336,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
         }
 
         ComPtr<IUnknown> metadata_interfaces;
-        auto             hr = this->info_->GetModuleMetaData(assembly_info.manifest_module_id, ofRead | ofWrite,
-                                                             IID_IMetaDataImport2, metadata_interfaces.GetAddressOf());
+        auto hr = this->info_->GetModuleMetaData(assembly_info.manifest_module_id, ofRead, IID_IMetaDataImport2,
+                                                 metadata_interfaces.GetAddressOf());
         if (FAILED(hr))
         {
             Logger::Warn("AssemblyLoadFinished failed to get metadata interface for module id ",
@@ -660,8 +660,8 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id, std::vector<ModuleID>& m
         corlib_app_domain_id = app_domain_id;
 
         ComPtr<IUnknown> metadata_interfaces;
-        auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
-                                                             metadata_interfaces.GetAddressOf());
+        auto             hr =
+            this->info_->GetModuleMetaData(module_id, ofRead, IID_IMetaDataImport2, metadata_interfaces.GetAddressOf());
 
         // Get the IMetaDataAssemblyImport interface to get metadata from the
         // managed assembly
