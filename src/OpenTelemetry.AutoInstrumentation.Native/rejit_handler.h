@@ -139,8 +139,6 @@ public:
 
     HRESULT NotifyReJITParameters(ModuleID moduleId, mdMethodDef methodId,
                                   ICorProfilerFunctionControl* pFunctionControl);
-    static HRESULT NotifyReJITCompilationStarted(FunctionID functionId, ReJITID rejitId);
-
     ICorProfilerInfo7* GetCorProfilerInfo();
 
     void SetCorAssemblyProfiler(AssemblyProperty* pCorAssemblyProfiler);

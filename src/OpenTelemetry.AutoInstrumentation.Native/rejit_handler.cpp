@@ -436,11 +436,6 @@ HRESULT RejitHandler::NotifyReJITParameters(ModuleID                     moduleI
     return functionControl->ApplyChanges(pFunctionControl);
 }
 
-HRESULT RejitHandler::NotifyReJITCompilationStarted(FunctionID functionId, ReJITID rejitId)
-{
-    return S_OK;
-}
-
 ICorProfilerInfo7* RejitHandler::GetCorProfilerInfo()
 {
     return m_profilerInfo;
