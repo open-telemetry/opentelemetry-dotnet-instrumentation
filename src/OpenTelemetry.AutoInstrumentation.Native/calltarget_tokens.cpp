@@ -3,7 +3,6 @@
 
 #include "calltarget_tokens.h"
 
-#include "cor_profiler.h"
 #include "il_rewriter_wrapper.h"
 #include "logger.h"
 #include "module_metadata.h"
@@ -600,7 +599,6 @@ HRESULT CallTargetTokens::EnsureBaseCalltargetTokens()
     // *** Ensure profiler assembly ref
     if (profilerAssemblyRef == mdAssemblyRefNil)
     {
-        const auto bytecode_instrumentation_name = trace::profiler->GetBytecodeInstrumentationAssembly();
         Logger::Debug("CallTargetTokens::EnsureBaseCalltargetTokens() Bytecode Instrumentation Assembly: ",
                       bytecode_instrumentation_name);
         const AssemblyReference assemblyReference =
@@ -837,7 +835,10 @@ void CallTargetTokens::AddAdditionalLocals(COR_SIGNATURE (&signatureBuffer)[500]
 {
 }
 
-CallTargetTokens::CallTargetTokens(ModuleMetadata* moduleMetadataPtr) : module_metadata_ptr(moduleMetadataPtr) {}
+CallTargetTokens::CallTargetTokens(ModuleMetadata* moduleMetadataPtr, const WSTRING& bytecodeInstrumentationName)
+    : module_metadata_ptr(moduleMetadataPtr), bytecode_instrumentation_name(bytecodeInstrumentationName)
+{
+}
 /**
  * PUBLIC
  **/

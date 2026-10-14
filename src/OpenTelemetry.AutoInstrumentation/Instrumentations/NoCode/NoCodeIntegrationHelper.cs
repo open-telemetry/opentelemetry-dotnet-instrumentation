@@ -40,8 +40,8 @@ internal static class NoCodeIntegrationHelper
                 instance: instance,
                 arguments: arguments,
                 returnValue: null,
-                methodName: noCodeEntry.Definition.TargetMethod,
-                typeName: noCodeEntry.Definition.TargetType);
+                methodName: noCodeEntry.TargetMethod,
+                typeName: noCodeEntry.TargetType);
 
             foreach (var dynamicAttr in noCodeEntry.DynamicAttributes)
             {
@@ -70,8 +70,8 @@ internal static class NoCodeIntegrationHelper
                     instance: instance,
                     arguments: arguments,
                     returnValue: null,
-                    methodName: noCodeEntry.Definition.TargetMethod,
-                    typeName: noCodeEntry.Definition.TargetType);
+                    methodName: noCodeEntry.TargetMethod,
+                    typeName: noCodeEntry.TargetType);
 
                 var dynamicName = noCodeEntry.DynamicSpanName.Evaluate(context)?.ToString();
 
@@ -93,7 +93,7 @@ internal static class NoCodeIntegrationHelper
         var activity = Source.StartActivity(name: spanName, kind: noCodeEntry.ActivityKind, tags: tags);
 
         // Store state for OnMethodEnd (needed for status rules evaluation)
-        var noCodeState = new NoCodeCallTargetState(noCodeEntry, instance, arguments, noCodeEntry.Definition.TargetMethod, noCodeEntry.Definition.TargetType);
+        var noCodeState = new NoCodeCallTargetState(noCodeEntry, instance, arguments, noCodeEntry.TargetMethod, noCodeEntry.TargetType);
         return new CallTargetState(activity, noCodeState);
     }
 
@@ -317,9 +317,9 @@ internal static class NoCodeIntegrationHelper
 
             // Only accept methods that exist in NoCodeEntries list
             var noCodeEntry = NoCodeEntries.SingleOrDefault(x =>
-                x.Definition.TargetType == typeName &&
-                x.Definition.TargetMethod == methodName &&
-                x.Definition.TargetAssembly == assemblyName &&
+                x.TargetType == typeName &&
+                x.TargetMethod == methodName &&
+                x.TargetAssembly == assemblyName &&
                 CheckParameters(x.SignatureTypes, parameters));
 
             if (noCodeEntry == null)

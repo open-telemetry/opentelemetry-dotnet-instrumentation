@@ -3,7 +3,7 @@
 
 namespace SourceGenerators;
 
-internal readonly record struct TargetToGenerate(int SignalType, string IntegrationName, string Assembly, string Type, string Method, int MinimumMajor, int MinimumMinor, int MinimumPatch, int MaximumMajor, int MaximumMinor, int MaximumPatch, string SignatureTypes, int IntegrationKind)
+internal readonly record struct TargetToGenerate(int SignalType, string IntegrationName, string Assembly, string Type, string Method, int MinimumMajor, int MinimumMinor, int MinimumPatch, int MaximumMajor, int MaximumMinor, int MaximumPatch, string SignatureTypes, int SignatureTypesLength, int IntegrationKind)
 {
     public readonly int SignalType = SignalType;
 
@@ -28,5 +28,8 @@ internal readonly record struct TargetToGenerate(int SignalType, string Integrat
     public readonly int MaximumPatch = MaximumPatch;
 
     public readonly string SignatureTypes = SignatureTypes;
+
+    public readonly int SignatureTypesLength = SignatureTypesLength;
+
     public readonly int IntegrationKind = IntegrationKind;
 }

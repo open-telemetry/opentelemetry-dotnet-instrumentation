@@ -8,6 +8,7 @@ EXPORTS
     AddInstrumentations
     AddDerivedInstrumentations
     AddInterfaceInstrumentations
+    RegisterCallTargetDefinitions
     SetSqlClientNetFxILRewriteEnabled
     InitializeTraceMethods
     ConfigureContinuousProfiler
