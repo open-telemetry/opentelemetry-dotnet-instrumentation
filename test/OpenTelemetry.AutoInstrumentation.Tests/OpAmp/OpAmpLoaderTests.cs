@@ -56,39 +56,6 @@ public class OpAmpLoaderTests
             plugin.Events);
     }
 
-    [Fact]
-    public async Task FullStateRequestIsHandledWithoutEffectiveConfigurationReporting()
-    {
-        var pluginSettings = new PluginsSettings();
-        pluginSettings.Plugins.Add(typeof(RecordingOpAmpPlugin).AssemblyQualifiedName!);
-        var pluginManager = new PluginManager(pluginSettings);
-        var plugin = Assert.IsType<RecordingOpAmpPlugin>(Assert.Single(pluginManager.Plugins).Instance);
-        plugin.RequestFullState = true;
-
-        try
-        {
-            _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
-            _loader.StartOpAmpClient();
-            await AssertCompletes(plugin.FullStateReport);
-
-            using var report = new CodedInputStream(await plugin.FullStateReport.ConfigureAwait(true));
-            var fields = new List<int>();
-            uint tag;
-            while ((tag = report.ReadTag()) != 0)
-            {
-                fields.Add(WireFormat.GetTagFieldNumber(tag));
-                report.SkipLastField();
-            }
-
-            Assert.Contains(3, fields); // agent_description
-            Assert.DoesNotContain(6, fields); // effective_config
-        }
-        finally
-        {
-            _loader.StopOpAmpClientIfRunning();
-        }
-    }
-
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -139,21 +106,15 @@ public class OpAmpLoaderTests
         finally
         {
             releaseConfiguration.Set();
-            try
+            _loader.StopOpAmpClientIfRunning();
+            if (prepareTask != null)
             {
-                if (prepareTask != null)
-                {
-                    await AssertCompletes(prepareTask);
-                }
-
-                if (stopTask != null)
-                {
-                    await AssertCompletes(stopTask);
-                }
+                await AssertCompletes(prepareTask);
             }
-            finally
+
+            if (stopTask != null)
             {
-                _loader.StopOpAmpClientIfRunning();
+                await AssertCompletes(stopTask);
             }
         }
     }
@@ -192,16 +153,15 @@ public class OpAmpLoaderTests
             releaseBeforeStop.Set();
             if (loaderStopTask != null)
             {
-                await Task.WhenAny(loaderStopTask, Task.Delay(TestTimeout));
+                await AssertCompletes(loaderStopTask);
             }
 
             if (beforeStopEntered.Task.IsCompleted)
             {
-                await Task.WhenAny(beforeStopCompleted.Task, Task.Delay(TestTimeout));
+                await AssertCompletes(beforeStopCompleted.Task);
             }
         }
 
-        await AssertCompletes(beforeStopCompleted.Task);
         Assert.Single(plugin.Events, name => name == nameof(RecordingOpAmpPlugin.BeforeOpAmpClientStopped));
     }
 
@@ -252,11 +212,7 @@ public class OpAmpLoaderTests
         try
         {
             _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
-            loaderStartTask = Task.Factory.StartNew(
-                _loader.StartOpAmpClient,
-                CancellationToken.None,
-                TaskCreationOptions.LongRunning,
-                TaskScheduler.Default);
+            loaderStartTask = Task.Run(_loader.StartOpAmpClient);
 
             await AssertCompletes(plugin.AfterStarted);
             await AssertCompletes(loaderStartTask);
@@ -327,20 +283,14 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
 {
     private static readonly Guid TestInstanceUid = Guid.NewGuid();
     private static readonly byte[] ServerCapabilitiesResponse = CreateServerCapabilitiesResponse(TestInstanceUid);
-    private static readonly byte[] FullStateRequestResponse = CreateServerCapabilitiesResponse(TestInstanceUid, ServerSentFlags.ReportFullState);
 
     private readonly ConcurrentQueue<string> _events = new();
     private readonly TaskCompletionSource<bool> _afterStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TaskCompletionSource<bool> _handlerDisposed = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private readonly TaskCompletionSource<byte[]> _fullStateReport = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     internal Task AfterStarted => _afterStarted.Task;
 
     internal Task HandlerDisposed => _handlerDisposed.Task;
-
-    internal Task<byte[]> FullStateReport => _fullStateReport.Task;
-
-    internal bool RequestFullState { get; set; }
 
     internal Action? ConfigureOptionsAction { get; set; }
 
@@ -416,7 +366,7 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
         BeforeStoppedAction?.Invoke();
     }
 
-    private static byte[] CreateServerCapabilitiesResponse(Guid instanceUid, ServerSentFlags flags = ServerSentFlags.None)
+    private static byte[] CreateServerCapabilitiesResponse(Guid instanceUid)
     {
         using var stream = new MemoryStream();
         using var output = new CodedOutputStream(stream, leaveOpen: true);
@@ -424,42 +374,19 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
         output.WriteBytes(ByteString.CopyFrom(instanceUid.ToByteArray()));
         output.WriteTag(7, WireFormat.WireType.Varint);
         output.WriteUInt64((ulong)ServerSentCapabilities.AcceptsStatus);
-        output.WriteTag(6, WireFormat.WireType.Varint);
-        output.WriteUInt64((ulong)flags);
         output.Flush();
         return stream.ToArray();
     }
 
     private sealed class RecordingHttpMessageHandler(RecordingOpAmpPlugin plugin) : HttpMessageHandler
     {
-        private bool _fullStateRequested;
-
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var response = ServerCapabilitiesResponse;
-            if (plugin.RequestFullState)
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
-                if (_fullStateRequested)
-                {
-#if NET
-                    var content = await request.Content!.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
-#else
-                    var content = await request.Content!.ReadAsByteArrayAsync().ConfigureAwait(false);
-#endif
-                    plugin._fullStateReport.TrySetResult(content);
-                }
-                else
-                {
-                    _fullStateRequested = true;
-                    response = FullStateRequestResponse;
-                }
-            }
-
-            return new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new ByteArrayContent(response),
-            };
+                Content = new ByteArrayContent(ServerCapabilitiesResponse),
+            });
         }
 
         protected override void Dispose(bool disposing)

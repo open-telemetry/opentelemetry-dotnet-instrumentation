@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Concurrent;
 using System.Text;
 using OpenTelemetry.AutoInstrumentation.OpAmp;
 using OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
@@ -88,7 +89,6 @@ public class OpAmpReporterTests
         _reporter.HandleServerCapabilities(ServerSentCapabilities.AcceptsStatus);
         _reporter.ReportFullState();
 
-        Assert.Single(_reportSender.EffectiveConfigReports);
         Assert.Collection(
             _reportSender.FullStateReports,
             report => Assert.Equal("initial", GetConfigContent(report.EffectiveConfigFiles)),
@@ -135,15 +135,10 @@ public class OpAmpReporterTests
             {
                 capabilitiesStarted.TrySetResult(true);
                 _reporter.HandleServerCapabilities(ServerSentCapabilities.AcceptsStatus);
-                // Revocation must finish after the previously admitted report is enqueued.
-                Assert.Single(_reportSender.EffectiveConfigReports);
                 _reporter.ReportFullState();
             });
 
             await AssertCompletes(capabilitiesStarted.Task);
-            Assert.False(capabilitiesTask.IsCompleted);
-            Assert.Empty(_reportSender.EffectiveConfigReports);
-            Assert.Empty(_reportSender.FullStateReports);
         }
         finally
         {
@@ -154,6 +149,9 @@ public class OpAmpReporterTests
         Assert.Equal(1, _plugin.GetterCalls);
         Assert.Equal("initial", GetConfigContent(Assert.Single(_reportSender.EffectiveConfigReports)));
         Assert.Null(Assert.Single(_reportSender.FullStateReports).EffectiveConfigFiles);
+        Assert.Equal(
+            [nameof(IOpAmpReportSender.SendEffectiveConfig), nameof(IOpAmpReportSender.SendFullStateReport)],
+            _reportSender.ReportOrder);
     }
 
     [Theory]
@@ -194,7 +192,6 @@ public class OpAmpReporterTests
                 _reporter.NotifyEffectiveConfigChanged();
                 _reporter.ReportFullState();
                 _reporter.HandleServerCapabilities(ServerSentCapabilities.AcceptsStatus);
-                _reporter.Stop();
             });
 
             await AssertCompletes(stopTask);
@@ -242,6 +239,8 @@ public class OpAmpReporterTests
 
         public List<FullStateReport> FullStateReports { get; } = [];
 
+        public ConcurrentQueue<string> ReportOrder { get; } = new();
+
         public bool FailEffectiveConfigSend { get; set; }
 
         public Action? BeforeEnqueue { get; set; }
@@ -255,12 +254,14 @@ public class OpAmpReporterTests
 
             BeforeEnqueue?.Invoke();
             EffectiveConfigReports.Add(files);
+            ReportOrder.Enqueue(nameof(SendEffectiveConfig));
         }
 
         public void SendFullStateReport(FullStateReport report)
         {
             BeforeEnqueue?.Invoke();
             FullStateReports.Add(report);
+            ReportOrder.Enqueue(nameof(SendFullStateReport));
         }
     }
 

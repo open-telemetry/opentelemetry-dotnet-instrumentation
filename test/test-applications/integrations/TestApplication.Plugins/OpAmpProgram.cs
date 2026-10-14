@@ -17,11 +17,7 @@ internal static class OpAmpProgram
             return;
         }
 
-        // OpAMP tests close stdin after verifying the background report reached the server.
-        // Console reads can block synchronously, so run the read separately to bound the wait.
-        if (!Task.Run(Console.ReadLine).Wait(TimeSpan.FromSeconds(30)))
-        {
-            throw new TimeoutException("The test did not release the application.");
-        }
+        // The parent test closes stdin after verifying delivery and bounds process shutdown.
+        Console.ReadLine();
     }
 }

@@ -135,8 +135,27 @@ public class PluginsTests : TestHelper
         const string ignoredPluginType = pluginTypePrefix + ignoredPlugin;
         const string selectedPluginName = selectedPluginType + pluginAssemblySuffix;
         const string ignoredPluginName = ignoredPluginType + pluginAssemblySuffix;
-        using var server = new MockOpAmpServer(Output, capabilities: ServerCapabilities.AcceptsStatus | ServerCapabilities.AcceptsEffectiveConfig);
-        server.Expect(frame => frame.AgentDescription != null && (frame.Capabilities & (ulong)AgentCapabilities.ReportsEffectiveConfig) == 0, "Does not advertise reporting for an ignored provider");
+        using var server = new MockOpAmpServer(
+            Output,
+            capabilities: ServerCapabilities.AcceptsStatus | ServerCapabilities.AcceptsEffectiveConfig,
+            flags: ServerToAgentFlags.ReportFullState);
+        ulong? initialSequenceNum = null;
+        server.Expect(
+            frame =>
+            {
+                if (frame.AgentDescription == null || (frame.Capabilities & (ulong)AgentCapabilities.ReportsEffectiveConfig) != 0)
+                {
+                    return false;
+                }
+
+                initialSequenceNum = frame.SequenceNum;
+                return true;
+            },
+            "Does not advertise reporting for an ignored provider");
+        server.Expect(
+            frame => initialSequenceNum.HasValue && frame.SequenceNum > initialSequenceNum.Value &&
+                     frame.AgentDescription != null && frame.EffectiveConfig == null,
+            "Reports full state without effective configuration after the server request");
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", $"{selectedPluginName}:{ignoredPluginName}");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_ENABLED", "true");
