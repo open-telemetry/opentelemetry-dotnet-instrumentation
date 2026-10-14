@@ -20,6 +20,7 @@ public class OpAmpLoaderTests
 {
     private static readonly TimeSpan TestTimeout = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan LoaderShutdownTimeout = TimeSpan.FromMilliseconds(100);
+    private readonly OpAmpLoader _loader = new();
 
     [Fact]
     public async Task UnsupportedReportingSettingsAreDisabledAndLifecycleCallbacksAreInvoked()
@@ -31,9 +32,9 @@ public class OpAmpLoaderTests
 
         try
         {
-            OpAmpLoader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
+            _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
             pluginManager.Initialized();
-            OpAmpLoader.StartOpAmpClient();
+            _loader.StartOpAmpClient();
             await AssertCompletes(plugin.AfterStarted);
 
             var configuredSettings = Assert.IsType<OpAmpClientSettings>(plugin.ConfiguredSettings);
@@ -42,7 +43,7 @@ public class OpAmpLoaderTests
         }
         finally
         {
-            OpAmpLoader.StopOpAmpClientIfRunning();
+            _loader.StopOpAmpClientIfRunning();
         }
 
         Assert.Equal(
@@ -56,41 +57,152 @@ public class OpAmpLoaderTests
     }
 
     [Fact]
-    public async Task ShutdownDeadlineDisposesClientDuringBlockedBeforeStopCallback()
+    public async Task FullStateRequestIsHandledWithoutEffectiveConfigurationReporting()
     {
         var pluginSettings = new PluginsSettings();
-        pluginSettings.Plugins.Add(typeof(BlockingBeforeStopPlugin).AssemblyQualifiedName!);
+        pluginSettings.Plugins.Add(typeof(RecordingOpAmpPlugin).AssemblyQualifiedName!);
         var pluginManager = new PluginManager(pluginSettings);
-        var plugin = Assert.IsType<BlockingBeforeStopPlugin>(Assert.Single(pluginManager.Plugins).Instance);
+        var plugin = Assert.IsType<RecordingOpAmpPlugin>(Assert.Single(pluginManager.Plugins).Instance);
+        plugin.RequestFullState = true;
+
+        try
+        {
+            _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
+            _loader.StartOpAmpClient();
+            await AssertCompletes(plugin.FullStateReport);
+
+            using var report = new CodedInputStream(await plugin.FullStateReport.ConfigureAwait(true));
+            var fields = new List<int>();
+            uint tag;
+            while ((tag = report.ReadTag()) != 0)
+            {
+                fields.Add(WireFormat.GetTagFieldNumber(tag));
+                report.SkipLastField();
+            }
+
+            Assert.Contains(3, fields); // agent_description
+            Assert.DoesNotContain(6, fields); // effective_config
+        }
+        finally
+        {
+            _loader.StopOpAmpClientIfRunning();
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ShutdownReturnsDuringConfigurationAndDiscardsLateClient(bool blockOptions)
+    {
+        using var releaseConfiguration = new ManualResetEventSlim();
+        var configurationEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var pluginSettings = new PluginsSettings();
+        pluginSettings.Plugins.Add(typeof(RecordingOpAmpPlugin).AssemblyQualifiedName!);
+        var pluginManager = new PluginManager(pluginSettings);
+        var plugin = Assert.IsType<RecordingOpAmpPlugin>(Assert.Single(pluginManager.Plugins).Instance);
+        Action blockConfiguration = () =>
+        {
+            configurationEntered.TrySetResult(true);
+            releaseConfiguration.Wait();
+        };
+        if (blockOptions)
+        {
+            plugin.ConfigureOptionsAction = blockConfiguration;
+        }
+        else
+        {
+            plugin.ConfigureClientAction = blockConfiguration;
+        }
+
+        Task? prepareTask = null;
+        Task? stopTask = null;
+        try
+        {
+            prepareTask = Task.Run(() => _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager));
+            await AssertCompletes(configurationEntered.Task);
+            stopTask = Task.Run(() =>
+            {
+                _loader.StopOpAmpClientIfRunning(LoaderShutdownTimeout);
+                _loader.StartOpAmpClient();
+            });
+            await AssertCompletes(stopTask);
+            Assert.False(prepareTask.IsCompleted);
+
+            releaseConfiguration.Set();
+            await AssertCompletes(prepareTask);
+            Assert.True(plugin.HandlerDisposed.IsCompleted);
+            Assert.Equal(
+                [nameof(RecordingOpAmpPlugin.ConfigureOpAmpClient), nameof(RecordingOpAmpPlugin.BeforeOpAmpClientStopped)],
+                plugin.Events);
+            Assert.False(plugin.AfterStarted.IsCompleted);
+        }
+        finally
+        {
+            releaseConfiguration.Set();
+            try
+            {
+                if (prepareTask != null)
+                {
+                    await AssertCompletes(prepareTask);
+                }
+
+                if (stopTask != null)
+                {
+                    await AssertCompletes(stopTask);
+                }
+            }
+            finally
+            {
+                _loader.StopOpAmpClientIfRunning();
+            }
+        }
+    }
+
+    [Fact]
+    public async Task ShutdownDeadlineDisposesClientDuringBlockedBeforeStopCallback()
+    {
+        using var releaseBeforeStop = new ManualResetEventSlim();
+        var beforeStopEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var beforeStopCompleted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var pluginSettings = new PluginsSettings();
+        pluginSettings.Plugins.Add(typeof(RecordingOpAmpPlugin).AssemblyQualifiedName!);
+        var pluginManager = new PluginManager(pluginSettings);
+        var plugin = Assert.IsType<RecordingOpAmpPlugin>(Assert.Single(pluginManager.Plugins).Instance);
+        plugin.BeforeStoppedAction = () =>
+        {
+            beforeStopEntered.TrySetResult(true);
+            releaseBeforeStop.Wait();
+            beforeStopCompleted.TrySetResult(true);
+        };
         Task? loaderStopTask = null;
 
         try
         {
-            OpAmpLoader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
+            _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
 
-            loaderStopTask = Task.Run(() => OpAmpLoader.StopOpAmpClientIfRunning(LoaderShutdownTimeout));
-            await AssertCompletes(plugin.BeforeStopCallbackEntered);
+            loaderStopTask = Task.Run(() => _loader.StopOpAmpClientIfRunning(LoaderShutdownTimeout));
+            await AssertCompletes(beforeStopEntered.Task);
             await AssertCompletes(loaderStopTask);
 
             await AssertCompletes(plugin.HandlerDisposed);
-            Assert.False(plugin.BeforeStopCallbackCompleted.IsCompleted);
+            Assert.False(beforeStopCompleted.Task.IsCompleted);
         }
         finally
         {
-            plugin.ReleaseBeforeStopCallback();
+            releaseBeforeStop.Set();
             if (loaderStopTask != null)
             {
                 await Task.WhenAny(loaderStopTask, Task.Delay(TestTimeout));
             }
 
-            if (plugin.BeforeStopCallbackEntered.IsCompleted)
+            if (beforeStopEntered.Task.IsCompleted)
             {
-                await Task.WhenAny(plugin.BeforeStopCallbackCompleted, Task.Delay(TestTimeout));
+                await Task.WhenAny(beforeStopCompleted.Task, Task.Delay(TestTimeout));
             }
         }
 
-        await AssertCompletes(plugin.BeforeStopCallbackCompleted);
-        Assert.Equal(1, plugin.BeforeStopCallbackCount);
+        await AssertCompletes(beforeStopCompleted.Task);
+        Assert.Single(plugin.Events, name => name == nameof(RecordingOpAmpPlugin.BeforeOpAmpClientStopped));
     }
 
     [Theory]
@@ -110,7 +222,7 @@ public class OpAmpLoaderTests
 
         try
         {
-            OpAmpLoader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
+            _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
 
             Assert.Equal(
                 [
@@ -122,7 +234,7 @@ public class OpAmpLoaderTests
         }
         finally
         {
-            OpAmpLoader.StopOpAmpClientIfRunning();
+            _loader.StopOpAmpClientIfRunning();
         }
     }
 
@@ -139,9 +251,9 @@ public class OpAmpLoaderTests
 
         try
         {
-            OpAmpLoader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
+            _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
             loaderStartTask = Task.Factory.StartNew(
-                OpAmpLoader.StartOpAmpClient,
+                _loader.StartOpAmpClient,
                 CancellationToken.None,
                 TaskCreationOptions.LongRunning,
                 TaskScheduler.Default);
@@ -157,7 +269,7 @@ public class OpAmpLoaderTests
                 await AssertCompletes(loaderStartTask);
             }
 
-            OpAmpLoader.StopOpAmpClientIfRunning();
+            _loader.StopOpAmpClientIfRunning();
         }
     }
 
@@ -179,11 +291,11 @@ public class OpAmpLoaderTests
 
         try
         {
-            OpAmpLoader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
-            OpAmpLoader.StartOpAmpClient();
+            _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
+            _loader.StartOpAmpClient();
             await AssertCompletes(plugin.AfterStarted);
 
-            loaderStopTask = Task.Run(() => OpAmpLoader.StopOpAmpClientIfRunning(LoaderShutdownTimeout));
+            loaderStopTask = Task.Run(() => _loader.StopOpAmpClientIfRunning(LoaderShutdownTimeout));
             await AssertCompletes(handlerDisposalEntered.Task);
             await AssertCompletes(loaderStopTask);
             Assert.False(plugin.HandlerDisposed.IsCompleted);
@@ -196,7 +308,7 @@ public class OpAmpLoaderTests
                 await AssertCompletes(loaderStopTask);
             }
 
-            OpAmpLoader.StopOpAmpClientIfRunning();
+            _loader.StopOpAmpClientIfRunning();
         }
 
         await AssertCompletes(plugin.HandlerDisposed);
@@ -215,14 +327,22 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
 {
     private static readonly Guid TestInstanceUid = Guid.NewGuid();
     private static readonly byte[] ServerCapabilitiesResponse = CreateServerCapabilitiesResponse(TestInstanceUid);
+    private static readonly byte[] FullStateRequestResponse = CreateServerCapabilitiesResponse(TestInstanceUid, ServerSentFlags.ReportFullState);
 
     private readonly ConcurrentQueue<string> _events = new();
     private readonly TaskCompletionSource<bool> _afterStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TaskCompletionSource<bool> _handlerDisposed = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly TaskCompletionSource<byte[]> _fullStateReport = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     internal Task AfterStarted => _afterStarted.Task;
 
     internal Task HandlerDisposed => _handlerDisposed.Task;
+
+    internal Task<byte[]> FullStateReport => _fullStateReport.Task;
+
+    internal bool RequestFullState { get; set; }
+
+    internal Action? ConfigureOptionsAction { get; set; }
 
     internal Action? ConfigureClientAction { get; set; }
 
@@ -265,6 +385,7 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
         settings.Heartbeat.IsEnabled = false;
         settings.InstanceUid = TestInstanceUid;
         settings.HttpClientFactory = () => new HttpClient(new RecordingHttpMessageHandler(this));
+        ConfigureOptionsAction?.Invoke();
     }
 
     public void ConfigureOpAmpClient(IOpAmpClient client)
@@ -295,7 +416,7 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
         BeforeStoppedAction?.Invoke();
     }
 
-    private static byte[] CreateServerCapabilitiesResponse(Guid instanceUid)
+    private static byte[] CreateServerCapabilitiesResponse(Guid instanceUid, ServerSentFlags flags = ServerSentFlags.None)
     {
         using var stream = new MemoryStream();
         using var output = new CodedOutputStream(stream, leaveOpen: true);
@@ -303,19 +424,42 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
         output.WriteBytes(ByteString.CopyFrom(instanceUid.ToByteArray()));
         output.WriteTag(7, WireFormat.WireType.Varint);
         output.WriteUInt64((ulong)ServerSentCapabilities.AcceptsStatus);
+        output.WriteTag(6, WireFormat.WireType.Varint);
+        output.WriteUInt64((ulong)flags);
         output.Flush();
         return stream.ToArray();
     }
 
     private sealed class RecordingHttpMessageHandler(RecordingOpAmpPlugin plugin) : HttpMessageHandler
     {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        private bool _fullStateRequested;
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            var response = ServerCapabilitiesResponse;
+            if (plugin.RequestFullState)
             {
-                Content = new ByteArrayContent(ServerCapabilitiesResponse),
-            });
+                if (_fullStateRequested)
+                {
+#if NET
+                    var content = await request.Content!.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+#else
+                    var content = await request.Content!.ReadAsByteArrayAsync().ConfigureAwait(false);
+#endif
+                    plugin._fullStateReport.TrySetResult(content);
+                }
+                else
+                {
+                    _fullStateRequested = true;
+                    response = FullStateRequestResponse;
+                }
+            }
+
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(response),
+            };
         }
 
         protected override void Dispose(bool disposing)
@@ -334,81 +478,4 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
     }
 }
 
-public sealed class BlockingBeforeStopPlugin : IPlugin, IOpAmpPlugin
-{
-    private readonly TaskCompletionSource<bool> _beforeStopCallbackEntered = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private readonly TaskCompletionSource<bool> _beforeStopCallbackRelease = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private readonly TaskCompletionSource<bool> _beforeStopCallbackCompleted = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private readonly TaskCompletionSource<bool> _handlerDisposed = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private int _beforeStopCallbackCount;
-
-    public int BeforeStopCallbackCount => Volatile.Read(ref _beforeStopCallbackCount);
-
-    internal Task BeforeStopCallbackEntered => _beforeStopCallbackEntered.Task;
-
-    internal Task BeforeStopCallbackCompleted => _beforeStopCallbackCompleted.Task;
-
-    internal Task HandlerDisposed => _handlerDisposed.Task;
-
-    public void Initializing()
-    {
-    }
-
-    public void Initialized()
-    {
-    }
-
-    public void ConfigureOpAmpOptions(OpAmpClientSettings settings)
-    {
-#if NET
-        ArgumentNullException.ThrowIfNull(settings);
-#else
-        if (settings == null)
-        {
-            throw new ArgumentNullException(nameof(settings));
-        }
-#endif
-
-        settings.HttpClientFactory = () => new HttpClient(new DisposalTrackingHandler(_handlerDisposed), disposeHandler: true);
-    }
-
-    public void ConfigureOpAmpClient(IOpAmpClient client)
-    {
-    }
-
-    public void AfterOpAmpClientStarted()
-    {
-    }
-
-    public void BeforeOpAmpClientStopped()
-    {
-        Interlocked.Increment(ref _beforeStopCallbackCount);
-        _beforeStopCallbackEntered.TrySetResult(true);
-        _beforeStopCallbackRelease.Task.GetAwaiter().GetResult();
-        _beforeStopCallbackCompleted.TrySetResult(true);
-    }
-
-    public void ReleaseBeforeStopCallback()
-    {
-        _beforeStopCallbackRelease.TrySetResult(true);
-    }
-
-    private sealed class DisposalTrackingHandler(TaskCompletionSource<bool> handlerDisposed) : HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            throw new NotSupportedException();
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                handlerDisposed.TrySetResult(true);
-            }
-
-            base.Dispose(disposing);
-        }
-    }
-}
 #pragma warning restore CA1515 // Consider making public types internal. Needed for plugin loading.

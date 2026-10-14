@@ -19,10 +19,11 @@ public interface IProvideEffectiveConfig : IOpAmpPlugin
     /// </summary>
     /// <returns>The configuration files, or an empty collection to report an empty configuration.</returns>
     /// <remarks>
-    /// File names must be unique. Contents are sent without redaction. This synchronous callback
-    /// runs on a background thread and should return promptly. Getter calls are serialized but
+    /// File names must be unique. Contents are sent without redaction. This read-only callback
+    /// runs on the thread requesting a report and must return promptly. Getter calls are serialized but
     /// may overlap plugin lifecycle callbacks and configuration updates. Publish configuration
     /// safely across threads and return a stable snapshot, including its buffers.
+    /// Do not issue reporting notifications or synchronously wait for OpAMP callbacks from this getter.
     /// A running callback may overlap plugin cleanup.
     /// </remarks>
     IReadOnlyCollection<EffectiveConfigFile> GetEffectiveConfig();

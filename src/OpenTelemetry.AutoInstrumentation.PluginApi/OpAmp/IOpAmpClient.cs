@@ -16,10 +16,11 @@ public interface IOpAmpClient
     /// </summary>
     /// <remarks>
     /// When reporting is enabled and the server accepts effective configuration, the selected
-    /// plugin's <see cref="IProvideEffectiveConfig.GetEffectiveConfig"/> is called asynchronously.
-    /// This notification returns without waiting for the getter or delivery. Pending notifications
-    /// may be coalesced. Automatic instrumentation also requests configuration when reporting becomes
-    /// available or the server requests full state. Notifications do not guarantee delivery during shutdown.
+    /// plugin's <see cref="IProvideEffectiveConfig.GetEffectiveConfig"/> must be able to complete
+    /// while this notification is in progress. Automatic instrumentation also requests current
+    /// configuration when reporting becomes available or the server requests full state.
+    /// Returning from this notification does not confirm delivery to the server.
+    /// Do not rely on delivery during shutdown.
     /// </remarks>
     void NotifyEffectiveConfigChanged();
 

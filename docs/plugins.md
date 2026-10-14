@@ -246,7 +246,8 @@ resources and unsubscribe there, including resources acquired before
 tolerate client disposal during forced shutdown.
 
 OpAMP requests do not produce application spans. Listener callbacks must return
-promptly.
+promptly. A blocking listener can delay other listeners and subsequent OpAMP
+message processing. Hand off lengthy work and return from the callback promptly.
 
 ### Effective configuration reporting
 
@@ -261,20 +262,22 @@ An empty collection reports an empty configuration. Contents are transmitted
 without redaction, so the plugin is responsible for removing sensitive values.
 
 Retain the client passed to `ConfigureOpAmpClient` and call
-`client.NotifyEffectiveConfigChanged()` after publishing configuration changes.
-Reporting requires server support. Notifications return without waiting for the
-getter or delivery, and pending notifications may be coalesced. Automatic
-instrumentation also requests configuration when reporting becomes available or
-the server requests full state; these reads do not require a notification.
+`client.NotifyEffectiveConfigChanged()` when the effective configuration changes.
+A notification caller must allow `GetEffectiveConfig()` running on another thread
+to complete. The plugin must also provide current configuration when reporting
+becomes available or the server requests full state; those reads do not require a
+notification.
 
-Getter calls run on a background thread and are serialized, but may overlap
-plugin lifecycle callbacks and configuration updates. Publish configuration
-safely across threads and return a stable snapshot, including its buffers.
-The getter should return promptly. Getter and reporting failures are logged;
-a later notification can attempt reporting again.
+`GetEffectiveConfig()` must be read-only and return promptly. It must tolerate
+concurrent configuration updates and plugin lifecycle callbacks, including
+cleanup. Publish configuration safely across threads and return a stable snapshot,
+including its buffers, that remains valid after the getter returns. Do not issue
+reporting notifications or synchronously wait for OpAMP callbacks from the getter.
 
-Notifications do not guarantee delivery during shutdown. A getter already
-running may overlap plugin cleanup.
+Reporting requires server support. Getter and reporting failures are logged; a
+later notification or server request can attempt reporting again. Returning from
+a notification does not confirm delivery to the server. Do not rely on delivery
+during shutdown.
 
 ## Selective sampling
 
