@@ -126,4 +126,9 @@ WSTRING ToWSTRING(const uint64_t value)
     return WSTRING(i, end);
 }
 
+bool StartsWith(const WSTRING& str, const WSTRING& prefix)
+{
+    return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0;
+}
+
 } // namespace trace

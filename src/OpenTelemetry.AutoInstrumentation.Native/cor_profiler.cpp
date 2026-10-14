@@ -788,7 +788,7 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id, std::vector<ModuleID>& m
 
         for (auto&& skip_assembly_pattern : skip_assembly_prefixes)
         {
-            if (module_info.assembly.name.rfind(skip_assembly_pattern, 0) == 0)
+            if (StartsWith(module_info.assembly.name, skip_assembly_pattern))
             {
                 bool is_included = false;
                 // The assembly matches the "skip" prefix, but check if it's specifically included
@@ -1552,7 +1552,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::GetAssemblyReferences(const WCHAR*       
     // managed profiler
     for (auto&& skip_assembly_pattern : skip_assembly_prefixes)
     {
-        if (assembly_name.rfind(skip_assembly_pattern, 0) == 0)
+        if (StartsWith(assembly_name, skip_assembly_pattern))
         {
             Logger::Debug("GetAssemblyReferences skipping module by pattern: Name=", assembly_name,
                           " Path=", wszAssemblyPath);
