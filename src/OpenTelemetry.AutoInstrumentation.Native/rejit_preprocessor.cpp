@@ -413,7 +413,7 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                     Logger::Debug("  Loading Assembly Metadata...");
                     auto hr = corProfilerInfo->GetModuleMetaData(moduleInfo.id, ofRead | ofWrite, IID_IMetaDataImport2,
                                                                  metadataInterfaces.GetAddressOf());
-                    if (FAILED(hr))
+                    if (hr != S_OK)
                     {
                         Logger::Warn("CallTarget_RequestRejitForModule failed to get metadata interface for ",
                                      moduleInfo.id, " ", moduleInfo.assembly.name);
@@ -621,7 +621,7 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                     Logger::Debug("  Loading Assembly Metadata...");
                     auto hr = corProfilerInfo->GetModuleMetaData(moduleInfo.id, ofRead | ofWrite, IID_IMetaDataImport2,
                                                                  metadataInterfaces.GetAddressOf());
-                    if (FAILED(hr))
+                    if (hr != S_OK)
                     {
                         Logger::Warn("CallTarget_RequestRejitForModule failed to get metadata interface for ",
                                      moduleInfo.id, " ", moduleInfo.assembly.name);

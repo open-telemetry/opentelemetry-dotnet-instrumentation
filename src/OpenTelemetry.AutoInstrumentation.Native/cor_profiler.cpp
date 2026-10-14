@@ -339,7 +339,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
         ComPtr<IUnknown> metadata_interfaces;
         auto hr = this->info_->GetModuleMetaData(assembly_info.manifest_module_id, ofRead, IID_IMetaDataImport2,
                                                  metadata_interfaces.GetAddressOf());
-        if (FAILED(hr))
+        if (hr != S_OK)
         {
             Logger::Warn("AssemblyLoadFinished failed to get metadata interface for module id ",
                          assembly_info.manifest_module_id, " from assembly ", assembly_info.name);
@@ -657,12 +657,17 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id, std::vector<ModuleID>& m
     if (!corlib_module_loaded && (module_info.assembly.name == mscorlib_assemblyName ||
                                   module_info.assembly.name == system_private_corelib_assemblyName))
     {
-        corlib_module_loaded = true;
-        corlib_app_domain_id = app_domain_id;
-
         ComPtr<IUnknown> metadata_interfaces;
         auto             hr =
             this->info_->GetModuleMetaData(module_id, ofRead, IID_IMetaDataImport2, metadata_interfaces.GetAddressOf());
+        if (hr != S_OK)
+        {
+            Logger::Warn("ModuleLoadFinished failed to get metadata interface for COR assembly ", module_id);
+            return S_OK;
+        }
+
+        corlib_module_loaded = true;
+        corlib_app_domain_id = app_domain_id;
 
         // Get the IMetaDataAssemblyImport interface to get metadata from the
         // managed assembly
@@ -826,7 +831,7 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id, std::vector<ModuleID>& m
         auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
                                                              metadata_interfaces.GetAddressOf());
 
-        if (FAILED(hr))
+        if (hr != S_OK)
         {
             Logger::Warn("ModuleLoadFinished failed to get metadata interface for ", module_id, " ",
                          module_info.assembly.name);
@@ -1667,6 +1672,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
     ComPtr<IUnknown> metadataInterfaces;
     hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
                                         metadataInterfaces.GetAddressOf());
+    if (hr != S_OK)
+    {
+        Logger::Warn("JITCompilationStarted failed to get metadata interface for ", module_id);
+        return S_OK;
+    }
 
     const auto& metadataImport = metadataInterfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
     const auto& metadataEmit   = metadataInterfaces.As<IMetaDataEmit2>(IID_IMetaDataEmit);
@@ -2305,10 +2315,11 @@ HRESULT CorProfiler::ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef
     ComPtr<IUnknown> metadata_interfaces;
     auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
                                                          metadata_interfaces.GetAddressOf());
-    if (FAILED(hr))
+    if (hr != S_OK)
     {
         Logger::Warn("ModifyAppDomainCreate: failed to get metadata interface for ", module_id);
-        return hr;
+        // Callers use FAILED; S_FALSE means the module has no metadata, not a usable result.
+        return FAILED(hr) ? hr : E_FAIL;
     }
 
     const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
@@ -2544,10 +2555,10 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
     ComPtr<IUnknown> metadata_interfaces;
     auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
                                                          metadata_interfaces.GetAddressOf());
-    if (FAILED(hr))
+    if (hr != S_OK)
     {
         Logger::Warn("GenerateLoaderType: failed to get metadata interface for ", module_id);
-        return hr;
+        return FAILED(hr) ? hr : E_FAIL;
     }
 
     const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
@@ -3459,10 +3470,10 @@ HRESULT CorProfiler::RewriteILSystemDataCommandText(const ModuleID module_id)
     auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
                                                          metadata_interfaces.GetAddressOf());
 
-    if (FAILED(hr))
+    if (hr != S_OK)
     {
         Logger::Warn("RewriteILSystemDataCommandText: Failed to get metadata interface for ", module_id);
-        return hr;
+        return FAILED(hr) ? hr : E_FAIL;
     }
 
     const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
@@ -3586,10 +3597,10 @@ HRESULT CorProfiler::GenerateLoaderMethod(const ModuleID module_id, mdMethodDef*
     ComPtr<IUnknown> metadata_interfaces;
     auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
                                                          metadata_interfaces.GetAddressOf());
-    if (FAILED(hr))
+    if (hr != S_OK)
     {
         Logger::Warn("GenerateLoaderMethod: failed to get metadata interface for ", module_id);
-        return hr;
+        return FAILED(hr) ? hr : E_FAIL;
     }
 
     const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
@@ -3798,10 +3809,10 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
     ComPtr<IUnknown> metadata_interfaces;
     auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
                                                          metadata_interfaces.GetAddressOf());
-    if (FAILED(hr))
+    if (hr != S_OK)
     {
         Logger::Warn("GenerateLoaderMethod: failed to get metadata interface for ", module_id);
-        return hr;
+        return FAILED(hr) ? hr : E_FAIL;
     }
 
     const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
