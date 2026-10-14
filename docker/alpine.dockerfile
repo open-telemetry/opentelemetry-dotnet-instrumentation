@@ -32,6 +32,8 @@ RUN apk update \
         grpc="${GRPC_VERSION}" \
         grpc-plugins="${GRPC_PLUGINS_VERSION}"
 
+# Make the unversioned Clang compiler binaries available to CMake.
+ENV PATH="/usr/lib/llvm21/bin:$PATH"
 ENV IsAlpine=true
 ENV PROTOBUF_PROTOC=/usr/bin/protoc
 ENV gRPC_PluginFullPath=/usr/bin/grpc_csharp_plugin
