@@ -61,7 +61,7 @@ public static partial class LibraryVersion
                 "10.0.0",
 #endif
 #if NET10_0
-                "10.0.12",
+                "10.0.13",
 #endif
 #endif
             ];
@@ -399,7 +399,7 @@ public static partial class LibraryVersion
                 "8.0.0",
                 "9.0.0",
                 "10.0.0",
-                "10.0.12",
+                "10.0.13",
 #endif
             ];
             return theoryData;
