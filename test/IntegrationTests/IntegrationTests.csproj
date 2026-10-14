@@ -22,6 +22,8 @@
     <PackageReference Include="Testcontainers" />
     <PackageReference Include="Verify.Xunit" />
     <PackageReference Include="Xunit.SkippableFact" />
+    <!-- System.Security.Cryptography.Pkcs is a transitive package from Microsoft.Data.SqlClient. Needs update to fix https://github.com/advisories/GHSA-846f-f764-76mx -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>
 
   <ItemGroup>
