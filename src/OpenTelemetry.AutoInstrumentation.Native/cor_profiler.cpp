@@ -3615,6 +3615,7 @@ HRESULT CorProfiler::GenerateLoaderMethod(const ModuleID module_id, mdMethodDef*
         return hr;
     }
 
+    mdMemberRef loader_method;
     {
         // Define a new static method __DDVoidMethodCall__ on the new type that has a void return type and takes no
         // arguments
@@ -3624,7 +3625,7 @@ HRESULT CorProfiler::GenerateLoaderMethod(const ModuleID module_id, mdMethodDef*
             ELEMENT_TYPE_VOID,             // Return type
         };
         hr = metadata_emit->DefineMemberRef(init_type_ref, WStr("__DDVoidMethodCall__"), initialize_signature,
-                                            sizeof(initialize_signature), ret_method_token);
+                                            sizeof(initialize_signature), &loader_method);
         if (FAILED(hr))
         {
             Logger::Warn("GenerateLoaderMethod: DefineMemberRef __DDVoidMethodCall__ failed");
@@ -3632,6 +3633,163 @@ HRESULT CorProfiler::GenerateLoaderMethod(const ModuleID module_id, mdMethodDef*
         }
     }
 
+    return GenerateLoaderLogMethod(module_id, metadata_emit, corlib_ref, loader_method, ret_method_token);
+}
+
+void __stdcall CorProfiler::NativeLog(int32_t level, const WCHAR* message, int32_t length) noexcept
+{
+    // C++ exceptions must never cross the unmanaged calli boundary.
+    try
+    {
+        if (message == nullptr || length < 0)
+        {
+            return;
+        }
+        const auto text = ToString(message, static_cast<std::size_t>(length));
+        if (level == 0)
+        {
+            Logger::Debug(text);
+        }
+        else if (level == 1)
+        {
+            Logger::Info(text);
+        }
+        else if (level == 2)
+        {
+            Logger::Warn(text);
+        }
+        else
+        {
+            Logger::Error(text);
+        }
+    }
+    catch (...)
+    {
+    }
+}
+
+HRESULT CorProfiler::GenerateLoaderLogMethod(ModuleID                      module_id,
+                                             const ComPtr<IMetaDataEmit2>& metadata_emit,
+                                             mdAssemblyRef                 corlib_ref,
+                                             mdMemberRef                   loader_method,
+                                             mdMethodDef*                  ret_method_token)
+{
+    HRESULT   hr;
+    mdTypeRef object_type, string_type, char_type, exception_type;
+    IfFailRet(metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Object"), &object_type));
+    IfFailRet(metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.String"), &string_type));
+    IfFailRet(metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Char"), &char_type));
+    IfFailRet(metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Exception"), &exception_type));
+
+    // A separate type with no static constructor lets the catch cover failures in the loader type's .cctor.
+    mdTypeDef wrapper_type;
+    IfFailRet(metadata_emit->DefineTypeDef(WStr("__OTelNativeLoaderLog__"), tdNotPublic | tdAbstract | tdSealed,
+                                           object_type, nullptr, &wrapper_type));
+    const COR_SIGNATURE method_signature[] = {IMAGE_CEE_CS_CALLCONV_DEFAULT, 0, ELEMENT_TYPE_VOID};
+    mdMethodDef         wrapper_method;
+    IfFailRet(metadata_emit->DefineMethod(wrapper_type, WStr("Load"), mdPublic | mdStatic | mdHideBySig,
+                                          method_signature, sizeof(method_signature), 0, miIL | miManaged,
+                                          &wrapper_method));
+
+    mdMemberRef         to_string, to_chars, get_length, concat;
+    const COR_SIGNATURE to_string_signature[] = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 0, ELEMENT_TYPE_STRING};
+    const COR_SIGNATURE to_chars_signature[]  = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 0, ELEMENT_TYPE_SZARRAY,
+                                                 ELEMENT_TYPE_CHAR};
+    const COR_SIGNATURE length_signature[]    = {IMAGE_CEE_CS_CALLCONV_HASTHIS, 0, ELEMENT_TYPE_I4};
+    const COR_SIGNATURE concat_signature[]    = {IMAGE_CEE_CS_CALLCONV_DEFAULT, 2, ELEMENT_TYPE_STRING,
+                                                 ELEMENT_TYPE_STRING, ELEMENT_TYPE_STRING};
+    IfFailRet(metadata_emit->DefineMemberRef(object_type, WStr("ToString"), to_string_signature,
+                                             sizeof(to_string_signature), &to_string));
+    IfFailRet(metadata_emit->DefineMemberRef(string_type, WStr("ToCharArray"), to_chars_signature,
+                                             sizeof(to_chars_signature), &to_chars));
+    IfFailRet(metadata_emit->DefineMemberRef(string_type, WStr("get_Length"), length_signature,
+                                             sizeof(length_signature), &get_length));
+    IfFailRet(metadata_emit->DefineMemberRef(string_type, WStr("Concat"), concat_signature, sizeof(concat_signature),
+                                             &concat));
+    const WCHAR prefix[] = WStr("An error occurred in the managed loader: ");
+    mdString    error_message;
+    IfFailRet(metadata_emit->DefineUserString(prefix, static_cast<ULONG>(WStrLen(prefix)), &error_message));
+
+    // String message, UTF-16 char pointer, pinned char array, original exception.
+    COR_SIGNATURE locals[32]     = {IMAGE_CEE_CS_CALLCONV_LOCAL_SIG,
+                                    4,
+                                    ELEMENT_TYPE_STRING,
+                                    ELEMENT_TYPE_PTR,
+                                    ELEMENT_TYPE_CHAR,
+                                    ELEMENT_TYPE_PINNED,
+                                    ELEMENT_TYPE_SZARRAY,
+                                    ELEMENT_TYPE_CHAR,
+                                    ELEMENT_TYPE_CLASS};
+    const auto    exception_size = CorSigCompressToken(exception_type, locals + 9);
+    mdSignature   locals_token;
+    IfFailRet(metadata_emit->GetTokenFromSig(locals, 9 + exception_size, &locals_token));
+    const COR_SIGNATURE log_signature[] =
+        {IMAGE_CEE_CS_CALLCONV_STDCALL, 3, ELEMENT_TYPE_VOID, ELEMENT_TYPE_I4, ELEMENT_TYPE_I, ELEMENT_TYPE_I4};
+    mdSignature log_token;
+    IfFailRet(metadata_emit->GetTokenFromSig(log_signature, sizeof(log_signature), &log_token));
+
+    ILRewriter rewriter(info_, nullptr, module_id, wrapper_method);
+    rewriter.InitializeTiny();
+    rewriter.SetTkLocalVarSig(locals_token);
+    ILRewriterWrapper il(&rewriter);
+    il.SetILPosition(rewriter.GetILList()->m_pNext);
+    auto return_instruction       = rewriter.NewILInstr();
+    return_instruction->m_opcode  = CEE_RET;
+    auto rethrow_instruction      = rewriter.NewILInstr();
+    rethrow_instruction->m_opcode = CEE_RETHROW;
+
+    auto try_begin = il.CallMember(loader_method, false);
+    il.CreateInstr(CEE_LEAVE, return_instruction);
+    auto catch_begin = il.StLocal(3);
+    auto log_begin   = il.LoadLocal(3);
+    il.CallMember(to_string, true);
+    il.StLocal(0);
+    il.LoadStr(error_message);
+    il.LoadLocal(0);
+    il.CallMember(concat, false);
+    il.StLocal(0);
+    il.LoadLocal(0);
+    il.CallMember(to_chars, true);
+    il.StLocal(2);
+    il.LoadLocal(2);
+    il.LoadInt32(0);
+    il.CreateInstr(CEE_LDELEMA, char_type);
+    il.CreateInstr(CEE_CONV_U);
+    il.StLocal(1);
+    il.LoadInt32(3);
+    il.LoadLocal(1);
+    il.LoadLocal(0);
+    il.CallMember(get_length, true);
+    il.LoadInt64(static_cast<INT64>(reinterpret_cast<UINT_PTR>(&NativeLog)));
+    il.CreateInstr(CEE_CONV_I);
+    il.CreateInstr(CEE_CALLI, log_token);
+    il.CreateInstr(CEE_LDNULL);
+    il.StLocal(2);
+    il.CreateInstr(CEE_LEAVE, rethrow_instruction);
+
+    // Preserve the original loader exception even if formatting/logging the diagnostic fails.
+    auto log_catch = il.Pop();
+    il.CreateInstr(CEE_LDNULL);
+    il.StLocal(2);
+    auto log_catch_end = il.CreateInstr(CEE_LEAVE, rethrow_instruction);
+    rewriter.InsertAfter(log_catch_end, rethrow_instruction);
+    rewriter.InsertAfter(rethrow_instruction, return_instruction);
+    auto clauses               = new EHClause[2]{};
+    clauses[0].m_Flags         = COR_ILEXCEPTION_CLAUSE_NONE;
+    clauses[0].m_pTryBegin     = log_begin;
+    clauses[0].m_pTryEnd       = log_catch;
+    clauses[0].m_pHandlerBegin = log_catch;
+    clauses[0].m_pHandlerEnd   = log_catch_end;
+    clauses[0].m_ClassToken    = exception_type;
+    clauses[1].m_Flags         = COR_ILEXCEPTION_CLAUSE_NONE;
+    clauses[1].m_pTryBegin     = try_begin;
+    clauses[1].m_pTryEnd       = catch_begin;
+    clauses[1].m_pHandlerBegin = catch_begin;
+    clauses[1].m_pHandlerEnd   = rethrow_instruction;
+    clauses[1].m_ClassToken    = exception_type;
+    rewriter.SetEHClause(clauses, 2);
+    IfFailRet(rewriter.Export());
+    *ret_method_token = wrapper_method;
     return S_OK;
 }
 

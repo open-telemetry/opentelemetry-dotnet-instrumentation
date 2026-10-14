@@ -102,6 +102,9 @@ private:
     //
     HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, ModuleID module_id, mdToken function_token, const FunctionInfo& caller, const ModuleMetadata& module_metadata);
     HRESULT GenerateLoaderMethod(ModuleID module_id, mdMethodDef* ret_method_token);
+    HRESULT GenerateLoaderLogMethod(ModuleID module_id, const ComPtr<IMetaDataEmit2>& metadata_emit,
+                                    mdAssemblyRef corlib_ref, mdMemberRef loader_method, mdMethodDef* ret_method_token);
+    static void __stdcall NativeLog(int32_t level, const WCHAR* message, int32_t length) noexcept;
     HRESULT GenerateLoaderType(const ModuleID module_id,
                                mdTypeDef*     loader_type,
                                mdMethodDef*   init_method,
