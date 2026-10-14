@@ -31,6 +31,27 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Following packages updated
   - `OpenTelemetry.Resources.Azure` from `1.19.1-beta.1` to `1.19.1-beta.2`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Configuration` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Configuration.EnvironmentVariables` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions`
+    from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Logging` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Options` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions`
+    from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Primitives` from `10.0.12` to `10.0.13`,
+  - `System.Diagnostics.DiagnosticSource` from `10.0.12` to `10.0.13`,
+  - `System.IO.Pipelines` from `10.0.12` to `10.0.13`,
+  - `System.Text.Encodings.Web` from `10.0.12` to `10.0.13`,
+  - `System.Text.Json` from `10.0.12` to `10.0.13`.
 
 ### Deprecated
 
