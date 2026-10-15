@@ -80,12 +80,12 @@ public class OpAmpLoaderTests
             plugin.ReleaseBeforeStopCallback();
             if (loaderStopTask != null)
             {
-                await Task.WhenAny(loaderStopTask, Task.Delay(TestTimeout));
+                await AssertCompletes(loaderStopTask);
             }
 
             if (plugin.BeforeStopCallbackEntered.IsCompleted)
             {
-                await Task.WhenAny(plugin.BeforeStopCallbackCompleted, Task.Delay(TestTimeout));
+                await AssertCompletes(plugin.BeforeStopCallbackCompleted);
             }
         }
 
@@ -204,9 +204,26 @@ public class OpAmpLoaderTests
 
     private static async Task AssertCompletes(Task task)
     {
-        var completedTask = await Task.WhenAny(task, Task.Delay(TestTimeout)).ConfigureAwait(false);
-        Assert.Same(task, completedTask);
-        await task.ConfigureAwait(false);
+        using var timeoutCancellation = new CancellationTokenSource();
+
+        try
+        {
+            var completedTask = await Task.WhenAny(
+                task,
+                Task.Delay(TestTimeout, timeoutCancellation.Token))
+                .ConfigureAwait(false);
+
+            Assert.Same(task, completedTask);
+            await task.ConfigureAwait(false);
+        }
+        finally
+        {
+#if NET
+            await timeoutCancellation.CancelAsync().ConfigureAwait(false);
+#else
+            timeoutCancellation.Cancel();
+#endif
+        }
     }
 }
 
@@ -234,7 +251,7 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
 
     internal OpAmpClientSettings? ConfiguredSettings { get; private set; }
 
-    internal string[] Events => _events.ToArray();
+    internal string[] Events => [.. _events];
 
     public void Initializing()
     {
