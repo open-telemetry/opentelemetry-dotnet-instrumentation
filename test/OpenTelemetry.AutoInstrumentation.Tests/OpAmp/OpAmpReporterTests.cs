@@ -95,6 +95,24 @@ public class OpAmpReporterTests
             report => Assert.Null(report.EffectiveConfigFiles));
     }
 
+    [Fact]
+    public void FullStateIsReportedWithoutConfigurationWhenProviderFails()
+    {
+        _reporter.HandleServerCapabilities(ServerCapabilities);
+        _plugin.ReadConfig = () => throw new InvalidOperationException("Cannot read configuration.");
+
+        _reporter.ReportFullState();
+        Assert.Null(Assert.Single(_reportSender.FullStateReports).EffectiveConfigFiles);
+
+        _plugin.ReadConfig = () => CreateConfig("updated");
+        _reporter.NotifyEffectiveConfigChanged();
+
+        Assert.Collection(
+            _reportSender.EffectiveConfigReports,
+            report => Assert.Equal("initial", GetConfigContent(report)),
+            report => Assert.Equal("updated", GetConfigContent(report)));
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

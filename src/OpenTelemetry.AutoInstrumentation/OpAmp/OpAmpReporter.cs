@@ -116,10 +116,23 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
             EffectiveConfigFile[]? files = null;
             if (_effectiveConfigProvider != null && _serverAcceptsEffectiveConfig)
             {
-                // Copy the plugin's buffers so later mutations cannot change the queued report.
-                files = _effectiveConfigProvider.GetEffectiveConfig()
-                    .Select(file => new EffectiveConfigFile(file.Content.ToArray(), file.ContentType, file.FileName))
-                    .ToArray();
+                try
+                {
+                    // Copy the plugin's buffers so later mutations cannot change the queued report.
+                    files = _effectiveConfigProvider.GetEffectiveConfig()
+                        .Select(file => new EffectiveConfigFile(file.Content.ToArray(), file.ContentType, file.FileName))
+                        .ToArray();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "An error occurred while preparing effective configuration for OpAmp reporting.");
+                    if (!fullState)
+                    {
+                        return;
+                    }
+
+                    // Omit unavailable configuration so independent state can still be reported.
+                }
             }
 
             if (_stopped)

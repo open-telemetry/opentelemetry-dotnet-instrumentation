@@ -263,6 +263,8 @@ without redaction, so the plugin is responsible for removing sensitive values.
 
 Retain the client passed to `ConfigureOpAmpClient` and call
 `client.NotifyEffectiveConfigChanged()` when the effective configuration changes.
+Repeated notifications can resend unchanged configuration.
+
 A notification caller must allow `GetEffectiveConfig()` running on another thread
 to complete. The plugin must also provide current configuration when reporting
 becomes available or the server requests full state; those reads do not require
@@ -274,10 +276,11 @@ cleanup. Publish configuration safely across threads and return a stable snapsho
 including its buffers, that remains valid after the getter returns. Do not issue
 reporting notifications or synchronously wait for OpAMP callbacks from the getter.
 
-Reporting requires server support. Getter and reporting failures are logged; a
-later notification or server request can attempt reporting again. Returning from
-a notification does not confirm delivery to the server. Do not rely on delivery
-during shutdown.
+Reporting requires server support. Getter and reporting failures are logged;
+a later notification or server request can attempt reporting again.
+If configuration retrieval fails during a full-state request, the other
+available state is still reported. Effective configuration is omitted;
+this does not report an empty configuration.
 
 ## Selective sampling
 
