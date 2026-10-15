@@ -71,7 +71,8 @@ namespace trace
 /// <returns>Result of the rewriting</returns>
 HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler,
                                       RejitHandlerModuleMethod*    methodHandler,
-                                      ICorProfilerFunctionControl* pFunctionControl, ICorProfilerInfo* corProfilerInfo)
+                                      ICorProfilerFunctionControl* pFunctionControl,
+                                      ICorProfilerInfo*            corProfilerInfo)
 {
     /*  ===============================
         Current CallTarget Limitations:
@@ -107,9 +108,10 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     ModuleID        module_id       = moduleHandler->GetModuleId();
     ModuleMetadata& module_metadata = *moduleHandler->GetModuleMetadata();
     FunctionInfo*   caller          = methodHandler->GetFunctionInfo();
-    TracerTokens*   tracerTokens = module_metadata.GetTracerTokens(m_corProfiler->GetBytecodeInstrumentationAssembly(), m_corProfiler->info_);
-    mdToken         function_token                = caller->id;
-    TypeSignature   retFuncArg                    = caller->method_signature.GetReturnValue();
+    TracerTokens*   tracerTokens =
+        module_metadata.GetTracerTokens(m_corProfiler->GetBytecodeInstrumentationAssembly(), m_corProfiler->info_);
+    mdToken                function_token         = caller->id;
+    TypeSignature          retFuncArg             = caller->method_signature.GetReturnValue();
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
     bool                   is_integration_method =
         integration_definition->target_method.type.assembly.name != tracemethodintegration_assemblyname;
@@ -188,10 +190,10 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     mdToken            callTargetReturnToken = mdTokenNil;
     ILInstr*           firstInstruction      = nullptr;
     auto               returnType            = caller->method_signature.GetReturnValue();
-    hr = tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, &returnType, &methodArguments, &callTargetStateIndex,
-                                                   &exceptionIndex, &callTargetReturnIndex, &returnValueIndex,
-                                                   &callTargetStateToken, &exceptionToken, &callTargetReturnToken,
-                                                   &firstInstruction, additionalLocalIndices);
+    hr = tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, &returnType, &methodArguments,
+                                                   &callTargetStateIndex, &exceptionIndex, &callTargetReturnIndex,
+                                                   &returnValueIndex, &callTargetStateToken, &exceptionToken,
+                                                   &callTargetReturnToken, &firstInstruction, additionalLocalIndices);
     if (FAILED(hr))
     {
         // Signature/local modification failed (e.g. the method's signature is too large to
@@ -202,8 +204,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
         return S_FALSE;
     }
 
-    ULONG beginMethodExceptionIndex = additionalLocalIndices[0];
-    ULONG endMethodExceptionIndex   = additionalLocalIndices[1];
+    ULONG      beginMethodExceptionIndex = additionalLocalIndices[0];
+    ULONG      endMethodExceptionIndex   = additionalLocalIndices[1];
     const auto refStructIndexes          = additionalLocalIndices.data() + 2;
 
     // ***
@@ -414,8 +416,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     ILInstr* pStateLeaveToBeginOriginalMethodInstr = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
 
     // *** BeginMethod exception filter
-    ILInstr* beginMethodFilter          = nullptr;
-    ILInstr* beginMethodCatchFirstInstr = nullptr;
+    ILInstr*   beginMethodFilter          = nullptr;
+    ILInstr*   beginMethodCatchFirstInstr = nullptr;
     const auto bubbleup_exception_typeref = tracerTokens->GetBubbleUpExceptionTypeRef();
     if (m_corProfiler->call_target_bubble_up_exception_available && bubbleup_exception_typeref != mdTypeRefNil)
     {
@@ -748,7 +750,7 @@ ILInstr* TracerMethodRewriter::CreateFilterForException(ILRewriterWrapper* rewri
     ILInstr* endNotException = rewriter->CreateInstr(CEE_BR_S);
 
     ILInstr* storeException = rewriter->StLocal(exceptionValueIndex);
-    isException->m_pTarget = storeException;
+    isException->m_pTarget  = storeException;
     rewriter->LoadLocal(exceptionValueIndex);
     if (m_corProfiler->call_target_bubble_up_exception_function_available &&
         containsCallTargetBubbleUpException != mdMemberRefNil)
