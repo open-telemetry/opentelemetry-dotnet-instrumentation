@@ -265,8 +265,8 @@ Retain the client passed to `ConfigureOpAmpClient` and call
 `client.NotifyEffectiveConfigChanged()` when the effective configuration changes.
 A notification caller must allow `GetEffectiveConfig()` running on another thread
 to complete. The plugin must also provide current configuration when reporting
-becomes available or the server requests full state; those reads do not require a
-notification.
+becomes available or the server requests full state; those reads do not require
+a notification.
 
 `GetEffectiveConfig()` must be read-only and return promptly. It must tolerate
 concurrent configuration updates and plugin lifecycle callbacks, including
