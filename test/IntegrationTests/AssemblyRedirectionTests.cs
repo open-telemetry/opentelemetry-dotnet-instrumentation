@@ -80,11 +80,9 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
 #if NET
     [Theory]
     [Trait("Category", "EndToEnd")]
-#if NET8_0
-    [InlineData("8.0.0", "10.0.0.0", "10.0.25.52411")]
-#elif NET9_0
-    [InlineData("9.0.0", "10.0.0.0", "10.0.25.52411")]
-#elif NET10_0
+#if NET10_0
+    [InlineData("10.0.13", "10.0.0.0", "10.0.1326.50504")]
+#elif NET11_0
     [InlineData("10.0.13", "10.0.0.0", "10.0.1326.50504")]
 #endif
     public void AdditionalDepsFallback(
