@@ -8,6 +8,8 @@
     <PackageReference Include="Oracle.ManagedDataAccess" VersionOverride="$(LibraryVersion)" />
     <!-- System.Text.Json is indirect reference. Bumping it to mitigate https://github.com/advisories/GHSA-8g4q-xg66-9fp4 -->
     <PackageReference Include="System.Text.Json" />
+    <!-- System.Security.Cryptography.Pkcs is a transitive package from Microsoft.Data.SqlClient. Needs update to fix https://github.com/advisories/GHSA-846f-f764-76mx -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>
   
 </Project>
