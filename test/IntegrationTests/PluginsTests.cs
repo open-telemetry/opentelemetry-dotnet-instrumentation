@@ -137,13 +137,14 @@ public class PluginsTests : TestHelper
         const string ignoredPluginName = ignoredPluginType + pluginAssemblySuffix;
         using var server = new MockOpAmpServer(
             Output,
-            capabilities: ServerCapabilities.AcceptsStatus | ServerCapabilities.AcceptsEffectiveConfig,
+            capabilities: ServerCapabilities.AcceptsStatus | ServerCapabilities.AcceptsEffectiveConfig | ServerCapabilities.OffersRemoteConfig,
             flags: ServerToAgentFlags.ReportFullState);
         ulong? initialSequenceNum = null;
         server.Expect(
             frame =>
             {
-                if (frame.AgentDescription == null || (frame.Capabilities & (ulong)AgentCapabilities.ReportsEffectiveConfig) != 0)
+                const AgentCapabilities ignoredCapabilities = AgentCapabilities.ReportsEffectiveConfig | AgentCapabilities.ReportsRemoteConfig | AgentCapabilities.AcceptsRemoteConfig;
+                if (frame.AgentDescription == null || (frame.Capabilities & (ulong)ignoredCapabilities) != 0)
                 {
                     return false;
                 }
@@ -154,8 +155,8 @@ public class PluginsTests : TestHelper
             "Does not advertise reporting for an ignored provider");
         server.Expect(
             frame => initialSequenceNum.HasValue && frame.SequenceNum > initialSequenceNum.Value &&
-                     frame.AgentDescription != null && frame.EffectiveConfig == null,
-            "Reports full state without effective configuration after the server request");
+                     frame.AgentDescription != null && frame.EffectiveConfig == null && frame.RemoteConfigStatus == null,
+            "Reports full state without configuration or status from an ignored provider");
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", $"{selectedPluginName}:{ignoredPluginName}");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_ENABLED", "true");
@@ -176,6 +177,7 @@ public class PluginsTests : TestHelper
         Assert.DoesNotContain($"{ignoredPlugin}.ConfigureOpAmpClient() invoked.", outputLines);
         Assert.DoesNotContain($"{ignoredPlugin}.BeforeOpAmpClientStopped() invoked.", outputLines);
         Assert.DoesNotContain($"{ignoredPlugin}.GetEffectiveConfig() invoked.", outputLines);
+        Assert.DoesNotContain($"{ignoredPlugin}.GetRemoteConfigStatus() invoked.", outputLines);
         Assert.Contains("Multiple OpAMP plugins are configured.", standardOutput, StringComparison.Ordinal);
         Assert.Contains($"Using '{selectedPluginType}'", standardOutput, StringComparison.Ordinal);
         Assert.Contains(ignoredPluginType, standardOutput, StringComparison.Ordinal);
@@ -191,11 +193,24 @@ public class PluginsTests : TestHelper
     {
         const int maxPendingCustomMessages = 123;
         const int maxPendingCustomMessageBytes = 456;
-        using var server = new MockOpAmpServer(Output, capabilities: ServerCapabilities.AcceptsStatus | ServerCapabilities.AcceptsEffectiveConfig);
+        using var server = new MockOpAmpServer(
+            Output,
+            capabilities: ServerCapabilities.AcceptsStatus | ServerCapabilities.AcceptsEffectiveConfig | ServerCapabilities.OffersRemoteConfig);
 
-        server.Expect(frame => (frame.Capabilities & (ulong)AgentCapabilities.ReportsEffectiveConfig) != 0, "Advertises effective configuration reporting");
-        // Startup can complete before server capabilities are dispatched, so assert the latest configuration.
-        server.Expect(frame => HasEffectiveConfig(frame, "updated: true"), "Reports changed effective configuration");
+        const AgentCapabilities expectedCapabilities = AgentCapabilities.ReportsEffectiveConfig | AgentCapabilities.ReportsRemoteConfig | AgentCapabilities.AcceptsRemoteConfig;
+        server.Expect(frame => (frame.Capabilities & (ulong)expectedCapabilities) == (ulong)expectedCapabilities, "Advertises configuration reporting and acceptance");
+        var reportedConfig = false;
+        var reportedStatus = false;
+        // The client may batch these fields into one frame or send them separately.
+        server.Expect(
+            frame =>
+            {
+                reportedConfig |= HasEffectiveConfig(frame, "updated: true");
+                reportedStatus |= frame.RemoteConfigStatus?.LastRemoteConfigHash.ToStringUtf8() == "config-hash" &&
+                                  frame.RemoteConfigStatus.Status == RemoteConfigStatuses.Applied && frame.RemoteConfigStatus.ErrorMessage.Length == 0;
+                return reportedConfig && reportedStatus;
+            },
+            "Reports changed effective configuration and remote configuration status");
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_SERVER_URL", server.Endpoint);
         configureOpAmp();

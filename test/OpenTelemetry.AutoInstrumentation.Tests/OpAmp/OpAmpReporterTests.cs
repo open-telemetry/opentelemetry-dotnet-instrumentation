@@ -14,13 +14,13 @@ public class OpAmpReporterTests
 {
     private const ServerSentCapabilities ServerCapabilities = ServerSentCapabilities.AcceptsStatus | ServerSentCapabilities.AcceptsEffectiveConfig;
     private static readonly TimeSpan TestTimeout = TimeSpan.FromSeconds(5);
-    private readonly TestEffectiveConfigPlugin _plugin = new();
+    private readonly TestReportingPlugin _plugin = new();
     private readonly RecordingOpAmpReportSender _reportSender = new();
     private readonly OpAmpReporter _reporter;
 
     public OpAmpReporterTests()
     {
-        _reporter = new OpAmpReporter(_plugin, _reportSender);
+        _reporter = new OpAmpReporter(_plugin, _plugin, _reportSender);
     }
 
     [Fact]
@@ -133,6 +133,173 @@ public class OpAmpReporterTests
     }
 
     [Fact]
+    public void ReportsInitialAndChangedRemoteStatus()
+    {
+        _reporter.HandleServerCapabilities(ServerSentCapabilities.OffersRemoteConfig);
+
+        _plugin.ReadRemoteStatus = () => CreateRemoteStatus(RemoteConfigStatusCode.Failed, "cannot apply", "new-hash");
+        _reporter.NotifyRemoteConfigStatusChanged();
+
+        Assert.Collection(
+            _reportSender.RemoteConfigStatusReports,
+            report => AssertRemoteStatus(report, RemoteConfigStatusCode.Applied),
+            report => AssertRemoteStatus(report, RemoteConfigStatusCode.Failed, "cannot apply", "new-hash"));
+        Assert.Empty(_reportSender.EffectiveConfigReports);
+    }
+
+    [Fact]
+    public void RemoteStatusIsOmittedUntilPluginPublishesApplicationProgress()
+    {
+        _plugin.ReadRemoteStatus = () => null;
+        _reporter.HandleServerCapabilities(ServerSentCapabilities.OffersRemoteConfig);
+        _reporter.NotifyRemoteConfigStatusChanged();
+
+        Assert.Empty(_reportSender.RemoteConfigStatusReports);
+
+        _plugin.ReadRemoteStatus = () => CreateRemoteStatus(RemoteConfigStatusCode.Applying);
+        _reporter.NotifyRemoteConfigStatusChanged();
+        _plugin.ReadRemoteStatus = () => CreateRemoteStatus(RemoteConfigStatusCode.Applied);
+        _reporter.NotifyRemoteConfigStatusChanged();
+
+        Assert.Collection(
+            _reportSender.RemoteConfigStatusReports,
+            report => AssertRemoteStatus(report, RemoteConfigStatusCode.Applying),
+            report => AssertRemoteStatus(report, RemoteConfigStatusCode.Applied));
+    }
+
+    [Fact]
+    public void RemoteStatusRequiresServerSupportAndStopsAtShutdown()
+    {
+        _reporter.NotifyRemoteConfigStatusChanged();
+        Assert.Equal(0, _plugin.RemoteStatusGetterCalls);
+
+        _reporter.HandleServerCapabilities(ServerSentCapabilities.OffersRemoteConfig);
+        _reporter.HandleServerCapabilities(ServerSentCapabilities.OffersRemoteConfig);
+        Assert.Equal(1, _plugin.RemoteStatusGetterCalls);
+
+        _plugin.ReadRemoteStatus = () => CreateRemoteStatus(RemoteConfigStatusCode.Applying, hash: "new-hash");
+        _reporter.HandleServerCapabilities(ServerSentCapabilities.None);
+        _reporter.NotifyRemoteConfigStatusChanged();
+        Assert.Equal(2, _plugin.RemoteStatusGetterCalls);
+
+        _reporter.HandleServerCapabilities(ServerCapabilities);
+        _reporter.NotifyRemoteConfigStatusChanged();
+        _reporter.ReportFullState();
+        Assert.Equal(2, _plugin.RemoteStatusGetterCalls);
+        Assert.Null(Assert.Single(_reportSender.FullStateReports).RemoteConfigStatus);
+
+        _plugin.ReadRemoteStatus = () => CreateRemoteStatus(RemoteConfigStatusCode.Failed, "cannot apply", "new-hash");
+        _reporter.HandleServerCapabilities(ServerSentCapabilities.OffersRemoteConfig);
+        Assert.Equal(3, _plugin.RemoteStatusGetterCalls);
+        Assert.Equal(3, _reportSender.RemoteConfigStatusReports.Count);
+
+        _reporter.Stop();
+        _reporter.NotifyRemoteConfigStatusChanged();
+        _reporter.ReportFullState();
+        _reporter.HandleServerCapabilities(ServerCapabilities);
+        Assert.Equal(3, _plugin.RemoteStatusGetterCalls);
+        Assert.Equal(3, _reportSender.RemoteConfigStatusReports.Count);
+        Assert.Single(_reportSender.FullStateReports);
+    }
+
+    [Fact]
+    public void FullStateReportsCurrentRemoteStatus()
+    {
+        _reporter.HandleServerCapabilities(ServerSentCapabilities.OffersRemoteConfig);
+
+        _plugin.ReadRemoteStatus = () => CreateRemoteStatus(RemoteConfigStatusCode.Failed, "cannot apply", "new-hash");
+        _reporter.ReportFullState();
+
+        AssertRemoteStatus(Assert.Single(_reportSender.FullStateReports).RemoteConfigStatus, RemoteConfigStatusCode.Failed, "cannot apply", "new-hash");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FullStateOmitsUnavailableRemoteStatus(bool hasProvider)
+    {
+        _plugin.ReadRemoteStatus = () => null;
+        var reporter = new OpAmpReporter(null, hasProvider ? _plugin : null, _reportSender);
+        reporter.HandleServerCapabilities(ServerSentCapabilities.OffersRemoteConfig);
+
+        reporter.ReportFullState();
+
+        Assert.Null(Assert.Single(_reportSender.FullStateReports).RemoteConfigStatus);
+        Assert.Empty(_reportSender.RemoteConfigStatusReports);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FullStateReportsAvailableStateWhenOneProviderFails(bool failEffectiveConfig)
+    {
+        _reporter.HandleServerCapabilities(ServerCapabilities | ServerSentCapabilities.OffersRemoteConfig);
+        if (failEffectiveConfig)
+        {
+            _plugin.ReadConfig = () => throw new InvalidOperationException("Cannot read configuration.");
+        }
+        else
+        {
+            _plugin.ReadRemoteStatus = () => throw new InvalidOperationException("Cannot read status.");
+        }
+
+        _reporter.ReportFullState();
+
+        var report = Assert.Single(_reportSender.FullStateReports);
+        if (failEffectiveConfig)
+        {
+            Assert.Null(report.EffectiveConfigFiles);
+            AssertRemoteStatus(report.RemoteConfigStatus, RemoteConfigStatusCode.Applied);
+        }
+        else
+        {
+            Assert.Equal("initial", GetConfigContent(report.EffectiveConfigFiles));
+            Assert.Null(report.RemoteConfigStatus);
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RemoteStatusFailureIsContainedAndNextNotificationRetries(bool failSending)
+    {
+        if (failSending)
+        {
+            _reportSender.BeforeEnqueue = () => throw new InvalidOperationException("Cannot queue status.");
+        }
+        else
+        {
+            _plugin.ReadRemoteStatus = () => throw new InvalidOperationException("Cannot read status.");
+        }
+
+        _reporter.HandleServerCapabilities(ServerSentCapabilities.OffersRemoteConfig);
+        Assert.Empty(_reportSender.RemoteConfigStatusReports);
+
+        _plugin.ReadRemoteStatus = () => CreateRemoteStatus();
+        _reportSender.BeforeEnqueue = null;
+        _reporter.NotifyRemoteConfigStatusChanged();
+        AssertRemoteStatus(Assert.Single(_reportSender.RemoteConfigStatusReports), RemoteConfigStatusCode.Applied);
+    }
+
+    [Fact]
+    public void FullStateSubmissionFailureIsContainedAndNextNotificationReportsStatus()
+    {
+        _reporter.HandleServerCapabilities(ServerSentCapabilities.OffersRemoteConfig);
+        _reportSender.BeforeEnqueue = () => throw new InvalidOperationException("Cannot queue report.");
+
+        _reporter.ReportFullState();
+        Assert.Empty(_reportSender.FullStateReports);
+
+        _reportSender.BeforeEnqueue = null;
+        _reporter.NotifyRemoteConfigStatusChanged();
+
+        Assert.Collection(
+            _reportSender.RemoteConfigStatusReports,
+            report => AssertRemoteStatus(report, RemoteConfigStatusCode.Applied),
+            report => AssertRemoteStatus(report, RemoteConfigStatusCode.Applied));
+    }
+
+    [Fact]
     public async Task CapabilityRevocationIsOrderedWithReporting()
     {
         using var releaseEnqueue = new ManualResetEventSlim();
@@ -173,9 +340,11 @@ public class OpAmpReporterTests
     }
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task ShutdownReturnsWhileReportingIsBlocked(bool blockSubmission)
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public async Task ShutdownReturnsWhileReportingIsBlocked(bool blockSubmission, bool remoteStatus)
     {
         using var releaseReport = new ManualResetEventSlim();
         var reportEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -190,6 +359,14 @@ public class OpAmpReporterTests
         {
             _reportSender.BeforeEnqueue = BlockReport;
         }
+        else if (remoteStatus)
+        {
+            _plugin.ReadRemoteStatus = () =>
+            {
+                BlockReport();
+                return CreateRemoteStatus();
+            };
+        }
         else
         {
             _plugin.ReadConfig = () =>
@@ -199,7 +376,8 @@ public class OpAmpReporterTests
             };
         }
 
-        var reportTask = Task.Run(() => _reporter.HandleServerCapabilities(ServerCapabilities));
+        var capabilities = remoteStatus ? ServerSentCapabilities.OffersRemoteConfig : ServerCapabilities;
+        var reportTask = Task.Run(() => _reporter.HandleServerCapabilities(capabilities));
         Task? stopTask = null;
         try
         {
@@ -208,12 +386,14 @@ public class OpAmpReporterTests
             {
                 _reporter.Stop();
                 _reporter.NotifyEffectiveConfigChanged();
+                _reporter.NotifyRemoteConfigStatusChanged();
                 _reporter.ReportFullState();
                 _reporter.HandleServerCapabilities(ServerSentCapabilities.AcceptsStatus);
             });
 
             await AssertCompletes(stopTask);
             Assert.Empty(_reportSender.EffectiveConfigReports);
+            Assert.Empty(_reportSender.RemoteConfigStatusReports);
         }
         finally
         {
@@ -221,8 +401,12 @@ public class OpAmpReporterTests
             await AssertCompletes(Task.WhenAll(reportTask, stopTask ?? Task.CompletedTask));
         }
 
-        Assert.Equal(1, _plugin.GetterCalls);
-        if (blockSubmission)
+        Assert.Equal(1, remoteStatus ? _plugin.RemoteStatusGetterCalls : _plugin.GetterCalls);
+        if (remoteStatus)
+        {
+            Assert.Equal(blockSubmission ? 1 : 0, _reportSender.RemoteConfigStatusReports.Count);
+        }
+        else if (blockSubmission)
         {
             Assert.Equal("initial", GetConfigContent(Assert.Single(_reportSender.EffectiveConfigReports)));
         }
@@ -251,11 +435,28 @@ public class OpAmpReporterTests
         return [new EffectiveConfigFile(Encoding.UTF8.GetBytes(content), "text/yaml", "config.yaml")];
     }
 
+    private static RemoteConfigStatusReport CreateRemoteStatus(
+        RemoteConfigStatusCode status = RemoteConfigStatusCode.Applied, string? errorMessage = null, string hash = "config-hash")
+    {
+        return new RemoteConfigStatusReport(Encoding.UTF8.GetBytes(hash), status, errorMessage);
+    }
+
+    private static void AssertRemoteStatus(
+        RemoteConfigStatusReport? report, RemoteConfigStatusCode status, string? errorMessage = null, string hash = "config-hash")
+    {
+        Assert.NotNull(report);
+        Assert.Equal(hash, Encoding.UTF8.GetString(report.LastRemoteConfigHash.ToArray()));
+        Assert.Equal(status, report.Status);
+        Assert.Equal(errorMessage, report.ErrorMessage);
+    }
+
     private sealed class RecordingOpAmpReportSender : IOpAmpReportSender
     {
         public List<IReadOnlyCollection<EffectiveConfigFile>> EffectiveConfigReports { get; } = [];
 
         public List<FullStateReport> FullStateReports { get; } = [];
+
+        public List<RemoteConfigStatusReport> RemoteConfigStatusReports { get; } = [];
 
         public ConcurrentQueue<string> ReportOrder { get; } = new();
 
@@ -281,20 +482,38 @@ public class OpAmpReporterTests
             FullStateReports.Add(report);
             ReportOrder.Enqueue(nameof(SendFullStateReport));
         }
+
+        public void SendRemoteConfigStatus(RemoteConfigStatusReport statusReport)
+        {
+            BeforeEnqueue?.Invoke();
+            RemoteConfigStatusReports.Add(statusReport);
+            ReportOrder.Enqueue(nameof(SendRemoteConfigStatus));
+        }
     }
 
-    private sealed class TestEffectiveConfigPlugin : IProvideEffectiveConfig
+    private sealed class TestReportingPlugin : IProvideEffectiveConfig, IProvideRemoteConfigStatus
     {
         private int _getterCalls;
+        private int _remoteStatusGetterCalls;
 
         public Func<IReadOnlyCollection<EffectiveConfigFile>> ReadConfig { get; set; } = () => CreateConfig("initial");
 
+        public Func<RemoteConfigStatusReport?> ReadRemoteStatus { get; set; } = () => CreateRemoteStatus();
+
         public int GetterCalls => Volatile.Read(ref _getterCalls);
+
+        public int RemoteStatusGetterCalls => Volatile.Read(ref _remoteStatusGetterCalls);
 
         public IReadOnlyCollection<EffectiveConfigFile> GetEffectiveConfig()
         {
             Interlocked.Increment(ref _getterCalls);
             return ReadConfig();
+        }
+
+        public RemoteConfigStatusReport? GetRemoteConfigStatus()
+        {
+            Interlocked.Increment(ref _remoteStatusGetterCalls);
+            return ReadRemoteStatus();
         }
 
         public void ConfigureOpAmpOptions(OpAmpClientSettings settings)

@@ -38,8 +38,9 @@ internal sealed class OpAmpManager : IDisposable
         _clientProxy = clientProxy;
         _settings = settings;
         var effectiveConfigProvider = settings.EffectiveConfigurationReporting.EnableReporting ? plugin as IProvideEffectiveConfig : null;
-        _reporter = new OpAmpReporter(effectiveConfigProvider, clientProxy);
-        if (_reporter.EffectiveConfigReportingEnabled)
+        var remoteConfigStatusProvider = settings.RemoteConfiguration.ReportsRemoteConfigStatus ? plugin as IProvideRemoteConfigStatus : null;
+        _reporter = new OpAmpReporter(effectiveConfigProvider, remoteConfigStatusProvider, clientProxy);
+        if (_reporter.EffectiveConfigReportingEnabled || _reporter.RemoteConfigStatusReportingEnabled)
         {
             clientProxy.Subscribe<ServerCapabilitiesMessage>(_reporter);
         }
@@ -169,6 +170,11 @@ internal sealed class OpAmpManager : IDisposable
         _reporter.NotifyEffectiveConfigChanged();
     }
 
+    internal void NotifyRemoteConfigStatusChanged()
+    {
+        _reporter.NotifyRemoteConfigStatusChanged();
+    }
+
     internal void Unsubscribe<T>(IOpAmpListener<T> listener)
         where T : OpAmpMessage
     {
@@ -224,8 +230,7 @@ internal sealed class OpAmpManager : IDisposable
         {
             // Do not advertise capabilities that automatic instrumentation cannot fulfill.
             _settings.EffectiveConfigurationReporting.EnableReporting = _reporter.EffectiveConfigReportingEnabled;
-            _settings.RemoteConfiguration.AcceptsRemoteConfig = false;
-            _settings.RemoteConfiguration.ReportsRemoteConfigStatus = false;
+            _settings.RemoteConfiguration.ReportsRemoteConfigStatus = _reporter.RemoteConfigStatusReportingEnabled;
 
             await _clientProxy.StartAsync(startupCancellationToken).ConfigureAwait(false);
 

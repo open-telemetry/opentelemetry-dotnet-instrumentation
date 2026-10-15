@@ -249,6 +249,39 @@ OpAMP requests do not produce application spans. Listener callbacks must return
 promptly. A blocking listener can delay other listeners and subsequent OpAMP
 message processing. Hand off lengthy work and return from the callback promptly.
 
+### Remote configuration status reporting
+
+The selected OpAMP plugin can implement `IProvideRemoteConfigStatus` and set
+`settings.RemoteConfiguration.ReportsRemoteConfigStatus = true` in
+`ConfigureOpAmpOptions`. Reporting requires both the provider and this explicit
+opt-in. To receive remote configuration offers, separately set
+`settings.RemoteConfiguration.AcceptsRemoteConfig = true` and subscribe to
+`RemoteConfigMessage` in `ConfigureOpAmpClient`. Both settings default to `false`.
+The plugin owns configuration processing and application.
+
+Implement `GetRemoteConfigStatus()` to return a `RemoteConfigStatusReport` with
+the received configuration hash, its application status, and an optional error
+message for a failed application. The getter can run before any configuration
+offer arrives or before application finishes. Return `null` when no status is
+available; that omits the status from the report. While applying a received
+configuration, return `RemoteConfigStatusCode.Applying` with its hash.
+
+Call `client.NotifyRemoteConfigStatusChanged()` after publishing a new status.
+Reporting requires the server to advertise `OffersRemoteConfig`. The getter may
+be called while a reporting notification is in progress and must return promptly.
+Publish status safely across threads and provide a stable snapshot, including its
+hash buffer. Do not issue reporting notifications or synchronously wait for OpAMP
+callbacks from the getter. Reads may overlap plugin lifecycle callbacks, including
+cleanup.
+
+Repeated notifications can resend unchanged status. The provider may be queried
+independently of change notifications, including when responding to a full-state
+request. Getter and reporting failures are logged; later notifications or server
+requests can retry. A failed getter omits status from a full-state response while
+other state is still reported.
+Returning from a notification does not confirm delivery to the server. Do not rely
+on delivery during shutdown.
+
 ### Effective configuration reporting
 
 The selected OpAMP plugin can implement `IProvideEffectiveConfig` and set
