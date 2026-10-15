@@ -167,8 +167,8 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
                                               &runtime_async_result_type))
             {
                 Logger::Warn("    * Skipping runtime-async method with an unsupported return signature: token=",
-                             methodDef, " caller_name=", caller.type.name, ".", caller.name, "() Signature=",
-                             caller.signature.str());
+                             methodDef, " caller_name=", caller.type.name, ".", caller.name,
+                             "() Signature=", caller.signature.str());
                 continue;
             }
 

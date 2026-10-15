@@ -113,8 +113,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
     bool                   is_integration_method =
         integration_definition->target_method.type.assembly.name != tracemethodintegration_assemblyname;
-    bool       ignoreByRefInstrumentation = !is_integration_method;
-    const bool isRuntimeAsync             = caller->IsRuntimeAsync();
+    bool       ignoreByRefInstrumentation         = !is_integration_method;
+    const bool isRuntimeAsync                     = caller->IsRuntimeAsync();
     const auto [retFuncElementType, retTypeFlags] = retFuncArg.GetElementTypeAndFlags();
     bool isVoid                                   = (retTypeFlags & TypeFlagVoid) > 0;
     bool isStatic = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);
