@@ -763,9 +763,9 @@ bool TryGetRuntimeAsyncResultType(const TypeSignature&            async_return_t
             return false;
         }
 
-        uint32_t generic_argument_count        = 0;
-        uint32_t generic_argument_count_length = 0;
-        const auto remaining_length            = static_cast<uint32_t>(end - current);
+        uint32_t   generic_argument_count        = 0;
+        uint32_t   generic_argument_count_length = 0;
+        const auto remaining_length              = static_cast<uint32_t>(end - current);
         if (FAILED(CorSigUncompressData(current, remaining_length, &generic_argument_count,
                                         &generic_argument_count_length)) ||
             generic_argument_count_length == 0 || generic_argument_count != 1)
