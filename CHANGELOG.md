@@ -58,6 +58,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Removed
 
+- Removed plugin configuration support for `RuntimeInstrumentationOptions`.
+  The parent `OpenTelemetry.Instrumentation.Runtime` package deprecated this
+  options type, and its drop-in configuration callback was always a no-op.
+
 ### Fixed
 
 - Fix missing or incomplete SqlClient traces when `System.Data`,
