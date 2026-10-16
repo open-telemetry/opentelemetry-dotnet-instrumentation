@@ -246,7 +246,41 @@ resources and unsubscribe there, including resources acquired before
 tolerate client disposal during forced shutdown.
 
 OpAMP requests do not produce application spans. Listener callbacks must return
-promptly.
+promptly. A blocking listener can delay other listeners and subsequent OpAMP
+message processing. Hand off lengthy work and return from the callback promptly.
+
+### Effective configuration reporting
+
+The selected OpAMP plugin can implement `IProvideEffectiveConfig` and set
+`settings.EffectiveConfigurationReporting.EnableReporting = true` in
+`ConfigureOpAmpOptions`. Reporting is disabled when the selected plugin does not
+provide this interface or does not enable the setting.
+
+Implement `GetEffectiveConfig()` to return the complete current configuration as
+an `IReadOnlyCollection<EffectiveConfigFile>`. File names must be unique.
+An empty collection reports an empty configuration. Contents are transmitted
+without redaction, so the plugin is responsible for removing sensitive values.
+
+Retain the client passed to `ConfigureOpAmpClient` and call
+`client.NotifyEffectiveConfigChanged()` when the effective configuration changes.
+Repeated notifications can resend unchanged configuration.
+
+A notification caller must allow `GetEffectiveConfig()` running on another thread
+to complete. The plugin must also provide current configuration when reporting
+becomes available or the server requests full state; those reads do not require
+a notification.
+
+`GetEffectiveConfig()` must be read-only and return promptly. It must tolerate
+concurrent configuration updates and plugin lifecycle callbacks, including
+cleanup. Publish configuration safely across threads and return a stable snapshot,
+including its buffers, that remains valid after the getter returns. Do not issue
+reporting notifications or synchronously wait for OpAMP callbacks from the getter.
+
+Reporting requires server support. Getter and reporting failures are logged;
+a later notification or server request can attempt reporting again.
+If configuration retrieval fails during a full-state request, the other
+available state is still reported. Effective configuration is omitted;
+this does not report an empty configuration.
 
 ## Selective sampling
 

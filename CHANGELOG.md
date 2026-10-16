@@ -16,6 +16,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   dependencies available to the .NET host when automatic assembly redirection
   cannot resolve a conflict.
 
+- Added experimental OpAMP effective configuration reporting for plugins through
+  `IProvideEffectiveConfig` and `IOpAmpClient.NotifyEffectiveConfigChanged()`.
+  See the
+  [plugin documentation](./docs/plugins.md#effective-configuration-reporting).
+
 ### Changed
 
 - **Breaking change:** `IContinuousProfilerExporter.ExportThreadSamples` now
