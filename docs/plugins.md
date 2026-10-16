@@ -394,10 +394,6 @@ sampling remains disabled until a runtime configuration enables that feature.
 | OpenTelemetry.Exporter.OtlpExporterOptions                               | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.20.0        |
 | OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions | OpenTelemetry.Instrumentation.AspNet           | 1.20.0        |
 
-Runtime metrics do not expose instrumentation options for plugins.
-`RuntimeInstrumentationOptions` is deprecated in the
-`OpenTelemetry.Instrumentation.Runtime` package and had no effect.
-
 ### Logs
 
 | Options type                                  | NuGet package                                | NuGet version |
