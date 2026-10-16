@@ -34,8 +34,35 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/core-1.20.0/VERSIONING.md#core-components):
+  [`1.20.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.20.0).
 - Following packages updated
-  - `OpenTelemetry.Resources.Azure` from `1.19.1-beta.1` to `1.19.1-beta.2`.
+  - `OpenTelemetry.Exporter.Prometheus.HttpListener`
+    from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.GrpcNetClient`
+    from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.19.0` to `1.20.0`,
+  - `OpenTelemetry.Instrumentation.Process` from `1.19.0-rc.1` to `1.20.0-rc.1`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.19.0-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.19.0` to `1.20.0`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.19.0` to `1.20.0`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis`
+    from `1.19.0-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.OpAmp.Client` from `0.7.0-alpha.2` to `0.8.0-alpha.1`,
+  - `OpenTelemetry.Shims.OpenTracing` from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Resources.Azure` from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Resources.Container` from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Resources.Host` from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Resources.OperatingSystem`
+    from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Resources.Process` from `1.19.1-rc.1` to `1.20.0-rc.1`,
+  - `OpenTelemetry.Resources.ProcessRuntime`
+    from `1.19.1-beta.1` to `1.20.0-beta.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.19.0` to `1.20.0`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
+    from `1.19.0-beta.1` to `1.20.0-beta.1`.
 - .NET Framework only, following packages updated
   - `Microsoft.Bcl.AsyncInterfaces` from `10.0.12` to `10.0.13`,
   - `Microsoft.Extensions.Configuration` from `10.0.12` to `10.0.13`,
@@ -54,6 +81,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Extensions.Options.ConfigurationExtensions`
     from `10.0.12` to `10.0.13`,
   - `Microsoft.Extensions.Primitives` from `10.0.12` to `10.0.13`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.19.0` to `1.20.0`,
+  - `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
+    from `1.19.0` to `1.20.0`,
   - `System.Diagnostics.DiagnosticSource` from `10.0.12` to `10.0.13`,
   - `System.IO.Pipelines` from `10.0.12` to `10.0.13`,
   - `System.Text.Encodings.Web` from `10.0.12` to `10.0.13`,
@@ -62,6 +92,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Deprecated
 
 ### Removed
+
+- Removed plugin configuration support for `RuntimeInstrumentationOptions`.
+  These options were always a no-op and are deprecated in the
+  `OpenTelemetry.Instrumentation.Runtime` package.
 
 ### Fixed
 

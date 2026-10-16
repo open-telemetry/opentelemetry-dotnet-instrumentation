@@ -29,7 +29,7 @@ internal static class EnvironmentConfigurationMetricHelper
                 MetricInstrumentation.AspNet => Wrappers.AddAspNetInstrumentation(builder, lazyInstrumentationLoader, pluginManager),
 #endif
                 MetricInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, lazyInstrumentationLoader),
-                MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder, pluginManager),
+                MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder),
                 MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder),
 #if NET
                 MetricInstrumentation.Npgsql => builder.AddMeter("Npgsql"),
@@ -211,9 +211,9 @@ internal static class EnvironmentConfigurationMetricHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddRuntimeInstrumentation(MeterProviderBuilder builder, PluginManager pluginManager)
+        public static MeterProviderBuilder AddRuntimeInstrumentation(MeterProviderBuilder builder)
         {
-            return builder.AddRuntimeInstrumentation(pluginManager.ConfigureMetricsOptions);
+            return builder.AddRuntimeInstrumentation();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
