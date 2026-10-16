@@ -8,51 +8,60 @@ using OpenTelemetry.Resources;
 
 namespace OpenTelemetry.AutoInstrumentation.OpAmp;
 
-internal static class OpAmpLoader
+internal sealed class OpAmpLoader
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("OpAmp");
     private static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(5);
-    private static readonly object LifecycleLock = new();
+    private readonly object _lifecycleLock = new();
 
-    private static OpAmpManager? _opAmpManager;
+    private OpAmpManager? _opAmpManager;
+    private bool _stopped;
 
-    public static void PrepareOpAmpClient(Resource resources, OpAmpSettings opAmpSettings, PluginManager pluginManager)
+    public void PrepareOpAmpClient(Resource resources, OpAmpSettings opAmpSettings, PluginManager pluginManager)
     {
-        lock (LifecycleLock)
+        // Instrumentation.Initialize calls preparation once per instrumentation lifetime.
+        lock (_lifecycleLock)
         {
-            if (_opAmpManager != null)
+            if (_stopped)
             {
-                throw new InvalidOperationException("OpAMP is already enabled");
+                return;
             }
+        }
 
+        // Plugin configuration must not prevent shutdown from acquiring the lifecycle lock.
 #pragma warning disable CA2000 // Candidates are registered or disposed by the bounded shutdown worker.
-            if (OpAmpManager.TryCreate(resources, opAmpSettings, pluginManager, out var manager))
+        var configured = OpAmpManager.TryCreate(resources, opAmpSettings, pluginManager, out var manager);
+#pragma warning restore CA2000
+        lock (_lifecycleLock)
+        {
+            if (configured && !_stopped)
             {
                 _opAmpManager = manager;
+                return;
             }
-            else if (manager != null)
-            {
-                StopManager(manager, ShutdownTimeout);
-            }
-#pragma warning restore CA2000
+        }
+
+        if (manager != null)
+        {
+            StopManager(manager, ShutdownTimeout);
         }
     }
 
-    public static void StartOpAmpClient()
+    public void StartOpAmpClient()
     {
-        lock (LifecycleLock)
+        lock (_lifecycleLock)
         {
             _opAmpManager?.StartClient();
         }
     }
 
-    public static void StopOpAmpClientIfRunning()
+    public void StopOpAmpClientIfRunning()
     {
         StopOpAmpClientIfRunning(ShutdownTimeout);
     }
 
     // The timeout is configurable only for deterministic tests. Production always uses ShutdownTimeout.
-    internal static void StopOpAmpClientIfRunning(TimeSpan shutdownTimeout)
+    internal void StopOpAmpClientIfRunning(TimeSpan shutdownTimeout)
     {
 #if NET
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(shutdownTimeout, TimeSpan.Zero);
@@ -64,8 +73,9 @@ internal static class OpAmpLoader
 #endif
 
         OpAmpManager? manager;
-        lock (LifecycleLock)
+        lock (_lifecycleLock)
         {
+            _stopped = true;
             manager = _opAmpManager;
             _opAmpManager = null;
         }

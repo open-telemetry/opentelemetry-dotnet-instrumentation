@@ -8,7 +8,7 @@ namespace IntegrationTests.Helpers;
 
 internal static class InstrumentedProcessHelper
 {
-    public static Process? Start(string executable, string? arguments, EnvironmentHelper environmentHelper)
+    public static Process? Start(string executable, string? arguments, EnvironmentHelper environmentHelper, bool redirectStandardInput = false)
     {
 #if NET
         ArgumentNullException.ThrowIfNull(environmentHelper);
@@ -27,7 +27,7 @@ internal static class InstrumentedProcessHelper
         startInfo.CreateNoWindow = true;
         startInfo.RedirectStandardOutput = true;
         startInfo.RedirectStandardError = true;
-        startInfo.RedirectStandardInput = false;
+        startInfo.RedirectStandardInput = redirectStandardInput;
         startInfo.StandardOutputEncoding = Encoding.Default;
 
         return Process.Start(startInfo);

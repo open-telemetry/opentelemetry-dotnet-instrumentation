@@ -23,6 +23,7 @@ internal sealed class OpAmpManager : IDisposable
     private readonly OpAmpClientProxy _clientProxy;
     private readonly IOpAmpPlugin? _plugin;
     private readonly OpAmpClientSettings _settings;
+    private readonly OpAmpReporter _reporter;
 
     private Task? _startupTask;
     private int _shutdownStarted;
@@ -36,6 +37,14 @@ internal sealed class OpAmpManager : IDisposable
         _plugin = plugin;
         _clientProxy = clientProxy;
         _settings = settings;
+        var effectiveConfigProvider = settings.EffectiveConfigurationReporting.EnableReporting ? plugin as IProvideEffectiveConfig : null;
+        _reporter = new OpAmpReporter(effectiveConfigProvider, clientProxy);
+        if (_reporter.EffectiveConfigReportingEnabled)
+        {
+            clientProxy.Subscribe<ServerCapabilitiesMessage>(_reporter);
+        }
+
+        clientProxy.Subscribe<FlagsMessage>(_reporter);
     }
 
     public void StartClient()
@@ -58,7 +67,10 @@ internal sealed class OpAmpManager : IDisposable
             return Task.CompletedTask;
         }
 
-        // Cancellation propagation and plugin callbacks may block synchronously.
+        _reporter.Stop();
+
+        // Plugin cancellation/lifecycle callbacks can delay shutdown.
+        // Run it separately so the loader can enforce its shutdown deadline.
         return Task.Run(StopOpAmpClientCoreAsync);
     }
 
@@ -71,6 +83,7 @@ internal sealed class OpAmpManager : IDisposable
             return;
         }
 
+        _reporter.Stop();
         CancelStartup();
 
         try
@@ -106,6 +119,7 @@ internal sealed class OpAmpManager : IDisposable
 
     internal void ForceDisposeClient()
     {
+        _reporter.Stop();
         if (Interlocked.Exchange(ref _clientDisposed, 1) == 0)
         {
             _clientProxy.Dispose();
@@ -119,8 +133,8 @@ internal sealed class OpAmpManager : IDisposable
             return _forcedShutdownCompletion.Task;
         }
 
-        // Forced disposal must not wait for lifecycle callbacks or startup cancellation because
-        // either can execute plugin-controlled code after the loader's shutdown deadline.
+        // Reach client disposal without waiting for the reporter, lifecycle callbacks or startup
+        // cancellation, any of which may be stalled after the loader's shutdown deadline.
         _ = Task.Factory.StartNew(
             () =>
             {
@@ -148,6 +162,11 @@ internal sealed class OpAmpManager : IDisposable
         where T : OpAmpMessage
     {
         _clientProxy.Subscribe(listener);
+    }
+
+    internal void NotifyEffectiveConfigChanged()
+    {
+        _reporter.NotifyEffectiveConfigChanged();
     }
 
     internal void Unsubscribe<T>(IOpAmpListener<T> listener)
@@ -204,7 +223,7 @@ internal sealed class OpAmpManager : IDisposable
         try
         {
             // Do not advertise capabilities that automatic instrumentation cannot fulfill.
-            _settings.EffectiveConfigurationReporting.EnableReporting = false;
+            _settings.EffectiveConfigurationReporting.EnableReporting = _reporter.EffectiveConfigReportingEnabled;
             _settings.RemoteConfiguration.AcceptsRemoteConfig = false;
             _settings.RemoteConfiguration.ReportsRemoteConfigStatus = false;
 

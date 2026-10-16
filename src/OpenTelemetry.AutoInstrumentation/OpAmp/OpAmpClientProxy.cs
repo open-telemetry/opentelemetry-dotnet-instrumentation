@@ -8,7 +8,7 @@ using OpenTelemetry.OpAmp.Client.Messages;
 namespace OpenTelemetry.AutoInstrumentation.OpAmp;
 
 // Owns access to the upstream client and applies instrumentation suppression to transport operations.
-internal sealed class OpAmpClientProxy : IDisposable
+internal sealed class OpAmpClientProxy : IOpAmpReportSender, IDisposable
 {
     private readonly OpAmpClient _client;
 
@@ -27,6 +27,18 @@ internal sealed class OpAmpClientProxy : IDisposable
     {
         using var suppressInstrumentation = SuppressInstrumentationScope.Begin();
         await _client.StopAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    public void SendEffectiveConfig(IReadOnlyCollection<EffectiveConfigFile> files)
+    {
+        using var suppressInstrumentation = SuppressInstrumentationScope.Begin();
+        _client.SendEffectiveConfig(files);
+    }
+
+    public void SendFullStateReport(FullStateReport report)
+    {
+        using var suppressInstrumentation = SuppressInstrumentationScope.Begin();
+        _client.SendFullStateReport(report);
     }
 
     public void Subscribe<T>(IOpAmpListener<T> listener)
