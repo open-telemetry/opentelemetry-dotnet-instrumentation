@@ -9,4 +9,6 @@ OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>
 OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.ValueWithType() -> void
 readonly OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Value -> TProxy?
 readonly OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Type -> System.Type!
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.EndAsyncMethod<TIntegration, TTarget, TReturn>(TTarget instance, TReturn returnValue, System.Exception! exception, in OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<TReturn?>
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.EndAsyncMethod<TIntegration, TTarget>(TTarget instance, System.Exception! exception, in OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn
 static OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Create(TProxy? value, System.Type! type) -> OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>

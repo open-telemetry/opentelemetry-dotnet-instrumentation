@@ -1,7 +1,7 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0.402-alpine3.24@sha256:230c3fbae0ceedc70bca04eed2bfb5694e8b248cadbb81010f41b7a993601f55
+FROM mcr.microsoft.com/dotnet/sdk:11.0.100-rc.2-alpine3.24@sha256:6bd5660fc4e5a9d1992eec9f3705346e866c609c2decc02d786feb073e582cb1
 
-# renovate: datasource=repology depName=clang21
-ARG CLANG21_VERSION=21.1.8-r3
+# renovate: datasource=repology depName=clang22
+ARG CLANG22_VERSION=22.1.3-r2
 # renovate: datasource=repology depName=cmake
 ARG CMAKE_VERSION=4.2.3-r0
 # renovate: datasource=repology depName=make
@@ -22,7 +22,7 @@ ARG GRPC_PLUGINS_VERSION=1.78.1-r2
 RUN apk update \
     && apk upgrade \
     && apk add --no-cache --update \
-        clang21="${CLANG21_VERSION}" \
+        clang22="${CLANG22_VERSION}" \
         cmake="${CMAKE_VERSION}" \
         make="${MAKE_VERSION}" \
         bash="${BASH_VERSION}" \
@@ -42,8 +42,7 @@ COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 # Install older SDKs using the install script
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 9.0.319 --install-dir /usr/share/dotnet --no-path \
-    && ./dotnet-install.sh -v 8.0.426 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 10.0.402 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project

@@ -11,6 +11,10 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
+#if NET10_0_OR_GREATER
+        VerifyRuntimeAsyncCompilation();
+#endif
+
         var noCodeTestingClass = new NoCodeTestingClass();
         var genericNoCodeTestingClass = new GenericNoCodeTestingClass<int, long>();
         var dynamicAttrTestingClass = new DynamicAttributeTestingClass();
@@ -64,6 +68,7 @@ internal static class Program
         await NoCodeTestingClass.TestMethodStaticAsync().ConfigureAwait(false);
 
         _ = await noCodeTestingClass.IntTaskTestMethodAsync().ConfigureAwait(false);
+        _ = await noCodeTestingClass.MultiDimensionalArrayTaskTestMethodAsync().ConfigureAwait(false);
 #if NET
         await noCodeTestingClass.ValueTaskTestMethodAsync().ConfigureAwait(false);
         _ = await noCodeTestingClass.IntValueTaskTestMethodAsync().ConfigureAwait(false);
@@ -112,4 +117,16 @@ internal static class Program
             [10.5, 20.75, 30.99],
             [true, false, true]);
     }
+
+#if NET10_0_OR_GREATER
+    private static void VerifyRuntimeAsyncCompilation()
+    {
+        const int runtimeAsyncMethodImplFlag = 0x2000;
+        var method = typeof(NoCodeTestingClass).GetMethod(nameof(NoCodeTestingClass.IntTaskTestMethodAsync));
+        if (method is null || ((int)method.MethodImplementationFlags & runtimeAsyncMethodImplFlag) == 0)
+        {
+            throw new InvalidOperationException("The NoCode test application was not compiled with runtime-async enabled.");
+        }
+    }
+#endif
 }
