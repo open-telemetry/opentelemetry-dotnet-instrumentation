@@ -76,6 +76,7 @@ internal static class Program
         _ = genericNoCodeTestingClass.GenericTestMethod(string.Empty, new object(), 123, 456L);
 
         NestedTypeTargets.Invoke();
+        RefStructTargets.Invoke();
         GenericNestedTypeTargets<int>.Invoke();
 
         // Dynamic attribute tests - extracting values from method parameters

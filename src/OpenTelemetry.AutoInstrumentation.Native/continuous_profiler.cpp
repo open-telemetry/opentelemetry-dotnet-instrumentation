@@ -707,7 +707,7 @@ void NamingHelper::GetFunctionName(FunctionIdentifier function_identifier, trace
     ComPtr<IUnknown> metadata_import_unknown;
     HRESULT          hr = info7_->GetModuleMetaData(function_identifier.module_id, ofRead, IID_IMetaDataImport2,
                                                     metadata_import_unknown.GetAddressOf());
-    if (FAILED(hr))
+    if (hr != S_OK)
     {
         trace::Logger::Debug("GetModuleMetaData failed. HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr);
         result.append(unknown_function_name);

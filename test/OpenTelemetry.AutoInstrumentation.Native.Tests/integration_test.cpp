@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/integration.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/tracer_integration_definition.h"
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/regex_utils.h"
 
 #ifdef _WIN32

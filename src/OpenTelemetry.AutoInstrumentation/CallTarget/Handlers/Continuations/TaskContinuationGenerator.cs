@@ -40,7 +40,7 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn> : Conti
         }
     }
 
-    public override TReturn? SetContinuation(TTarget instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
+    public override TReturn? SetContinuation(TTarget? instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
     {
         return Resolver.ExecuteCallback(instance, returnValue, exception, in state);
     }
@@ -56,7 +56,7 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn> : Conti
             _preserveContext = preserveContext;
         }
 
-        public override TReturn? ExecuteCallback(TTarget instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
+        public override TReturn? ExecuteCallback(TTarget? instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
         {
             if (exception != null || returnValue == null)
             {
@@ -74,7 +74,7 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn> : Conti
             return ToTReturn(ContinuationAction(previousTask, instance, state));
         }
 
-        private async Task ContinuationAction(Task previousTask, TTarget target, CallTargetState state)
+        private async Task ContinuationAction(Task previousTask, TTarget? target, CallTargetState state)
         {
             if (!previousTask.IsCompleted)
             {
@@ -133,13 +133,13 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn> : Conti
             _preserveContext = preserveContext;
         }
 
-        public override TReturn? ExecuteCallback(TTarget instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
+        public override TReturn? ExecuteCallback(TTarget? instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
         {
             var previousTask = returnValue == null ? null : FromTReturn<Task>(returnValue);
             return ToTReturn(ContinuationAction(previousTask, instance, state, exception));
         }
 
-        private async Task ContinuationAction(Task? previousTask, TTarget target, CallTargetState state, Exception? exception)
+        private async Task ContinuationAction(Task? previousTask, TTarget? target, CallTargetState state, Exception? exception)
         {
             if (previousTask is not null)
             {

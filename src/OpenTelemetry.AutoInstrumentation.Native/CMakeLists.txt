@@ -220,13 +220,18 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         rejit_handler.cpp
         rejit_preprocessor.cpp
         rejit_work_offloader.cpp
+        thread_utils.cpp
         runtime_sampler_configuration.cpp
         runtime_sampler_service.cpp
         environment_variables_util.cpp
         stack_capturer.cpp
         stub_generator.cpp
         suspension_guards.cpp
-        method_rewriter.cpp
+        function_control_wrapper.cpp
+        tracer_handler_module_method.cpp
+        tracer_integration_definition.cpp
+        tracer_method_rewriter.cpp
+        tracer_rejit_preprocessor.cpp
         tracer_tokens.cpp
         lib/coreclr/src/pal/prebuilt/idl/corprof_i.cpp
 )

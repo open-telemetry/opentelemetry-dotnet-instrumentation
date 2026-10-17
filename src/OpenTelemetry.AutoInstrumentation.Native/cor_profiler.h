@@ -18,8 +18,9 @@
 #include "environment_variables.h"
 #include "il_rewriter.h"
 #include "integration.h"
+#include "tracer_integration_definition.h"
 #include "pal.h"
-#include "rejit_preprocessor.h"
+#include "tracer_rejit_preprocessor.h"
 #include "rejit_handler.h"
 #include "runtime_sampler_configuration.h"
 #include "Synchronized.hpp"
@@ -71,6 +72,7 @@ private:
     bool enable_calltarget_state_by_ref = true;
     std::unique_ptr<TracerRejitPreprocessor> tracer_integration_preprocessor = nullptr;
     bool call_target_bubble_up_exception_available = false;
+    bool call_target_bubble_up_exception_function_available = false;
 
     // Cor assembly properties
     AssemblyProperty corAssemblyProperty{};
@@ -100,6 +102,9 @@ private:
     //
     HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, ModuleID module_id, mdToken function_token, const FunctionInfo& caller, const ModuleMetadata& module_metadata);
     HRESULT GenerateLoaderMethod(ModuleID module_id, mdMethodDef* ret_method_token);
+    HRESULT GenerateLoaderLogMethod(ModuleID module_id, const ComPtr<IMetaDataEmit2>& metadata_emit,
+                                    mdAssemblyRef corlib_ref, mdMemberRef loader_method, mdMethodDef* ret_method_token);
+    static void __stdcall NativeLog(int32_t level, const WCHAR* message, int32_t length) noexcept;
     HRESULT GenerateLoaderType(const ModuleID module_id,
                                mdTypeDef*     loader_type,
                                mdMethodDef*   init_method,
@@ -128,7 +133,8 @@ private:
     bool GetIntegrationTypeRef(ModuleMetadata& module_metadata, ModuleID module_id,
                                const IntegrationDefinition& integration_definition, mdTypeRef& integration_type_ref);
     bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);
-    static bool EnsureCallTargetBubbleUpExceptionTypeAvailable(const ModuleMetadata& module_metadata);
+    static bool EnsureCallTargetBubbleUpExceptionTypeAvailable(const ModuleMetadata& module_metadata, mdTypeDef* typeDef);
+    static bool EnsureIsCallTargetBubbleUpExceptionFunctionAvailable(const ModuleMetadata& module_metadata, mdTypeDef typeDef);
 
     //
     // Initialization methods
@@ -190,14 +196,8 @@ public:
     // ReJIT Methods
     //
 
-    HRESULT STDMETHODCALLTYPE ReJITCompilationStarted(FunctionID functionId, ReJITID rejitId,
-                                                      BOOL fIsSafeToBlock) override;
-
     HRESULT STDMETHODCALLTYPE GetReJITParameters(ModuleID moduleId, mdMethodDef methodId,
                                                  ICorProfilerFunctionControl* pFunctionControl) override;
-
-    HRESULT STDMETHODCALLTYPE ReJITCompilationFinished(FunctionID functionId, ReJITID rejitId, HRESULT hrStatus,
-                                                       BOOL fIsSafeToBlock) override;
 
     HRESULT STDMETHODCALLTYPE ReJITError(ModuleID moduleId, mdMethodDef methodId, FunctionID functionId,
                                          HRESULT hrStatus) override;
@@ -262,6 +262,9 @@ public:
     HRESULT RewriteILSystemDataCommandText(const ModuleID module_id);
 
     friend class TracerMethodRewriter;
+
+    bool IsCallTargetBubbleUpExceptionTypeAvailable() const;
+    bool IsCallTargetBubbleUpFunctionAvailable() const;
 };
 
 // Note: Generally you should not have a single, global callback implementation,
