@@ -81,9 +81,9 @@ public class OpAmpLoaderTests
             _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
             pluginManager.Initialized();
             _loader.StartOpAmpClient();
-            await AssertCompletes(plugin.AfterStarted);
+            await AssertCompletes(plugin.InitialRequestBody);
 
-            var capabilities = ReadAgentCapabilities(Assert.IsType<byte[]>(plugin.InitialRequestBody));
+            var capabilities = ReadAgentCapabilities(await plugin.InitialRequestBody.ConfigureAwait(true));
             Assert.Equal(reportStatus, (capabilities & reportsRemoteConfigCapability) != 0);
             Assert.Equal(acceptConfig, (capabilities & acceptsRemoteConfigCapability) != 0);
         }
@@ -359,6 +359,7 @@ public class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
     private readonly ConcurrentQueue<string> _events = new();
     private readonly TaskCompletionSource<bool> _afterStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TaskCompletionSource<bool> _handlerDisposed = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly TaskCompletionSource<byte[]> _initialRequestBody = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     internal Task AfterStarted => _afterStarted.Task;
 
@@ -376,7 +377,7 @@ public class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
 
     internal OpAmpClientSettings? ConfiguredSettings { get; private set; }
 
-    internal byte[]? InitialRequestBody { get; private set; }
+    internal Task<byte[]> InitialRequestBody => _initialRequestBody.Task;
 
     internal string[] Events => [.. _events];
 
@@ -455,10 +456,11 @@ public class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
         {
             cancellationToken.ThrowIfCancellationRequested();
 #if NET
-            plugin.InitialRequestBody ??= await request.Content!.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+            var requestBody = await request.Content!.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
 #else
-            plugin.InitialRequestBody ??= await request.Content!.ReadAsByteArrayAsync().ConfigureAwait(false);
+            var requestBody = await request.Content!.ReadAsByteArrayAsync().ConfigureAwait(false);
 #endif
+            plugin._initialRequestBody.TrySetResult(requestBody);
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new ByteArrayContent(ServerCapabilitiesResponse),
