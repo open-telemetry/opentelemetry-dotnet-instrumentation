@@ -10,3 +10,23 @@ OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.ValueWithType
 readonly OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Value -> TProxy?
 readonly OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Type -> System.Type!
 static OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>.Create(TProxy? value, System.Type! type) -> OpenTelemetry.AutoInstrumentation.DuckTyping.ValueWithType<TProxy>
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetBubbleUpException.IsCallTargetBubbleUpException(System.Exception? exception) -> bool
+OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.GetInternalDuckTypedInstance<TReturn>() -> TReturn
+OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.ToString() -> string?
+*REMOVED*OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.ToString() -> string!
+*REMOVED*OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity! activity) -> void
+*REMOVED*static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget>(TTarget instance, object![]! arguments) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+*REMOVED*static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.EndMethod<TIntegration, TTarget, TReturn>(TTarget instance, TReturn returnValue, System.Exception! exception, in OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<TReturn?>
+*REMOVED*static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.EndMethod<TIntegration, TTarget>(TTarget instance, System.Exception! exception, in OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity) -> void
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget>(TTarget? instance, object![]! arguments) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.EndMethod<TIntegration, TTarget, TReturn>(TTarget? instance, TReturn? returnValue, System.Exception? exception, in OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<TReturn?>
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.EndMethod<TIntegration, TTarget>(TTarget? instance, System.Exception? exception, in OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetRefStruct
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetRefStruct.CallTargetRefStruct() -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetRefStruct.ElementType.get -> System.Type?
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetRefStruct.GenericType.get -> System.Type?
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetRefStruct.StructType.get -> System.Type?
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetRefStruct.Value.get -> nint
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.CreateRefStruct(void* refStructPointer, System.RuntimeTypeHandle refStructTypeHandle) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetRefStruct
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetRefStruct.Create(void* refStructPointer, System.RuntimeTypeHandle refStructTypeHandle) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetRefStruct

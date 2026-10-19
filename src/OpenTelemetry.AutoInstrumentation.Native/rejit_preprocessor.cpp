@@ -8,16 +8,204 @@
 #include "integration.h"
 #include "logger.h"
 #include "rejit_handler.h"
+#include "function_control_wrapper.h"
+#include "tracer_integration_definition.h"
 
 namespace trace
 {
+
+Rejitter::Rejitter(std::shared_ptr<RejitHandler> handler, RejitterPriority priority)
+    : m_rejitHandler(handler), m_priority(priority)
+{
+    handler->RegisterRejitter(this);
+}
+
+Rejitter::~Rejitter() = default;
+
+template <class RejitRequestDefinition>
+void RejitPreprocessor<RejitRequestDefinition>::Shutdown()
+{
+    Logger::Debug("RejitPreprocessor::Shutdown");
+
+    std::lock_guard<std::mutex> moduleGuard(m_modules_lock);
+    std::lock_guard<std::mutex> ngenModuleGuard(m_ngenInlinersModules_lock);
+
+    m_modules.clear();
+    m_ngenInlinersModules.clear();
+}
+
+template <class RejitRequestDefinition>
+RejitHandlerModule* RejitPreprocessor<RejitRequestDefinition>::GetOrAddModule(ModuleID moduleId)
+{
+    if (m_rejit_handler->IsShutdownRequested())
+    {
+        return nullptr;
+    }
+
+    std::lock_guard<std::mutex> guard(m_modules_lock);
+    auto                        find_res = m_modules.find(moduleId);
+    if (find_res != m_modules.end())
+    {
+        return find_res->second.get();
+    }
+
+    RejitHandlerModule* moduleHandler = new RejitHandlerModule(moduleId, m_rejit_handler.get());
+    m_modules[moduleId]               = std::unique_ptr<RejitHandlerModule>(moduleHandler);
+    return moduleHandler;
+}
+
+template <class RejitRequestDefinition>
+bool RejitPreprocessor<RejitRequestDefinition>::HasModuleAndMethod(ModuleID moduleId, mdMethodDef methodDef)
+{
+    if (m_rejit_handler->IsShutdownRequested())
+    {
+        return false;
+    }
+
+    std::lock_guard<std::mutex> guard(m_modules_lock);
+    auto                        find_res = m_modules.find(moduleId);
+    if (find_res != m_modules.end())
+    {
+        auto moduleHandler = find_res->second.get();
+        return moduleHandler->ContainsMethod(methodDef);
+    }
+
+    return false;
+}
+
+template <class RejitRequestDefinition>
+void RejitPreprocessor<RejitRequestDefinition>::RemoveModule(ModuleID moduleId)
+{
+    if (m_rejit_handler->IsShutdownRequested())
+    {
+        return;
+    }
+
+    // Removes the RejitHandlerModule instance
+    std::lock_guard<std::mutex> modulesGuard(m_modules_lock);
+    m_modules.erase(moduleId);
+
+    // Removes the moduleID from the inliners vector
+    std::lock_guard<std::mutex> inlinersGuard(m_ngenInlinersModules_lock);
+    m_ngenInlinersModules.erase(std::remove(m_ngenInlinersModules.begin(), m_ngenInlinersModules.end(), moduleId),
+                                m_ngenInlinersModules.end());
+}
+
+template <class RejitRequestDefinition>
+void RejitPreprocessor<RejitRequestDefinition>::AddNGenInlinerModule(ModuleID moduleId)
+{
+    if (m_rejit_handler->IsShutdownRequested())
+    {
+        // If the shutdown was requested, we return.
+        return;
+    }
+
+    // Process the inliner module list ( to catch any incomplete data module )
+    // and also check if the module is already in the inliners list
+    std::lock_guard<std::mutex> modulesGuard(m_modules_lock);
+    std::lock_guard<std::mutex> inlinersGuard(m_ngenInlinersModules_lock);
+
+    bool alreadyAdded = false;
+    for (const auto& moduleInliner : m_ngenInlinersModules)
+    {
+        if (moduleInliner == moduleId)
+        {
+            alreadyAdded = true;
+        }
+
+        for (const auto& mod : m_modules)
+        {
+            mod.second->RequestRejitForInlinersInModule(moduleInliner);
+        }
+    }
+
+    // If the module is not in the inliners list we added and request rejit for it.
+    if (!alreadyAdded)
+    {
+        // Add the new module inliner
+        m_ngenInlinersModules.push_back(moduleId);
+
+        for (const auto& mod : m_modules)
+        {
+            mod.second->RequestRejitForInlinersInModule(moduleId);
+        }
+    }
+}
+
+template <class RejitRequestDefinition>
+HRESULT RejitPreprocessor<RejitRequestDefinition>::RejitMethod(FunctionControlWrapper& functionControl)
+{
+    auto moduleId = functionControl.GetModuleId();
+    auto methodId = functionControl.GetMethodId();
+
+    auto moduleHandler = GetOrAddModule(moduleId);
+    if (moduleHandler == nullptr)
+    {
+        return S_FALSE;
+    }
+
+    RejitHandlerModuleMethod* methodHandler = nullptr;
+    if (!moduleHandler->TryGetMethod(methodId, &methodHandler))
+    {
+        return S_FALSE;
+    }
+
+    if (methodHandler->GetMethodDef() == mdMethodDefNil)
+    {
+        Logger::Warn("RejitMethod: mdMethodDef is missing for "
+                     "MethodDef: ",
+                     methodId);
+        return S_FALSE;
+    }
+
+    if (methodHandler->GetFunctionInfo() == nullptr)
+    {
+        Logger::Warn("RejitMethod: FunctionInfo is missing for "
+                     "MethodDef: ",
+                     methodId);
+        return S_FALSE;
+    }
+
+    if (moduleHandler->GetModuleId() == 0)
+    {
+        Logger::Warn("RejitMethod: ModuleID is missing for "
+                     "MethodDef: ",
+                     methodId);
+        return S_FALSE;
+    }
+
+    if (moduleHandler->GetModuleMetadata() == nullptr)
+    {
+        Logger::Warn("RejitMethod: ModuleMetadata is missing for "
+                     "MethodDef: ",
+                     methodId);
+        return S_FALSE;
+    }
+
+    auto rewriter = methodHandler->GetMethodRewriter();
+
+    if (rewriter == nullptr)
+    {
+        Logger::Error("RejitMethod: The rewriter is missing for "
+                      "MethodDef: ",
+                      methodId, ", methodHandler type name = ", typeid(methodHandler).name());
+        return S_FALSE;
+    }
+
+    return rewriter->Rewrite(moduleHandler, methodHandler, (ICorProfilerFunctionControl*)&functionControl,
+                             (ICorProfilerInfo*)&functionControl);
+}
 
 // RejitPreprocessor
 template <class RejitRequestDefinition>
 RejitPreprocessor<RejitRequestDefinition>::RejitPreprocessor(CorProfiler*                        corProfiler,
                                                              std::shared_ptr<RejitHandler>       rejit_handler,
-                                                             std::shared_ptr<RejitWorkOffloader> work_offloader)
-    : m_corProfiler(corProfiler), m_rejit_handler(std::move(rejit_handler)), m_work_offloader(std::move(work_offloader))
+                                                             std::shared_ptr<RejitWorkOffloader> work_offloader,
+                                                             RejitterPriority                    priority)
+    : Rejitter(rejit_handler, priority)
+    , m_corProfiler(corProfiler)
+    , m_rejit_handler(std::move(rejit_handler))
+    , m_work_offloader(std::move(work_offloader))
 {
 }
 
@@ -29,8 +217,7 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
                                                                        ComPtr<IMetaDataAssemblyEmit>&   assemblyEmit,
                                                                        const ModuleInfo&                moduleInfo,
                                                                        const mdTypeDef                  typeDef,
-                                                                       std::vector<ModuleID>&           vtModules,
-                                                                       std::vector<mdMethodDef>&        vtMethodDefs)
+                                                                       std::vector<MethodIdentifier>&   rejitRequests)
 {
     auto       target_method    = GetTargetMethod(definition);
     auto       is_interface     = GetIsInterface(definition);
@@ -119,46 +306,15 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
             }
         }
 
-        auto is_exact_signature_match = GetIsExactSignatureMatch(definition);
-
-        if (is_exact_signature_match)
+        if (GetIsExactSignatureMatch(definition) &&
+            !CheckExactSignatureMatch(metadataImport, functionInfo, target_method))
         {
-            // Compare if the current mdMethodDef contains the same number of arguments as the
-            // instrumentation target
-            if (numOfArgs != target_method.signature_types.size() - 1)
-            {
-                Logger::Info("    * Skipping ", caller.type.name, ".", caller.name,
-                             ": the methoddef doesn't have the right number of arguments (", numOfArgs, " arguments).");
-                continue;
-            }
-
-            // Compare each mdMethodDef argument type to the instrumentation target
-            bool        argumentsMismatch = false;
-            const auto& methodArguments   = functionInfo.method_signature.GetMethodArguments();
-
-            Logger::Debug("    * Comparing signature for method: ", caller.type.name, ".", caller.name);
-            for (unsigned int i = 0; i < numOfArgs; i++)
-            {
-                const auto argumentTypeName            = methodArguments[i].GetTypeTokName(metadataImport);
-                const auto integrationArgumentTypeName = target_method.signature_types[i + 1];
-                Logger::Debug("        -> ", argumentTypeName, " = ", integrationArgumentTypeName);
-                if (argumentTypeName != integrationArgumentTypeName && integrationArgumentTypeName != WStr("_"))
-                {
-                    argumentsMismatch = true;
-                    break;
-                }
-            }
-            if (argumentsMismatch)
-            {
-                Logger::Info("    * Skipping ", target_method.method_name,
-                             ": the methoddef doesn't have the right type of arguments.");
-                continue;
-            }
+            continue;
         }
 
         // As we are in the right method, we gather all information we need and stored it in to the
         // ReJIT handler.
-        auto moduleHandler = m_rejit_handler->GetOrAddModule(moduleInfo.id);
+        auto moduleHandler = GetOrAddModule(moduleInfo.id);
         if (moduleHandler == nullptr)
         {
             Logger::Warn("Module handler is null, this only happens if the RejitHandler has been shutdown.");
@@ -182,11 +338,12 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
             [=, request = definition, fInfo = functionInfo](const mdMethodDef method, RejitHandlerModule* module)
         { return CreateMethod(method, module, fInfo, request); };
 
-        moduleHandler->CreateMethodIfNotExists(methodDef, creator);
+        RejitHandlerModuleMethodUpdaterFunc updater = [this, definition](RejitHandlerModuleMethod* method)
+        { UpdateMethod(method, definition); };
+        moduleHandler->CreateMethodIfNotExists(methodDef, creator, updater);
 
         // Store module_id and methodDef to request the ReJIT after analyzing all integrations.
-        vtModules.push_back(moduleInfo.id);
-        vtMethodDefs.push_back(methodDef);
+        rejitRequests.emplace_back(moduleInfo.id, methodDef);
 
         Logger::Info("Method enqueued for ReJIT for ", target_method.type.name, ".", target_method.method_name, "(",
                      (target_method.signature_types.size() - 1), " params).");
@@ -218,13 +375,11 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
 
     auto corProfilerInfo = m_rejit_handler->GetCorProfilerInfo();
 
-    std::vector<ModuleID>    vtModules;
-    std::vector<mdMethodDef> vtMethodDefs;
+    std::vector<MethodIdentifier> rejitRequests;
 
     // Preallocate with size => 15 due this is the current max of method interceptions in a single module
     // (see InstrumentationDefinitions.Generated.cs)
-    vtModules.reserve(15);
-    vtMethodDefs.reserve(15);
+    rejitRequests.reserve(15);
 
     for (const auto& module : modules)
     {
@@ -258,7 +413,7 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                     Logger::Debug("  Loading Assembly Metadata...");
                     auto hr = corProfilerInfo->GetModuleMetaData(moduleInfo.id, ofRead | ofWrite, IID_IMetaDataImport2,
                                                                  metadataInterfaces.GetAddressOf());
-                    if (FAILED(hr))
+                    if (hr != S_OK)
                     {
                         Logger::Warn("CallTarget_RequestRejitForModule failed to get metadata interface for ",
                                      moduleInfo.id, " ", moduleInfo.assembly.name);
@@ -448,7 +603,7 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                         // Looking for the method to rewrite
                         //
                         ProcessTypeDefForRejit(definition, metadataImport, metadataEmit, assemblyImport, assemblyEmit,
-                                               moduleInfo, typeDef, vtModules, vtMethodDefs);
+                                               moduleInfo, typeDef, rejitRequests);
                     }
                 }
             }
@@ -466,7 +621,7 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                     Logger::Debug("  Loading Assembly Metadata...");
                     auto hr = corProfilerInfo->GetModuleMetaData(moduleInfo.id, ofRead | ofWrite, IID_IMetaDataImport2,
                                                                  metadataInterfaces.GetAddressOf());
-                    if (FAILED(hr))
+                    if (hr != S_OK)
                     {
                         Logger::Warn("CallTarget_RequestRejitForModule failed to get metadata interface for ",
                                      moduleInfo.id, " ", moduleInfo.assembly.name);
@@ -507,23 +662,30 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                 // Looking for the method to rewrite
                 //
                 ProcessTypeDefForRejit(definition, metadataImport, metadataEmit, assemblyImport, assemblyEmit,
-                                       moduleInfo, typeDef, vtModules, vtMethodDefs);
+                                       moduleInfo, typeDef, rejitRequests);
             }
         }
     }
 
-    const auto rejitCount = (ULONG)vtMethodDefs.size();
+    const auto rejitCount = static_cast<ULONG>(rejitRequests.size());
 
     // Request the ReJIT for all integrations found in the module.
     if (rejitCount > 0)
     {
         if (enqueueInSameThread)
         {
-            m_rejit_handler->RequestRejit(vtModules, vtMethodDefs);
+            std::vector<ModuleID>    modulesVector;
+            std::vector<mdMethodDef> methodsVector;
+            for (const auto& request : rejitRequests)
+            {
+                modulesVector.push_back(request.moduleId);
+                methodsVector.push_back(request.methodToken);
+            }
+            m_rejit_handler->RequestRejit(modulesVector, methodsVector);
         }
         else
         {
-            m_rejit_handler->EnqueueForRejit(vtModules, vtMethodDefs);
+            m_rejit_handler->EnqueueRequestRejit(rejitRequests, nullptr);
         }
     }
 
@@ -575,41 +737,46 @@ void RejitPreprocessor<RejitRequestDefinition>::EnqueueRequestRejitForLoadedModu
     m_work_offloader->Enqueue(std::make_unique<RejitWorkItem>(std::move(action)));
 }
 
-// TraceIntegrationRejitPreprocessor
-
-const MethodReference& TracerRejitPreprocessor::GetTargetMethod(const IntegrationDefinition& integrationDefinition)
+template <class RejitRequestDefinition>
+bool RejitPreprocessor<RejitRequestDefinition>::CheckExactSignatureMatch(ComPtr<IMetaDataImport2>& metadataImport,
+                                                                         const FunctionInfo&       functionInfo,
+                                                                         const MethodReference&    targetMethod)
 {
-    return integrationDefinition.target_method;
-}
+    const auto numOfArgs = functionInfo.method_signature.NumberOfArguments();
 
-const bool TracerRejitPreprocessor::GetIsDerived(const IntegrationDefinition& integrationDefinition)
-{
-    return integrationDefinition.is_derived;
-}
+    // Compare if the current mdMethodDef contains the same number of arguments as the
+    // instrumentation target
+    if (numOfArgs != targetMethod.signature_types.size() - 1)
+    {
+        Logger::Info("    * Skipping ", functionInfo.type.name, ".", functionInfo.name,
+                     ": the methoddef doesn't have the right number of arguments (", numOfArgs, " arguments).");
+        return false;
+    }
 
-const bool TracerRejitPreprocessor::GetIsInterface(const IntegrationDefinition& integrationDefinition)
-{
-    return integrationDefinition.is_interface;
-}
+    // Compare each mdMethodDef argument type to the instrumentation target
+    bool        argumentsMismatch = false;
+    const auto& methodArguments   = functionInfo.method_signature.GetMethodArguments();
 
-const bool TracerRejitPreprocessor::GetIsExactSignatureMatch(const IntegrationDefinition& integrationDefinition)
-{
-    return integrationDefinition.is_exact_signature_match;
-}
+    Logger::Debug("    * Comparing signature for method: ", functionInfo.type.name, ".", functionInfo.name);
+    for (unsigned int i = 0; i < numOfArgs; i++)
+    {
+        const auto argumentTypeName            = methodArguments[i].GetTypeTokName(metadataImport);
+        const auto integrationArgumentTypeName = targetMethod.signature_types[i + 1];
+        Logger::Debug("        -> ", argumentTypeName, " = ", integrationArgumentTypeName);
+        if (argumentTypeName != integrationArgumentTypeName && integrationArgumentTypeName != WStr("_"))
+        {
+            argumentsMismatch = true;
+            break;
+        }
+    }
+    if (argumentsMismatch)
+    {
+        Logger::Info("    * Skipping ", targetMethod.method_name,
+                     ": the methoddef doesn't have the right type of arguments.");
+        return false;
+    }
 
-const bool TracerRejitPreprocessor::GetIsEnabled(const IntegrationDefinition& integrationDefinition)
-{
-    return integrationDefinition.GetEnabled();
-}
-
-const std::unique_ptr<RejitHandlerModuleMethod> TracerRejitPreprocessor::CreateMethod(
-    const mdMethodDef            methodDef,
-    RejitHandlerModule*          module,
-    const FunctionInfo&          functionInfo,
-    const IntegrationDefinition& integrationDefinition)
-{
-    return std::make_unique<TracerRejitHandlerModuleMethod>(methodDef, module, functionInfo, integrationDefinition,
-                                                            std::make_unique<TracerMethodRewriter>(m_corProfiler));
+    return true;
 }
 
 template class RejitPreprocessor<IntegrationDefinition>;

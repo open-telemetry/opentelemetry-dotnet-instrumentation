@@ -85,7 +85,12 @@ internal class IntegrationMapper
         {
             var result = DuckType.GetOrCreateProxyType(instanceGenericConstraint, targetType);
             instanceProxyType = result.ProxyType;
-            callGenericTypes.Add(instanceProxyType!);
+            if (instanceProxyType is null)
+            {
+                ThrowHelper.ThrowArgumentException($"The instance proxy type for method: {BeginMethodName} in type: {integrationType.FullName} is null.");
+            }
+
+            callGenericTypes.Add(instanceProxyType);
         }
         else
         {
@@ -106,9 +111,9 @@ internal class IntegrationMapper
         {
             ilWriter.Emit(OpCodes.Ldarg_0);
 
-            if (instanceGenericConstraint != null)
+            if (instanceProxyType != null)
             {
-                WriteCreateNewProxyInstance(ilWriter, instanceProxyType!, targetType);
+                WriteCreateNewProxyInstance(ilWriter, instanceProxyType, targetType);
             }
         }
 
@@ -116,23 +121,34 @@ internal class IntegrationMapper
         for (var i = mustLoadInstance ? 1 : 0; i < onMethodBeginParameters.Length; i++)
         {
             var sourceParameterType = argumentsTypes[mustLoadInstance ? i - 1 : i];
+            var sourceParameterTypeElementType = sourceParameterType.GetElementType();
             var targetParameterType = onMethodBeginParameters[i].ParameterType;
             Type? targetParameterTypeConstraint = null;
             Type? parameterProxyType = null;
 
             if (targetParameterType.IsGenericParameter)
             {
+                if (sourceParameterTypeElementType is null)
+                {
+                    ThrowHelper.ThrowArgumentException("The source parameter type element type is null.");
+                }
+
                 targetParameterType = genericArgumentsTypes[targetParameterType.GenericParameterPosition];
                 targetParameterTypeConstraint = targetParameterType.GetGenericParameterConstraints().FirstOrDefault(pType => pType != typeof(IDuckType));
                 if (targetParameterTypeConstraint is null)
                 {
-                    callGenericTypes.Add(sourceParameterType.GetElementType()!);
+                    callGenericTypes.Add(sourceParameterTypeElementType);
                 }
                 else
                 {
-                    var result = DuckType.GetOrCreateProxyType(targetParameterTypeConstraint, sourceParameterType.GetElementType()!);
+                    var result = DuckType.GetOrCreateProxyType(targetParameterTypeConstraint, sourceParameterTypeElementType);
                     parameterProxyType = result.ProxyType;
-                    callGenericTypes.Add(parameterProxyType!);
+                    if (parameterProxyType is null)
+                    {
+                        ThrowHelper.ThrowArgumentException($"The parameter proxy type for method: {BeginMethodName} in type: {integrationType.FullName} is null.");
+                    }
+
+                    callGenericTypes.Add(parameterProxyType);
                 }
             }
             else if (targetParameterType.IsByRef && targetParameterType.GetElementType() is { IsGenericParameter: true } elementType)
@@ -142,7 +158,12 @@ internal class IntegrationMapper
                 targetParameterTypeConstraint = genTargetParameterType.GetGenericParameterConstraints().FirstOrDefault(pType => pType != typeof(IDuckType));
                 if (targetParameterTypeConstraint is null)
                 {
-                    callGenericTypes.Add(sourceParameterType.GetElementType()!);
+                    if (sourceParameterTypeElementType is null)
+                    {
+                        ThrowHelper.ThrowArgumentException("The source parameter type element type is null.");
+                    }
+
+                    callGenericTypes.Add(sourceParameterTypeElementType);
                 }
                 else
                 {
@@ -245,7 +266,12 @@ internal class IntegrationMapper
         {
             var result = DuckType.GetOrCreateProxyType(instanceGenericConstraint, targetType);
             instanceProxyType = result.ProxyType;
-            callGenericTypes.Add(instanceProxyType!);
+            if (instanceProxyType is null)
+            {
+                ThrowHelper.ThrowArgumentException($"The instance proxy type for method: {BeginMethodName} in type: {integrationType.FullName} is null.");
+            }
+
+            callGenericTypes.Add(instanceProxyType);
         }
         else
         {
@@ -266,9 +292,9 @@ internal class IntegrationMapper
         {
             ilWriter.Emit(OpCodes.Ldarg_0);
 
-            if (instanceGenericConstraint != null)
+            if (instanceProxyType != null)
             {
-                WriteCreateNewProxyInstance(ilWriter, instanceProxyType!, targetType);
+                WriteCreateNewProxyInstance(ilWriter, instanceProxyType, targetType);
             }
         }
 
@@ -385,7 +411,12 @@ internal class IntegrationMapper
         {
             var result = DuckType.GetOrCreateProxyType(instanceGenericConstraint, targetType);
             instanceProxyType = result.ProxyType;
-            callGenericTypes.Add(instanceProxyType!);
+            if (instanceProxyType is null)
+            {
+                ThrowHelper.ThrowArgumentException($"The instance proxy type for method: {EndMethodName} in type: {integrationType.FullName} is null.");
+            }
+
+            callGenericTypes.Add(instanceProxyType);
         }
         else
         {
@@ -406,9 +437,9 @@ internal class IntegrationMapper
         {
             ilWriter.Emit(OpCodes.Ldarg_0);
 
-            if (instanceGenericConstraint != null)
+            if (instanceProxyType != null)
             {
-                WriteCreateNewProxyInstance(ilWriter, instanceProxyType!, targetType);
+                WriteCreateNewProxyInstance(ilWriter, instanceProxyType, targetType);
             }
         }
 
@@ -504,7 +535,12 @@ internal class IntegrationMapper
         {
             var result = DuckType.GetOrCreateProxyType(instanceGenericConstraint, targetType);
             instanceProxyType = result.ProxyType;
-            callGenericTypes.Add(instanceProxyType!);
+            if (instanceProxyType is null)
+            {
+                ThrowHelper.ThrowArgumentException($"The instance proxy type for method: {EndMethodName} in type: {integrationType.FullName} is null.");
+            }
+
+            callGenericTypes.Add(instanceProxyType);
         }
         else
         {
@@ -524,7 +560,12 @@ internal class IntegrationMapper
             {
                 var result = DuckType.GetOrCreateProxyType(returnValueGenericConstraint, returnType);
                 returnValueProxyType = result.ProxyType;
-                callGenericTypes.Add(returnValueProxyType!);
+                if (returnValueProxyType is null)
+                {
+                    ThrowHelper.ThrowArgumentException($"The return value proxy type for method: {EndMethodName} in type: {integrationType.FullName} is null.");
+                }
+
+                callGenericTypes.Add(returnValueProxyType);
             }
             else
             {
@@ -550,9 +591,9 @@ internal class IntegrationMapper
         {
             ilWriter.Emit(OpCodes.Ldarg_0);
 
-            if (instanceGenericConstraint != null)
+            if (instanceProxyType != null)
             {
-                WriteCreateNewProxyInstance(ilWriter, instanceProxyType!, targetType);
+                WriteCreateNewProxyInstance(ilWriter, instanceProxyType, targetType);
             }
         }
 
@@ -685,7 +726,12 @@ internal class IntegrationMapper
         {
             var result = DuckType.GetOrCreateProxyType(instanceGenericConstraint, targetType);
             instanceProxyType = result.ProxyType;
-            callGenericTypes.Add(instanceProxyType!);
+            if (instanceProxyType is null)
+            {
+                ThrowHelper.ThrowArgumentException($"The instance proxy type for method: {EndAsyncMethodName} in type: {integrationType.FullName} is null.");
+            }
+
+            callGenericTypes.Add(instanceProxyType);
         }
         else
         {
@@ -705,7 +751,12 @@ internal class IntegrationMapper
             {
                 var result = DuckType.GetOrCreateProxyType(returnValueGenericConstraint, returnType);
                 returnValueProxyType = result.ProxyType;
-                callGenericTypes.Add(returnValueProxyType!);
+                if (returnValueProxyType is null)
+                {
+                    ThrowHelper.ThrowArgumentException($"The return value proxy type for method: {EndAsyncMethodName} in type: {integrationType.FullName} is null.");
+                }
+
+                callGenericTypes.Add(returnValueProxyType);
             }
             else
             {
@@ -731,9 +782,9 @@ internal class IntegrationMapper
         {
             ilWriter.Emit(OpCodes.Ldarg_0);
 
-            if (instanceGenericConstraint != null)
+            if (instanceProxyType != null)
             {
-                WriteCreateNewProxyInstance(ilWriter, instanceProxyType!, targetType);
+                WriteCreateNewProxyInstance(ilWriter, instanceProxyType, targetType);
             }
         }
 
@@ -830,16 +881,31 @@ internal class IntegrationMapper
         ilWriter.Emit(OpCodes.Newobj, proxyTypeCtor);
     }
 
-    private static TTo? UnwrapReturnValue<TFrom, TTo>(TFrom returnValue)
+    private static TTo? UnwrapReturnValue<TFrom, TTo>(TFrom? returnValue)
         where TFrom : IDuckType
     {
-        return (TTo?)returnValue.Instance;
+        if (returnValue is not null)
+        {
+            return returnValue.GetInternalDuckTypedInstance<TTo>();
+        }
+
+        Log.Debug("UnwrapReturnValue<{0}, {1}>: The return value is null.", typeof(TFrom), typeof(TTo));
+        return default;
     }
 
-    private static async Task<TTo?> UnwrapTaskReturnValue<TFrom, TTo>(Task<TFrom> returnValue, bool preserveContext)
+    private static Task<TTo?>? UnwrapTaskReturnValue<TFrom, TTo>(Task<TFrom?>? returnValue, bool preserveContext)
         where TFrom : IDuckType
     {
-        return (TTo?)(await returnValue.ConfigureAwait(preserveContext)).Instance;
+        if (returnValue is not null)
+        {
+            return InternalUnwrapTaskReturnValue(returnValue, preserveContext);
+        }
+
+        Log.Debug("UnwrapTaskReturnValue<{0}, {1}>: The return value is null.", typeof(TFrom), typeof(TTo));
+        return null;
+
+        static async Task<TTo?> InternalUnwrapTaskReturnValue(Task<TFrom?> returnValue, bool preserveContext)
+            => UnwrapReturnValue<TFrom, TTo>(await returnValue.ConfigureAwait(preserveContext));
     }
 
     private static void WriteIntValue(ILGenerator il, int value)
@@ -908,16 +974,9 @@ internal class IntegrationMapper
 
     private static T? ConvertType<T>(object value)
     {
-        var conversionType = typeof(T);
-        if (value is null || conversionType == typeof(object))
+        if (value is null or T)
         {
             return (T?)value;
-        }
-
-        var valueType = value.GetType();
-        if (valueType == conversionType || conversionType.IsAssignableFrom(valueType))
-        {
-            return (T)value;
         }
 
         // Finally we try to duck type

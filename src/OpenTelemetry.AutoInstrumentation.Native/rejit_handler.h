@@ -30,6 +30,7 @@ typedef std::shared_lock<Lock> ReadLock;
 // forward declarations...
 class RejitHandlerModule;
 class RejitHandler;
+class Rejitter;
 
 /// <summary>
 /// Rejit handler representation of a method
@@ -63,22 +64,9 @@ public:
 /// <summary>
 /// Rejit handler representation of a method
 /// </summary>
-class TracerRejitHandlerModuleMethod : public RejitHandlerModuleMethod
-{
-private:
-    std::unique_ptr<IntegrationDefinition> m_integrationDefinition;
 
-public:
-    TracerRejitHandlerModuleMethod(
-                    mdMethodDef methodDef,
-                    RejitHandlerModule* module,
-                    const FunctionInfo& functionInfo,
-                    const IntegrationDefinition& integrationDefinition,
-                    std::unique_ptr<MethodRewriter> methodRewriter);
-    
-    IntegrationDefinition* GetIntegrationDefinition();
-};
 
+using RejitHandlerModuleMethodUpdaterFunc = std::function<void(RejitHandlerModuleMethod*)>;
 using RejitHandlerModuleMethodCreatorFunc = std::function<std::unique_ptr<RejitHandlerModuleMethod>(const mdMethodDef, RejitHandlerModule*)>;
 
 /// <summary>
@@ -105,7 +93,7 @@ public:
     ModuleMetadata* GetModuleMetadata();
     void SetModuleMetadata(ModuleMetadata* metadata);
 
-    bool CreateMethodIfNotExists(mdMethodDef methodDef, RejitHandlerModuleMethodCreatorFunc creator);
+    bool CreateMethodIfNotExists(mdMethodDef methodDef, RejitHandlerModuleMethodCreatorFunc creator, RejitHandlerModuleMethodUpdaterFunc updater);
     bool ContainsMethod(mdMethodDef methodDef);
     bool TryGetMethod(mdMethodDef methodDef, /* OUT */ RejitHandlerModuleMethod** methodHandler);
 
@@ -122,39 +110,35 @@ private:
     std::atomic_bool m_shutdown = {false};
     Lock m_shutdown_lock;
 
-    std::mutex m_modules_lock;
-    std::unordered_map<ModuleID, std::unique_ptr<RejitHandlerModule>> m_modules;
     AssemblyProperty* m_pCorAssemblyProperty = nullptr;
+    std::vector<Rejitter*> m_rejitters;
 
     ICorProfilerInfo7* m_profilerInfo;
     ICorProfilerInfo12* m_profilerInfo12;
 
     std::shared_ptr<RejitWorkOffloader> m_work_offloader;
         
-    std::mutex m_ngenInlinersModules_lock;
-    std::vector<ModuleID> m_ngenInlinersModules;
 
 public:
     RejitHandler(ICorProfilerInfo7* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader);
     RejitHandler(ICorProfilerInfo12* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader);
 
-    RejitHandlerModule* GetOrAddModule(ModuleID moduleId);
+    void RegisterRejitter(Rejitter* rejitter);
 
     void RemoveModule(ModuleID moduleId);
     bool HasModuleAndMethod(ModuleID moduleId, mdMethodDef methodDef);
 
     void AddNGenInlinerModule(ModuleID moduleId);
 
-    void EnqueueForRejit(std::vector<ModuleID>& modulesVector, std::vector<mdMethodDef>& modulesMethodDef);
-    void RequestRejit(std::vector<ModuleID>& modulesVector, std::vector<mdMethodDef>& modulesMethodDef);
+    void EnqueueForRejit(std::vector<ModuleID>& modulesVector, std::vector<mdMethodDef>& modulesMethodDef, std::shared_ptr<std::promise<void>> promise = nullptr, bool callRevertExplicitly = false);
+    void EnqueueRequestRejit(std::vector<MethodIdentifier>& rejitRequests, std::shared_ptr<std::promise<void>> promise, bool callRevertExplicitly = false);
+    void RequestRejit(std::vector<ModuleID>& modulesVector, std::vector<mdMethodDef>& modulesMethodDef, bool callRevertExplicitly = false);
 
     void Shutdown();
     bool IsShutdownRequested();
 
     HRESULT NotifyReJITParameters(ModuleID moduleId, mdMethodDef methodId,
                                   ICorProfilerFunctionControl* pFunctionControl);
-    static HRESULT NotifyReJITCompilationStarted(FunctionID functionId, ReJITID rejitId);
-
     ICorProfilerInfo7* GetCorProfilerInfo();
 
     void SetCorAssemblyProfiler(AssemblyProperty* pCorAssemblyProfiler);
