@@ -14,13 +14,13 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public readonly ref struct CallTargetReturn<T>
 {
-    private readonly T _returnValue;
+    private readonly T? _returnValue;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CallTargetReturn{T}"/> struct.
     /// </summary>
     /// <param name="returnValue">Return value</param>
-    public CallTargetReturn(T returnValue)
+    public CallTargetReturn(T? returnValue)
     {
         _returnValue = returnValue;
     }
@@ -45,7 +45,7 @@ public readonly ref struct CallTargetReturn<T>
     /// <returns>Return value</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #pragma warning disable CA1024 // Use properties where appropriate
-    public T GetReturnValue() => _returnValue;
+    public T? GetReturnValue() => _returnValue;
 #pragma warning restore CA1024 // Use properties where appropriate
 
     /// <summary>

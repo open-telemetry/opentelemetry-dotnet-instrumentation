@@ -35,6 +35,11 @@ public class Plugin : IPlugin
                 new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "BubbleUpOnBegin", ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(BubbleUpOnBeginValidator).Assembly.FullName!, typeof(BubbleUpOnBeginValidator).FullName!, DirectCallTargetKind, TracingCategory),
                 new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "BubbleUpOnEnd", ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(BubbleUpOnEndValidator).Assembly.FullName!, typeof(BubbleUpOnEndValidator).FullName!, DirectCallTargetKind, TracingCategory),
                 new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "IgnoreRegularIntegrationException", ["System.Void"], 1, 0, 0, 1, 65535, 65535, typeof(RegularExceptionValidator).Assembly.FullName!, typeof(RegularExceptionValidator).FullName!, DirectCallTargetKind, TracingCategory),
+#if NET
+                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "UseSpan", ["System.Void", "_"], 1, 0, 0, 1, 65535, 65535, typeof(RefStructValidator).Assembly.FullName!, typeof(RefStructValidator).FullName!, DirectCallTargetKind, TracingCategory),
+                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "UseReadOnlySpan", ["System.Void", "_"], 1, 0, 0, 1, 65535, 65535, typeof(RefStructValidator).Assembly.FullName!, typeof(RefStructValidator).FullName!, DirectCallTargetKind, TracingCategory),
+                new("TestLibrary.InstrumentationTarget", "TestLibrary.InstrumentationTarget.Command", "UseByRefSpan", ["System.Void", "_"], 1, 0, 0, 1, 65535, 65535, typeof(RefStructValidator).Assembly.FullName!, typeof(RefStructValidator).FullName!, DirectCallTargetKind, TracingCategory),
+#endif
             ]
         };
 

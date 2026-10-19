@@ -40,14 +40,14 @@ internal static class BeginMethodHandler<TIntegration, TTarget, TArg1, TArg2, TA
         }
         finally
         {
-            _invokeDelegate ??= (TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5, ref TArg6 arg6, ref TArg7 arg7, ref TArg8 arg8) => CallTargetState.GetDefault();
+            _invokeDelegate ??= (TTarget? instance, ref TArg1? arg1, ref TArg2? arg2, ref TArg3? arg3, ref TArg4? arg4, ref TArg5? arg5, ref TArg6? arg6, ref TArg7? arg7, ref TArg8? arg8) => CallTargetState.GetDefault();
         }
     }
 
-    internal delegate CallTargetState InvokeDelegate(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5, ref TArg6 arg6, ref TArg7 arg7, ref TArg8 arg8);
+    internal delegate CallTargetState InvokeDelegate(TTarget? instance, ref TArg1? arg1, ref TArg2? arg2, ref TArg3? arg3, ref TArg4? arg4, ref TArg5? arg5, ref TArg6? arg6, ref TArg7? arg7, ref TArg8? arg8);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static CallTargetState Invoke(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5, ref TArg6 arg6, ref TArg7 arg7, ref TArg8 arg8)
+    internal static CallTargetState Invoke(TTarget? instance, ref TArg1? arg1, ref TArg2? arg2, ref TArg3? arg3, ref TArg4? arg4, ref TArg5? arg5, ref TArg6? arg6, ref TArg7? arg7, ref TArg8? arg8)
     {
         return new CallTargetState(Activity.Current, _invokeDelegate(instance, ref arg1, ref arg2, ref arg3, ref arg4, ref arg5, ref arg6, ref arg7, ref arg8));
     }

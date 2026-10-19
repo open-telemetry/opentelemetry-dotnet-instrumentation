@@ -49,6 +49,8 @@ std::string ToString(const GUID& uid);
 WSTRING ToWSTRING(const std::string& str);
 WSTRING ToWSTRING(uint64_t i);
 
+bool StartsWith(const WSTRING& str, const WSTRING& prefix);
+
 static const WSTRING EmptyWStr = WStr("");
 
 } // namespace trace

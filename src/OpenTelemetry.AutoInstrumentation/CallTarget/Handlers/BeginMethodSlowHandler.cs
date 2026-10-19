@@ -34,10 +34,10 @@ internal static class BeginMethodSlowHandler<TIntegration, TTarget>
         }
     }
 
-    internal delegate CallTargetState InvokeDelegate(TTarget instance, object[] arguments);
+    internal delegate CallTargetState InvokeDelegate(TTarget? instance, object[] arguments);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static CallTargetState Invoke(TTarget instance, object[] arguments)
+    internal static CallTargetState Invoke(TTarget? instance, object[] arguments)
     {
         return new CallTargetState(Activity.Current, _invokeDelegate(instance, arguments));
     }
