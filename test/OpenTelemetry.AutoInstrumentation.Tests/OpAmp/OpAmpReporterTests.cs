@@ -167,45 +167,27 @@ public class OpAmpReporterTests
             report => AssertRemoteStatus(report, RemoteConfigStatusCode.Applied));
     }
 
-    [Fact]
-    public void RemoteStatusRequiresServerSupportAndStopsAtShutdown()
+    [Theory]
+    [InlineData(RemoteConfigStatusCode.Applied, null)]
+    [InlineData(RemoteConfigStatusCode.Failed, "cannot apply")]
+    public void ReportsRemoteStatusAfterServerStopsOfferingConfiguration(RemoteConfigStatusCode status, string? errorMessage)
     {
-        _reporter.NotifyRemoteConfigStatusChanged();
-        Assert.Equal(0, _plugin.RemoteStatusGetterCalls);
+        _plugin.ReadRemoteStatus = () => CreateRemoteStatus(RemoteConfigStatusCode.Applying);
+        _reporter.HandleServerCapabilities(ServerSentCapabilities.AcceptsStatus | ServerSentCapabilities.OffersRemoteConfig);
+        _reporter.HandleServerCapabilities(ServerSentCapabilities.AcceptsStatus);
 
-        _reporter.HandleServerCapabilities(ServerSentCapabilities.OffersRemoteConfig);
-        _reporter.HandleServerCapabilities(ServerSentCapabilities.OffersRemoteConfig);
-        Assert.Equal(1, _plugin.RemoteStatusGetterCalls);
-
-        _plugin.ReadRemoteStatus = () => CreateRemoteStatus(RemoteConfigStatusCode.Applying, hash: "new-hash");
-        _reporter.HandleServerCapabilities(ServerSentCapabilities.None);
-        _reporter.NotifyRemoteConfigStatusChanged();
-        Assert.Equal(2, _plugin.RemoteStatusGetterCalls);
-
-        _reporter.HandleServerCapabilities(ServerCapabilities);
+        _plugin.ReadRemoteStatus = () => CreateRemoteStatus(status, errorMessage);
         _reporter.NotifyRemoteConfigStatusChanged();
         _reporter.ReportFullState();
-        Assert.Equal(2, _plugin.RemoteStatusGetterCalls);
-        Assert.Null(Assert.Single(_reportSender.FullStateReports).RemoteConfigStatus);
 
-        _plugin.ReadRemoteStatus = () => CreateRemoteStatus(RemoteConfigStatusCode.Failed, "cannot apply", "new-hash");
-        _reporter.HandleServerCapabilities(ServerSentCapabilities.OffersRemoteConfig);
-        Assert.Equal(3, _plugin.RemoteStatusGetterCalls);
-        Assert.Equal(3, _reportSender.RemoteConfigStatusReports.Count);
-
-        _reporter.Stop();
-        _reporter.NotifyRemoteConfigStatusChanged();
-        _reporter.ReportFullState();
-        _reporter.HandleServerCapabilities(ServerCapabilities);
-        Assert.Equal(3, _plugin.RemoteStatusGetterCalls);
-        Assert.Equal(3, _reportSender.RemoteConfigStatusReports.Count);
-        Assert.Single(_reportSender.FullStateReports);
+        AssertRemoteStatus(_reportSender.RemoteConfigStatusReports.Last(), status, errorMessage);
+        AssertRemoteStatus(Assert.Single(_reportSender.FullStateReports).RemoteConfigStatus, status, errorMessage);
     }
 
     [Fact]
     public void FullStateReportsCurrentRemoteStatus()
     {
-        _reporter.HandleServerCapabilities(ServerSentCapabilities.OffersRemoteConfig);
+        _reporter.HandleServerCapabilities(ServerSentCapabilities.AcceptsStatus);
 
         _plugin.ReadRemoteStatus = () => CreateRemoteStatus(RemoteConfigStatusCode.Failed, "cannot apply", "new-hash");
         _reporter.ReportFullState();

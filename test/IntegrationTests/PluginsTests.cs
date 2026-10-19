@@ -195,7 +195,7 @@ public class PluginsTests : TestHelper
         const int maxPendingCustomMessageBytes = 456;
         using var server = new MockOpAmpServer(
             Output,
-            capabilities: ServerCapabilities.AcceptsStatus | ServerCapabilities.AcceptsEffectiveConfig | ServerCapabilities.OffersRemoteConfig);
+            capabilities: ServerCapabilities.AcceptsStatus | ServerCapabilities.AcceptsEffectiveConfig);
 
         const AgentCapabilities expectedCapabilities = AgentCapabilities.ReportsEffectiveConfig | AgentCapabilities.ReportsRemoteConfig | AgentCapabilities.AcceptsRemoteConfig;
         server.Expect(frame => (frame.Capabilities & (ulong)expectedCapabilities) == (ulong)expectedCapabilities, "Advertises configuration reporting and acceptance");

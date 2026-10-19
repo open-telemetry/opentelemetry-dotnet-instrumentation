@@ -213,8 +213,8 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
 
     private RemoteConfigStatusReport? ReadRemoteConfigStatus()
     {
-        if (_stopped || _remoteConfigStatusProvider == null ||
-            (_serverCapabilities & ServerSentCapabilities.OffersRemoteConfig) == 0)
+        // Status describes previously received configuration, regardless of current server offers.
+        if (_stopped || _remoteConfigStatusProvider == null)
         {
             return null;
         }

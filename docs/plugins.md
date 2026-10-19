@@ -267,12 +267,12 @@ available; that omits the status from the report. While applying a received
 configuration, return `RemoteConfigStatusCode.Applying` with its hash.
 
 Call `client.NotifyRemoteConfigStatusChanged()` after publishing a new status.
-Reporting requires the server to advertise `OffersRemoteConfig`. The getter may
-be called while a reporting notification is in progress and must return promptly.
-Publish status safely across threads and provide a stable snapshot, including its
-hash buffer. Do not issue reporting notifications or synchronously wait for OpAMP
-callbacks from the getter. Reads may overlap plugin lifecycle callbacks, including
-cleanup.
+Status reporting continues if the server stops offering remote configuration.
+The getter may be called while a reporting notification is in progress and must
+return promptly. Publish status safely across threads and provide a stable
+snapshot, including its hash buffer. Do not issue reporting notifications or
+synchronously wait for OpAMP callbacks from the getter. Reads may overlap plugin
+lifecycle callbacks, including cleanup.
 
 Repeated notifications can resend unchanged status. The provider may be queried
 independently of change notifications, including when responding to a full-state

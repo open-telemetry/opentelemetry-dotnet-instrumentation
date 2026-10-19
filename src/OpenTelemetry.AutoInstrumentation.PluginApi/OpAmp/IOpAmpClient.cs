@@ -30,9 +30,10 @@ public interface IOpAmpClient
     /// Notifies automatic instrumentation that the remote configuration status may have changed.
     /// </summary>
     /// <remarks>
-    /// When reporting is enabled and the server offers remote configuration, the selected
-    /// plugin's <see cref="IProvideRemoteConfigStatus.GetRemoteConfigStatus"/> must be able to complete
-    /// while this notification is in progress. Repeated notifications can resend unchanged status.
+    /// When reporting is enabled, the selected plugin's
+    /// <see cref="IProvideRemoteConfigStatus.GetRemoteConfigStatus"/> must be able to complete while
+    /// this notification is in progress. Reporting continues if the server stops offering remote
+    /// configuration. Repeated notifications can resend unchanged status.
     /// The provider may be queried independently of change notifications, including when responding
     /// to a full-state request. Returning from this notification does not confirm delivery to the server.
     /// Do not rely on delivery during shutdown.
