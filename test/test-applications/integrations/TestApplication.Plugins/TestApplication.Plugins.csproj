@@ -1,4 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <StartupObject>TestApplication.Plugins.OpAmpProgram</StartupObject>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Update="config.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

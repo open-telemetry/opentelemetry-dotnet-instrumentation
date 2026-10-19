@@ -17,6 +17,11 @@ internal sealed class PluginOpAmpClient : IOpAmpClient
         _manager = manager;
     }
 
+    public void NotifyEffectiveConfigChanged()
+    {
+        _manager.NotifyEffectiveConfigChanged();
+    }
+
     public void Subscribe<T>(IOpAmpListener<T> listener)
         where T : OpAmpMessage
     {

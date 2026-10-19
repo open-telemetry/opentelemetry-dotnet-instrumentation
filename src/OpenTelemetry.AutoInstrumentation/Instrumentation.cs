@@ -25,6 +25,7 @@ internal static class Instrumentation
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
     private static readonly LazyInstrumentationLoader LazyInstrumentationLoader = new();
     private static readonly ContinuousProfilerManager ContinuousProfiler = new(() => Volatile.Read(ref _isExiting) != 0);
+    private static readonly OpAmpLoader OpAmpClientLoader = new();
 
     private static readonly Lazy<LoggerProvider?> LoggerProviderFactory = new(InitializeLoggerProvider, true);
 
@@ -221,7 +222,7 @@ internal static class Instrumentation
         {
             var resources = ResourceHelper.AggregateResources(_tracerProvider, _meterProvider, LoggerProvider);
 
-            OpAmpLoader.PrepareOpAmpClient(resources, OpAmpSettings.Value, _pluginManager);
+            OpAmpClientLoader.PrepareOpAmpClient(resources, OpAmpSettings.Value, _pluginManager);
         }
 
         // Notify plugins all initialization is done
@@ -229,7 +230,7 @@ internal static class Instrumentation
 
         if (opAmpClientEnabled)
         {
-            OpAmpLoader.StartOpAmpClient();
+            OpAmpClientLoader.StartOpAmpClient();
         }
     }
 
@@ -454,7 +455,7 @@ internal static class Instrumentation
 
         try
         {
-            OpAmpLoader.StopOpAmpClientIfRunning();
+            OpAmpClientLoader.StopOpAmpClientIfRunning();
 
             LazyInstrumentationLoader?.Dispose();
             ContinuousProfiler.Dispose();
