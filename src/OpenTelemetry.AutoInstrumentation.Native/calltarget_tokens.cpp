@@ -3,7 +3,6 @@
 
 #include "calltarget_tokens.h"
 
-#include "cor_profiler.h"
 #include "il_rewriter_wrapper.h"
 #include "logger.h"
 #include "module_metadata.h"
@@ -39,69 +38,82 @@ HRESULT CallTargetTokens::EnsureCorLibTokens()
     // *** Ensure corlib assembly ref
     if (corLibAssemblyRef == mdAssemblyRefNil)
     {
-        auto hr =
+        mdAssemblyRef newCorLibAssemblyRef = mdAssemblyRefNil;
+        auto          hr =
             module_metadata->assembly_emit->DefineAssemblyRef(corAssemblyProperty.ppbPublicKey,
                                                               corAssemblyProperty.pcbPublicKey,
                                                               corAssemblyProperty.szName.data(),
                                                               &corAssemblyProperty.pMetaData,
                                                               &corAssemblyProperty.pulHashAlgId,
                                                               sizeof(corAssemblyProperty.pulHashAlgId),
-                                                              corAssemblyProperty.assemblyFlags, &corLibAssemblyRef);
-        if (corLibAssemblyRef == mdAssemblyRefNil)
+                                                              corAssemblyProperty.assemblyFlags, &newCorLibAssemblyRef);
+        if (FAILED(hr) || newCorLibAssemblyRef == mdAssemblyRefNil)
         {
             Logger::Warn("Wrapper corLibAssemblyRef could not be defined.");
             return hr;
         }
+        corLibAssemblyRef = newCorLibAssemblyRef;
     }
 
     // *** Ensure System.Object type ref
     if (objectTypeRef == mdTypeRefNil)
     {
-        auto hr = module_metadata->metadata_emit->DefineTypeRefByName(corLibAssemblyRef, SystemObject, &objectTypeRef);
+        mdTypeRef newObjectTypeRef = mdTypeRefNil;
+        auto      hr =
+            module_metadata->metadata_emit->DefineTypeRefByName(corLibAssemblyRef, SystemObject, &newObjectTypeRef);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper objectTypeRef could not be defined.");
             return hr;
         }
+        objectTypeRef = newObjectTypeRef;
     }
 
     // *** Ensure System.Exception type ref
     if (exTypeRef == mdTypeRefNil)
     {
-        auto hr = module_metadata->metadata_emit->DefineTypeRefByName(corLibAssemblyRef, SystemException, &exTypeRef);
+        mdTypeRef newExTypeRef = mdTypeRefNil;
+        auto      hr =
+            module_metadata->metadata_emit->DefineTypeRefByName(corLibAssemblyRef, SystemException, &newExTypeRef);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper exTypeRef could not be defined.");
             return hr;
         }
+        exTypeRef = newExTypeRef;
     }
 
     // *** Ensure System.Type type ref
     if (typeRef == mdTypeRefNil)
     {
-        auto hr = module_metadata->metadata_emit->DefineTypeRefByName(corLibAssemblyRef, SystemTypeName, &typeRef);
+        mdTypeRef newTypeRef = mdTypeRefNil;
+        auto hr = module_metadata->metadata_emit->DefineTypeRefByName(corLibAssemblyRef, SystemTypeName, &newTypeRef);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper typeRef could not be defined.");
             return hr;
         }
+        typeRef = newTypeRef;
     }
 
     // *** Ensure System.RuntimeTypeHandle type ref
     if (runtimeTypeHandleRef == mdTypeRefNil)
     {
-        auto hr = module_metadata->metadata_emit->DefineTypeRefByName(corLibAssemblyRef, RuntimeTypeHandleTypeName,
-                                                                      &runtimeTypeHandleRef);
+        mdTypeRef newRuntimeTypeHandleRef = mdTypeRefNil;
+        auto      hr = module_metadata->metadata_emit->DefineTypeRefByName(corLibAssemblyRef, RuntimeTypeHandleTypeName,
+                                                                           &newRuntimeTypeHandleRef);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper runtimeTypeHandleRef could not be defined.");
             return hr;
         }
+        runtimeTypeHandleRef = newRuntimeTypeHandleRef;
     }
 
     // *** Ensure Type.GetTypeFromHandle token
     if (getTypeFromHandleToken == mdTokenNil)
     {
+        mdToken  newGetTypeFromHandleToken = mdTokenNil;
         unsigned runtimeTypeHandle_buffer;
         auto     runtimeTypeHandle_size = CorSigCompressToken(runtimeTypeHandleRef, &runtimeTypeHandle_buffer);
 
@@ -121,24 +133,27 @@ HRESULT CallTargetTokens::EnsureCorLibTokens()
         offset += runtimeTypeHandle_size;
 
         auto hr = module_metadata->metadata_emit->DefineMemberRef(typeRef, GetTypeFromHandleMethodName, signature,
-                                                                  offset, &getTypeFromHandleToken);
+                                                                  offset, &newGetTypeFromHandleToken);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper getTypeFromHandleToken could not be defined.");
             return hr;
         }
+        getTypeFromHandleToken = newGetTypeFromHandleToken;
     }
 
     // *** Ensure System.RuntimeMethodHandle type ref
     if (runtimeMethodHandleRef == mdTypeRefNil)
     {
+        mdTypeRef newRuntimeMethodHandleRef = mdTypeRefNil;
         auto hr = module_metadata->metadata_emit->DefineTypeRefByName(corLibAssemblyRef, RuntimeMethodHandleTypeName,
-                                                                      &runtimeMethodHandleRef);
+                                                                      &newRuntimeMethodHandleRef);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper runtimeMethodHandleRef could not be defined.");
             return hr;
         }
+        runtimeMethodHandleRef = newRuntimeMethodHandleRef;
     }
 
     return S_OK;
@@ -167,13 +182,15 @@ mdTypeRef CallTargetTokens::GetTargetVoidReturnTypeRef()
     // *** Ensure calltargetreturn void type ref
     if (callTargetReturnVoidTypeRef == mdTypeRefNil)
     {
+        mdTypeRef newCallTargetReturnVoidTypeRef = mdTypeRefNil;
         hr = module_metadata->metadata_emit->DefineTypeRefByName(profilerAssemblyRef, GetCallTargetReturnType().data(),
-                                                                 &callTargetReturnVoidTypeRef);
+                                                                 &newCallTargetReturnVoidTypeRef);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper callTargetReturnVoidTypeRef could not be defined.");
             return mdTypeRefNil;
         }
+        callTargetReturnVoidTypeRef = newCallTargetReturnVoidTypeRef;
     }
 
     return callTargetReturnVoidTypeRef;
@@ -200,7 +217,8 @@ mdMemberRef CallTargetTokens::GetCallTargetReturnVoidDefaultMemberRef()
     // *** Ensure CallTargetReturn.GetDefault() member ref
     if (callTargetReturnVoidTypeGetDefault == mdMemberRefNil)
     {
-        ModuleMetadata* module_metadata = GetMetadata();
+        mdMemberRef     newCallTargetReturnVoidTypeGetDefault = mdMemberRefNil;
+        ModuleMetadata* module_metadata                       = GetMetadata();
 
         unsigned callTargetReturnVoidTypeBuffer;
         auto     callTargetReturnVoidTypeSize =
@@ -220,12 +238,13 @@ mdMemberRef CallTargetTokens::GetCallTargetReturnVoidDefaultMemberRef()
         hr = module_metadata->metadata_emit
                  ->DefineMemberRef(callTargetReturnVoidTypeRef,
                                    managed_profiler_calltarget_returntype_getdefault_name.data(), signature,
-                                   signatureLength, &callTargetReturnVoidTypeGetDefault);
+                                   signatureLength, &newCallTargetReturnVoidTypeGetDefault);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper callTargetReturnVoidTypeGetDefault could not be defined.");
             return mdMemberRefNil;
         }
+        callTargetReturnVoidTypeGetDefault = newCallTargetReturnVoidTypeGetDefault;
     }
 
     return callTargetReturnVoidTypeGetDefault;
@@ -293,7 +312,8 @@ mdMethodSpec CallTargetTokens::GetCallTargetDefaultValueMethodSpec(const TypeSig
     // *** Ensure we have the CallTargetInvoker.GetDefaultValue<> memberRef
     if (getDefaultMemberRef == mdMemberRefNil)
     {
-        auto          signatureLength = 5;
+        mdMemberRef   newGetDefaultMemberRef = mdMemberRefNil;
+        auto          signatureLength        = 5;
         COR_SIGNATURE signature[signatureBufferSize];
         unsigned      offset = 0;
 
@@ -307,12 +327,13 @@ mdMethodSpec CallTargetTokens::GetCallTargetDefaultValueMethodSpec(const TypeSig
         auto hr =
             module_metadata->metadata_emit->DefineMemberRef(callTargetTypeRef,
                                                             managed_profiler_calltarget_getdefaultvalue_name.data(),
-                                                            signature, signatureLength, &getDefaultMemberRef);
+                                                            signature, signatureLength, &newGetDefaultMemberRef);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper getDefaultMemberRef could not be defined.");
             return hr;
         }
+        getDefaultMemberRef = newGetDefaultMemberRef;
     }
 
     // *** Create de MethodSpec using the TypeSignature
@@ -354,16 +375,17 @@ mdMethodSpec CallTargetTokens::GetCallTargetDefaultValueMethodSpec(const TypeSig
     return getDefaultMethodSpec;
 }
 
-HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*         reWriter,
-                                         TypeSignature*      methodReturnValue,
-                                         ULONG*              callTargetStateIndex,
-                                         ULONG*              exceptionIndex,
-                                         ULONG*              callTargetReturnIndex,
-                                         ULONG*              returnValueIndex,
-                                         mdToken*            callTargetStateToken,
-                                         mdToken*            exceptionToken,
-                                         mdToken*            callTargetReturnToken,
-                                         std::vector<ULONG>& additionalLocalIndices)
+HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*                       reWriter,
+                                         TypeSignature*                    methodReturnValue,
+                                         const std::vector<TypeSignature>* methodTypeArguments,
+                                         ULONG*                            callTargetStateIndex,
+                                         ULONG*                            exceptionIndex,
+                                         ULONG*                            callTargetReturnIndex,
+                                         ULONG*                            returnValueIndex,
+                                         mdToken*                          callTargetStateToken,
+                                         mdToken*                          exceptionToken,
+                                         mdToken*                          callTargetReturnToken,
+                                         std::vector<ULONG>&               additionalLocalIndices)
 {
     auto hr = EnsureBaseCalltargetTokens();
     if (FAILED(hr))
@@ -400,7 +422,7 @@ HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*         reWriter,
     }
 
     constexpr ULONG variableNumber        = 3;
-    const auto      additionalLocalsCount = GetAdditionalLocalsCount();
+    const auto      additionalLocalsCount = GetAdditionalLocalsCount(*methodTypeArguments);
     ULONG           newLocalsCount        = variableNumber + static_cast<ULONG>(additionalLocalsCount);
 
     // Gets the calltarget state type buffer and size
@@ -522,7 +544,8 @@ HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*         reWriter,
     }
 
     // Additional locals provided by the concrete CallTarget token implementation.
-    AddAdditionalLocals(newSignatureBuffer, newSignatureOffset, newSignatureSize);
+    AddAdditionalLocals(methodReturnValue, methodTypeArguments, newSignatureBuffer, newSignatureOffset,
+                        newSignatureSize);
 
     if (newSignatureSize > signatureBufferSize)
     {
@@ -589,6 +612,8 @@ ModuleMetadata* CallTargetTokens::GetMetadata()
 
 HRESULT CallTargetTokens::EnsureBaseCalltargetTokens()
 {
+    std::lock_guard<std::recursive_mutex> guard(metadata_mutex);
+
     auto hr = EnsureCorLibTokens();
     if (FAILED(hr))
     {
@@ -600,7 +625,7 @@ HRESULT CallTargetTokens::EnsureBaseCalltargetTokens()
     // *** Ensure profiler assembly ref
     if (profilerAssemblyRef == mdAssemblyRefNil)
     {
-        const auto bytecode_instrumentation_name = trace::profiler->GetBytecodeInstrumentationAssembly();
+        mdAssemblyRef newProfilerAssemblyRef = mdAssemblyRefNil;
         Logger::Debug("CallTargetTokens::EnsureBaseCalltargetTokens() Bytecode Instrumentation Assembly: ",
                       bytecode_instrumentation_name);
         const AssemblyReference assemblyReference =
@@ -630,44 +655,50 @@ HRESULT CallTargetTokens::EnsureBaseCalltargetTokens()
 
         hr = module_metadata->assembly_emit->DefineAssemblyRef(&assemblyReference.public_key.data, public_key_size,
                                                                assemblyReference.name.data(), &assembly_metadata,
-                                                               nullptr, 0, 0, &profilerAssemblyRef);
+                                                               nullptr, 0, 0, &newProfilerAssemblyRef);
 
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper profilerAssemblyRef could not be defined.");
             return hr;
         }
+        profilerAssemblyRef = newProfilerAssemblyRef;
     }
 
     // *** Ensure calltarget type ref
     if (callTargetTypeRef == mdTypeRefNil)
     {
+        mdTypeRef newCallTargetTypeRef = mdTypeRefNil;
         hr = module_metadata->metadata_emit->DefineTypeRefByName(profilerAssemblyRef, GetCallTargetType().data(),
-                                                                 &callTargetTypeRef);
+                                                                 &newCallTargetTypeRef);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper callTargetTypeRef could not be defined.");
             return hr;
         }
+        callTargetTypeRef = newCallTargetTypeRef;
     }
 
     // *** Ensure calltargetstate type ref
     if (callTargetStateTypeRef == mdTypeRefNil)
     {
+        mdTypeRef newCallTargetStateTypeRef = mdTypeRefNil;
         hr = module_metadata->metadata_emit->DefineTypeRefByName(profilerAssemblyRef, GetCallTargetStateType().data(),
-                                                                 &callTargetStateTypeRef);
+                                                                 &newCallTargetStateTypeRef);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper callTargetStateTypeRef could not be defined.");
             return hr;
         }
+        callTargetStateTypeRef = newCallTargetStateTypeRef;
     }
 
     // *** Ensure CallTargetState.GetDefault() member ref
     if (callTargetStateTypeGetDefault == mdMemberRefNil)
     {
-        unsigned callTargetStateTypeBuffer;
-        auto     callTargetStateTypeSize = CorSigCompressToken(callTargetStateTypeRef, &callTargetStateTypeBuffer);
+        mdMemberRef newCallTargetStateTypeGetDefault = mdMemberRefNil;
+        unsigned    callTargetStateTypeBuffer;
+        auto        callTargetStateTypeSize = CorSigCompressToken(callTargetStateTypeRef, &callTargetStateTypeBuffer);
 
         const ULONG   signatureLength = 3 + callTargetStateTypeSize;
         COR_SIGNATURE signature[signatureBufferSize];
@@ -683,12 +714,28 @@ HRESULT CallTargetTokens::EnsureBaseCalltargetTokens()
         auto hr =
             module_metadata->metadata_emit
                 ->DefineMemberRef(callTargetStateTypeRef, managed_profiler_calltarget_statetype_getdefault_name.data(),
-                                  signature, signatureLength, &callTargetStateTypeGetDefault);
+                                  signature, signatureLength, &newCallTargetStateTypeGetDefault);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper callTargetStateTypeGetDefault could not be defined.");
             return hr;
         }
+        callTargetStateTypeGetDefault = newCallTargetStateTypeGetDefault;
+    }
+
+    // Ensure the wrapper type before using it in local and method signatures.
+    if (callTargetRefStructTypeRef == mdTypeRefNil && GetCallTargetRefStructType() != EmptyWStr)
+    {
+        mdTypeRef newCallTargetRefStructTypeRef = mdTypeRefNil;
+        hr = module_metadata->metadata_emit->DefineTypeRefByName(profilerAssemblyRef,
+                                                                 GetCallTargetRefStructType().data(),
+                                                                 &newCallTargetRefStructTypeRef);
+        if (FAILED(hr))
+        {
+            Logger::Warn("Wrapper callTargetRefStructTypeRef could not be defined.");
+            return hr;
+        }
+        callTargetRefStructTypeRef = newCallTargetRefStructTypeRef;
     }
 
     return S_OK;
@@ -708,14 +755,16 @@ mdTypeSpec CallTargetTokens::GetTargetReturnValueTypeRef(TypeSignature* returnAr
     // *** Ensure calltargetreturn type ref
     if (callTargetReturnTypeRef == mdTypeRefNil)
     {
-        hr = module_metadata->metadata_emit->DefineTypeRefByName(profilerAssemblyRef,
-                                                                 GetCallTargetReturnGenericType().data(),
-                                                                 &callTargetReturnTypeRef);
+        mdTypeRef newCallTargetReturnTypeRef = mdTypeRefNil;
+        hr                                   = module_metadata->metadata_emit->DefineTypeRefByName(profilerAssemblyRef,
+                                                                                                   GetCallTargetReturnGenericType().data(),
+                                                                                                   &newCallTargetReturnTypeRef);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper callTargetReturnTypeRef could not be defined.");
             return mdTypeSpecNil;
         }
+        callTargetReturnTypeRef = newCallTargetReturnTypeRef;
     }
 
     PCCOR_SIGNATURE returnSignatureBuffer;
@@ -826,18 +875,23 @@ mdToken CallTargetTokens::GetCurrentTypeRef(const TypeInfo* currentType, bool& i
     return cType->id;
 }
 
-int CallTargetTokens::GetAdditionalLocalsCount()
+int CallTargetTokens::GetAdditionalLocalsCount(const std::vector<TypeSignature>& methodTypeArguments)
 {
     return 0;
 }
 
-void CallTargetTokens::AddAdditionalLocals(COR_SIGNATURE (&signatureBuffer)[500],
+void CallTargetTokens::AddAdditionalLocals(TypeSignature*                    methodReturnValue,
+                                           const std::vector<TypeSignature>* methodTypeArguments,
+                                           COR_SIGNATURE (&signatureBuffer)[500],
                                            ULONG& signatureOffset,
                                            ULONG& signatureSize)
 {
 }
 
-CallTargetTokens::CallTargetTokens(ModuleMetadata* moduleMetadataPtr) : module_metadata_ptr(moduleMetadataPtr) {}
+CallTargetTokens::CallTargetTokens(ModuleMetadata* moduleMetadataPtr, const WSTRING& bytecodeInstrumentationName)
+    : module_metadata_ptr(moduleMetadataPtr), bytecode_instrumentation_name(bytecodeInstrumentationName)
+{
+}
 /**
  * PUBLIC
  **/
@@ -863,24 +917,25 @@ mdAssemblyRef CallTargetTokens::GetCorLibAssemblyRef()
     return corLibAssemblyRef;
 }
 
-HRESULT CallTargetTokens::ModifyLocalSigAndInitialize(void*               rewriterWrapperPtr,
-                                                      TypeSignature*      methodReturnType,
-                                                      ULONG*              callTargetStateIndex,
-                                                      ULONG*              exceptionIndex,
-                                                      ULONG*              callTargetReturnIndex,
-                                                      ULONG*              returnValueIndex,
-                                                      mdToken*            callTargetStateToken,
-                                                      mdToken*            exceptionToken,
-                                                      mdToken*            callTargetReturnToken,
-                                                      ILInstr**           firstInstruction,
-                                                      std::vector<ULONG>& additionalLocalIndices)
+HRESULT CallTargetTokens::ModifyLocalSigAndInitialize(void*                             rewriterWrapperPtr,
+                                                      TypeSignature*                    methodReturnType,
+                                                      const std::vector<TypeSignature>* methodTypeArguments,
+                                                      ULONG*                            callTargetStateIndex,
+                                                      ULONG*                            exceptionIndex,
+                                                      ULONG*                            callTargetReturnIndex,
+                                                      ULONG*                            returnValueIndex,
+                                                      mdToken*                          callTargetStateToken,
+                                                      mdToken*                          exceptionToken,
+                                                      mdToken*                          callTargetReturnToken,
+                                                      ILInstr**                         firstInstruction,
+                                                      std::vector<ULONG>&               additionalLocalIndices)
 {
     ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*)rewriterWrapperPtr;
 
     // Modify the Local Var Signature of the method
-    auto hr = ModifyLocalSig(rewriterWrapper->GetILRewriter(), methodReturnType, callTargetStateIndex, exceptionIndex,
-                             callTargetReturnIndex, returnValueIndex, callTargetStateToken, exceptionToken,
-                             callTargetReturnToken, additionalLocalIndices);
+    auto hr = ModifyLocalSig(rewriterWrapper->GetILRewriter(), methodReturnType, methodTypeArguments,
+                             callTargetStateIndex, exceptionIndex, callTargetReturnIndex, returnValueIndex,
+                             callTargetStateToken, exceptionToken, callTargetReturnToken, additionalLocalIndices);
 
     if (FAILED(hr))
     {

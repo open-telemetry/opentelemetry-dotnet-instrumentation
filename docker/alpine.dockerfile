@@ -1,23 +1,23 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0.401-alpine3.23@sha256:3f9c03432d664163a90d20e3ed0a3784d0aa82c1b9cbd1a7dd4609fede95669e
+FROM mcr.microsoft.com/dotnet/sdk:10.0.402-alpine3.24@sha256:230c3fbae0ceedc70bca04eed2bfb5694e8b248cadbb81010f41b7a993601f55
 
 # renovate: datasource=repology depName=clang21
-ARG CLANG21_VERSION=21.1.2-r2
+ARG CLANG21_VERSION=21.1.8-r3
 # renovate: datasource=repology depName=cmake
-ARG CMAKE_VERSION=4.1.3-r0
+ARG CMAKE_VERSION=4.2.3-r0
 # renovate: datasource=repology depName=make
-ARG MAKE_VERSION=4.4.1-r3
+ARG MAKE_VERSION=4.4.1-r4
 # renovate: datasource=repology depName=bash
-ARG BASH_VERSION=5.3.3-r1
+ARG BASH_VERSION=5.3.9-r1
 # renovate: datasource=repology depName=alpine-sdk
-ARG ALPINE_SDK_VERSION=1.1-r0
+ARG ALPINE_SDK_VERSION=1.1-r1
 # renovate: datasource=repology depName=protobuf
 ARG PROTOBUF_VERSION=31.1-r1
 # renovate: datasource=repology depName=protobuf-dev
 ARG PROTOBUF_DEV_VERSION=31.1-r1
 # renovate: datasource=repology depName=grpc
-ARG GRPC_VERSION=1.76.0-r2
+ARG GRPC_VERSION=1.78.1-r2
 # renovate: datasource=repology depName=grpc-plugins
-ARG GRPC_PLUGINS_VERSION=1.76.0-r2
+ARG GRPC_PLUGINS_VERSION=1.78.1-r2
 
 RUN apk update \
     && apk upgrade \
@@ -32,6 +32,8 @@ RUN apk update \
         grpc="${GRPC_VERSION}" \
         grpc-plugins="${GRPC_PLUGINS_VERSION}"
 
+# Make the unversioned Clang compiler binaries available to CMake.
+ENV PATH="/usr/lib/llvm21/bin:$PATH"
 ENV IsAlpine=true
 ENV PROTOBUF_PROTOC=/usr/bin/protoc
 ENV gRPC_PluginFullPath=/usr/bin/grpc_csharp_plugin
@@ -40,8 +42,8 @@ COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 # Install older SDKs using the install script
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 9.0.318 --install-dir /usr/share/dotnet --no-path \
-    && ./dotnet-install.sh -v 8.0.425 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 9.0.319 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 8.0.426 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project

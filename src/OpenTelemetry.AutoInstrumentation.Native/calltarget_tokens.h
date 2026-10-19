@@ -8,6 +8,7 @@
 
 #include <corhlpr.h>
 
+#include <atomic>
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
@@ -30,18 +31,19 @@ class CallTargetTokens
 {
 private:
     ModuleMetadata* module_metadata_ptr = nullptr;
+    const WSTRING   bytecode_instrumentation_name;
 
     // CorLib tokens
-    mdAssemblyRef corLibAssemblyRef = mdAssemblyRefNil;
-    mdTypeRef objectTypeRef = mdTypeRefNil;
-    mdTypeRef typeRef = mdTypeRefNil;
-    mdTypeRef runtimeTypeHandleRef = mdTypeRefNil;
-    mdToken getTypeFromHandleToken = mdTokenNil;
-    mdTypeRef runtimeMethodHandleRef = mdTypeRefNil;
+    std::atomic<mdAssemblyRef> corLibAssemblyRef{mdAssemblyRefNil};
+    std::atomic<mdTypeRef> objectTypeRef{mdTypeRefNil};
+    std::atomic<mdTypeRef> typeRef{mdTypeRefNil};
+    std::atomic<mdTypeRef> runtimeTypeHandleRef{mdTypeRefNil};
+    std::atomic<mdToken> getTypeFromHandleToken{mdTokenNil};
+    std::atomic<mdTypeRef> runtimeMethodHandleRef{mdTypeRefNil};
 
-    mdMemberRef callTargetStateTypeGetDefault = mdMemberRefNil;
-    mdMemberRef callTargetReturnVoidTypeGetDefault = mdMemberRefNil;
-    mdMemberRef getDefaultMemberRef = mdMemberRefNil;
+    std::atomic<mdMemberRef> callTargetStateTypeGetDefault{mdMemberRefNil};
+    std::atomic<mdMemberRef> callTargetReturnVoidTypeGetDefault{mdMemberRefNil};
+    std::atomic<mdMemberRef> getDefaultMemberRef{mdMemberRefNil};
 
     HRESULT EnsureCorLibTokens();
     mdTypeRef GetTargetStateTypeRef();
@@ -51,7 +53,9 @@ private:
     mdMemberRef GetCallTargetReturnValueDefaultMemberRef(mdTypeSpec callTargetReturnTypeSpec);
     mdMethodSpec GetCallTargetDefaultValueMethodSpec(const TypeSignature* methodArgument);
 
-    HRESULT ModifyLocalSig(ILRewriter* reWriter, TypeSignature* methodReturnValue, ULONG* callTargetStateIndex,
+    HRESULT ModifyLocalSig(ILRewriter* reWriter, TypeSignature* methodReturnValue,
+                           const std::vector<TypeSignature>* methodTypeArguments,
+                           ULONG* callTargetStateIndex,
                            ULONG* exceptionIndex, ULONG* callTargetReturnIndex, ULONG* returnValueIndex,
                            mdToken* callTargetStateToken, mdToken* exceptionToken, mdToken* callTargetReturnToken,
                            std::vector<ULONG>& additionalLocalIndices);
@@ -60,19 +64,21 @@ private:
                                                const TypeInfo* currentType, ILInstr** instruction);
 
 protected:
+    std::recursive_mutex metadata_mutex;
     // CallTarget tokens
-    mdAssemblyRef profilerAssemblyRef = mdAssemblyRefNil;
+    std::atomic<mdAssemblyRef> profilerAssemblyRef{mdAssemblyRefNil};
 
     // The variables 'enable_by_ref_instrumentation' and 'enable_calltarget_state_by_ref' will always be true,
     // but instead of removing them and the conditional branches they affect, we will keep the variables to make
     // future upstream pulls easier.
     const bool enable_by_ref_instrumentation  = true;
     const bool enable_calltarget_state_by_ref = true;
-    mdTypeRef  callTargetTypeRef              = mdTypeRefNil;
-    mdTypeRef  callTargetStateTypeRef         = mdTypeRefNil;
-    mdTypeRef  callTargetReturnVoidTypeRef    = mdTypeRefNil;
-    mdTypeRef  callTargetReturnTypeRef        = mdTypeRefNil;
-    mdTypeRef  exTypeRef                      = mdTypeRefNil;
+    std::atomic<mdTypeRef> callTargetTypeRef{mdTypeRefNil};
+    std::atomic<mdTypeRef> callTargetStateTypeRef{mdTypeRefNil};
+    std::atomic<mdTypeRef> callTargetReturnVoidTypeRef{mdTypeRefNil};
+    std::atomic<mdTypeRef> callTargetReturnTypeRef{mdTypeRefNil};
+    std::atomic<mdTypeRef> callTargetRefStructTypeRef{mdTypeRefNil};
+    std::atomic<mdTypeRef> exTypeRef{mdTypeRefNil};
 
     ModuleMetadata* GetMetadata();
     virtual HRESULT EnsureBaseCalltargetTokens();
@@ -82,13 +88,16 @@ protected:
     virtual const WSTRING& GetCallTargetStateType()         = 0;
     virtual const WSTRING& GetCallTargetReturnType()        = 0;
     virtual const WSTRING& GetCallTargetReturnGenericType() = 0;
-    virtual void AddAdditionalLocals(COR_SIGNATURE (&signatureBuffer)[500], ULONG& signatureOffset,
+    virtual const WSTRING& GetCallTargetRefStructType()     = 0;
+    virtual void AddAdditionalLocals(TypeSignature*                    methodReturnValue,
+                                               const std::vector<TypeSignature>* methodTypeArguments,
+                                               COR_SIGNATURE (&signatureBuffer)[500], ULONG& signatureOffset,
                                      ULONG& signatureSize);
 
-    CallTargetTokens(ModuleMetadata* moduleMetadataPtr);
+    CallTargetTokens(ModuleMetadata* moduleMetadataPtr, const WSTRING& bytecodeInstrumentationName);
 
 public:
-    virtual int GetAdditionalLocalsCount();
+    virtual int GetAdditionalLocalsCount(const std::vector<TypeSignature>& methodTypeArguments);
 
     mdTypeRef GetObjectTypeRef();
     mdTypeRef GetExceptionTypeRef();
@@ -98,6 +107,7 @@ public:
     mdToken GetCurrentTypeRef(const TypeInfo* currentType, bool& isValueType);
 
     HRESULT ModifyLocalSigAndInitialize(void* rewriterWrapperPtr, TypeSignature* methodReturnType,
+                                        const std::vector<TypeSignature>* methodTypeArguments,
                                         ULONG* callTargetStateIndex, ULONG* exceptionIndex,
                                         ULONG* callTargetReturnIndex, ULONG* returnValueIndex,
                                         mdToken* callTargetStateToken, mdToken* exceptionToken,

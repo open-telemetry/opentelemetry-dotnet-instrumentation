@@ -31,6 +31,7 @@ inetsrv
 JIT
 LASTEXITCODE
 LINQ
+libstdc
 longdate
 MASSTRANSIT
 metricsexporter
@@ -64,6 +65,7 @@ protos
 RABBITMQ
 Serilog
 Sonoma
+specstrings
 spdlog
 SQLCLIENT
 sqlserver

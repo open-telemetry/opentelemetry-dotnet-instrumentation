@@ -491,3 +491,21 @@ internal class DuckTypeCustomAttributeHasNamedArgumentsException : DuckTypeExcep
         throw new DuckTypeCustomAttributeHasNamedArgumentsException(attributeData.AttributeType.FullName ?? "Null", type.FullName ?? type.Name);
     }
 }
+
+/// <summary>
+/// DuckCopy struct contains properties but no copyable fields.
+/// </summary>
+internal sealed class DuckTypeDuckCopyStructDoesNotContainsAnyField : DuckTypeException
+{
+    private DuckTypeDuckCopyStructDoesNotContainsAnyField(Type type)
+        : base($"The [DuckCopy] struct '{type.FullName ?? type.Name}' has no public fields. DuckCopy proxies must use fields instead of properties.")
+    {
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(Type type)
+    {
+        throw new DuckTypeDuckCopyStructDoesNotContainsAnyField(type);
+    }
+}

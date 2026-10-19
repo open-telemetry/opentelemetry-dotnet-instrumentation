@@ -70,10 +70,10 @@ internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
         }
     }
 
-    internal delegate CallTargetReturn<TReturn?> InvokeDelegate(TTarget instance, TReturn? returnValue, Exception exception, in CallTargetState state);
+    internal delegate CallTargetReturn<TReturn?> InvokeDelegate(TTarget? instance, TReturn? returnValue, Exception? exception, in CallTargetState state);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static CallTargetReturn<TReturn?> Invoke(TTarget instance, TReturn? returnValue, Exception exception, in CallTargetState state)
+    internal static CallTargetReturn<TReturn?> Invoke(TTarget? instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
     {
         if (_continuationGenerator != null)
         {

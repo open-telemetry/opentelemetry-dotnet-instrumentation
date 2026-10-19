@@ -15,25 +15,23 @@
 #include "clr_helpers.h"
 #include "com_ptr.h"
 #include "integration.h"
+#include "tracer_integration_definition.h"
 #include "string_utils.h"
 #include "tracer_tokens.h"
 
 namespace trace
 {
 
-class ModuleMetadata
+class ModuleMetadata : public ModuleMetadataBase
 {
 private:
     std::mutex wrapper_mutex;
+    std::once_flag tracer_tokens_once_flag;
     std::unique_ptr<std::unordered_map<WSTRING, mdTypeRef>> integration_types = nullptr;
     std::unique_ptr<TracerTokens> tracerTokens = nullptr;
     std::unique_ptr<std::vector<IntegrationDefinition>> integrations = nullptr;
 
 public:
-    const ComPtr<IMetaDataImport2> metadata_import{};
-    const ComPtr<IMetaDataEmit2> metadata_emit{};
-    const ComPtr<IMetaDataAssemblyImport> assembly_import{};
-    const ComPtr<IMetaDataAssemblyEmit> assembly_emit{};
     const WSTRING assemblyName = EmptyWStr;
     const AppDomainID app_domain_id;
     const GUID module_version_id;
@@ -43,11 +41,9 @@ public:
                    ComPtr<IMetaDataAssemblyImport> assembly_import, ComPtr<IMetaDataAssemblyEmit> assembly_emit,
                    const WSTRING& assembly_name, const AppDomainID app_domain_id, const GUID module_version_id,
                    std::unique_ptr<std::vector<IntegrationDefinition>>&& integrations,
-                   const AssemblyProperty* corAssemblyProperty) :
-        metadata_import(metadata_import),
-        metadata_emit(metadata_emit),
-        assembly_import(assembly_import),
-        assembly_emit(assembly_emit),
+                   const AssemblyProperty* corAssemblyProperty) : ModuleMetadataBase(metadata_import,
+        metadata_emit,
+        assembly_import, assembly_emit),
         assemblyName(assembly_name),
         app_domain_id(app_domain_id),
         module_version_id(module_version_id),
@@ -59,11 +55,9 @@ public:
     ModuleMetadata(ComPtr<IMetaDataImport2> metadata_import, ComPtr<IMetaDataEmit2> metadata_emit,
                    ComPtr<IMetaDataAssemblyImport> assembly_import, ComPtr<IMetaDataAssemblyEmit> assembly_emit,
                    const WSTRING& assembly_name, const AppDomainID app_domain_id,
-                   const AssemblyProperty* corAssemblyProperty) :
-        metadata_import(metadata_import),
-        metadata_emit(metadata_emit),
-        assembly_import(assembly_import),
-        assembly_emit(assembly_emit),
+                   const AssemblyProperty* corAssemblyProperty) : ModuleMetadataBase(metadata_import,
+        metadata_emit,
+        assembly_import, assembly_emit),
         assemblyName(assembly_name),
         app_domain_id(app_domain_id),
         module_version_id(),
@@ -71,8 +65,10 @@ public:
     {
     }
 
-    bool TryGetIntegrationTypeRef(const WSTRING& keyIn, mdTypeRef& valueOut) const
+    bool TryGetIntegrationTypeRef(const WSTRING& keyIn, mdTypeRef& valueOut)
     {
+        std::scoped_lock<std::mutex> lock(wrapper_mutex);
+
         if (integration_types == nullptr)
         {
             return false;
@@ -100,13 +96,14 @@ public:
         (*integration_types)[keyIn] = valueIn;
     }
 
-    TracerTokens* GetTracerTokens()
+    TracerTokens* GetTracerTokens(const WSTRING& bytecodeInstrumentationName, ICorProfilerInfo4* profilerInfo)
     {
-        if (tracerTokens == nullptr)
-        {
-            tracerTokens =
-                std::make_unique<TracerTokens>(this);
-        }
+        std::call_once(tracer_tokens_once_flag, [this, bytecodeInstrumentationName, profilerInfo] {
+                           ComPtr<ICorProfilerInfo4> info;
+                           info.Copy(profilerInfo);
+                           tracerTokens = std::make_unique<TracerTokens>(this, bytecodeInstrumentationName, info);
+        });
+
         return tracerTokens.get();
     }
 };

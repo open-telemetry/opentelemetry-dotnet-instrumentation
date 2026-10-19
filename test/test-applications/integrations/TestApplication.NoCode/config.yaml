@@ -998,3 +998,33 @@ instrumentation/development:
               parameter_types:
           span:
              name: Span-GenericParentNestedValueType
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.RefStructTargets
+            method: UseValue
+            signature:
+              return_type: System.Void
+              parameter_types: ["TestApplication.NoCode.RefStructValue"]
+          span:
+            name: Span-RefStructValue
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.RefStructTargets
+            method: UseByRefValue
+            signature:
+              return_type: System.Void
+              parameter_types: ["TestApplication.NoCode.RefStructValue&"]
+          span:
+            name: Span-ByRefStructValue
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.RefStructTargets
+            method: UseMixedValues
+            signature:
+              return_type: System.Void
+              parameter_types: ["TestApplication.NoCode.RefStructValue", "System.Int32", "TestApplication.NoCode.RefStructValue&"]
+          span:
+            name: Span-MixedRefStructValues

@@ -12,6 +12,13 @@
 namespace trace
 {
 
+std::string PadLeft(const std::string& txt, std::size_t len, char c)
+{
+    std::stringstream str;
+    str << std::right << std::setfill(c) << std::setw(len) << txt;
+    return str.str();
+}
+
 std::string ToString(const std::string& str)
 {
     return str;
@@ -28,21 +35,28 @@ std::string ToString(const WSTRING& wstr)
 {
     return ToString(wstr.data(), wstr.size());
 }
+std::string ToString(const WCHAR* wstr)
+{
+    if (wstr == nullptr || *wstr == WStr('\0'))
+        return std::string();
+    return ToString(wstr, WStrLen(wstr));
+}
 std::string ToString(const WCHAR* wstr, std::size_t nbChars)
 {
 #ifdef _WIN32
     if (nbChars == 0)
         return std::string();
 
-    std::string tmpStr(tmp_buffer_size, 0);
-    int size_needed = WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, &tmpStr[0], tmp_buffer_size, NULL, NULL);
-    if (size_needed < tmp_buffer_size)
+    char tmpStr[tmp_buffer_size];
+    int  charsWritten = WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, tmpStr, tmp_buffer_size, nullptr, nullptr);
+    if (charsWritten < tmp_buffer_size && charsWritten != 0)
     {
-        return tmpStr.substr(0, size_needed);
+        return std::string(tmpStr, charsWritten);
     }
 
-    std::string strTo(size_needed, 0);
-    WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, &strTo[0], size_needed, NULL, NULL);
+    const auto  sizeNeeded = WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, nullptr, 0, nullptr, nullptr);
+    std::string strTo(sizeNeeded, 0);
+    WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, strTo.data(), sizeNeeded, nullptr, nullptr);
     return strTo;
 #else
     // WCHAR is UTF-16 on non-Windows platforms in the CoreCLR PAL.
@@ -51,21 +65,37 @@ std::string ToString(const WCHAR* wstr, std::size_t nbChars)
 #endif
 }
 
+std::string ToString(const GUID& uid)
+{
+    std::stringstream txt;
+    // {821CFB0A-7847-490F-B8BC-F9E913BC2CA6}
+    txt << "{";
+    txt << Hex(uid.Data1, 8, "") << "-";
+    txt << Hex(uid.Data2, 4, "") << "-";
+    txt << Hex(uid.Data3, 4, "") << "-";
+    txt << Hex(uid.Data4[0], 2, "") << Hex(uid.Data4[1], 2, "") << "-";
+    txt << Hex(uid.Data4[2], 2, "") << Hex(uid.Data4[3], 2, "") << Hex(uid.Data4[4], 2, "") << Hex(uid.Data4[5], 2, "")
+        << Hex(uid.Data4[6], 2, "") << Hex(uid.Data4[7], 2, "");
+    txt << "}";
+    return txt.str();
+}
+
 WSTRING ToWSTRING(const std::string& str)
 {
 #ifdef _WIN32
     if (str.empty())
         return std::wstring();
 
-    std::wstring tmpStr(tmp_buffer_size, 0);
-    int          size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &tmpStr[0], tmp_buffer_size);
-    if (size_needed < tmp_buffer_size)
+    WCHAR tmpStr[tmp_buffer_size];
+    int   charsWritten = MultiByteToWideChar(CP_UTF8, 0, str.data(), (int)str.size(), tmpStr, tmp_buffer_size);
+    if (charsWritten < tmp_buffer_size && charsWritten != 0)
     {
-        return tmpStr.substr(0, size_needed);
+        return WSTRING(tmpStr, charsWritten);
     }
 
-    std::wstring wstrTo(size_needed, 0);
-    MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
+    const auto sizeNeeded = MultiByteToWideChar(CP_UTF8, 0, str.data(), (int)str.size(), nullptr, 0);
+    WSTRING    wstrTo(sizeNeeded, 0);
+    MultiByteToWideChar(CP_UTF8, 0, str.data(), (int)str.size(), wstrTo.data(), sizeNeeded);
     return wstrTo;
 #else
     auto ustr = miniutf::to_utf16(str);
@@ -95,6 +125,11 @@ WSTRING ToWSTRING(const uint64_t value)
         res /= 10;
     } while (res != 0);
     return WSTRING(i, end);
+}
+
+bool StartsWith(const WSTRING& str, const WSTRING& prefix)
+{
+    return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0;
 }
 
 } // namespace trace

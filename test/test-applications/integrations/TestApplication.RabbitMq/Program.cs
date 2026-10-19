@@ -195,6 +195,20 @@ internal static class Program
 
         var interfaceConsumer = new AsyncExplicitImplementationConsumer(asyncConsumersModel);
 
+        // A same-named public method must not receive the interface instrumentation.
+        interfaceConsumer.HandleBasicDeliver(
+            string.Empty,
+            0,
+            false,
+            string.Empty,
+            RoutingKey,
+            asyncConsumersModel.CreateBasicProperties(),
+#if RABBITMQ_6_0_0_OR_GREATER
+            ReadOnlyMemory<byte>.Empty).GetAwaiter().GetResult();
+#else
+            Array.Empty<byte>()).GetAwaiter().GetResult();
+#endif
+
         using var interfaceMre = new ManualResetEventSlim(false);
 
         interfaceConsumer.Received += (_, ea) =>

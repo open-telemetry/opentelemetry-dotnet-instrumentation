@@ -36,7 +36,7 @@ public static partial class LibraryVersion
                 new("8.0.23"),
                 new("9.0.12"),
                 new("10.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("10.0.12", supportedFrameworks: [ "net10.0" ]),
+                new("10.0.13", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -76,7 +76,7 @@ public static partial class LibraryVersion
                 new("5.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "5.0.0" } }),
                 new("5.3.4", additionalMetaData: new() { { "NLogExtensionsLogging", "5.3.15" } }),
                 new("6.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "6.0.0" } }),
-                new("6.2.1", additionalMetaData: new() { { "NLogExtensionsLogging", "6.2.1" } }),
+                new("6.2.2", additionalMetaData: new() { { "NLogExtensionsLogging", "6.2.2" } }),
             ]
         },
         {
@@ -161,9 +161,9 @@ public static partial class LibraryVersion
             "TestApplication.Quartz",
             [
                 new("3.6.0"),
-                new("3.22.3"),
+                new("3.22.6"),
                 new("4.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("4.4.0", supportedFrameworks: [ "net10.0" ]),
+                new("4.5.1", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -181,7 +181,7 @@ public static partial class LibraryVersion
                 new("8.0.0"),
                 new("9.0.0"),
                 new("10.0.0"),
-                new("10.0.12"),
+                new("10.0.13"),
             ]
         },
         {
@@ -219,7 +219,7 @@ public static partial class LibraryVersion
                 new("9.0.0", supportedFrameworks: [ "net9.0" ]),
                 new("6.0.0", supportedFrameworks: [ "net462" ]),
                 new("10.0.0", supportedFrameworks: [ "net8.0", "net9.0" ]),
-                new("10.0.12", supportedFrameworks: [ "net462", "net10.0" ]),
+                new("10.0.13", supportedFrameworks: [ "net462", "net10.0" ]),
             ]
         },
         {

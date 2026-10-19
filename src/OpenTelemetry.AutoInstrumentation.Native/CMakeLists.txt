@@ -97,7 +97,7 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 # ******************************************************
 
 # Sets compiler options
-add_compile_options(-std=c++17 -fPIC -fms-extensions -fvisibility=hidden)
+add_compile_options(-std=c++20 -fPIC -fms-extensions -fvisibility=hidden)
 add_compile_options(-DPAL_STDCPP_COMPAT -DPLATFORM_UNIX -DUNICODE)
 add_compile_options(-Wno-invalid-noreturn -Wno-macro-redefined)
 
@@ -220,13 +220,18 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         rejit_handler.cpp
         rejit_preprocessor.cpp
         rejit_work_offloader.cpp
+        thread_utils.cpp
         runtime_sampler_configuration.cpp
         runtime_sampler_service.cpp
         environment_variables_util.cpp
         stack_capturer.cpp
         stub_generator.cpp
         suspension_guards.cpp
-        method_rewriter.cpp
+        function_control_wrapper.cpp
+        tracer_handler_module_method.cpp
+        tracer_integration_definition.cpp
+        tracer_method_rewriter.cpp
+        tracer_rejit_preprocessor.cpp
         tracer_tokens.cpp
         type_name_assembly_reference_parser.cpp
         type_name_assembly_redirection_rewriter.cpp
@@ -292,3 +297,7 @@ set_target_properties(${TARGET_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Define linker libraries
 target_link_libraries(${TARGET_NAME} "OpenTelemetry.AutoInstrumentation.Native.static")
+
+if (ISLINUX)
+    target_link_libraries(${TARGET_NAME} -Wl,--build-id)
+endif()

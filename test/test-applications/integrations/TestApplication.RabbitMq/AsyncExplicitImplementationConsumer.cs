@@ -58,6 +58,25 @@ internal sealed class AsyncExplicitImplementationConsumer : IBasicConsumer, IAsy
         return Task.CompletedTask;
     }
 
+    // The public method has the same name and signature as the explicit implementation.
+    // Interface instrumentation must select the explicit method and leave this one alone.
+    public Task HandleBasicDeliver(
+        string consumerTag,
+        ulong deliveryTag,
+        bool redelivered,
+        string exchange,
+        string routingKey,
+        IBasicProperties properties,
+#if RABBITMQ_6_0_0_OR_GREATER
+        ReadOnlyMemory<byte> body)
+#else
+        byte[] body)
+#endif
+    {
+        Received?.Invoke(this, new BasicDeliverEventArgs(consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body));
+        return Task.CompletedTask;
+    }
+
     Task IAsyncBasicConsumer.HandleModelShutdown(object model, ShutdownEventArgs reason) => _consumer.HandleModelShutdown(model, reason);
 
     void IBasicConsumer.HandleBasicCancel(string consumerTag) => throw new InvalidOperationException("Should never be called.");

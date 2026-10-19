@@ -64,10 +64,10 @@ HRESULT StubGenerator::ModifyProcessStartupHooks(const ModuleID module_id, mdMet
     ComPtr<IUnknown> metadata_interfaces;
     auto             hr = m_pICorProfilerInfo->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
                                                                  metadata_interfaces.GetAddressOf());
-    if (FAILED(hr))
+    if (hr != S_OK)
     {
         Logger::Warn("ModifyProcessStartupHooks: failed to get metadata interface for ", module_id);
-        return hr;
+        return FAILED(hr) ? hr : E_FAIL;
     }
 
     const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
@@ -182,10 +182,10 @@ HRESULT StubGenerator::GenerateHookFixup(const ModuleID module_id,
     ComPtr<IUnknown> metadata_interfaces;
     auto hr = this->m_pICorProfilerInfo->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
                                                            metadata_interfaces.GetAddressOf());
-    if (FAILED(hr))
+    if (hr != S_OK)
     {
         Logger::Warn("GenerateHookFixup: failed to get metadata interface for ", module_id);
-        return hr;
+        return FAILED(hr) ? hr : E_FAIL;
     }
 
     const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);

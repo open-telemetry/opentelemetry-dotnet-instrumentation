@@ -260,7 +260,7 @@ internal static class PackageVersionDefinitions
             [
                 // new("3.4.0"), - transitive vulnerability https://github.com/advisories/GHSA-rxg9-xrhp-64gj, <= 3.5.0
                 new("3.6.0"),
-                new("3.22.3"),
+                new("3.22.6"),
                 new("4.0.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]),
                 new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
             ]
@@ -351,10 +351,10 @@ internal static class PackageVersionDefinitions
                 // Use case 2: Equal to instrumentation tool version
                 // net8.0: 10.0.0 (equal to instrumentation 10.0.0)
                 // net9.0: 10.0.0 (equal to instrumentation 10.0.0)
-                // net462: 10.0.12 (equal to instrumentation 10.0.12)
-                // net10.0: 10.0.12 (framework override to 10.0.0, validates build parameter was respected)
+                // net462: 10.0.13 (equal to instrumentation 10.0.13
+                // net10.0: 10.0.13 (framework override to 10.0.0, validates build parameter was respected)
                 new("10.0.0", supportedTargetFrameworks: ["net8.0", "net9.0"], supportedExecutionFrameworks: ["net8.0", "net9.0"]),
-                new("10.0.12", supportedTargetFrameworks: ["net462", "net10.0"], supportedExecutionFrameworks: ["net462", "net10.0"]),
+                new("10.0.13", supportedTargetFrameworks: ["net462", "net10.0"], supportedExecutionFrameworks: ["net462", "net10.0"]),
             ]
         },
         new()

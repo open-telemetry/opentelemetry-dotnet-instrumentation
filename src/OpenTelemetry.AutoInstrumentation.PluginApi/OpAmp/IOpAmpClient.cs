@@ -12,6 +12,21 @@ namespace OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
 public interface IOpAmpClient
 {
     /// <summary>
+    /// Notifies automatic instrumentation of an effective configuration change.
+    /// </summary>
+    /// <remarks>
+    /// Call when the effective configuration changes.
+    /// Repeated notifications can resend unchanged configuration.
+    /// When reporting is enabled and the server accepts effective configuration, the selected
+    /// plugin's <see cref="IProvideEffectiveConfig.GetEffectiveConfig"/> must be able to complete
+    /// while this notification is in progress. Automatic instrumentation also requests current
+    /// configuration when reporting becomes available or the server requests full state.
+    /// Returning from this notification does not confirm delivery to the server.
+    /// Do not rely on delivery during shutdown.
+    /// </remarks>
+    void NotifyEffectiveConfigChanged();
+
+    /// <summary>
     /// Subscribes a listener to messages of the specified type.
     /// </summary>
     /// <typeparam name="T">The OpAMP message type.</typeparam>
