@@ -334,6 +334,12 @@
     <ClInclude Include="stub_generator.h" />
     <ClInclude Include="suspension_guards.h" />
     <ClInclude Include="thread_suspend.h" />
+    <ClInclude Include="thread_utils.h" />
+    <ClInclude Include="function_control_wrapper.h" />
+    <ClInclude Include="tracer_handler_module_method.h" />
+    <ClInclude Include="tracer_integration_definition.h" />
+    <ClInclude Include="tracer_method_rewriter.h" />
+    <ClInclude Include="tracer_rejit_preprocessor.h" />
     <ClInclude Include="tracer_tokens.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="version.h" />
@@ -354,7 +360,6 @@
     <ClCompile Include="integration.cpp" />
     <ClCompile Include="member_resolver.cpp" />
     <ClCompile Include="metadata_builder.cpp" />
-    <ClCompile Include="method_rewriter.cpp" />
     <ClCompile Include="miniutf.cpp" />
     <ClCompile Include="native_symbol_resolver.cpp" />
     <ClCompile Include="netfx_runtime_capture.cpp" />
@@ -373,6 +378,12 @@
     <ClCompile Include="stub_generator.cpp" />
     <ClCompile Include="suspension_guards.cpp" />
     <ClCompile Include="thread_suspend.cpp" />
+    <ClCompile Include="thread_utils.cpp" />
+    <ClCompile Include="function_control_wrapper.cpp" />
+    <ClCompile Include="tracer_handler_module_method.cpp" />
+    <ClCompile Include="tracer_integration_definition.cpp" />
+    <ClCompile Include="tracer_method_rewriter.cpp" />
+    <ClCompile Include="tracer_rejit_preprocessor.cpp" />
     <ClCompile Include="tracer_tokens.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>

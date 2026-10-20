@@ -4,6 +4,26 @@
 
 using namespace trace;
 
+TEST(StringUtilsTest, LongUtf8AndUtf16StringsRoundTrip)
+{
+    for (const auto length : {511, 512, 513, 1000})
+    {
+        const WSTRING ascii(length, WStr('a'));
+        EXPECT_EQ(ToString(ascii), std::string(length, 'a'));
+        EXPECT_EQ(ToWSTRING(std::string(length, 'a')), ascii);
+
+        // UTF-8 needs two bytes per character, so it exceeds the stack buffer before UTF-16 does.
+        const WSTRING wide(length, WStr('\u00E9'));
+        std::string   utf8;
+        for (int i = 0; i < length; i++)
+        {
+            utf8 += "\xC3\xA9";
+        }
+        EXPECT_EQ(ToString(wide), utf8);
+        EXPECT_EQ(ToWSTRING(utf8), wide);
+    }
+}
+
 TEST(StringUtilsTest, ToStringUsesExplicitLength)
 {
     const WCHAR value[] = {WStr('a'), WStr('b'), WStr('c'), WStr('d')};

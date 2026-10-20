@@ -51,4 +51,24 @@ public class CallTargetBubbleUpException : Exception
     {
     }
 #pragma warning restore SYSLIB0051 // Type or member is obsolete
+
+    /// <summary>
+    /// Determines whether an exception or one of its inner exceptions must propagate to the application.
+    /// </summary>
+    /// <param name="exception">The exception to inspect.</param>
+    /// <returns>Whether the exception chain contains a <see cref="CallTargetBubbleUpException"/>.</returns>
+    public static bool IsCallTargetBubbleUpException(Exception? exception)
+    {
+        while (exception is not null)
+        {
+            if (exception is CallTargetBubbleUpException)
+            {
+                return true;
+            }
+
+            exception = exception.InnerException;
+        }
+
+        return false;
+    }
 }

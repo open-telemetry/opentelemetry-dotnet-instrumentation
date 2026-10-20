@@ -7,6 +7,7 @@
 #define OTEL_CLR_PROFILER_INTEGRATION_H_
 
 #include <corhlpr.h>
+#include <corprof.h>
 #include <cstdint>
 #include <iomanip>
 #include <sstream>
@@ -313,48 +314,7 @@ struct MethodReference
     }
 };
 
-struct IntegrationDefinition
-{
-private:
-    std::uint32_t categories = 1;
-    std::uint32_t enabled_categories = 0;
 
-public:
-    const MethodReference target_method;
-    const TypeReference integration_type;
-    const bool is_derived = false;
-    const bool is_interface = false;
-    const bool is_exact_signature_match = true;
-
-    IntegrationDefinition()
-    {
-    }
-
-    IntegrationDefinition(const MethodReference& target_method, const TypeReference& integration_type, bool isDerived,
-                          bool isInterface, bool is_exact_signature_match, std::uint32_t categories = 1,
-                          std::uint32_t enabledCategories = static_cast<std::uint32_t>(-1)) :
-        categories(categories),
-        enabled_categories(categories & enabledCategories),
-        target_method(target_method),
-        integration_type(integration_type),
-        is_derived(isDerived),
-        is_interface(isInterface),
-        is_exact_signature_match(is_exact_signature_match)
-    {
-    }
-
-    inline bool operator==(const IntegrationDefinition& other) const
-    {
-        return target_method == other.target_method && integration_type == other.integration_type &&
-               is_derived == other.is_derived && is_interface == other.is_interface &&
-               is_exact_signature_match == other.is_exact_signature_match && categories == other.categories;
-    }
-
-    inline bool GetEnabled() const
-    {
-        return enabled_categories != 0;
-    }
-};
 
 typedef struct _CallTargetDefinition
 {
@@ -378,6 +338,25 @@ enum class CallTargetKind : std::uint8_t
     Default = 0,
     Derived = 1,
     Interface = 2
+};
+
+struct MethodIdentifier
+{
+    ModuleID moduleId;
+    mdMethodDef methodToken;
+
+    MethodIdentifier() : moduleId(0), methodToken(0) {}
+    MethodIdentifier(ModuleID moduleId, mdMethodDef methodToken) : moduleId(moduleId), methodToken(methodToken) {}
+
+    bool operator<(const MethodIdentifier& rhs) const
+    {
+        return moduleId < rhs.moduleId || (moduleId == rhs.moduleId && methodToken < rhs.methodToken);
+    }
+
+    bool operator==(const MethodIdentifier& other) const
+    {
+        return moduleId == other.moduleId && methodToken == other.methodToken;
+    }
 };
 
 typedef struct _CallTargetDefinition2
@@ -419,9 +398,6 @@ namespace
 
 } // namespace
 
-    std::vector<IntegrationDefinition> GetIntegrationsFromTraceMethodsConfiguration(
-    const TypeReference& integration_type,
-    const WSTRING& configuration_string);
 
 } // namespace trace
 
