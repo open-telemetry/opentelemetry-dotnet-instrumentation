@@ -41,6 +41,12 @@ internal sealed class OpAmpClientProxy : IOpAmpReportSender, IDisposable
         _client.SendFullStateReport(report);
     }
 
+    public void SendRemoteConfigStatus(RemoteConfigStatusReport statusReport)
+    {
+        using var suppressInstrumentation = SuppressInstrumentationScope.Begin();
+        _client.SendRemoteConfigStatus(statusReport);
+    }
+
     public void Subscribe<T>(IOpAmpListener<T> listener)
         where T : OpAmpMessage
     {

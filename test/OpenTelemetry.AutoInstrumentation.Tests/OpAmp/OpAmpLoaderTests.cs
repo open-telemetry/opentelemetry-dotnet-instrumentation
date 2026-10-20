@@ -57,6 +57,43 @@ public class OpAmpLoaderTests
     }
 
     [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task RemoteStatusReportingRequiresOptInAndPreservesRemoteConfigAcceptance(bool reportStatus, bool acceptConfig)
+    {
+        // Capability masks follow AgentCapabilities in opamp.proto.
+        const ulong acceptsRemoteConfigCapability = 0x00000002;
+        const ulong reportsRemoteConfigCapability = 0x00001000;
+        var pluginSettings = new PluginsSettings();
+        pluginSettings.Plugins.Add(typeof(RemoteConfigStatusOpAmpPlugin).AssemblyQualifiedName!);
+        var pluginManager = new PluginManager(pluginSettings);
+        var plugin = Assert.IsType<RemoteConfigStatusOpAmpPlugin>(Assert.Single(pluginManager.Plugins).Instance);
+        plugin.ConfigureOptionsAction = () =>
+        {
+            plugin.ConfiguredSettings!.RemoteConfiguration.ReportsRemoteConfigStatus = reportStatus;
+            plugin.ConfiguredSettings.RemoteConfiguration.AcceptsRemoteConfig = acceptConfig;
+        };
+
+        try
+        {
+            _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
+            pluginManager.Initialized();
+            _loader.StartOpAmpClient();
+            await AssertCompletes(plugin.InitialRequestBody);
+
+            var capabilities = ReadAgentCapabilities(await plugin.InitialRequestBody.ConfigureAwait(true));
+            Assert.Equal(reportStatus, (capabilities & reportsRemoteConfigCapability) != 0);
+            Assert.Equal(acceptConfig, (capabilities & acceptsRemoteConfigCapability) != 0);
+        }
+        finally
+        {
+            _loader.StopOpAmpClientIfRunning();
+        }
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task ShutdownReturnsDuringConfigurationAndDiscardsLateClient(bool blockOptions)
@@ -270,6 +307,24 @@ public class OpAmpLoaderTests
         await AssertCompletes(plugin.HandlerDisposed);
     }
 
+    private static ulong ReadAgentCapabilities(byte[] requestBody)
+    {
+        using var input = new CodedInputStream(requestBody);
+        uint tag;
+        while ((tag = input.ReadTag()) != 0)
+        {
+            // AgentToServer.capabilities is field 4, encoded as a uint64.
+            if (tag == WireFormat.MakeTag(4, WireFormat.WireType.Varint))
+            {
+                return input.ReadUInt64();
+            }
+
+            input.SkipLastField();
+        }
+
+        throw new InvalidOperationException("The initial OpAMP request did not include capabilities.");
+    }
+
     private static async Task AssertCompletes(Task task)
     {
         using var timeoutCancellation = new CancellationTokenSource();
@@ -296,7 +351,7 @@ public class OpAmpLoaderTests
 }
 
 #pragma warning disable CA1515 // Consider making public types internal. Needed for plugin loading.
-public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
+public class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
 {
     private static readonly Guid TestInstanceUid = Guid.NewGuid();
     private static readonly byte[] ServerCapabilitiesResponse = CreateServerCapabilitiesResponse(TestInstanceUid);
@@ -304,6 +359,7 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
     private readonly ConcurrentQueue<string> _events = new();
     private readonly TaskCompletionSource<bool> _afterStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TaskCompletionSource<bool> _handlerDisposed = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly TaskCompletionSource<byte[]> _initialRequestBody = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     internal Task AfterStarted => _afterStarted.Task;
 
@@ -321,6 +377,8 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
 
     internal OpAmpClientSettings? ConfiguredSettings { get; private set; }
 
+    internal Task<byte[]> InitialRequestBody => _initialRequestBody.Task;
+
     internal string[] Events => [.. _events];
 
     public void Initializing()
@@ -330,9 +388,6 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
     public void Initialized()
     {
         _events.Enqueue(nameof(Initialized));
-
-        ConfiguredSettings!.EffectiveConfigurationReporting.EnableReporting = true;
-        ConfiguredSettings.RemoteConfiguration.ReportsRemoteConfigStatus = true;
     }
 
     public void ConfigureOpAmpOptions(OpAmpClientSettings settings)
@@ -397,13 +452,19 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
 
     private sealed class RecordingHttpMessageHandler(RecordingOpAmpPlugin plugin) : HttpMessageHandler
     {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+#if NET
+            var requestBody = await request.Content!.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+#else
+            var requestBody = await request.Content!.ReadAsByteArrayAsync().ConfigureAwait(false);
+#endif
+            plugin._initialRequestBody.TrySetResult(requestBody);
+            return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new ByteArrayContent(ServerCapabilitiesResponse),
-            });
+            };
         }
 
         protected override void Dispose(bool disposing)
@@ -419,6 +480,14 @@ public sealed class RecordingOpAmpPlugin : IPlugin, IOpAmpPlugin
                 plugin._handlerDisposed.TrySetResult(true);
             }
         }
+    }
+}
+
+public sealed class RemoteConfigStatusOpAmpPlugin : RecordingOpAmpPlugin, IProvideRemoteConfigStatus
+{
+    public RemoteConfigStatusReport? GetRemoteConfigStatus()
+    {
+        return null;
     }
 }
 

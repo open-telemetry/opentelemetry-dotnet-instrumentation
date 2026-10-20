@@ -9,5 +9,7 @@ internal interface IOpAmpReportSender
 {
     void SendEffectiveConfig(IReadOnlyCollection<EffectiveConfigFile> files);
 
+    void SendRemoteConfigStatus(RemoteConfigStatusReport statusReport);
+
     void SendFullStateReport(FullStateReport report);
 }

@@ -21,6 +21,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   See the
   [plugin documentation](./docs/plugins.md#effective-configuration-reporting).
 
+- Added experimental OpAMP remote configuration status reporting for plugins through
+  `IProvideRemoteConfigStatus` and `IOpAmpClient.NotifyRemoteConfigStatusChanged()`.
+  Plugins can also opt into receiving remote configuration offers. See the
+  [plugin documentation](./docs/plugins.md#remote-configuration-status-reporting).
+
 ### Changed
 
 - **Breaking change:** `IContinuousProfilerExporter.ExportThreadSamples` now

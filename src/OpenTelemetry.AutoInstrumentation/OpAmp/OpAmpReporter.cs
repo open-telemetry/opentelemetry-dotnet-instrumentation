@@ -12,22 +12,29 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("OpAmp");
     private readonly IProvideEffectiveConfig? _effectiveConfigProvider;
+    private readonly IProvideRemoteConfigStatus? _remoteConfigStatusProvider;
     private readonly IOpAmpReportSender _reportSender;
     private readonly object _reportLock = new();
 
     // Protected by _reportLock, together with configuration reads and submissions.
-    private bool _serverAcceptsEffectiveConfig;
+    private ServerSentCapabilities _serverCapabilities;
 
     // Shutdown sets this flag without waiting for the reporting lock.
     private volatile bool _stopped;
 
-    public OpAmpReporter(IProvideEffectiveConfig? effectiveConfigProvider, IOpAmpReportSender reportSender)
+    public OpAmpReporter(
+        IProvideEffectiveConfig? effectiveConfigProvider,
+        IProvideRemoteConfigStatus? remoteConfigStatusProvider,
+        IOpAmpReportSender reportSender)
     {
         _effectiveConfigProvider = effectiveConfigProvider;
+        _remoteConfigStatusProvider = remoteConfigStatusProvider;
         _reportSender = reportSender;
     }
 
     public bool EffectiveConfigReportingEnabled => _effectiveConfigProvider != null;
+
+    public bool RemoteConfigStatusReportingEnabled => _remoteConfigStatusProvider != null;
 
     public void NotifyEffectiveConfigChanged()
     {
@@ -38,7 +45,20 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
 
         lock (_reportLock)
         {
-            Report(fullState: false);
+            ReportEffectiveConfig();
+        }
+    }
+
+    public void NotifyRemoteConfigStatusChanged()
+    {
+        if (_stopped || !RemoteConfigStatusReportingEnabled)
+        {
+            return;
+        }
+
+        lock (_reportLock)
+        {
+            ReportRemoteConfigStatus();
         }
     }
 
@@ -70,16 +90,20 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
                 return;
             }
 
-            var acceptsEffectiveConfig = (capabilities & ServerSentCapabilities.AcceptsEffectiveConfig) != 0;
-            if (acceptsEffectiveConfig == _serverAcceptsEffectiveConfig)
+            var newlyEnabled = capabilities & ~_serverCapabilities;
+            // Each nonzero advertisement replaces the previous set, including revoked capabilities.
+            _serverCapabilities = capabilities;
+
+            if ((newlyEnabled & ServerSentCapabilities.AcceptsEffectiveConfig) != 0)
             {
-                return;
+                ReportEffectiveConfig();
             }
 
-            _serverAcceptsEffectiveConfig = acceptsEffectiveConfig;
-            if (_serverAcceptsEffectiveConfig)
+            // Report any status already available; null is omitted.
+            // The plugin notifies us as configuration application progresses.
+            if ((newlyEnabled & ServerSentCapabilities.OffersRemoteConfig) != 0)
             {
-                Report(fullState: false);
+                ReportRemoteConfigStatus();
             }
         }
     }
@@ -93,7 +117,7 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
 
         lock (_reportLock)
         {
-            Report(fullState: true);
+            ReportFullStateCore();
         }
     }
 
@@ -104,55 +128,107 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
     }
 
     // Called under _reportLock to order capability changes with local SDK submission.
-    private void Report(bool fullState)
+    private void ReportEffectiveConfig()
     {
-        if (_stopped || (!fullState && (!EffectiveConfigReportingEnabled || !_serverAcceptsEffectiveConfig)))
+        var files = ReadEffectiveConfig();
+        if (_stopped || files == null)
         {
             return;
         }
 
         try
         {
-            EffectiveConfigFile[]? files = null;
-            if (_effectiveConfigProvider != null && _serverAcceptsEffectiveConfig)
-            {
-                try
-                {
-                    // Copy the plugin's buffers so later mutations cannot change the queued report.
-                    files = _effectiveConfigProvider.GetEffectiveConfig()
-                        .Select(file => new EffectiveConfigFile(file.Content.ToArray(), file.ContentType, file.FileName))
-                        .ToArray();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error(ex, "An error occurred while preparing effective configuration for OpAmp reporting.");
-                    if (!fullState)
-                    {
-                        return;
-                    }
-
-                    // Omit unavailable configuration so independent state can still be reported.
-                }
-            }
-
-            if (_stopped)
-            {
-                return;
-            }
-
             // Shutdown may begin after this check; an admitted submission is allowed to finish.
-            if (fullState)
-            {
-                _reportSender.SendFullStateReport(new FullStateReport { EffectiveConfigFiles = files });
-            }
-            else
-            {
-                _reportSender.SendEffectiveConfig(files!);
-            }
+            _reportSender.SendEffectiveConfig(files);
         }
         catch (Exception ex)
         {
             Logger.Error(ex, "An error occurred while reporting OpAmp state.");
+        }
+    }
+
+    private void ReportFullStateCore()
+    {
+        var files = ReadEffectiveConfig();
+        var remoteConfigStatus = ReadRemoteConfigStatus();
+        if (_stopped)
+        {
+            return;
+        }
+
+        try
+        {
+            _reportSender.SendFullStateReport(new FullStateReport
+            {
+                EffectiveConfigFiles = files,
+                RemoteConfigStatus = remoteConfigStatus
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "An error occurred while reporting OpAmp state.");
+        }
+    }
+
+    // Called under _reportLock
+    private void ReportRemoteConfigStatus()
+    {
+        var report = ReadRemoteConfigStatus();
+        if (_stopped || report == null)
+        {
+            return;
+        }
+
+        try
+        {
+            _reportSender.SendRemoteConfigStatus(report);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "An error occurred while reporting OpAmp remote configuration status.");
+        }
+    }
+
+    private EffectiveConfigFile[]? ReadEffectiveConfig()
+    {
+        if (_stopped || _effectiveConfigProvider == null ||
+            (_serverCapabilities & ServerSentCapabilities.AcceptsEffectiveConfig) == 0)
+        {
+            return null;
+        }
+
+        try
+        {
+            // Copy the plugin's buffers so later mutations cannot change the queued report.
+            return _effectiveConfigProvider.GetEffectiveConfig()
+                .Select(file => new EffectiveConfigFile(file.Content.ToArray(), file.ContentType, file.FileName))
+                .ToArray();
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "An error occurred while preparing effective configuration for OpAmp reporting.");
+            return null;
+        }
+    }
+
+    private RemoteConfigStatusReport? ReadRemoteConfigStatus()
+    {
+        // Status describes previously received configuration, regardless of current server offers.
+        if (_stopped || _remoteConfigStatusProvider == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            var report = _remoteConfigStatusProvider.GetRemoteConfigStatus();
+            // Copy the hash so later mutations cannot change the queued report.
+            return report == null ? null : new RemoteConfigStatusReport(report.LastRemoteConfigHash.Span, report.Status, report.ErrorMessage);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "An error occurred while preparing remote configuration status for OpAmp reporting.");
+            return null;
         }
     }
 }
