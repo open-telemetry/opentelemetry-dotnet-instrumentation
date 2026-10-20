@@ -11,8 +11,6 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 /// </summary>
 internal class EnvironmentInitializer
 {
-    private const string VariablePrefix = "OTEL_";
-
     public static void Initialize(NameValueCollection nameValueCollection)
     {
         foreach (var setting in nameValueCollection.AllKeys)
@@ -22,16 +20,11 @@ internal class EnvironmentInitializer
                 continue;
             }
 
-            if (!setting.StartsWith(VariablePrefix, StringComparison.Ordinal))
+            if (setting != ConfigurationKeys.FileBasedConfiguration.Enabled
+                && setting != ConfigurationKeys.FileBasedConfiguration.FileName)
             {
-                // not OTEL_ setting
-                continue;
-            }
-
-            if (setting == ConfigurationKeys.ServiceName
-                || setting == ConfigurationKeys.ResourceAttributes)
-            {
-                // don't copy resource attributes incl. service name to env vars
+                // YAML selection is process-level. Managed settings are read from
+                // the current AppDomain's appSettings instead of being promoted.
                 continue;
             }
 

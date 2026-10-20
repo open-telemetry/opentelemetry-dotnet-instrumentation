@@ -707,33 +707,26 @@ public sealed class SettingsTests
     }
 
     [Fact]
-    internal void ResourceSettings_LoadEnvVar_AppSettingsSourceTakesPriorityOverEnvVarSource()
+    internal void ResourceSettings_LoadEnvVar_EnvironmentSourceTakesPriorityOverAppSettingsSource()
     {
         const string envVarValue = "service-name-from-env-var";
         const string appSettingsValue = "service-name-from-app-settings";
 
-        try
-        {
-            Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, envVarValue);
-            var configuration = new Configuration(
-                false,
-                new NameValueConfigurationSource(false, new NameValueCollection
-                {
-                    { ConfigurationKeys.ServiceName, appSettingsValue }
-                }),
-                new EnvironmentConfigurationSource(false));
-            var settings = new ResourceSettings();
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?> { { ConfigurationKeys.ServiceName, envVarValue } });
+        var configuration = new Configuration(
+            false,
+            new EnvironmentConfigurationSource(false),
+            new NameValueConfigurationSource(false, new NameValueCollection
+            {
+                { ConfigurationKeys.ServiceName, appSettingsValue }
+            }));
+        var settings = new ResourceSettings();
 
-            settings.LoadEnvVar(configuration);
+        settings.LoadEnvVar(configuration);
 
-            var resource = Assert.Single(settings.Resources);
-            Assert.Equal(Constants.ResourceAttributes.AttributeServiceName, resource.Key);
-            Assert.Equal(appSettingsValue, resource.Value);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, null);
-        }
+        var resource = Assert.Single(settings.Resources);
+        Assert.Equal(Constants.ResourceAttributes.AttributeServiceName, resource.Key);
+        Assert.Equal(envVarValue, resource.Value);
     }
 
     [Fact]
@@ -810,10 +803,66 @@ public sealed class SettingsTests
     }
 
     [Fact]
-    internal void FromDefaultSources_ResourceSettingsMergeAppSettingsAfterEnvironmentVariables()
+    internal void FromDefaultSources_NonResourceSettingsUseAppSettingsWhenEnvironmentIsAbsent()
+    {
+        using var overrideScope = OverrideAppSettings((ConfigurationKeys.Traces.Exporter, "console"));
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { ConfigurationKeys.Traces.Exporter, null }
+        });
+
+        var settings = Settings.FromDefaultSources<TracerSettings>(false);
+
+        Assert.Equal([TracesExporter.Console], settings.TracesExporters);
+        Assert.Null(Environment.GetEnvironmentVariable(ConfigurationKeys.Traces.Exporter));
+    }
+
+    [Fact]
+    internal void FromDefaultSources_ProcessSettingsIgnoreAppSettings()
     {
         using var overrideScope = OverrideAppSettings(
-            (ConfigurationKeys.ResourceAttributes, "deployment.environment=staging"),
+            (ConfigurationKeys.FailFast, "true"),
+            (ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled, "true"));
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { ConfigurationKeys.FailFast, null },
+            { ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled, null }
+        });
+
+        Assert.False(Settings.FromDefaultSources<FailFastSettings>(false).FailFast);
+        Assert.False(Settings.FromDefaultSources<TracerSettings>(false).InstrumentationOptions.SqlClientNetFxIlRewriteEnabled);
+    }
+
+    [Fact]
+    internal void FromDefaultSources_OtlpExporterUsesGenericAppSettings()
+    {
+        using var overrideScope = OverrideAppSettings(
+            (AutoOtlpDefinitions.DefaultEndpointEnvVarName, "http://collector:4318/base"),
+            (AutoOtlpDefinitions.DefaultHeadersEnvVarName, "x-test=value"),
+            (AutoOtlpDefinitions.DefaultTimeoutEnvVarName, "1234"));
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { AutoOtlpDefinitions.DefaultEndpointEnvVarName, null },
+            { AutoOtlpDefinitions.DefaultHeadersEnvVarName, null },
+            { AutoOtlpDefinitions.DefaultTimeoutEnvVarName, null },
+            { AutoOtlpDefinitions.TracesEndpointEnvVarName, null },
+            { AutoOtlpDefinitions.TracesHeadersEnvVarName, null },
+            { AutoOtlpDefinitions.TracesTimeoutEnvVarName, null }
+        });
+
+        var settings = Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
+
+        Assert.NotNull(settings);
+        Assert.Equal("http://collector:4318/base/v1/traces", settings.Endpoint?.AbsoluteUri);
+        Assert.Equal("x-test=value", settings.Headers);
+        Assert.Equal(1234, settings.TimeoutMilliseconds);
+    }
+
+    [Fact]
+    internal void FromDefaultSources_ResourceSettingsSelectEnvironmentAttributeList()
+    {
+        using var overrideScope = OverrideAppSettings(
+            (ConfigurationKeys.ResourceAttributes, "deployment.environment=staging,app.only=yes"),
             (ConfigurationKeys.ServiceName, "app-settings-service"));
         using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
@@ -824,9 +873,10 @@ public sealed class SettingsTests
         var settings = Settings.FromDefaultSources<ResourceSettings>(false);
         var resources = settings.Resources.ToDictionary(kv => kv.Key, kv => kv.Value);
 
-        Assert.Equal("staging", resources["deployment.environment"]);
+        Assert.Equal("prod", resources["deployment.environment"]);
         Assert.Equal("checkout", resources["service.namespace"]);
-        Assert.Equal("app-settings-service", resources[Constants.ResourceAttributes.AttributeServiceName]);
+        Assert.Equal("env-service", resources[Constants.ResourceAttributes.AttributeServiceName]);
+        Assert.DoesNotContain("app.only", resources.Keys);
         Assert.Equal(3, resources.Count);
     }
 
@@ -961,6 +1011,7 @@ resource:
 #if NETFRAMEWORK
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled, null);
 #endif
 
 #if NET
@@ -973,7 +1024,6 @@ resource:
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled, null);
 
         // Cleanup OTLP env vars
         foreach (var envVar in GetAllOtlpEnvVarNames())

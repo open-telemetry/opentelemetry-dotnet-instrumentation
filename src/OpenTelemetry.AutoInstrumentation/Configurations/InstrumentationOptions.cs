@@ -16,7 +16,9 @@ internal class InstrumentationOptions
 #if NETFRAMEWORK
         AspNetInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
         AspNetInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
-        SqlClientNetFxIlRewriteEnabled = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled) ?? false;
+        // This switch changes the process-wide native profiler behavior.
+        SqlClientNetFxIlRewriteEnabled = new Configuration(configuration.FailFast, new EnvironmentConfigurationSource(configuration.FailFast))
+            .GetBool(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled) ?? false;
         SqlClientNetFxExperimentalContextPropagation = GetSqlClientNetFxExperimentalContextPropagation(configuration);
 #endif
 #if NET

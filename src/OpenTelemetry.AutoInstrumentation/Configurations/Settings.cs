@@ -35,12 +35,15 @@ internal abstract class Settings
             sources.Add(new EnvironmentConfigurationSource(failFast));
 
 #if NETFRAMEWORK
-            sources.Add(new AppSettingsConfigurationSource(failFast, ConfigurationManager.AppSettings));
+            if (typeof(T) != typeof(FailFastSettings))
+            {
+                sources.Add(new AppSettingsConfigurationSource(failFast, ConfigurationManager.AppSettings));
+            }
 #endif
 
             var configuration = new Configuration(failFast, [.. sources]);
             var settings = new T();
-            settings.LoadFromDefaultSources(configuration, failFast);
+            settings.LoadEnvVar(configuration);
             return settings;
         }
     }
@@ -68,11 +71,6 @@ internal abstract class Settings
     /// </summary>
     /// <param name="configuration">The <see cref="YamlConfiguration"/> to use when retrieving configuration values.</param>
     protected abstract void OnLoadFile(YamlConfiguration configuration);
-
-    protected virtual void LoadFromDefaultSources(Configuration configuration, bool failFast)
-    {
-        LoadEnvVar(configuration);
-    }
 
     private static YamlConfiguration ReadYamlConfiguration()
     {

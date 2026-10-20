@@ -186,7 +186,7 @@ public class AspNetTests(ITestOutputHelper output)
         // on the firewall.
         using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
-        collector.ResourceExpector.Expect("service.name", "my-service-name"); // resource-specific Web.config precedence on .NET Framework
+        collector.ResourceExpector.Expect("service.name", ServiceName); // process environment takes precedence over Web.config
         collector.ResourceExpector.Expect("deployment.environment.name", "test"); // this resource attribute is set via Web.config
         collector.ResourceExpector.Matches("service.instance.id", "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"); // automatically generated
 

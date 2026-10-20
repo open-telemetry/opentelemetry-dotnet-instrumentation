@@ -282,11 +282,10 @@ release.
 
 ### Fixed
 
-- On .NET Framework, `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES`
-  from `App.config`/`Web.config` are no longer promoted to process
-  environment variables. This change allows services in a shared IIS
-  Application Pool to have service-specific resource attributes instead
-  of inheriting the same values for all services.
+- On .NET Framework, managed `OTEL_*` settings from `App.config`/`Web.config`
+  are read within each AppDomain instead of being promoted to process
+  environment variables. Environment variables take precedence over local
+  settings, including resource attributes.
 - Suppress instrumentation while starting the OpAMP client to prevent internal
   OpAMP transport calls from being collected as traces.
 

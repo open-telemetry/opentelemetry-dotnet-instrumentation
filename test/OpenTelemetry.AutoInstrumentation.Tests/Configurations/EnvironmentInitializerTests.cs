@@ -10,14 +10,13 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 [Collection("Non-Parallel Collection")]
 public class EnvironmentInitializerTests
 {
-    private const string OtelResourceAttributesVariableName = "OTEL_RESOURCE_ATTRIBUTES";
-    private const string OtelServiceVariableName = "OTEL_SERVICE_NAME";
-    private const string OtelVariableName = "OTEL_SETTING";
+    private const string OtelVariableName = ConfigurationKeys.FileBasedConfiguration.FileName;
+    private const string ManagedVariableName = "OTEL_TRACES_EXPORTER";
     private const string NonOtelVariableName = "OTHER_SETTING";
     private const string SomeValue = "val";
 
     [Fact]
-    public void SetsOTelEnvironmentVariable_WhenItWasEmpty()
+    public void SetsYamlSelectionEnvironmentVariable_WhenItWasEmpty()
     {
         using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
@@ -34,7 +33,7 @@ public class EnvironmentInitializerTests
     }
 
     [Fact]
-    public void Noop_WhenEnvironmentVariableWasAlreadySet()
+    public void Noop_WhenYamlSelectionEnvironmentVariableWasAlreadySet()
     {
         using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
@@ -68,24 +67,21 @@ public class EnvironmentInitializerTests
     }
 
     [Theory]
-    [InlineData(OtelServiceVariableName)]
-    [InlineData(OtelResourceAttributesVariableName)]
-    public void Noop_WhenSettingResources(string variableName)
+    [InlineData("OTEL_SERVICE_NAME")]
+    [InlineData("OTEL_RESOURCE_ATTRIBUTES")]
+    [InlineData(ManagedVariableName)]
+    public void Noop_WhenSettingIsManaged(string variableName)
     {
-        try
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
-            Environment.SetEnvironmentVariable(variableName, null);
-            EnvironmentInitializer.Initialize(new NameValueCollection
-            {
-                { variableName, SomeValue }
-            });
-            var actual = Environment.GetEnvironmentVariable(variableName);
+            { variableName, null }
+        });
 
-            Assert.True(string.IsNullOrEmpty(actual), $"initializer should ignore {variableName} resource variable");
-        }
-        finally
+        EnvironmentInitializer.Initialize(new NameValueCollection
         {
-            Environment.SetEnvironmentVariable(variableName, null);
-        }
+            { variableName, SomeValue }
+        });
+
+        Assert.Null(Environment.GetEnvironmentVariable(variableName));
     }
 }
