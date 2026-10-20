@@ -22,6 +22,11 @@ internal sealed class PluginOpAmpClient : IOpAmpClient
         _manager.NotifyEffectiveConfigChanged();
     }
 
+    public void NotifyRemoteConfigStatusChanged()
+    {
+        _manager.NotifyRemoteConfigStatusChanged();
+    }
+
     public void Subscribe<T>(IOpAmpListener<T> listener)
         where T : OpAmpMessage
     {
