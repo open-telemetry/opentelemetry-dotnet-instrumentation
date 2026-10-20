@@ -223,6 +223,7 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         thread_utils.cpp
         runtime_sampler_configuration.cpp
         runtime_sampler_service.cpp
+        runtime_async.cpp
         environment_variables_util.cpp
         stack_capturer.cpp
         stub_generator.cpp

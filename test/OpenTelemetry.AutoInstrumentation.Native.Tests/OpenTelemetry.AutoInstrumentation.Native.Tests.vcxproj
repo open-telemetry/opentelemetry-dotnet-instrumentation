@@ -102,6 +102,7 @@
     </ClCompile>
     <ClCompile Include="runtime_sampler_configuration_test.cpp" />
     <ClCompile Include="runtime_sampler_service_test.cpp" />
+    <ClCompile Include="runtime_async_test.cpp" />
     <ClCompile Include="stack_capture_shutdown_test.cpp" />
     <ClCompile Include="startup_hook_test.cpp" />
     <ClCompile Include="string_utils_test.cpp" />

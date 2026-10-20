@@ -140,7 +140,8 @@ HRESULT StubGenerator::ModifyProcessStartupHooks(const ModuleID module_id, mdMet
             mdToken      token = 0;
             TypeInfo     typeInfo{};
             WSTRING      methodName = WStr("ProcessStartupHooks");
-            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature(),
+                                miIL | miManaged);
             Logger::Info(m_profiler->GetILCodes("*** ModifyProcessStartupHooks: Modified Code: ", &rewriter, caller,
                                                 metadata_import));
         }
@@ -434,7 +435,8 @@ HRESULT StubGenerator::GenerateHookFixup(const ModuleID module_id,
             mdToken      token = 0;
             TypeInfo     typeInfo{};
             WSTRING      methodName = WStr("__OTPatchStartupHookValue__");
-            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature(),
+                                miIL | miManaged);
             Logger::Info(this->m_profiler->GetILCodes("*** GenerateHookFixup: Modified Code: ", &rewriter, caller,
                                                       metadata_import));
         }

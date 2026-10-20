@@ -136,6 +136,8 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
     std::vector<BYTE> final_signature_bytes;
     std::vector<BYTE> method_spec_signature;
 
+    DWORD method_impl_flags = 0;
+
     HRESULT    hr         = E_FAIL;
     const auto token_type = TypeFromToken(token);
     switch (token_type)
@@ -146,8 +148,8 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
             break;
         case mdtMethodDef:
             hr = metadata_import->GetMemberProps(token, &parent_token, function_name, kNameMaxSize, &function_name_len,
-                                                 nullptr, &raw_signature, &raw_signature_len, nullptr, nullptr, nullptr,
-                                                 nullptr, nullptr);
+                                                 nullptr, &raw_signature, &raw_signature_len, nullptr,
+                                                 &method_impl_flags, nullptr, nullptr, nullptr);
             break;
         case mdtMethodSpec:
         {
@@ -164,6 +166,7 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
             function_name_len = DWORD(generic_info.name.length() + 1);
             method_spec_token = token;
             method_def_token  = generic_info.id;
+            method_impl_flags = generic_info.method_impl_flags;
         }
         break;
         default:
@@ -187,13 +190,14 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
                 MethodSignature(final_signature_bytes),
                 MethodSignature(method_spec_signature),
                 method_def_token,
-                FunctionMethodSignature(raw_signature, raw_signature_len)};
+                FunctionMethodSignature(raw_signature, raw_signature_len),
+                method_impl_flags};
     }
 
     final_signature_bytes = GetSignatureByteRepresentation(raw_signature_len, raw_signature);
 
     return {token, WSTRING(function_name), type_info, MethodSignature(final_signature_bytes),
-            FunctionMethodSignature(raw_signature, raw_signature_len)};
+            FunctionMethodSignature(raw_signature, raw_signature_len), method_impl_flags};
 }
 
 ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id)

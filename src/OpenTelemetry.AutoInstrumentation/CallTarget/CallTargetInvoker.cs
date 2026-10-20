@@ -310,6 +310,52 @@ public static class CallTargetInvoker
         return new CallTargetReturn<TReturn?>(returnValue);
     }
 
+#if NET
+    /// <summary>
+    /// End Method invoker for a runtime-async method declaring a non-generic Task or ValueTask.
+    /// </summary>
+    /// <typeparam name="TIntegration">Integration type</typeparam>
+    /// <typeparam name="TTarget">Target type</typeparam>
+    /// <typeparam name="TDeclaredReturn">The Task or ValueTask declared by the target</typeparam>
+    /// <param name="instance">Instance value</param>
+    /// <param name="exception">Exception value</param>
+    /// <param name="state">CallTarget state</param>
+    /// <returns>CallTarget return structure</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static CallTargetReturn EndMethodRuntimeAsync<TIntegration, TTarget, TDeclaredReturn>(TTarget? instance, Exception? exception, in CallTargetState state)
+    {
+        if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
+        {
+            return RuntimeAsyncEndMethodHandler<TIntegration, TTarget, TDeclaredReturn>.Invoke(instance, exception, in state);
+        }
+
+        return CallTargetReturn.GetDefault();
+    }
+
+    /// <summary>
+    /// End Method invoker for a runtime-async method declaring Task&lt;T&gt; or ValueTask&lt;T&gt;.
+    /// </summary>
+    /// <typeparam name="TIntegration">Integration type</typeparam>
+    /// <typeparam name="TTarget">Target type</typeparam>
+    /// <typeparam name="TReturn">The unwrapped return type produced by the target body</typeparam>
+    /// <typeparam name="TDeclaredReturn">The Task&lt;T&gt; or ValueTask&lt;T&gt; declared by the target</typeparam>
+    /// <param name="instance">Instance value</param>
+    /// <param name="returnValue">Unwrapped return value</param>
+    /// <param name="exception">Exception value</param>
+    /// <param name="state">CallTarget state</param>
+    /// <returns>CallTarget return structure</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static CallTargetReturn<TReturn?> EndMethodRuntimeAsync<TIntegration, TTarget, TReturn, TDeclaredReturn>(TTarget? instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
+    {
+        if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
+        {
+            return RuntimeAsyncEndMethodHandler<TIntegration, TTarget, TReturn, TDeclaredReturn>.Invoke(instance, returnValue, exception, in state);
+        }
+
+        return new CallTargetReturn<TReturn?>(returnValue);
+    }
+#endif
+
     /// <summary>
     /// Log integration exception
     /// </summary>

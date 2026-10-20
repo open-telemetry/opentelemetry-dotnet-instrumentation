@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Added bytecode instrumentation support for methods compiled with the experimental
+  .NET runtime-async feature.
+
 ### Changed
 
 #### Dependency updates
