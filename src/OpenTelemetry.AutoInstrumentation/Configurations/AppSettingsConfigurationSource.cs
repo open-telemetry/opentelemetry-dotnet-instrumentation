@@ -11,6 +11,16 @@ internal sealed class AppSettingsConfigurationSource(
     NameValueCollection appSettings)
     : StringConfigurationSource(failFast)
 {
-    public override string? GetString(string key) => appSettings[key];
+    public override string? GetString(string key)
+    {
+        // These settings affect native, process-wide behavior.
+        if (key == ConfigurationKeys.FailFast
+            || key == ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled)
+        {
+            return null;
+        }
+
+        return appSettings[key];
+    }
 }
 #endif

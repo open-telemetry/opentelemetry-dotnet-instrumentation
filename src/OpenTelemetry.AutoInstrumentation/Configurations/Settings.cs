@@ -35,10 +35,7 @@ internal abstract class Settings
             sources.Add(new EnvironmentConfigurationSource(failFast));
 
 #if NETFRAMEWORK
-            if (typeof(T) != typeof(FailFastSettings))
-            {
-                sources.Add(new AppSettingsConfigurationSource(failFast, ConfigurationManager.AppSettings));
-            }
+            sources.Add(new AppSettingsConfigurationSource(failFast, ConfigurationManager.AppSettings));
 #endif
 
             var configuration = new Configuration(failFast, [.. sources]);
