@@ -29,6 +29,7 @@ public class ParserMetricsTests
         Assert.NotNull(firstExporter);
         Assert.Equal("http://localhost:4318/v1/metrics", firstExporter!.Endpoint);
         Assert.Equal(10000, firstExporter.Timeout);
+        Assert.Equal("gzip", firstExporter.Compression);
         Assert.Equal("cumulative", firstExporter.TemporalityPreference);
 
         var secondReader = config.MeterProvider.Readers[1].Periodic;
@@ -38,6 +39,7 @@ public class ParserMetricsTests
         Assert.NotNull(grpcExporter);
         Assert.Equal("http://localhost:4317", grpcExporter!.Endpoint);
         Assert.Equal(8000, grpcExporter.Timeout);
+        Assert.Equal("none", grpcExporter.Compression);
         Assert.Equal("delta", grpcExporter.TemporalityPreference);
 
         var consoleReader = config.MeterProvider.Readers[2].Periodic;

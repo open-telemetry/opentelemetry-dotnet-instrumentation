@@ -13,7 +13,7 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        var postgresPort = GetPostgresPort(args);
+        var postgresPort = ArgumentHelper.GetArgument(args, "--postgres", "5432");
         var connectionString = $"Server=127.0.0.1;Port={postgresPort};User ID=postgres;Database=postgres";
 
         var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
@@ -55,15 +55,5 @@ internal static class Program
         {
             await connection.DisposeAsync().ConfigureAwait(false);
         }
-    }
-
-    private static string GetPostgresPort(string[] args)
-    {
-        if (args.Length > 1)
-        {
-            return args[1];
-        }
-
-        return "5432";
     }
 }

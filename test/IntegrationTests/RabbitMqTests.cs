@@ -64,7 +64,7 @@ public class RabbitMqTests : TestHelper
     {
         var producerSpans = collected.Where(span => span.Span.Kind == Span.Types.SpanKind.Producer).ToList();
 
-        Assert.Equal(3, producerSpans.Count);
+        Assert.Equal(5, producerSpans.Count);
 
         return producerSpans.All(span => VerifySingleMatchingConsumerSpan(span));
 
@@ -116,11 +116,17 @@ public class RabbitMqTests : TestHelper
         collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateProducerSpan(span));
         collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateProducerSpan(span));
         collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateProducerSpan(span));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateProducerSpan(span));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateProducerSpan(span));
         collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateConsumerSpan(span, "receive"));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateConsumerSpan(span, "deliver"));
+        collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateConsumerSpan(span, "deliver"));
         collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateConsumerSpan(span, "deliver"));
         collector.Expect("OpenTelemetry.AutoInstrumentation.RabbitMq", VersionHelper.AutoInstrumentationVersion, span => ValidateConsumerSpan(span, "deliver"));
 
         collector.ExpectCollected(collected => ValidatePropagation(collected));
+        collector.ExpectAllCollected(collected =>
+            collected.Count(span => span.Scope.Name == "OpenTelemetry.AutoInstrumentation.RabbitMq") == 10);
 
         EnableBytecodeInstrumentation();
         RunTestApplication(new()

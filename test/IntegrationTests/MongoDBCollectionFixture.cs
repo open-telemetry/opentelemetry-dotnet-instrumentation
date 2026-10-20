@@ -17,6 +17,7 @@ public class MongoDBCollectionFixture : ICollectionFixture<MongoDBFixture>
 
 public class MongoDBFixture : IAsyncLifetime
 {
+    private const int ContainerStartAttempts = 3;
     private const int MongoDBPort = 27017;
     private static readonly string MongoDBImage = ReadImageFrom("mongodb.Dockerfile");
 
@@ -45,15 +46,33 @@ public class MongoDBFixture : IAsyncLifetime
     private static async Task<IContainer> LaunchMongoContainerAsync(int port)
     {
         var waitForOs = await GetWaitForOSTypeAsync().ConfigureAwait(false);
-        var mongoContainersBuilder = new ContainerBuilder(MongoDBImage)
-            .WithName($"mongo-db-{port}")
-            .WithPortBinding(port, MongoDBPort)
-            .WithWaitStrategy(waitForOs.UntilInternalTcpPortIsAvailable(MongoDBPort));
 
-        var container = mongoContainersBuilder.Build();
-        await container.StartAsync().ConfigureAwait(false);
+        for (var attempt = 1; attempt <= ContainerStartAttempts; attempt++)
+        {
+            var mongoContainersBuilder = new ContainerBuilder(MongoDBImage)
+                .WithName($"mongo-db-{port}-{attempt}")
+                .WithPortBinding(port, MongoDBPort)
+                .WithWaitStrategy(waitForOs.UntilInternalTcpPortIsAvailable(MongoDBPort));
 
-        return container;
+            var container = mongoContainersBuilder.Build();
+            try
+            {
+                await container.StartAsync().ConfigureAwait(false);
+                return container;
+            }
+            catch (ContainerNotRunningException)
+            {
+                await container.DisposeAsync().ConfigureAwait(false);
+                if (attempt == ContainerStartAttempts)
+                {
+                    throw;
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+            }
+        }
+
+        throw new InvalidOperationException("MongoDB container failed to start.");
     }
 
     private static async Task ShutdownMongoContainerAsync(IContainer container)

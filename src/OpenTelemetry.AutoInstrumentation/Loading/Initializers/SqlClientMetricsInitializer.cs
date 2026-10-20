@@ -11,8 +11,8 @@ internal sealed class SqlClientMetricsInitializer : SqlClientInitializer
 
     private int _initialized;
 
-    public SqlClientMetricsInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
-        : base(lazyInstrumentationLoader, nameof(SqlClientMetricsInitializer))
+    public SqlClientMetricsInitializer(PluginManager pluginManager)
+        : base(nameof(SqlClientMetricsInitializer))
     {
         _pluginManager = pluginManager;
     }
@@ -26,7 +26,7 @@ internal sealed class SqlClientMetricsInitializer : SqlClientInitializer
         }
 
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentation, OpenTelemetry.Instrumentation.SqlClient")!;
-        var instanceField = instrumentationType?.GetField("Instance");
+        var instanceField = instrumentationType?.GetField("Instance", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
         var instance = instanceField?.GetValue(null);
         var metricsOptionsPropertyInfo = instrumentationType?.GetProperty("MetricOptions");
 
@@ -36,7 +36,7 @@ internal sealed class SqlClientMetricsInitializer : SqlClientInitializer
         }
 
         var handleManagerType = Type.GetType("OpenTelemetry.Instrumentation.InstrumentationHandleManager, OpenTelemetry.Instrumentation.SqlClient");
-        var handleManagerField = instrumentationType?.GetField("HandleManager");
+        var handleManagerField = instrumentationType?.GetField("HandleManager", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
         var handleManager = handleManagerField?.GetValue(instance);
         var addMetricHandleMethod = handleManagerType?.GetMethod("AddMetricHandle");
         var metricHandle = addMetricHandleMethod?.Invoke(handleManager, []);

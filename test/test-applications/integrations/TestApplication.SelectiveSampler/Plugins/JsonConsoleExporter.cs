@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Text.Json;
+using OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling;
+using OpenTelemetry.AutoInstrumentation.PluginApi.SelectiveSampling;
 using TestApplication.ContinuousProfiler;
 
 namespace TestApplication.SelectiveSampler.Plugins;
 
-internal sealed class JsonConsoleExporter
+internal sealed class JsonConsoleExporter : ISelectiveSamplerExporter, IContinuousProfilerExporter
 {
     private readonly SampleNativeFormatParser _sampleNativeFormatParser;
 
@@ -23,15 +25,13 @@ internal sealed class JsonConsoleExporter
         WriteToConsole(samples);
     }
 
-    public void ExportThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken)
+    public void ExportThreadSamples(byte[] buffer, int read, uint samplingInterval, CancellationToken cancellationToken)
     {
         var samples = _sampleNativeFormatParser.ParseThreadSamples(buffer, read);
         WriteToConsole(samples ?? []);
     }
 
-#pragma warning disable CA1822 // Mark members as static. Needed for AutoInstrumentation plugin loading.
     public void ExportAllocationSamples(byte[] buffer, int read, CancellationToken cancellationToken)
-#pragma warning restore CA1822 // Mark members as static. Needed for AutoInstrumentation plugin loading.
     {
     }
 

@@ -26,16 +26,16 @@ permissions:
 jobs:
   build:
     name: Build documentation
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
 
     - name: Checkout code
-      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
 
     - name: Restore lychee cache
-      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       id: cache-restore
       with:
         path: .lycheecache
@@ -44,25 +44,25 @@ jobs:
 
     - name: Run markdown links checks
       if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
-      uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2.8.0
+      uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
       with:
         fail: true
         args: --cache --cache-exclude-status '403, 429, 500..599' --max-cache-age 1d --threads 1 --max-concurrency 1 --verbose --retry-wait-time 5 --max-retries 3 --timeout 60 --no-progress './**/*.md' './**/*.html'
 
     - name: Run markdownlint
-      uses: streetsidesoftware/cspell-action@de2a73e963e7443969755b648a1008f77033c5b2 # v8.4.0
+      uses: streetsidesoftware/cspell-action@ce1816e4ce36532956ac6e983737392774b6e169 # v9.2.0
       with:
         files: '**/*.md'
 
     - name: Run cspell
-      uses: DavidAnson/markdownlint-cli2-action@ded1f9488f68a970bc66ea5619e13e9b52e601cd # v23.2.0
+      uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff # v24.2.0
       with:
         globs: '**/*.md;!.github/**;!lychee/out.md'
         separator: ';'
 
     - name: Save lychee cache
       if: always()
-      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: .lycheecache
         key: ${{ steps.cache-restore.outputs.cache-primary-key }}

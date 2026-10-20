@@ -175,12 +175,12 @@ public abstract class TestHelper
             Output.WriteLine($"DotnetCLI Starting Application: {testApplicationPath}");
             var executable = EnvironmentHelper.GetTestApplicationExecutionSource();
             var args = $"{testApplicationPath} {testSettings.Arguments ?? string.Empty}";
-            return InstrumentedProcessHelper.Start(executable, args, EnvironmentHelper);
+            return InstrumentedProcessHelper.Start(executable, args, EnvironmentHelper, testSettings.RedirectStandardInput);
         }
         else if (startupMode == TestAppStartupMode.Exe)
         {
             Output.WriteLine($"Starting Application: {testApplicationPath}");
-            return InstrumentedProcessHelper.Start(testApplicationPath, testSettings.Arguments, EnvironmentHelper);
+            return InstrumentedProcessHelper.Start(testApplicationPath, testSettings.Arguments, EnvironmentHelper, testSettings.RedirectStandardInput);
         }
         else
         {

@@ -12,7 +12,7 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        var mySqlPort = GetMySqlPort(args);
+        var mySqlPort = ArgumentHelper.GetArgument(args, "--mysql", "3306");
 
         var connString = $@"Server=127.0.0.1;Port={mySqlPort};Uid=root";
 
@@ -25,15 +25,5 @@ internal static class Program
         {
             Console.WriteLine(reader.GetInt32(0));
         }
-    }
-
-    private static string GetMySqlPort(string[] args)
-    {
-        if (args.Length > 1)
-        {
-            return args[1];
-        }
-
-        return "3306";
     }
 }

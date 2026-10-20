@@ -17,6 +17,15 @@ internal class QuartzInitializer : InstrumentationInitializer
 
     public override void Initialize(ILifespanManager lifespanManager)
     {
+        var quartzIJob = Type.GetType("Quartz.IJob, Quartz", throwOnError: false);
+
+        var quartzAssemblyVersion = quartzIJob?.Assembly.GetName().Version;
+
+        if (IsQuartz4OrGreater(quartzAssemblyVersion))
+        {
+            return;
+        }
+
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Quartz.QuartzJobInstrumentation, OpenTelemetry.Instrumentation.Quartz")!;
 
         var options = new OpenTelemetry.Instrumentation.Quartz.QuartzInstrumentationOptions();
@@ -26,5 +35,10 @@ internal class QuartzInitializer : InstrumentationInitializer
         var instrumentation = Activator.CreateInstance(instrumentationType, options)!;
 
         lifespanManager.Track(instrumentation);
+    }
+
+    private static bool IsQuartz4OrGreater(Version? quartzAssemblyVersion)
+    {
+        return quartzAssemblyVersion is { Major: >= 4 };
     }
 }

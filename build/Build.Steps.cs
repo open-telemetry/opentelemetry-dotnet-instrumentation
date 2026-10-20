@@ -19,6 +19,10 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
 {
+    private const string InstrumentSh = "instrument.sh";
+    private const string AdditionalDepsSh = "generate-additional-deps.sh";
+    private const string AdditionalDepsPs1 = "generate-additional-deps.ps1";
+
     [Solution("OpenTelemetry.AutoInstrumentation.sln")] readonly Solution Solution;
 
     AbsolutePath OutputDirectory => RootDirectory / "bin";
@@ -258,18 +262,21 @@ partial class Build
 
     Target CompileNativeDependenciesForManagedTests => _ => _
         .Description("Compiles the native dependencies for testing applications")
+        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeDependenciesForManagedTestsWindows)
         .DependsOn(CompileNativeDependenciesForManagedTestsLinux)
         .DependsOn(CompileNativeDependenciesForManagedTestsMacOs);
 
     Target CompileNativeSrc => _ => _
         .Description("Compiles the native loader")
+        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeSrcWindows)
         .DependsOn(CompileNativeSrcLinux)
         .DependsOn(CompileNativeSrcMacOs);
 
     Target CompileNativeTests => _ => _
         .Description("Compiles the native loader unit tests")
+        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeTestsWindows)
         .DependsOn(CompileNativeTestsLinux);
 
@@ -460,15 +467,17 @@ partial class Build
                 .SetProjectFile(generatorTool));
         });
 
-    Target CopyInstrumentScripts => _ => _
+    Target CopyScripts => _ => _
         .Unlisted()
         .After(Clean)
         .After(CreateRequiredDirectories)
         .Executes(() =>
         {
-            var source = RootDirectory / "instrument.sh";
             var dest = TracerHomeDirectory;
-            source.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
+            foreach (var script in new[] { InstrumentSh, AdditionalDepsSh, AdditionalDepsPs1 })
+            {
+                (RootDirectory / script).CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
+            }
         });
 
     Target CopyLegalFiles => _ => _
@@ -570,6 +579,7 @@ partial class Build
             var unitTestProjects = new[]
             {
                 Solution.GetProjectByName(Projects.Tests.AutoInstrumentationBuildTasksTests),
+                Solution.GetProjectByName(Projects.Tests.AutoInstrumentationFuzzTests),
                 Solution.GetProjectByName(Projects.Tests.AutoInstrumentationLoaderTests),
                 Solution.GetProjectByName(Projects.Tests.AutoInstrumentationStartupHookTests),
                 Solution.GetProjectByName(Projects.Tests.AutoInstrumentationTests)
@@ -648,7 +658,7 @@ partial class Build
                 DotNetTestSettings ConfigureIntegrationTest(DotNetTestSettings settings) => settings
                     .SetConfiguration(BuildConfiguration)
                     .SetFilter(AndFilter(TestNameFilter(), ContainersFilter()))
-                    .SetBlameHangTimeout("5m")
+                    .SetBlameHangTimeout("10m")
                     .EnableTrxLogOutput(GetResultsDirectory(project))
                     .SetProjectFile(project)
                     .SetNoRestore(NoRestore);

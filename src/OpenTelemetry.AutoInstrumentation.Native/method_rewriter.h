@@ -8,30 +8,34 @@
 
 #include "util.h"
 #include "cor.h"
+#include "corprof.h"
+
+struct ILInstr;
+class ILRewriterWrapper;
 
 namespace trace
 {
     // forward declarations
     class RejitHandlerModule;
     class RejitHandlerModuleMethod;
+    class CorProfiler;
 
 class MethodRewriter
 {
-public:
-    virtual HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler) = 0;
-};
-
-
-class TracerMethodRewriter : public MethodRewriter, public Singleton<TracerMethodRewriter>
-{
-    friend class Singleton<TracerMethodRewriter>;
-    
-private:
-    TracerMethodRewriter(){}
+protected:
+    CorProfiler* m_corProfiler;
 
 public:
-    HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler) override;
+    explicit MethodRewriter(CorProfiler* corProfiler) : m_corProfiler(corProfiler)
+    {
+    }
+
+    virtual HRESULT Rewrite(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler,
+                            ICorProfilerFunctionControl* pFunctionControl, ICorProfilerInfo* corProfilerInfo) = 0;
+
+    virtual ~MethodRewriter() = default;
 };
+
 
 } // namespace trace
 

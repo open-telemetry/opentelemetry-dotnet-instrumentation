@@ -11,20 +11,24 @@ using OpenTelemetry.AutoInstrumentation.Plugins;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
-internal sealed class AspNetInitializer
+internal sealed class AspNetInitializer : IInstrumentationInitializer
 {
     private readonly PluginManager _pluginManager;
     private readonly TracerSettings _tracerSettings;
 
     private int _initialized;
 
-    public AspNetInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
+    public AspNetInitializer(PluginManager pluginManager, TracerSettings tracerSettings)
     {
         _pluginManager = pluginManager;
         _tracerSettings = tracerSettings;
-        lazyInstrumentationLoader.Add(new AspNetDirectInitializer(InitializeOnFirstCall, "AspNetDirectInitializerForTraces"));
-        lazyInstrumentationLoader.Add(new AspNetMvcInitializer(InitializeOnFirstCall, "AspNetMvcInitializerForTraces"));
-        lazyInstrumentationLoader.Add(new AspNetWebApiInitializer(InitializeOnFirstCall, "AspNetWebApiInitializerForTraces"));
+    }
+
+    public void Register(LazyInstrumentationLoader lazyInstrumentationLoader)
+    {
+        new AspNetDirectInitializer(InitializeOnFirstCall, "AspNetDirectInitializerForTraces").Register(lazyInstrumentationLoader);
+        new AspNetMvcInitializer(InitializeOnFirstCall, "AspNetMvcInitializerForTraces").Register(lazyInstrumentationLoader);
+        new AspNetWebApiInitializer(InitializeOnFirstCall, "AspNetWebApiInitializerForTraces").Register(lazyInstrumentationLoader);
     }
 
     private void InitializeOnFirstCall(ILifespanManager lifespanManager)

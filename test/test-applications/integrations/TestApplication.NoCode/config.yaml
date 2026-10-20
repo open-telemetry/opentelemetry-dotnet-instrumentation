@@ -958,3 +958,73 @@ instrumentation/development:
                - name: batch.flags
                  value_source: arguments[4]
                  type: bool_array
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NestedTypeTargets+ReferenceType
+            method: Target
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name: Span-NestedReferenceType
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.NestedTypeTargets+ValueType
+            method: Target
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name: Span-NestedValueType
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.GenericNestedTypeTargets`1+ReferenceType
+            method: Target
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name: Span-GenericParentNestedReferenceType
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.GenericNestedTypeTargets`1+ValueType
+            method: Target
+            signature:
+              return_type: System.Void
+              parameter_types:
+          span:
+             name: Span-GenericParentNestedValueType
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.RefStructTargets
+            method: UseValue
+            signature:
+              return_type: System.Void
+              parameter_types: ["TestApplication.NoCode.RefStructValue"]
+          span:
+            name: Span-RefStructValue
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.RefStructTargets
+            method: UseByRefValue
+            signature:
+              return_type: System.Void
+              parameter_types: ["TestApplication.NoCode.RefStructValue&"]
+          span:
+            name: Span-ByRefStructValue
+        - target:
+            assembly:
+              name: TestApplication.NoCode
+            type: TestApplication.NoCode.RefStructTargets
+            method: UseMixedValues
+            signature:
+              return_type: System.Void
+              parameter_types: ["TestApplication.NoCode.RefStructValue", "System.Int32", "TestApplication.NoCode.RefStructValue&"]
+          span:
+            name: Span-MixedRefStructValues

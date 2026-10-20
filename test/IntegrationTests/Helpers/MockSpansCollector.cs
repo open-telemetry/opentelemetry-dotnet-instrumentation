@@ -3,16 +3,18 @@
 
 using System.Collections.Concurrent;
 using System.Globalization;
+using System.Net;
+#if NET
+using System.Security.Cryptography.X509Certificates;
+#endif
 using System.Text;
+#if NET
+using Microsoft.AspNetCore.Http;
+#endif
+using Google.Protobuf;
 using OpenTelemetry.Proto.Collector.Trace.V1;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Trace.V1;
-
-#if NETFRAMEWORK
-using System.Net;
-#else
-using Microsoft.AspNetCore.Http;
-#endif
 
 namespace IntegrationTests.Helpers;
 
@@ -27,9 +29,11 @@ internal sealed class MockSpansCollector : IDisposable
     private readonly BlockingCollection<Collected> _spans = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
     private Func<ICollection<Collected>, bool>? _collectedExpectation;
+    private Func<ICollection<Collected>, bool>? _allCollectedExpectation;
 
     public MockSpansCollector(ITestOutputHelper output, string host = "localhost")
     {
+        ProtobufDescriptorWarmup.Ensure();
         _output = output;
 
 #if NET
@@ -38,6 +42,15 @@ internal sealed class MockSpansCollector : IDisposable
         _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/traces/");
 #endif
     }
+
+#if NET
+    public MockSpansCollector(ITestOutputHelper output, X509Certificate2 serverCertificate)
+    {
+        ProtobufDescriptorWarmup.Ensure();
+        _output = output;
+        _listener = new TestHttpServer(output, nameof(MockSpansCollector), serverCertificate, new PathHandler(HandleHttpRequests, "/v1/traces"));
+    }
+#endif
 
     /// <summary>
     /// Gets the TCP port that this collector is listening on.
@@ -70,6 +83,11 @@ internal sealed class MockSpansCollector : IDisposable
     public void ExpectCollected(Func<ICollection<Collected>, bool> collectedExpectation)
     {
         _collectedExpectation = collectedExpectation;
+    }
+
+    public void ExpectAllCollected(Func<ICollection<Collected>, bool> collectedExpectation)
+    {
+        _allCollectedExpectation = collectedExpectation;
     }
 
     public void AssertExpectations(TimeSpan? timeout = null)
@@ -132,6 +150,17 @@ internal sealed class MockSpansCollector : IDisposable
                     if (_collectedExpectation != null && !_collectedExpectation(expectationsMet))
                     {
                         FailCollectedExpectation(expectationsMet);
+                    }
+
+                    if (_allCollectedExpectation != null)
+                    {
+                        var allCollected = expectationsMet.Concat(additionalEntries).ToList();
+                        DrainAvailable(allCollected);
+
+                        if (!_allCollectedExpectation(allCollected))
+                        {
+                            FailCollectedExpectation(allCollected);
+                        }
                     }
 
                     return;
@@ -201,10 +230,29 @@ internal sealed class MockSpansCollector : IDisposable
         Assert.Fail(message.ToString());
     }
 
+    private static ExportTraceServiceRequest ParseTraceRequest(Stream bodyStream, string? contentType)
+    {
+        if (contentType?.IndexOf("json", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            using var reader = new StreamReader(bodyStream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
+            return JsonParser.Default.Parse<ExportTraceServiceRequest>(reader.ReadToEnd());
+        }
+
+        return ExportTraceServiceRequest.Parser.ParseFrom(bodyStream);
+    }
+
+    private void DrainAvailable(List<Collected> collected)
+    {
+        while (_spans.TryTake(out var resourceSpan, TestTimeout.NoExpectation))
+        {
+            collected.Add(resourceSpan);
+        }
+    }
+
 #if NETFRAMEWORK
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        var traceMessage = ExportTraceServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
+        var traceMessage = ParseTraceRequest(ctx.Request.InputStream, ctx.Request.ContentType);
         HandleTraceMessage(traceMessage);
 
         ctx.GenerateEmptyProtobufResponse<ExportTraceServiceResponse>();
@@ -213,7 +261,7 @@ internal sealed class MockSpansCollector : IDisposable
     private async Task HandleHttpRequests(HttpContext ctx)
     {
         using var bodyStream = await ctx.ReadBodyToMemoryAsync().ConfigureAwait(false);
-        var traceMessage = ExportTraceServiceRequest.Parser.ParseFrom(bodyStream);
+        var traceMessage = ParseTraceRequest(bodyStream, ctx.Request.ContentType);
         HandleTraceMessage(traceMessage);
 
         await ctx.GenerateEmptyProtobufResponseAsync<ExportTraceServiceResponse>().ConfigureAwait(false);
@@ -229,7 +277,7 @@ internal sealed class MockSpansCollector : IDisposable
             {
                 foreach (var span in scopeSpans.Spans ?? Enumerable.Empty<Span>())
                 {
-                    _spans.Add(new Collected(scopeSpans.Scope, span, scopeSpans.SchemaUrl));
+                    _spans.Add(new Collected(scopeSpans.Scope ?? new InstrumentationScope(), span, scopeSpans.SchemaUrl));
                 }
             }
         }

@@ -9,7 +9,7 @@ COPY bin/OpenTelemetry.DotNet.Auto.psm1 .
 ENV OTEL_DOTNET_AUTO_INSTALL_DIR=C:\opentelemetry
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 RUN Import-Module .\OpenTelemetry.DotNet.Auto.psm1 -Verbose; `
-    Install-OpenTelemetryCore -LocalPath .\tracer.zip; `
+    Install-OpenTelemetryCore -LocalPath .\tracer.zip -SkipReleaseVerification; `
     Register-OpenTelemetryForIIS;
 ENV OTEL_DOTNET_AUTO_LOG_DIRECTORY=C:\inetpub\wwwroot\logs `
     OTEL_LOG_LEVEL=debug

@@ -29,7 +29,7 @@ internal static class EnvironmentConfigurationMetricHelper
                 MetricInstrumentation.AspNet => Wrappers.AddAspNetInstrumentation(builder, lazyInstrumentationLoader, pluginManager),
 #endif
                 MetricInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, lazyInstrumentationLoader),
-                MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder, pluginManager),
+                MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder),
                 MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder),
 #if NET
                 MetricInstrumentation.Npgsql => builder.AddMeter("Npgsql"),
@@ -59,6 +59,9 @@ internal static class EnvironmentConfigurationMetricHelper
                         "Microsoft.AspNetCore.MemoryPool"),
 #endif
                 MetricInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, lazyInstrumentationLoader, pluginManager),
+#if NET
+                MetricInstrumentation.Quartz => builder.AddMeter("Quartz"),
+#endif
                 _ => null,
             };
         }
@@ -139,7 +142,7 @@ internal static class EnvironmentConfigurationMetricHelper
                         }
                         else if (exporter.Console != null)
                         {
-                            builder = Wrappers.AddConsoleExporter(builder, pluginManager, exporter.Console);
+                            builder = Wrappers.AddConsoleExporter(builder, pluginManager, reader.Periodic, exporter.Console);
                         }
                     }
 
@@ -208,9 +211,9 @@ internal static class EnvironmentConfigurationMetricHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddRuntimeInstrumentation(MeterProviderBuilder builder, PluginManager pluginManager)
+        public static MeterProviderBuilder AddRuntimeInstrumentation(MeterProviderBuilder builder)
         {
-            return builder.AddRuntimeInstrumentation(pluginManager.ConfigureMetricsOptions);
+            return builder.AddRuntimeInstrumentation();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -229,11 +232,12 @@ internal static class EnvironmentConfigurationMetricHelper
         // Exporters
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddConsoleExporter(MeterProviderBuilder builder, PluginManager pluginManager, PeriodicMetricReaderConfig readerConfig)
+        public static MeterProviderBuilder AddConsoleExporter(MeterProviderBuilder builder, PluginManager pluginManager, PeriodicMetricReaderConfig readerConfig, ConsoleExporterConfig consoleExporterConfig)
         {
             return builder.AddConsoleExporter((consoleExporterOptions, metricReaderOptions) =>
             {
                 readerConfig.CopyTo(metricReaderOptions.PeriodicExportingMetricReaderOptions);
+                metricReaderOptions.TemporalityPreference = consoleExporterConfig.GetTemporalityPreference();
                 pluginManager.ConfigureMetricsOptions(consoleExporterOptions);
                 pluginManager.ConfigureMetricsOptions(metricReaderOptions);
             });
@@ -244,17 +248,6 @@ internal static class EnvironmentConfigurationMetricHelper
         {
             return builder.AddConsoleExporter((consoleExporterOptions, metricReaderOptions) =>
             {
-                pluginManager.ConfigureMetricsOptions(consoleExporterOptions);
-                pluginManager.ConfigureMetricsOptions(metricReaderOptions);
-            });
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddConsoleExporter(MeterProviderBuilder builder, PluginManager pluginManager, ConsoleExporterConfig consoleExporterConfig)
-        {
-            return builder.AddConsoleExporter((consoleExporterOptions, metricReaderOptions) =>
-            {
-                metricReaderOptions.TemporalityPreference = consoleExporterConfig.GetTemporalityPreference();
                 pluginManager.ConfigureMetricsOptions(consoleExporterOptions);
                 pluginManager.ConfigureMetricsOptions(metricReaderOptions);
             });

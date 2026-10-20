@@ -5,11 +5,13 @@
 
 using System.Globalization;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -22,6 +24,32 @@ internal sealed class TestHttpServer : IDisposable
     private readonly IHost _listener;
 
     public TestHttpServer(ITestOutputHelper output, string name, params PathHandler[] pathHandlers)
+        : this(
+            output,
+            name,
+            options => options.Listen(IPAddress.Loopback, 0),
+            pathHandlers)
+    {
+    }
+
+    public TestHttpServer(ITestOutputHelper output, string name, X509Certificate2 serverCertificate, params PathHandler[] pathHandlers)
+        : this(
+            output,
+            name,
+            options => options.Listen(IPAddress.Any, 0, listenOptions =>
+            {
+                listenOptions.Protocols = HttpProtocols.Http2;
+                listenOptions.UseHttps(serverCertificate);
+            }),
+            pathHandlers)
+    {
+    }
+
+    private TestHttpServer(
+        ITestOutputHelper output,
+        string name,
+        Action<KestrelServerOptions> configureKestrel,
+        params PathHandler[] pathHandlers)
     {
         _output = output;
         _name = name;
@@ -30,8 +58,7 @@ internal sealed class TestHttpServer : IDisposable
             .ConfigureWebHost(webHostBuilder =>
             {
                 webHostBuilder
-                    .UseKestrel(options =>
-                        options.Listen(IPAddress.Loopback, 0)) // dynamic port
+                    .UseKestrel(configureKestrel)
                     .Configure(x =>
                     {
                         foreach (var pathHandler in pathHandlers)

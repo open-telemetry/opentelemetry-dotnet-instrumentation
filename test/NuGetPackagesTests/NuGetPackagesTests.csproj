@@ -20,6 +20,7 @@
     <Compile Include="..\IntegrationTests\Helpers\OutputHelper.cs" />
     <Compile Include="..\IntegrationTests\Helpers\PathHandler.cs" />
     <Compile Include="..\IntegrationTests\Helpers\ProcessHelper.cs" />
+    <Compile Include="..\IntegrationTests\Helpers\ProtobufDescriptorWarmup.cs" />
     <Compile Include="..\IntegrationTests\Helpers\TcpPortProvider.cs" />
     <Compile Include="..\IntegrationTests\Helpers\TestAppStartupMode.cs" />
     <Compile Include="..\IntegrationTests\Helpers\TestHelper.cs" />
@@ -53,6 +54,8 @@
     <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="NuGet.Versioning" />
+    <!-- System.Security.Cryptography.Pkcs is a transitive package from Microsoft.Data.SqlClient. Needs update to fix https://github.com/advisories/GHSA-846f-f764-76mx -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="Testcontainers" />
     <PackageReference Include="Verify.Xunit" />
   </ItemGroup>

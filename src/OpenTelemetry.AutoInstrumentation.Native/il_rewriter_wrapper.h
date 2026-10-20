@@ -23,24 +23,26 @@ public:
     ILRewriter* GetILRewriter() const;
     ILInstr* GetCurrentILInstr() const;
     void SetILPosition(ILInstr* pILInstr);
-    void Pop() const;
+    ILInstr* Pop() const;
     ILInstr* LoadNull() const;
-    void LoadInt64(INT64 value) const;
-    void LoadInt32(INT32 value) const;
+    ILInstr* LoadInt64(INT64 value) const;
+    ILInstr* LoadInt32(INT32 value) const;
     ILInstr* LoadArgument(UINT16 index) const;
     ILInstr* LoadArgumentRef(UINT16 index) const;
-    void Cast(mdTypeRef type_ref) const;
-    void Box(mdTypeRef type_ref) const;
-    void UnboxAny(mdTypeRef type_ref) const;
-    void UnboxAnyAfter(mdTypeRef type_ref) const;
+    ILInstr* LoadFieldAddress(mdFieldDef field_def, bool is_static = false) const;
+    ILInstr* Cast(mdTypeRef type_ref) const;
+    ILInstr* Box(mdTypeRef type_ref) const;
+    ILInstr* UnboxAny(mdTypeRef type_ref) const;
+    ILInstr* UnboxAnyAfter(mdTypeRef type_ref) const;
     void CreateArray(mdTypeRef type_ref, INT32 size) const;
     ILInstr* CallMember(const mdMemberRef& member_ref, bool is_virtual) const;
-    void Duplicate() const;
+    ILInstr* Duplicate() const;
     void BeginLoadValueIntoArray(INT32 arrayIndex) const;
-    void EndLoadValueIntoArray() const;
+    ILInstr* EndLoadValueIntoArray() const;
     bool ReplaceMethodCalls(mdMemberRef old_method_ref, mdMemberRef new_method_ref) const;
     ILInstr* LoadToken(mdToken token) const;
     ILInstr* LoadObj(mdToken token) const;
+    ILInstr* LoadStr(mdString token) const;
     ILInstr* StLocal(unsigned index) const;
     ILInstr* LoadLocal(unsigned index) const;
     ILInstr* LoadLocalAddress(unsigned index) const;
@@ -50,6 +52,8 @@ public:
     ILInstr* EndFinally() const;
 
     ILInstr* CreateInstr(unsigned opCode) const;
+    ILInstr* CreateInstr(unsigned opCode, uint32_t arg) const;
+    ILInstr* CreateInstr(unsigned opCode, ILInstr* target) const;
     ILInstr* InitObj(mdTypeRef type_ref) const;
 };
 

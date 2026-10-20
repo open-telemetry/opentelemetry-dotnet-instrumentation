@@ -23,7 +23,6 @@ internal sealed class Startup
 
     public static void Configure(IApplicationBuilder app)
     {
-        app.UseMiddleware<CsrfMiddleware>();
         app.UseDeveloperExceptionPage();
         app.UseWebSockets();
         app.UseGraphQL<ISchema>();

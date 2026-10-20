@@ -29,7 +29,7 @@ internal static class DockerNetworkHelper
         {
             if (network.IPAM.Config[0].Gateway == IntegrationTestsGateway)
             {
-                return network.ID;
+                return IntegrationTestsNetworkName;
             }
             else
             {

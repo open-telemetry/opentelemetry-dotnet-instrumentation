@@ -44,6 +44,14 @@ internal class OtlpHttpExporterConfig
     public int? Timeout { get; set; } = 10000;
 
     /// <summary>
+    /// Gets or sets the compression algorithm for the exporter.
+    /// Values include: gzip, none.
+    /// If omitted or null, none is used.
+    /// </summary>
+    [YamlMember(Alias = "compression")]
+    public string? Compression { get; set; }
+
+    /// <summary>
     /// Gets or sets the temporality preference for the exporter.
     /// Values include: cumulative, delta.
     /// If omitted or null, cumulative is used.

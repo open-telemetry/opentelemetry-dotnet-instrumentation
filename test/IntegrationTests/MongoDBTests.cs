@@ -70,7 +70,7 @@ public class MongoDBTests : TestHelper
 #if NET462
             Framework = string.IsNullOrEmpty(packageVersion) || new Version(packageVersion) >= new Version(3, 0, 0) ? "net472" : "net462",
 #endif
-            Arguments = $"--mongo-db {_mongoDB.Port} {MongoDbNamespace} {MongoDbCollectionName} --trigger-error",
+            Arguments = $"--mongo-db {_mongoDB.Port} --database {MongoDbNamespace} --collection {MongoDbCollectionName} --trigger-error",
             PackageVersion = packageVersion
         });
 
@@ -168,7 +168,7 @@ public class MongoDBTests : TestHelper
 #if NET462
             Framework = string.IsNullOrEmpty(packageVersion) || new Version(packageVersion) >= new Version(3, 0, 0) ? "net472" : "net462",
 #endif
-            Arguments = $"--mongo-db {_mongoDB.Port} {MongoDbNamespace} {MongoDbCollectionName}",
+            Arguments = $"--mongo-db {_mongoDB.Port} --database {MongoDbNamespace} --collection {MongoDbCollectionName}",
             PackageVersion = packageVersion
         });
     }

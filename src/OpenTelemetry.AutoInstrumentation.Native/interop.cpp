@@ -11,9 +11,12 @@
 
 #include "cor_profiler.h"
 #include "configuration.h"
+#include "logger.h"
 
 #ifndef _WIN32
 #include <dlfcn.h>
+#undef EXTERN_C
+#define EXTERN_C extern "C" __attribute__((visibility("default")))
 #endif
 
 #ifdef _WIN32
@@ -23,7 +26,13 @@ EXTERN_C VOID STDAPICALLTYPE GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray,
                                                         BYTE** pSymbolsArray,
                                                         int*   symbolsSize)
 {
-    return trace::profiler->GetAssemblyAndSymbolsBytes(pAssemblyArray, assemblySize, pSymbolsArray, symbolsSize);
+    if (trace::profiler == nullptr)
+    {
+        trace::Logger::Error("GetAssemblyAndSymbolsBytes: CLR profiler is not initialized.");
+        return;
+    }
+
+    trace::profiler->GetAssemblyAndSymbolsBytes(pAssemblyArray, assemblySize, pSymbolsArray, symbolsSize);
 }
 #endif
 
@@ -34,12 +43,49 @@ EXTERN_C BOOL STDAPICALLTYPE IsProfilerAttached()
 
 EXTERN_C VOID STDAPICALLTYPE AddInstrumentations(WCHAR* id, trace::CallTargetDefinition* items, int size)
 {
-    return trace::profiler->AddInstrumentations(id, items, size);
+    if (trace::profiler == nullptr)
+    {
+        trace::Logger::Error("AddInstrumentations: CLR profiler is not initialized.");
+        return;
+    }
+
+    trace::profiler->AddInstrumentations(id, items, size);
 }
 
 EXTERN_C VOID STDAPICALLTYPE AddDerivedInstrumentations(WCHAR* id, trace::CallTargetDefinition* items, int size)
 {
-    return trace::profiler->AddDerivedInstrumentations(id, items, size);
+    if (trace::profiler == nullptr)
+    {
+        trace::Logger::Error("AddDerivedInstrumentations: CLR profiler is not initialized.");
+        return;
+    }
+
+    trace::profiler->AddDerivedInstrumentations(id, items, size);
+}
+
+EXTERN_C VOID STDAPICALLTYPE AddInterfaceInstrumentations(WCHAR* id, trace::CallTargetDefinition* items, int size)
+{
+    if (trace::profiler == nullptr)
+    {
+        trace::Logger::Error("AddInterfaceInstrumentations: CLR profiler is not initialized.");
+        return;
+    }
+
+    trace::profiler->AddInterfaceInstrumentations(id, items, size);
+}
+
+EXTERN_C int STDAPICALLTYPE RegisterCallTargetDefinitions(WCHAR*                        id,
+                                                          trace::CallTargetDefinition2* items,
+                                                          int                           size,
+                                                          std::uint32_t                 enabledCategories)
+{
+    if (trace::profiler == nullptr)
+    {
+        trace::Logger::Error("RegisterCallTargetDefinitions: CLR profiler is not initialized.");
+        return 0;
+    }
+
+    return trace::profiler->RegisterCallTargetDefinitions(id, items, size, enabledCategories);
 }
 
 EXTERN_C VOID STDAPICALLTYPE SetSqlClientNetFxILRewriteEnabled(bool enabled)
@@ -53,9 +99,83 @@ EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool         threadSamp
                                                          unsigned int maxMemorySamplesPerMinute,
                                                          unsigned int selectedThreadSamplingInterval)
 {
-    return trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
-                                                        allocationSamplingEnabled, maxMemorySamplesPerMinute,
-                                                        selectedThreadSamplingInterval);
+    try
+    {
+        if (trace::profiler == nullptr)
+        {
+            trace::Logger::Error("ConfigureContinuousProfiler: CLR profiler is not initialized.");
+            return;
+        }
+
+        trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval,
+                                                     allocationSamplingEnabled, maxMemorySamplesPerMinute,
+                                                     selectedThreadSamplingInterval);
+    }
+    catch (...)
+    {
+        return;
+    }
+}
+
+EXTERN_C INT32 STDAPICALLTYPE
+ApplyContinuousProfilerConfiguration(const continuous_profiler::RuntimeSamplerConfiguration* request,
+                                     const continuous_profiler::RuntimeSamplerAuthority      authority,
+                                     continuous_profiler::RuntimeSamplerState*               actualState)
+{
+    try
+    {
+        if (trace::profiler == nullptr)
+        {
+            const auto stateResult = continuous_profiler::EncodeRuntimeSamplerState({}, actualState);
+            if (stateResult == continuous_profiler::RuntimeSamplerStateQueryResult::InvalidArgument)
+            {
+                return static_cast<INT32>(continuous_profiler::RuntimeSamplerApplyResult::RejectedInvalidArgument);
+            }
+            if (stateResult == continuous_profiler::RuntimeSamplerStateQueryResult::UnsupportedLayout)
+            {
+                return static_cast<INT32>(continuous_profiler::RuntimeSamplerApplyResult::RejectedUnsupportedLayout);
+            }
+            return static_cast<INT32>(continuous_profiler::RuntimeSamplerApplyResult::ShuttingDown);
+        }
+
+        return static_cast<INT32>(
+            trace::profiler->ApplyContinuousProfilerConfiguration(request, authority, actualState));
+    }
+    catch (...)
+    {
+        try
+        {
+            if (trace::profiler != nullptr)
+            {
+                trace::profiler->GetContinuousProfilerState(actualState);
+            }
+            else
+            {
+                continuous_profiler::EncodeRuntimeSamplerState({}, actualState);
+            }
+        }
+        catch (...)
+        {
+        }
+        return static_cast<INT32>(continuous_profiler::RuntimeSamplerApplyResult::ActivationFailed);
+    }
+}
+
+EXTERN_C INT32 STDAPICALLTYPE GetContinuousProfilerState(continuous_profiler::RuntimeSamplerState* actualState)
+{
+    try
+    {
+        if (trace::profiler == nullptr)
+        {
+            return static_cast<INT32>(continuous_profiler::EncodeRuntimeSamplerState({}, actualState));
+        }
+
+        return static_cast<INT32>(trace::profiler->GetContinuousProfilerState(actualState));
+    }
+    catch (...)
+    {
+        return static_cast<INT32>(continuous_profiler::RuntimeSamplerStateQueryResult::InvalidArgument);
+    }
 }
 
 EXTERN_C VOID STDAPICALLTYPE InitializeTraceMethods(WCHAR* id,
@@ -63,8 +183,14 @@ EXTERN_C VOID STDAPICALLTYPE InitializeTraceMethods(WCHAR* id,
                                                     WCHAR* integration_type_name_ptr,
                                                     WCHAR* configuration_string_ptr)
 {
-    return trace::profiler->InitializeTraceMethods(id, integration_assembly_name_ptr, integration_type_name_ptr,
-                                                   configuration_string_ptr);
+    if (trace::profiler == nullptr)
+    {
+        trace::Logger::Error("InitializeTraceMethods: CLR profiler is not initialized.");
+        return;
+    }
+
+    trace::profiler->InitializeTraceMethods(id, integration_assembly_name_ptr, integration_type_name_ptr,
+                                            configuration_string_ptr);
 }
 
 #ifndef _WIN32

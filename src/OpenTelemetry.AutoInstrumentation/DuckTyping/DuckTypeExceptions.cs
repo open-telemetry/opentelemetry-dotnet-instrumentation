@@ -473,3 +473,39 @@ internal class DuckTypeReverseProxyMustImplementGenericMethodAsGenericException 
         throw new DuckTypeReverseProxyMustImplementGenericMethodAsGenericException(implementationMethod, targetMethod);
     }
 }
+
+/// <summary>
+/// DuckType custom attribute uses named arguments
+/// </summary>
+internal class DuckTypeCustomAttributeHasNamedArgumentsException : DuckTypeException
+{
+    private DuckTypeCustomAttributeHasNamedArgumentsException(string attributeName, string type)
+        : base($"The attribute '{attributeName}' applied to '{type}' uses named arguments. Named arguments are not supported for custom attributes.")
+    {
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(Type type, CustomAttributeData attributeData)
+    {
+        throw new DuckTypeCustomAttributeHasNamedArgumentsException(attributeData.AttributeType.FullName ?? "Null", type.FullName ?? type.Name);
+    }
+}
+
+/// <summary>
+/// DuckCopy struct contains properties but no copyable fields.
+/// </summary>
+internal sealed class DuckTypeDuckCopyStructDoesNotContainsAnyField : DuckTypeException
+{
+    private DuckTypeDuckCopyStructDoesNotContainsAnyField(Type type)
+        : base($"The [DuckCopy] struct '{type.FullName ?? type.Name}' has no public fields. DuckCopy proxies must use fields instead of properties.")
+    {
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(Type type)
+    {
+        throw new DuckTypeDuckCopyStructDoesNotContainsAnyField(type);
+    }
+}

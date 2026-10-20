@@ -38,7 +38,7 @@ public class AzureTests : TestHelper
 
         RunTestApplication(new()
         {
-            Arguments = $"{_azure.Port}",
+            Arguments = $"--port {_azure.Port}",
             PackageVersion = packageVersion
         });
 

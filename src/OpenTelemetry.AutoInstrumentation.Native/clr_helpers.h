@@ -18,6 +18,25 @@
 
 namespace trace
 {
+class ModuleMetadataBase
+{
+public:
+    const ComPtr<IMetaDataImport2>        metadata_import{};
+    const ComPtr<IMetaDataEmit2>          metadata_emit{};
+    const ComPtr<IMetaDataAssemblyImport> assembly_import{};
+    const ComPtr<IMetaDataAssemblyEmit>   assembly_emit{};
+
+    ModuleMetadataBase(ComPtr<IMetaDataImport2>        metadata_import,
+                       ComPtr<IMetaDataEmit2>          metadata_emit,
+                       ComPtr<IMetaDataAssemblyImport> assembly_import,
+                       ComPtr<IMetaDataAssemblyEmit>   assembly_emit)
+        : metadata_import(metadata_import)
+        , metadata_emit(metadata_emit)
+        , assembly_import(assembly_import)
+        , assembly_emit(assembly_emit)
+    {
+    }
+};
 class ModuleMetadata;
 
 const size_t kNameMaxSize = 1024;
@@ -161,6 +180,15 @@ static Enumerator<mdTypeRef> EnumTypeRefs(const ComPtr<IMetaDataImport2>& metada
         [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
 }
 
+static Enumerator<mdTypeSpec> EnumTypeSpecs(const ComPtr<IMetaDataImport2>& metadata_import)
+{
+    return Enumerator<mdTypeSpec>(
+        [metadata_import](HCORENUM* ptr, mdTypeSpec arr[], ULONG max, ULONG* cnt) -> HRESULT {
+            return metadata_import->EnumTypeSpecs(ptr, arr, max, cnt);
+        },
+        [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
+}
+
 static Enumerator<mdModuleRef> EnumModuleRefs(const ComPtr<IMetaDataImport2>& metadata_import)
 {
     return Enumerator<mdModuleRef>(
@@ -177,6 +205,16 @@ static Enumerator<mdAssemblyRef> EnumAssemblyRefs(const ComPtr<IMetaDataAssembly
             return assembly_import->EnumAssemblyRefs(ptr, arr, max, cnt);
         },
         [assembly_import](HCORENUM ptr) -> void { assembly_import->CloseEnum(ptr); });
+}
+
+static Enumerator<mdInterfaceImpl> EnumInterfaceImpls(const ComPtr<IMetaDataImport2>& metadata_import,
+                                                       const mdTypeDef typeDef)
+{
+    return Enumerator<mdInterfaceImpl>(
+        [metadata_import, typeDef](HCORENUM* ptr, mdInterfaceImpl arr[], ULONG max, ULONG* cnt) -> HRESULT {
+            return metadata_import->EnumInterfaceImpls(ptr, typeDef, arr, max, cnt);
+        },
+        [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
 }
 
 struct RuntimeInformation
@@ -234,8 +272,8 @@ struct AssemblyInfo
     {
     }
 
-    AssemblyInfo(AssemblyID id, WSTRING name, ModuleID manifest_module_id, AppDomainID app_domain_id,
-                 WSTRING app_domain_name) :
+    AssemblyInfo(AssemblyID id, const WSTRING& name, ModuleID manifest_module_id, AppDomainID app_domain_id,
+                 const WSTRING& app_domain_name) :
         id(id),
         name(name),
         manifest_module_id(manifest_module_id),
@@ -261,7 +299,7 @@ struct AssemblyMetadata
     {
     }
 
-    AssemblyMetadata(ModuleID module_id, WSTRING name, mdAssembly assembly_token, USHORT major, USHORT minor,
+    AssemblyMetadata(ModuleID module_id, const WSTRING& name, mdAssembly assembly_token, USHORT major, USHORT minor,
                      USHORT build, USHORT revision) :
         module_id(module_id),
         name(name),
@@ -294,7 +332,8 @@ struct AssemblyProperty
     {
     }
 
-    AssemblyProperty(WSTRING szName, void* ppbPublicKey, ULONG pcbPublicKey, ULONG pulHashAlgId, DWORD assemblyFlags) :
+    AssemblyProperty(const WSTRING& szName, void* ppbPublicKey, ULONG pcbPublicKey, ULONG pulHashAlgId,
+                     DWORD assemblyFlags) :
         szName(szName),
         ppbPublicKey(ppbPublicKey),
         pcbPublicKey(pcbPublicKey),
@@ -325,7 +364,7 @@ struct ModuleInfo
     ModuleInfo() : id(0), path(EmptyWStr), assembly({}), flags(0)
     {
     }
-    ModuleInfo(ModuleID id, WSTRING path, AssemblyInfo assembly, DWORD flags) :
+    ModuleInfo(ModuleID id, const WSTRING& path, const AssemblyInfo& assembly, DWORD flags) :
         id(id), path(path), assembly(assembly), flags(flags)
     {
     }
@@ -380,7 +419,8 @@ struct TypeInfo
         scopeToken(0)
     {
     }
-    TypeInfo(mdToken id, WSTRING name, mdTypeSpec type_spec, ULONG32 token_type, std::shared_ptr<TypeInfo> extend_from,
+    TypeInfo(mdToken id, const WSTRING& name, mdTypeSpec type_spec, ULONG32 token_type,
+             std::shared_ptr<TypeInfo> extend_from,
              bool valueType, bool isGeneric, std::shared_ptr<TypeInfo> parent_type, mdToken scopeToken) :
         id(id),
         name(name),
@@ -404,7 +444,8 @@ enum MethodArgumentTypeFlag
 {
     TypeFlagByRef = 0x01,
     TypeFlagVoid = 0x02,
-    TypeFlagBoxedType = 0x04
+    TypeFlagBoxedType = 0x04,
+    TypeFlagPinnedType = 0x08
 };
 
 // Represents a segment inside a larger signature (Method Signature / Local Var Signature) of
@@ -414,7 +455,7 @@ struct TypeSignature
     ULONG offset;
     ULONG length;
     PCCOR_SIGNATURE pbBase;
-    mdToken GetTypeTok(ComPtr<IMetaDataEmit2>& pEmit, mdAssemblyRef corLibRef) const;
+    mdToken GetTypeTok(const ComPtr<IMetaDataEmit2>& pEmit, mdAssemblyRef corLibRef) const;
     WSTRING GetTypeTokName(ComPtr<IMetaDataImport2>& pImport) const;
     std::tuple<unsigned, int> GetElementTypeAndFlags() const;
     ULONG GetSignature(PCCOR_SIGNATURE& data) const;
@@ -434,10 +475,8 @@ public:
     FunctionMethodSignature() : pbBase(nullptr), len(0)
     {
     }
-    FunctionMethodSignature(PCCOR_SIGNATURE pb, unsigned cbBuffer)
+    FunctionMethodSignature(PCCOR_SIGNATURE pb, unsigned cbBuffer) : pbBase(pb), len(cbBuffer)
     {
-        pbBase = pb;
-        len = cbBuffer;
     };
     ULONG NumberOfTypeArguments() const
     {
@@ -529,9 +568,9 @@ struct FunctionInfo
     {
     }
 
-    FunctionInfo(mdToken id, WSTRING name, TypeInfo type, MethodSignature signature,
-                 MethodSignature function_spec_signature, mdToken method_def_id,
-                 FunctionMethodSignature method_signature) :
+    FunctionInfo(mdToken id, const WSTRING& name, const TypeInfo& type, const MethodSignature& signature,
+                 const MethodSignature& function_spec_signature, mdToken method_def_id,
+                 const FunctionMethodSignature& method_signature) :
         id(id),
         name(name),
         type(type),
@@ -543,8 +582,8 @@ struct FunctionInfo
     {
     }
 
-    FunctionInfo(mdToken id, WSTRING name, TypeInfo type, MethodSignature signature,
-                 FunctionMethodSignature method_signature) :
+    FunctionInfo(mdToken id, const WSTRING& name, const TypeInfo& type, const MethodSignature& signature,
+                 const FunctionMethodSignature& method_signature) :
         id(id),
         name(name),
         type(type),
@@ -628,7 +667,7 @@ mdAssemblyRef FindAssemblyRef(const ComPtr<IMetaDataAssemblyImport>& assembly_im
 HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit, const AssemblyProperty& corAssemblyProperty,
                              mdAssemblyRef* corlib_ref);
 
-bool FindTypeDefByName(const trace::WSTRING instrumentationTargetMethodTypeName, const trace::WSTRING assemblyName,
+bool FindTypeDefByName(const trace::WSTRING& instrumentationTargetMethodTypeName, const trace::WSTRING& assemblyName,
                        const ComPtr<IMetaDataImport2>& metadata_import, mdTypeDef& typeDef);
 
 // FunctionMethodSignature
@@ -652,6 +691,56 @@ bool ParseParamOrLocal(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd);
 // RetType ::= CustomMod* ( VOID | TYPEDBYREF | [BYREF] Type )
 // CustomMod* TYPEDBYREF we don't support
 bool ParseRetType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd);
+struct GenericTypeProps
+{
+private:
+    PCCOR_SIGNATURE pbBase;
+    ULONG           len;
+
+public:
+    unsigned char SpecElementType = 0;  // Element type of the TypeSpec. e.g GENERICINST, VAR, MVAR, SZARRAY etc.
+    mdToken OpenTypeToken = mdTokenNil; // Token of the open generic type, can be TypeDef or TypeRef. In any case except
+                                        // CLASS or VALUETYPE, this will be mdTokenNil.
+    unsigned char GenericElementType =
+        0; // Element type of the generic type, can be any valid element type. e.g. OBJECT, CLASS, VALUETYPE etc.
+    unsigned ParamsCount       = 0; // Number of generic type args. e.g. GenericClass<T,V> params count will be 2.
+    unsigned IndexOfFirstParam = 0; // Index (the offset in signature) of the first generic parameter type.
+    unsigned ParamPosition     = 0; // For VAR and MVAR will be the number in the generic type parameters.
+    std::vector<std::tuple<PCCOR_SIGNATURE, ULONG, unsigned char>> ParamsSignature; // Collection of tuple(signature,
+                                                                                    // length) for each generic
+                                                                                    // parameter type.
+
+    GenericTypeProps(PCCOR_SIGNATURE pb, ULONG len) : pbBase(pb), len(len) {}
+
+    HRESULT TryParse();
+};
+
+HRESULT IsByRefLike(const ComPtr<IMetaDataImport2>& metadataImport,
+                    mdTypeDef                       typeDefToken,
+                    bool&                           hasByRefLikeAttribute);
+HRESULT ResolveTypeInternal(ICorProfilerInfo4*           info,
+                            const std::vector<ModuleID>& loadedModules,
+                            const std::vector<WCHAR>&    refTypeName,
+                            mdToken                      parentToken,
+                            const WSTRING&               resolutionScopeName,
+                            mdTypeDef&                   resolvedTypeDefToken,
+                            ComPtr<IMetaDataImport2>&    resolvedMetadataImport);
+HRESULT ResolveType(ICorProfilerInfo4*                     info,
+                    const ComPtr<IMetaDataImport2>&        metadataImport,
+                    const ComPtr<IMetaDataAssemblyImport>& assemblyImport,
+                    mdTypeRef                              typeRefToken,
+                    mdTypeDef&                             resolvedTypeDefToken,
+                    ComPtr<IMetaDataImport2>&              resolvedMetadataImport);
+HRESULT IsTypeByRefLike(ICorProfilerInfo4*        info,
+                        const ModuleMetadataBase& metadata,
+                        const TypeSignature&      signature,
+                        const mdAssemblyRef&      corLibAssemblyRef,
+                        bool&                     isByRefLike);
+HRESULT IsTypeTokenByRefLike(ICorProfilerInfo4*        info,
+                             const ModuleMetadataBase& metadata,
+                             mdToken                   token,
+                             bool&                     isByRefLike);
+
 } // namespace trace
 
 #endif // OTEL_CLR_PROFILER_CLR_HELPERS_H_

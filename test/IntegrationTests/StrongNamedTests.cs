@@ -25,7 +25,17 @@ public class StrongNamedTests : TestHelper
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "ByteCode.Plugin.StrongNamedValidation");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestLibrary.InstrumentationTarget.Plugin, TestLibrary.InstrumentationTarget, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c0db600a13f60b51");
-        RunTestApplication();
+        var (standardOutput, _, _) = RunTestApplication();
+
+        Assert.Contains("Bubble-up exception propagated from BubbleUpOnBegin.", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("Bubble-up exception propagated from BubbleUpOnEnd.", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("Wrapped bubble-up exception propagated from BubbleUpOnBegin.", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("Wrapped bubble-up exception propagated from BubbleUpOnEnd.", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("Regular integration exception was swallowed.", standardOutput, StringComparison.Ordinal);
+#if NET
+        Assert.Contains("CallTarget Span<int> validated.", standardOutput, StringComparison.Ordinal);
+        Assert.Contains("CallTarget ReadOnlySpan<int> validated.", standardOutput, StringComparison.Ordinal);
+#endif
 
         // TODO: When native logs are moved to an EventSource implementation check for the log
         // TODO: entries reporting the missing instrumentation type and missing instrumentation methods.

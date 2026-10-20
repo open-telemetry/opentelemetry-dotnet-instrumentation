@@ -1,6 +1,12 @@
 #include "pch.h"
 
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/integration.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/tracer_integration_definition.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/regex_utils.h"
+
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 using namespace trace;
 
@@ -13,6 +19,26 @@ TEST(IntegrationTest, AssemblyReference)
     EXPECT_EQ(ref.version, Version(1, 2, 3, 4));
     EXPECT_EQ(ref.locale, L"notneutral");
     EXPECT_EQ(ref.public_key, PublicKey({0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef}));
+}
+
+TEST(IntegrationTest, CallTargetDefinition2PreservesV1Prefix)
+{
+    EXPECT_EQ(offsetof(CallTargetDefinition2, categories), sizeof(CallTargetDefinition) + 4);
+    EXPECT_EQ(sizeof(CallTargetDefinition2), sizeof(CallTargetDefinition) + 8);
+}
+
+TEST(IntegrationTest, SharedCallTargetRemainsEnabledWhileOneCategoryIsEnabled)
+{
+    MethodReference       target(WStr("TargetAssembly"), WStr("TargetType"), WStr("TargetMethod"), Version(1, 0, 0, 0),
+                                 Version(2, 0, 0, 0), {});
+    TypeReference         integration(WStr("IntegrationAssembly"), WStr("IntegrationType"), {}, {});
+    IntegrationDefinition traceEnabled(target, integration, false, false, true, 3, 1);
+    IntegrationDefinition metricEnabled(target, integration, false, false, true, 3, 2);
+    IntegrationDefinition unrelatedCategoryEnabled(target, integration, false, false, true, 3, 4);
+
+    EXPECT_TRUE(traceEnabled.GetEnabled());
+    EXPECT_TRUE(metricEnabled.GetEnabled());
+    EXPECT_FALSE(unrelatedCategoryEnabled.GetEnabled());
 }
 
 TEST(IntegrationTest, AssemblyReferenceNameOnly)
@@ -48,3 +74,159 @@ TEST(IntegrationTest, AssemblyReferenceInvalidVersion)
     AssemblyReference ref(L"Some.Assembly, Version=xyz");
     EXPECT_EQ(ref.version, Version(0, 0, 0, 0));
 }
+
+TEST(IntegrationTest, AssemblyReferenceVersionRejectsOversizedComponent)
+{
+    AssemblyReference ref(WStr("Some.Assembly, Version=999999999999999999999999.2.3.4"));
+    EXPECT_EQ(ref.version, Version(0, 0, 0, 0));
+}
+
+TEST(IntegrationTest, AssemblyReferenceVersionRejectsPartiallyParsedOversizedComponent)
+{
+    AssemblyReference ref(WStr("Some.Assembly, Version=1.65536.3.4"));
+    EXPECT_EQ(ref.version, Version(0, 0, 0, 0));
+}
+
+TEST(IntegrationTest, TraceMethodParsingIncludesValidEntries)
+{
+    TypeReference integration(WStr("TestAssemblyName"), WStr("TestTypeName"), {}, {});
+
+    std::vector<IntegrationDefinition> integrationDefinitions = GetIntegrationsFromTraceMethodsConfiguration(
+        integration, WStr("Program[Main];Namespace.GenericCollection`1[Get];NonGenericType[GenericMethod]"));
+    EXPECT_EQ(integrationDefinitions.size(), 3);
+
+    for (auto integrationDefinition : integrationDefinitions)
+    {
+        EXPECT_EQ(integrationDefinition.integration_type.assembly.name, integration.assembly.name);
+        EXPECT_EQ(integrationDefinition.integration_type.name, integration.name);
+
+        EXPECT_EQ(integrationDefinition.target_method.type.assembly.name, tracemethodintegration_assemblyname);
+        EXPECT_EQ(integrationDefinition.target_method.signature_types.size(), 0);
+        EXPECT_EQ(integrationDefinition.is_exact_signature_match, false);
+        EXPECT_EQ(integrationDefinition.is_derived, false);
+    }
+
+    EXPECT_EQ(integrationDefinitions[0].target_method.type.name, WStr("Program"));
+    EXPECT_EQ(integrationDefinitions[0].target_method.method_name, WStr("Main"));
+
+    EXPECT_EQ(integrationDefinitions[1].target_method.type.name, WStr("Namespace.GenericCollection`1"));
+    EXPECT_EQ(integrationDefinitions[1].target_method.method_name, WStr("Get"));
+
+    EXPECT_EQ(integrationDefinitions[2].target_method.type.name, WStr("NonGenericType"));
+    EXPECT_EQ(integrationDefinitions[2].target_method.method_name, WStr("GenericMethod"));
+}
+
+TEST(IntegrationTest, TraceMethodParsingExcludesInvalidEntries)
+{
+    TypeReference integration(WStr("TestAssemblyName"), WStr("TestTypeName"), {}, {});
+
+    std::vector<IntegrationDefinition> integrationDefinitions = GetIntegrationsFromTraceMethodsConfiguration(
+        integration, WStr("TypeWithNoMethodsSpecified;;TypeWithNoClose[;TypeWithNoOpen];TypeWithoutMethods[]"));
+    EXPECT_EQ(integrationDefinitions.size(), 0);
+}
+
+TEST(IntegrationTest, MatchesSecretsPatternRecognizesOtlpHeaders)
+{
+    const std::string
+        environment_variables[]{"OTEL_EXPORTER_OTLP_HEADERS=authorization=Bearer%20super-secret-token",
+                                "OTEL_EXPORTER_OTLP_TRACES_HEADERS=authorization=Bearer%20super-secret-token",
+                                "OTEL_EXPORTER_OTLP_METRICS_HEADERS=authorization=Bearer%20super-secret-token",
+                                "OTEL_EXPORTER_OTLP_LOGS_HEADERS=authorization=Bearer%20super-secret-token"};
+
+    for (const auto& environment_variable : environment_variables)
+    {
+        EXPECT_TRUE(MatchesSecretsPattern(environment_variable)) << environment_variable;
+    }
+}
+
+#ifdef _WIN32
+// Memory-safety regression test for ExtractPublicKeyToken: the copy loop must bound itself to
+// the matched 8-byte token, not to the caller-supplied length. The 8-byte destination is placed
+// at the end of a committed page backed by a PAGE_NOACCESS guard page, so an over-write faults.
+namespace
+{
+
+class GuardedWriteBuffer
+{
+public:
+    explicit GuardedWriteBuffer(size_t size)
+    {
+        SYSTEM_INFO si{};
+        GetSystemInfo(&si);
+        const size_t page = si.dwPageSize;
+
+        // The destination must fit within the committed page so that its final byte abuts the
+        // guard page; a larger request cannot be represented by this helper.
+        if (size == 0 || size > page)
+        {
+            return;
+        }
+
+        auto* base = static_cast<unsigned char*>(VirtualAlloc(nullptr, page * 2, MEM_RESERVE, PAGE_NOACCESS));
+        if (base == nullptr)
+        {
+            return;
+        }
+
+        if (VirtualAlloc(base, page, MEM_COMMIT, PAGE_READWRITE) == nullptr)
+        {
+            VirtualFree(base, 0, MEM_RELEASE);
+            return;
+        }
+
+        // Only publish base_/data_ once both allocations succeeded; on failure data() stays null
+        // and the test asserts on it rather than dereferencing an invalid pointer.
+        base_ = base;
+        data_ = base_ + page - size;
+    }
+
+    ~GuardedWriteBuffer()
+    {
+        if (base_ != nullptr)
+        {
+            VirtualFree(base_, 0, MEM_RELEASE);
+        }
+    }
+
+    GuardedWriteBuffer(const GuardedWriteBuffer&)            = delete;
+    GuardedWriteBuffer& operator=(const GuardedWriteBuffer&) = delete;
+
+    unsigned char* data() const
+    {
+        return data_;
+    }
+
+private:
+    unsigned char* base_ = nullptr;
+    unsigned char* data_ = nullptr;
+};
+
+// SEH wrapper - must not own any C++ objects requiring unwinding.
+bool ExtractPublicKeyTokenFaults(const WSTRING& str, unsigned char* data, int length)
+{
+    __try
+    {
+        ExtractPublicKeyToken(str, data, length);
+        return false;
+    }
+    __except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH)
+    {
+        return true;
+    }
+}
+
+} // namespace
+
+TEST(IntegrationTest, ExtractPublicKeyTokenDoesNotWritePastBufferWhenLengthExceedsMatch)
+{
+    // 8-byte destination, but the caller asks for 10 bytes; the match only supplies 8.
+    const WSTRING      reference = L"PublicKeyToken=0123456789abcdef";
+    GuardedWriteBuffer buffer(8);
+    ASSERT_NE(buffer.data(), nullptr) << "Failed to set up the guard-page buffer for the test.";
+
+    const bool faulted = ExtractPublicKeyTokenFaults(reference, buffer.data(), 10);
+
+    ASSERT_FALSE(faulted) << "ExtractPublicKeyToken wrote past the end of the destination buffer because the copy "
+                             "loop trusted the caller-supplied length instead of the matched token size.";
+}
+#endif

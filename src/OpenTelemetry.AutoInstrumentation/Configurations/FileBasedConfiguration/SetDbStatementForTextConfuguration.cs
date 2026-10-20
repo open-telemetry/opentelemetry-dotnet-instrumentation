@@ -10,6 +10,12 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
 internal class SetDbStatementForTextConfuguration
 {
     /// <summary>
+    /// Gets or sets a value indicating whether Oracle Client instrumentation to enable database OpenTelemetry tracing.
+    /// </summary>
+    [YamlMember(Alias = "database_opentelemetry_tracing")]
+    public bool DatabaseOpenTelemetryTracing { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether SQL statements are passed through the db.statement attribute.
     /// If false, db.statement is recorded only for executing stored procedures.
     /// </summary>

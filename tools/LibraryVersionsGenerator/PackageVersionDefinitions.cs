@@ -141,7 +141,8 @@ internal static class PackageVersionDefinitions
                 // new("2.1.7"), transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
                 // new("3.1.7", supportedTargetFrameworks: new[] { "net8.0" }, supportedExecutionFrameworks: new[] { "net8.0" }), // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243, transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
                 // new("4.0.6"), transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
-                new("5.2.2"),
+                new("5.2.3"),
+                new("6.1.5"),
                 new("*")
             ]
         },
@@ -203,7 +204,8 @@ internal static class PackageVersionDefinitions
             Versions =
             [
                 // new("6.0.0"), - high vulnerability https://github.com/advisories/GHSA-x9vc-6hfv-hg8c, <= 6.0.10, <= 7.0.6, and <= 8.0.2 test should be skipped
-                // new("6.0.11"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4 <= 6.0.12, <=7.0.8, <=8.0.4 test should be skipped
+                // new("6.0.13"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4 <= 6.0.12, <=7.0.10, <=8.0.4 test should be skipped
+                // new("7.0.10"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4 <= 6.0.12, <=7.0.10, <=8.0.4 test should be skipped
                 new("8.0.9"),
                 new("9.0.4", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
                 new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
@@ -258,7 +260,9 @@ internal static class PackageVersionDefinitions
             [
                 // new("3.4.0"), - transitive vulnerability https://github.com/advisories/GHSA-rxg9-xrhp-64gj, <= 3.5.0
                 new("3.6.0"),
-                new("*")
+                new("3.22.7"),
+                new("4.0.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]),
+                new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
             ]
         },
         new()
@@ -296,6 +300,9 @@ internal static class PackageVersionDefinitions
             [
                 new("2.6.122"),
                 new("2.12.14"),
+                new("3.0.25", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
+                new("3.1.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]), // first version with the new internal ConnectImplAsync signature
+                new("3.3.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]), // first version with the new internal ConnectImplAsync signature
                 new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
             ]
         },
@@ -344,10 +351,10 @@ internal static class PackageVersionDefinitions
                 // Use case 2: Equal to instrumentation tool version
                 // net8.0: 10.0.0 (equal to instrumentation 10.0.0)
                 // net9.0: 10.0.0 (equal to instrumentation 10.0.0)
-                // net462: 10.0.8 (equal to instrumentation 10.0.8)
-                // net10.0: 10.0.8 (framework override to 10.0.0, validates build parameter was respected)
+                // net462: 10.0.13 (equal to instrumentation 10.0.13
+                // net10.0: 10.0.13 (framework override to 10.0.0, validates build parameter was respected)
                 new("10.0.0", supportedTargetFrameworks: ["net8.0", "net9.0"], supportedExecutionFrameworks: ["net8.0", "net9.0"]),
-                new("10.0.8", supportedTargetFrameworks: ["net462", "net10.0"], supportedExecutionFrameworks: ["net462", "net10.0"]),
+                new("10.0.13", supportedTargetFrameworks: ["net462", "net10.0"], supportedExecutionFrameworks: ["net462", "net10.0"]),
             ]
         },
         new()
@@ -357,7 +364,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Wcf.Core",
             Versions =
             [
-                new("1.8.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
+                new("1.8.1", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
                 new("*", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"])
             ]
         }

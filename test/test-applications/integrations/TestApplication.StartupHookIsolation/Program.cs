@@ -4,11 +4,12 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
+using TestApplication.Shared;
 
-// Args: [exit: <int>|throw] [exceptionType] [exceptionMessage]
+// Args: [--exit-code <int>] [--throw --exception-type <type> --exception-message <message>]
 // Modes:
-//   <int>       - returns <int> exit code
-//   throw       - throws an exception of the provided exceptionType with the provided exceptionMessage
+//   --exit-code - returns the provided exit code
+//   --throw     - throws an exception of the provided exceptionType with the provided exceptionMessage
 // This application is doing the following:
 //  1. Sends a span with the name of the AssemblyLoadContext where the executing assembly is loaded
 //  2. Checks that the Main entrypoint is not running twice by using a process-wide environment variable as a marker
@@ -17,9 +18,10 @@ using System.Runtime.Loader;
 //      3.2. With the provided exit code within range [1,99], or
 //      3.3. With 0 if application is running in Default ALC or 999 otherwise
 
-var exit = args.Length > 0 ? args[0] : null;
-var exceptionType = args.Length > 1 ? args[1] : null;
-var exceptionMessage = args.Length > 2 ? string.Join(" ", args.Skip(2)) : null;
+var exit = ArgumentHelper.GetArgument(args, "--exit-code", string.Empty);
+var shouldThrow = ArgumentHelper.HasArgument(args, "--throw");
+var exceptionType = ArgumentHelper.GetArgument(args, "--exception-type", string.Empty);
+var exceptionMessage = ArgumentHelper.GetArgument(args, "--exception-message", string.Empty);
 
 // 1. Sends a span with the name of the AssemblyLoadContext where the executing assembly is loaded
 var currentAlc = AssemblyLoadContext.GetLoadContext(Assembly.GetExecutingAssembly())!;
@@ -38,8 +40,13 @@ Environment.SetEnvironmentVariable(EnvVarName, "true");
 
 // 3. Exits:
 // 3.1. Throws the provided exception
-if (exit == "throw" && exceptionType is not null && exceptionMessage is not null)
+if (shouldThrow)
 {
+    if (string.IsNullOrEmpty(exceptionType) || string.IsNullOrEmpty(exceptionMessage))
+    {
+        throw new ArgumentException("Throw mode requires --exception-type and --exception-message.");
+    }
+
     Console.WriteLine($"[MODE] Throw mode - will throw {exceptionType} with message: \"{exceptionMessage}\"");
     throw (Exception)Activator.CreateInstance(Type.GetType(exceptionType)!, [exceptionMessage])!;
 }

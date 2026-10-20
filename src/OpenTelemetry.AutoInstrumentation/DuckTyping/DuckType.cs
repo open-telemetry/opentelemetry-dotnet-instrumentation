@@ -3,6 +3,7 @@
 
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -287,6 +288,8 @@ internal static partial class DuckType
                 // Create Methods
                 CreateReverseProxyMethods(proxyTypeBuilder, typeToDeriveFrom, typeToDelegateTo, instanceField);
 
+                AddCustomAttributes(proxyTypeBuilder, typeToDelegateTo, dryRun);
+
                 if (dryRun)
                 {
                     // Dry run
@@ -359,6 +362,8 @@ internal static partial class DuckType
         // Ensure visibility
         EnsureTypeVisibility(moduleBuilder, typeToDelegateTo);
         EnsureTypeVisibility(moduleBuilder, typeToDeriveFrom);
+        // Duck chaining calls the internal CreateCache<T> from the generated assembly.
+        EnsureTypeVisibility(moduleBuilder, typeof(DuckType));
 
         var assembly = string.Empty;
         if (typeToDelegateTo.Assembly is not null)
@@ -376,12 +381,18 @@ internal static partial class DuckType
 #endif
         }
 
-        // Create a valid type name that can be used as a member of a class. (BenchmarkDotNet fails if is an invalid name)
+        // Create a type name that can be used as a member of a class. The name is primarily for debugging.
 #if NET
-        var proxyTypeName = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}.{typeToDeriveFrom.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}_{++_typeCount}";
+        var proxyTypeNamePrefix = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}.{typeToDeriveFrom.FullName?.Replace(".", "_", StringComparison.Ordinal).Replace("+", "__", StringComparison.Ordinal)}";
 #else
-        var proxyTypeName = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_").Replace("+", "__")}.{typeToDeriveFrom.FullName?.Replace(".", "_").Replace("+", "__")}_{++_typeCount}";
+        var proxyTypeNamePrefix = $"{assembly}.{typeToDelegateTo.FullName?.Replace(".", "_").Replace("+", "__")}.{typeToDeriveFrom.FullName?.Replace(".", "_").Replace("+", "__")}";
 #endif
+        var proxyTypeNameSuffix = $"_{(++_typeCount).ToString(CultureInfo.InvariantCulture)}";
+        var maxPrefixSize = 1023 - proxyTypeNameSuffix.Length;
+        var proxyTypeName = (proxyTypeNamePrefix.Length > maxPrefixSize
+                                ? proxyTypeNamePrefix.Substring(0, maxPrefixSize)
+                                : proxyTypeNamePrefix)
+                            + proxyTypeNameSuffix;
 
         // Create Type
         proxyTypeBuilder = moduleBuilder.DefineType(
@@ -427,7 +438,7 @@ internal static partial class DuckType
 
         var instanceField = proxyTypeBuilder.DefineField("_currentInstance", instanceType, FieldAttributes.Private | FieldAttributes.InitOnly);
 
-        var propInstance = proxyTypeBuilder.DefineProperty("Instance", PropertyAttributes.None, typeof(object), null);
+        var propInstance = proxyTypeBuilder.DefineProperty(nameof(IDuckType.Instance), PropertyAttributes.None, typeof(object), null);
         var getPropInstance = proxyTypeBuilder.DefineMethod(
             "get_Instance",
             MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot,
@@ -444,7 +455,7 @@ internal static partial class DuckType
         il.Emit(OpCodes.Ret);
         propInstance.SetGetMethod(getPropInstance);
 
-        var propType = proxyTypeBuilder.DefineProperty("Type", PropertyAttributes.None, typeof(Type), null);
+        var propType = proxyTypeBuilder.DefineProperty(nameof(IDuckType.Type), PropertyAttributes.None, typeof(Type), null);
         var getPropType = proxyTypeBuilder.DefineMethod(
             "get_Type",
             MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot,
@@ -456,10 +467,20 @@ internal static partial class DuckType
         il.Emit(OpCodes.Ret);
         propType.SetGetMethod(getPropType);
 
-        var toStringTargetType = targetType.GetMethod("ToString", Type.EmptyTypes);
+        var getInstanceMethod = proxyTypeBuilder.DefineMethod(
+            nameof(IDuckType.GetInternalDuckTypedInstance),
+            MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot);
+        var getInstanceGenericTypeParameters = getInstanceMethod.DefineGenericParameters("TReturn");
+        getInstanceMethod.SetReturnType(getInstanceGenericTypeParameters[0].MakeByRefType());
+        il = getInstanceMethod.GetILGenerator();
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldflda, instanceField);
+        il.Emit(OpCodes.Ret);
+
+        var toStringTargetType = targetType.GetMethod(nameof(IDuckType.ToString), Type.EmptyTypes);
         if (toStringTargetType is not null)
         {
-            var toStringMethod = proxyTypeBuilder.DefineMethod("ToString", toStringTargetType.Attributes, typeof(string), Type.EmptyTypes);
+            var toStringMethod = proxyTypeBuilder.DefineMethod(nameof(IDuckType.ToString), toStringTargetType.Attributes, typeof(string), Type.EmptyTypes);
             il = toStringMethod.GetILGenerator();
             il.Emit(OpCodes.Ldarg_0);
             if (instanceType.IsValueType)
@@ -487,6 +508,46 @@ internal static partial class DuckType
         }
 
         return instanceField;
+    }
+
+    private static void AddCustomAttributes(TypeBuilder? proxyTypeBuilder, Type targetType, bool isDryRun)
+    {
+        foreach (var customAttributeData in targetType.GetCustomAttributesData())
+        {
+            var attributeType = customAttributeData.AttributeType;
+            if (attributeType == typeof(DuckAttribute)
+             || attributeType == typeof(DuckCopyAttribute)
+             || attributeType == typeof(DuckFieldAttribute)
+             || attributeType == typeof(DuckIgnoreAttribute)
+             || attributeType == typeof(DuckIncludeAttribute)
+             || attributeType == typeof(DuckReverseMethodAttribute))
+            {
+                continue;
+            }
+
+            // Don't support named arguments for now
+            if (customAttributeData.NamedArguments.Count > 0)
+            {
+                DuckTypeCustomAttributeHasNamedArgumentsException.Throw(targetType, customAttributeData);
+            }
+
+            var args = Array.Empty<object?>();
+            if (customAttributeData.ConstructorArguments.Count > 0)
+            {
+                args = new object[customAttributeData.ConstructorArguments.Count];
+                for (var i = 0; i < customAttributeData.ConstructorArguments.Count; i++)
+                {
+                    args[i] = customAttributeData.ConstructorArguments[i].Value;
+                }
+            }
+
+            var attributeBuilder = new CustomAttributeBuilder(customAttributeData.Constructor, constructorArgs: args);
+
+            if (!isDryRun)
+            {
+                proxyTypeBuilder?.SetCustomAttribute(attributeBuilder);
+            }
+        }
     }
 
     /// <summary>
@@ -995,6 +1056,7 @@ internal static partial class DuckType
         il.Emit(OpCodes.Initobj, proxyDefinitionType);
 
         // Start copy properties from the proxy to the structure
+        var containsFields = false;
         foreach (var finfo in proxyDefinitionType.GetFields())
         {
             // Skip readonly fields
@@ -1016,12 +1078,18 @@ internal static partial class DuckType
                 il.Emit(OpCodes.Ldloca_S, proxyLocal.LocalIndex);
                 il.EmitCall(OpCodes.Call, prop.GetMethod, null);
                 il.Emit(OpCodes.Stfld, finfo);
+                containsFields = true;
             }
         }
 
         // Return
         il.WriteLoadLocal(structLocal.LocalIndex);
         il.Emit(OpCodes.Ret);
+
+        if (!containsFields && proxyDefinitionType.GetProperties().Length != 0)
+        {
+            DuckTypeDuckCopyStructDoesNotContainsAnyField.Throw(proxyDefinitionType);
+        }
 
         var delegateType = typeof(CreateProxyInstance<>).MakeGenericType(proxyDefinitionType);
         return createStructMethod.CreateDelegate(delegateType);
@@ -1162,7 +1230,8 @@ internal static partial class DuckType
         /// </summary>
         public static readonly Type Type = typeof(T);
 
-        private static CreateTypeResult _fastPath;
+        // CreateTypeResult is a struct and must be boxed for safe concurrent access.
+        private static StrongBox<CreateTypeResult>? _fastPath;
 
         /// <summary>
         /// Gets the proxy type for a target type using the T proxy definition
@@ -1173,19 +1242,15 @@ internal static partial class DuckType
         public static CreateTypeResult GetProxy(Type targetType)
         {
             // We set a fast path for the first proxy type for a proxy definition. (It's likely to have a proxy definition just for one target type)
-            var fastPath = _fastPath;
-            if (fastPath.TargetType == targetType)
+            var fastPath = Volatile.Read(ref _fastPath);
+            if (fastPath?.Value.TargetType == targetType)
             {
-                return fastPath;
+                return fastPath.Value;
             }
 
             var result = GetOrCreateProxyType(Type, targetType);
 
-            fastPath = _fastPath;
-            if (fastPath.TargetType is null)
-            {
-                _fastPath = result;
-            }
+            _fastPath ??= new(result);
 
             return result;
         }
@@ -1267,19 +1332,15 @@ internal static partial class DuckType
         public static CreateTypeResult GetReverseProxy(Type targetType)
         {
             // We set a fast path for the first proxy type for a proxy definition. (It's likely to have a proxy definition just for one target type)
-            var fastPath = _fastPath;
-            if (fastPath.TargetType == targetType)
+            var fastPath = Volatile.Read(ref _fastPath);
+            if (fastPath?.Value.TargetType == targetType)
             {
-                return fastPath;
+                return fastPath.Value;
             }
 
             var result = GetOrCreateReverseProxyType(Type, targetType);
 
-            fastPath = _fastPath;
-            if (fastPath.TargetType is null)
-            {
-                _fastPath = result;
-            }
+            _fastPath ??= new(result);
 
             return result;
         }

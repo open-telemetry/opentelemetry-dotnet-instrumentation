@@ -85,21 +85,11 @@ internal static class Program
 
     private static int GetTcpPort(string[] args)
     {
-        if (args.Length > 1)
-        {
-            return int.Parse(args[1], CultureInfo.InvariantCulture);
-        }
-
-        return 9090;
+        return int.Parse(ArgumentHelper.GetArgument(args, "--tcpPort", "9090"), CultureInfo.InvariantCulture);
     }
 
     private static int GetHttpPort(string[] args)
     {
-        if (args.Length > 3)
-        {
-            return int.Parse(args[3], CultureInfo.InvariantCulture);
-        }
-
-        return 9009;
+        return int.Parse(ArgumentHelper.GetArgument(args, "--httpPort", "9009"), CultureInfo.InvariantCulture);
     }
 }

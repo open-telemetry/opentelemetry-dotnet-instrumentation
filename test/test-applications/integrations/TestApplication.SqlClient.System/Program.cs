@@ -25,6 +25,14 @@ internal static class Program
         var (databasePassword, databasePort) = ParseArgs(args);
         var connectionString = GetConnectionString(databasePassword, databasePort);
 
+        using (var scalarCommandConnection = new SqlConnection(connectionString))
+        {
+            if (SqlServerScalarCommandExecutor.TryExecute(scalarCommandConnection, args))
+            {
+                return;
+            }
+        }
+
         using (var connection = new SqlConnection(connectionString))
         {
             ExecuteCommands(connection);
@@ -150,12 +158,9 @@ internal static class Program
 
     private static (string DatabasePassword, string Port) ParseArgs(string[] args)
     {
-        if (args?.Length != 2)
-        {
-            throw new ArgumentException($"{nameof(TestApplication.SqlClient)}: requires two command-line arguments: <dbPassword> <dbPort>");
-        }
-
-        return (DatabasePassword: args[0], Port: args[1]);
+        return (
+            DatabasePassword: ArgumentHelper.GetRequiredArgument(args, "--password"),
+            Port: ArgumentHelper.GetRequiredArgument(args, "--port"));
     }
 }
 #pragma warning restore CS0618 // Type or member is obsolete

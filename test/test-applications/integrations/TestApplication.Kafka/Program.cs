@@ -16,27 +16,17 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        if (args.Length < 4)
-        {
-            throw new ArgumentException("Required parameters not provided.");
-        }
-
-        var port = args[1];
+        var port = ArgumentHelper.GetRequiredArgument(args, "--kafka");
         _bootstrapServers = $"localhost:{port}";
 
-        var topicName = args[3];
+        var topicName = ArgumentHelper.GetRequiredArgument(args, "--topic-name");
 
-        if (args.Length == 5 && args[4] == "--consume-only")
+        if (ArgumentHelper.HasArgument(args, "--consume-only"))
         {
             return await ConsumeOnly(topicName).ConfigureAwait(false);
         }
 
-        if (args.Length == 4)
-        {
-            return await ProduceAndConsume(topicName).ConfigureAwait(false);
-        }
-
-        throw new ArgumentException("Invalid parameters.");
+        return await ProduceAndConsume(topicName).ConfigureAwait(false);
     }
 
     private static async Task<int> ConsumeOnly(string topicName)
@@ -238,8 +228,29 @@ internal static class Program
         };
 
         using var adminClient = new AdminClientBuilder(adminClientConfig).Build();
-        await adminClient.CreateTopicsAsync([
-            new TopicSpecification { Name = topic, ReplicationFactor = 1, NumPartitions = 1 }
-        ]).ConfigureAwait(false);
+
+        // The broker may not be ready to accept admin requests immediately after the
+        // container starts, so retry a few times before giving up.
+        const int maxAttempts = 10;
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                await adminClient.CreateTopicsAsync([
+                    new TopicSpecification { Name = topic, ReplicationFactor = 1, NumPartitions = 1 }
+                ]).ConfigureAwait(false);
+                return;
+            }
+            catch (CreateTopicsException ex) when (ex.Results.All(result => result.Error.Code == ErrorCode.TopicAlreadyExists))
+            {
+                // Topic was already created (e.g. by a previous attempt); nothing else to do.
+                return;
+            }
+            catch (KafkaException ex) when (attempt < maxAttempts)
+            {
+                Console.WriteLine($"CreateTopic attempt {attempt}/{maxAttempts} failed: {ex.Message}. Retrying...");
+                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+            }
+        }
     }
 }

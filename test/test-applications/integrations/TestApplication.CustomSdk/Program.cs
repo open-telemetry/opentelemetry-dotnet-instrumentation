@@ -29,11 +29,6 @@ internal static class Program
 
     public static async Task Main(string[] args)
     {
-        if (args.Length != 4)
-        {
-            throw new InvalidOperationException("Missing arguments. Provide redis port with --redis-port <redis-port> and test server port with --test-server-port <test-server-port>.");
-        }
-
         ConsoleHelper.WriteSplashScreen(args);
 
         // When export of NServiceBus metrics is tested, which are updated on receive side,
@@ -97,7 +92,7 @@ internal static class Program
 
                 using var client = new HttpClient();
                 client.Timeout = TimeSpan.FromSeconds(5);
-                var port = int.Parse(args[3], CultureInfo.InvariantCulture);
+                var port = int.Parse(ArgumentHelper.GetRequiredArgument(args, "--test-server-port"), CultureInfo.InvariantCulture);
                 await client.GetStringAsync(new Uri($"http://localhost:{port}/test"), cancellation.Token).ConfigureAwait(false);
             }
 
@@ -164,7 +159,7 @@ internal static class Program
 
     private static async Task PingRedis(string[] args)
     {
-        var redisPort = int.Parse(GetRedisPort(args), CultureInfo.InvariantCulture);
+        var redisPort = int.Parse(ArgumentHelper.GetRequiredArgument(args, "--redis-port"), CultureInfo.InvariantCulture);
 
         var connectionString = $"127.0.0.1:{redisPort}";
 
@@ -172,15 +167,5 @@ internal static class Program
         var db = connection.GetDatabase();
 
         await db.PingAsync().ConfigureAwait(false);
-    }
-
-    private static string GetRedisPort(string[] args)
-    {
-        if (args.Length > 1)
-        {
-            return args[1];
-        }
-
-        return "6379";
     }
 }

@@ -79,7 +79,7 @@ internal static class DotNetSettingsExtensions
 
             if (buildInfo.SupportedFrameworks.Length > 0)
             {
-                p = p.SetProperty("TargetFrameworks", string.Join(";", buildInfo.SupportedFrameworks));
+                p = p.SetProperty("TargetFrameworks", "\"\"\"" + string.Join(";", buildInfo.SupportedFrameworks) + "\"\"\"");
             }
 
             return p;

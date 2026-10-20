@@ -8,11 +8,13 @@
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <GeneratedFolder>Generated</GeneratedFolder>
     <CompilerGeneratedFilesOutputPath>$(GeneratedFolder)\$(TargetFramework)</CompilerGeneratedFilesOutputPath>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
     <!-- Do not catch general exception types. Typically, we need to handle all Exception to do not break application. -->
     <NoWarn>$(NoWarn);CA1031</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation.PluginApi\OpenTelemetry.AutoInstrumentation.PluginApi.csproj" />
     <ProjectReference Include="..\SourceGenerators\SourceGenerators.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
     <Compile Remove="$(GeneratedFolder)/*/**/*.cs" />
   </ItemGroup>

@@ -4,4 +4,7 @@
     <TargetFrameworks>net462</TargetFrameworks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="..\TestApplication.SqlClient.System\SqlServerScalarCommandExecutor.cs" Link="SqlServerScalarCommandExecutor.cs" />
+  </ItemGroup>
 </Project>

@@ -108,11 +108,12 @@ partial class Build : NukeBuild
         .DependsOn(GenerateTransientDependencies)
         .DependsOn(CompileManagedSrc)
         .DependsOn(PublishManagedProfiler)
+        .DependsOn(PrepareAdditionalDeps)
         .DependsOn(PublishRuleEngineJson)
         .DependsOn(GenerateAssemblyRedirectionSource)
         .DependsOn(CompileNativeSrc)
         .DependsOn(PublishNativeProfiler)
-        .DependsOn(CopyInstrumentScripts)
+        .DependsOn(CopyScripts)
         .DependsOn(CopyLegalFiles)
         .DependsOn(CreateVersionFile);
 

@@ -1,25 +1,24 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using OpenTelemetry.OpAmp.Client;
-using OpenTelemetry.OpAmp.Client.Settings;
+using OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
 
 namespace OpenTelemetry.AutoInstrumentation.Plugins;
 
 internal partial class PluginManager
 {
-    public void ConfigureOpAmpOptions(OpAmpClientSettings options)
+    public IReadOnlyList<(Type Type, IOpAmpPlugin Instance)> GetOpAmpPlugins()
     {
-        CallPlugins("ConfigureOpAmpOptions", (typeof(OpAmpClientSettings), options));
-    }
+        var plugins = new List<(Type Type, IOpAmpPlugin Instance)>();
 
-    public void AfterOpAmpClientStarted(OpAmpClient client)
-    {
-        CallPlugins("AfterOpAmpClientStarted", (typeof(OpAmpClient), client));
-    }
+        foreach (var plugin in _plugins)
+        {
+            if (plugin.Instance is IOpAmpPlugin opAmpPlugin)
+            {
+                plugins.Add((plugin.Type, opAmpPlugin));
+            }
+        }
 
-    public void BeforeOpAmpClientStopped()
-    {
-        CallPlugins("BeforeOpAmpClientStopped");
+        return plugins;
     }
 }

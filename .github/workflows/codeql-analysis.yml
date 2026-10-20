@@ -34,12 +34,13 @@ jobs:
         include:
         - language: actions
           # renovate: datasource=github-runners depType=github-runner
-          machine: ubuntu-24.04
+          machine: ubuntu-26.04
         - language: c-cpp
-          build-mode: autobuild
+          # Keep this as "none" so paths-ignore in codeql-config.yml excludes vendored native lib files.
+          build-mode: none
           queries: security-extended
           # renovate: datasource=github-runners depType=github-runner
-          machine: ubuntu-24.04
+          machine: ubuntu-26.04
         - language: csharp
           build-mode: manual
           # renovate: datasource=github-runners depType=github-runner
@@ -62,14 +63,14 @@ jobs:
         disk-root: "D:"
 
     - name: Checkout code
-      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         filter: 'tree:0'
         persist-credentials: false
         show-progress: false
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@87557b9c84dde89fdd9b10e88954ac2f4248e463 # v4.36.1
+      uses: github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
@@ -77,7 +78,7 @@ jobs:
         queries: ${{ matrix.queries }}
 
     - name: Setup .NET
-      uses: ./.github/actions/setup-dotnet
+      uses: $/.github/actions/setup-dotnet
       if: matrix.language == 'csharp'
 
     # If the analyze step fails for one of the languages you are analyzing with
@@ -91,7 +92,7 @@ jobs:
       run: ./build.cmd BuildTracer
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@87557b9c84dde89fdd9b10e88954ac2f4248e463 # v4.36.1
+      uses: github/codeql-action/analyze@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
       with:
         category: "/language:${{matrix.language}}"
 
@@ -99,7 +100,7 @@ jobs:
     name: results # Matches required status check
     if: ${{ !cancelled() }}
     needs: [ analyze ]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     steps:
       - name: Report status

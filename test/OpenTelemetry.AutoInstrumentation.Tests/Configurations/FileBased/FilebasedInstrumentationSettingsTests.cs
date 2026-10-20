@@ -4,6 +4,7 @@
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.HeadersCapture;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
 
@@ -50,14 +51,18 @@ public class FilebasedInstrumentationSettingsTests
                     CaptureRequestMetadata = "x-request-id",
                     CaptureResponseMetadata = "x-response-id"
                 },
-                OracleMda = new SetDbStatementForTextConfuguration
-                {
-                    SetDbStatementForText = true
-                },
                 HttpClient = new CaptureHeadersConfiguration
                 {
                     CaptureRequestHeaders = "x-request-id",
                     CaptureResponseHeaders = "x-response-id"
+                },
+                Npgsql = new NpgsqlConfiguration
+                {
+                    ContextPropagation = true
+                },
+                OracleMda = new SetDbStatementForTextConfuguration
+                {
+                    SetDbStatementForText = true
                 }
             }
         };
@@ -76,9 +81,11 @@ public class FilebasedInstrumentationSettingsTests
 
         Assert.NotNull(settings.EnabledInstrumentations);
         Assert.Contains(TracerInstrumentation.GrpcNetClient, settings.EnabledInstrumentations);
+        Assert.Contains(TracerInstrumentation.Npgsql, settings.EnabledInstrumentations);
         Assert.Contains(TracerInstrumentation.OracleMda, settings.EnabledInstrumentations);
         Assert.Contains(TracerInstrumentation.HttpClient, settings.EnabledInstrumentations);
 
+        Assert.True(settings.InstrumentationOptions.NpgsqlContextPropagation);
         Assert.True(settings.InstrumentationOptions.OracleMdaSetDbStatementForText);
         Assert.Contains(AdditionalTag.CreateGrpcRequestCache("x-request-id"), settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureRequestMetadata);
         Assert.Contains(AdditionalTag.CreateGrpcResponseCache("x-response-id"), settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata);
@@ -332,8 +339,13 @@ public class FilebasedInstrumentationSettingsTests
 
 #if NETFRAMEWORK
     [Fact]
-    public void LoadFile_SetsSqlClientNetFxIlRewriteEnvironmentVariable()
+    public void LoadFile_SetsSqlClientNetFxOptions()
     {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxExperimentalContextPropagation, "true" }
+        });
+
         var instrumentation = new DotNetInstrumentation
         {
             Traces = new DotNetTraces
@@ -355,6 +367,7 @@ public class FilebasedInstrumentationSettingsTests
         settings.LoadFile(conf);
 
         Assert.True(settings.InstrumentationOptions.SqlClientNetFxIlRewriteEnabled);
+        Assert.True(settings.InstrumentationOptions.SqlClientNetFxExperimentalContextPropagation);
     }
 #endif
 }

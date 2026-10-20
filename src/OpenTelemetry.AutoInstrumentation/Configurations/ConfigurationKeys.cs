@@ -50,6 +50,16 @@ internal partial class ConfigurationKeys
     public const string OpAmpServerUrl = "OTEL_DOTNET_AUTO_OPAMP_SERVER_URL";
 
     /// <summary>
+    /// Configuration key for the maximum number of pending OpAMP custom messages.
+    /// </summary>
+    public const string OpAmpMaxPendingCustomMessages = "OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGES";
+
+    /// <summary>
+    /// Configuration key for the maximum aggregate size of pending OpAMP custom message payloads.
+    /// </summary>
+    public const string OpAmpMaxPendingCustomMessageBytes = "OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGE_BYTES";
+
+    /// <summary>
     /// Configuration key for enabling all instrumentations.
     /// </summary>
     public const string InstrumentationEnabled = "OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED";
@@ -87,12 +97,6 @@ internal partial class ConfigurationKeys
         /// Configuration key for enabling file based configuration.
         /// </summary>
         public const string Enabled = "OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED";
-
-        /// <summary>
-        /// Configuration key for the deprecated path to the configuration file.
-        /// Default is <c>"config.yaml"</c>.
-        /// </summary>
-        public const string ExperimentalFileName = "OTEL_EXPERIMENTAL_CONFIG_FILE";
 
         /// <summary>
         /// Configuration key for the path to the configuration file.
@@ -201,14 +205,32 @@ internal partial class ConfigurationKeys
             public const string HttpInstrumentationCaptureResponseHeaders = "OTEL_DOTNET_AUTO_TRACES_HTTP_INSTRUMENTATION_CAPTURE_RESPONSE_HEADERS";
 
             /// <summary>
+            /// Configuration key for enabling Npgsql context propagation to the PostgreSQL server.
+            /// </summary>
+            public const string NpgsqlContextPropagation = "OTEL_DOTNET_AUTO_NPGSQL_CONTEXT_PROPAGATION";
+
+            /// <summary>
+            /// Configuration key for Oracle Client instrumentation to enable database OpenTelemetry tracing.
+            /// </summary>
+            public const string OracleMdaDatabaseOpenTelemetryTracing = "OTEL_DOTNET_AUTO_ORACLEMDA_DATABASE_OPENTELEMETRY_TRACING";
+
+            /// <summary>
             /// Configuration key for Oracle Client instrumentation to enable passing text query as a db.statement attribute.
             /// </summary>
             public const string OracleMdaSetDbStatementForText = "OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT";
 
+#if NETFRAMEWORK
             /// <summary>
             /// Configuration key for enabling IL rewriting of SqlClient on .NET Framework to ensure CommandText is available.
             /// </summary>
             public const string SqlClientNetFxILRewriteEnabled = "OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED";
+
+            /// <summary>
+            /// Configuration key for enabling context propagation to the server side.
+            /// <remarks>It should be in sync with the name from https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/main/src/OpenTelemetry.Instrumentation.SqlClient/SqlClientTraceInstrumentationOptions.cs</remarks>
+            /// </summary>
+            public const string SqlClientNetFxExperimentalContextPropagation = "OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_CONTEXT_PROPAGATION";
+#endif
         }
     }
 

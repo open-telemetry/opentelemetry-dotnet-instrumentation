@@ -2,3 +2,5 @@ file_format: "1.0"
 
 opamp/development:
   server_url: ${OTEL_DOTNET_AUTO_OPAMP_SERVER_URL}
+  max_pending_custom_messages: ${OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGES}
+  max_pending_custom_message_bytes: ${OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGE_BYTES}

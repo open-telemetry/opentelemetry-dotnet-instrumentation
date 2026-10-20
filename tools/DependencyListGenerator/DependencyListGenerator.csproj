@@ -6,10 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\test\test-keypair.snk</AssemblyOriginatorKeyFile>
     <!-- 
         LangVersion needs to be 13.0 as it is dependency on _builds.csrpoj. 
-        It can be udated when .NET8/.NET9 supportf will be dropped.
+        It can be udated when .NET8/.NET9 support will be dropped.
     -->
     <LangVersion>13.0</LangVersion>
   </PropertyGroup>
@@ -18,6 +17,8 @@
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" />
     <PackageReference Include="NuGet.ProjectModel" />
     <PackageReference Include="System.IO.Abstractions" />
+    <!-- System.Security.Cryptography.Pkcs is a transitive package from NuGet.ProjectModel. Needs update to fix https://github.com/advisories/GHSA-846f-f764-76mx -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>
 
 </Project>

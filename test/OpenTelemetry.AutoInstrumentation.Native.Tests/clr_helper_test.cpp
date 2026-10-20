@@ -3,6 +3,9 @@
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/clr_helpers.h"
 #include "test_helpers.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 #include <vector>
 
 using namespace trace;
@@ -167,6 +170,48 @@ TEST_F(CLRHelperTest, GetsTypeInfoFromTypeRefs)
     EXPECT_EQ(expected, actual);
 }
 
+TEST_F(CLRHelperTest, GetsTypeInfoFromTypeSpecs)
+{
+    size_t valid_type_specs = 0;
+    for (auto& type_spec : EnumTypeSpecs(metadata_import_))
+    {
+        const auto type_info = GetTypeInfo(metadata_import_, type_spec);
+        if (type_info.IsValid())
+        {
+            EXPECT_EQ(type_spec, type_info.type_spec);
+            EXPECT_EQ(mdtTypeSpec, type_info.token_type);
+            valid_type_specs++;
+        }
+    }
+
+    EXPECT_GT(valid_type_specs, 0u);
+}
+
+TEST_F(CLRHelperTest, ReturnsEmptyForCircularTypeSpec)
+{
+    mdTypeSpec next_type_spec = mdTypeSpecNil + 1;
+    for (auto& type_spec : EnumTypeSpecs(metadata_import_))
+    {
+        if (type_spec >= next_type_spec)
+        {
+            next_type_spec = type_spec + 1;
+        }
+    }
+
+    COR_SIGNATURE signature[8]       = {ELEMENT_TYPE_GENERICINST, ELEMENT_TYPE_CLASS};
+    const auto    compressed_length  = CorSigCompressToken(next_type_spec, &signature[2]);
+    signature[2 + compressed_length] = 1;
+    signature[3 + compressed_length] = ELEMENT_TYPE_I4;
+
+    mdTypeSpec circular_type_spec = mdTypeSpecNil;
+    const auto hr = metadata_emit_->GetTokenFromTypeSpec(signature, 4 + compressed_length, &circular_type_spec);
+    ASSERT_TRUE(SUCCEEDED(hr));
+    ASSERT_EQ(next_type_spec, circular_type_spec);
+
+    const auto type_info = GetTypeInfo(metadata_import_, circular_type_spec);
+    EXPECT_FALSE(type_info.IsValid());
+}
+
 TEST_F(CLRHelperTest, GetsTypeInfoFromModuleRefs)
 {
     // TODO(cbd): figure out how to create a module ref, for now its empty
@@ -253,16 +298,190 @@ TEST_F(CLRHelperTest, FindNestedTypeDefsByName)
     }
 }
 
-TEST_F(CLRHelperTest, DoesNotFindDoubleNestedTypeDefsByName)
+TEST_F(CLRHelperTest, TypeSignatureGetTypeTokName)
 {
-    std::vector<std::wstring> expected_types = {L"TestApplication.ExampleLibrary.NotARealClass",
-                                                L"TestApplication.ExampleLibrary.FakeClient.Biscuit+Cookie+Raisin"};
+    COR_SIGNATURE signatureChar[] = {ELEMENT_TYPE_CHAR};
+    TypeSignature charTypeSignature{};
+    charTypeSignature.pbBase = signatureChar;
+    charTypeSignature.length = 1;
+    charTypeSignature.offset = 0;
 
-    for (auto& def : expected_types)
+    COR_SIGNATURE signatureByRefChar[] = {ELEMENT_TYPE_BYREF, ELEMENT_TYPE_CHAR};
+    TypeSignature byRefCharTypeSignature{};
+    byRefCharTypeSignature.pbBase = signatureByRefChar;
+    byRefCharTypeSignature.length = 2;
+    byRefCharTypeSignature.offset = 0;
+
+    COR_SIGNATURE signaturePtrChar[] = {ELEMENT_TYPE_PTR, ELEMENT_TYPE_CHAR};
+    TypeSignature ptrCharTypeSignature{};
+    ptrCharTypeSignature.pbBase = signaturePtrChar;
+    ptrCharTypeSignature.length = 2;
+    ptrCharTypeSignature.offset = 0;
+
+    std::vector<std::tuple<TypeSignature, WSTRING>> tests = {{charTypeSignature, WStr("System.Char")},
+                                                             {byRefCharTypeSignature, WStr("System.Char&")},
+                                                             {ptrCharTypeSignature, WStr("System.Char*")}};
+
+    for (auto& test : tests)
     {
-        mdTypeDef typeDef = mdTypeDefNil;
-        auto      found   = FindTypeDefByName(def, L"TestApplication.ExampleLibrary", metadata_import_, typeDef);
-        EXPECT_FALSE(found) << "Failed type is : " << def << std::endl;
-        EXPECT_EQ(typeDef, mdTypeDefNil) << "Failed type is : " << def << std::endl;
+        auto actual   = std::get<0>(test).GetTypeTokName(metadata_import_);
+        auto expected = std::get<1>(test);
+
+        EXPECT_EQ(actual, expected);
     }
 }
+
+TEST_F(CLRHelperTest, FunctionLocalSignatureTryParse)
+{
+    COR_SIGNATURE localSignatureWithOneChar[]      = {0x07, 0x01, ELEMENT_TYPE_CHAR};
+    COR_SIGNATURE localSignatureWithOneByRefChar[] = {0x07, 0x01, ELEMENT_TYPE_BYREF, ELEMENT_TYPE_CHAR};
+    COR_SIGNATURE localSignatureWithOnePtrChar[]   = {0x07, 0x01, ELEMENT_TYPE_PTR, ELEMENT_TYPE_CHAR};
+
+    std::vector<std::tuple<COR_SIGNATURE*, ULONG, WSTRING>> tests =
+        {{localSignatureWithOneChar, 3, WStr("[System.Char]")},
+         {localSignatureWithOneByRefChar, 4, WStr("[System.Char&]")},
+         {localSignatureWithOnePtrChar, 4, WStr("[System.Char*]")}};
+
+    for (auto& test : tests)
+    {
+        std::vector<TypeSignature> locals;
+        HRESULT                    hr = FunctionLocalSignature::TryParse(std::get<0>(test), std::get<1>(test), locals);
+        EXPECT_EQ(hr, S_OK);
+        EXPECT_EQ(locals.size(), 1) << "Failed test input is params=" << std::get<2>(test) << std::endl;
+    }
+}
+
+TEST_F(CLRHelperTest, FindDoubleNestedTypeDefsByName)
+{
+    mdTypeDef  typeDef = mdTypeDefNil;
+    const auto found   = FindTypeDefByName(WStr("TestApplication.ExampleLibrary.FakeClient.Biscuit+Cookie+Raisin"),
+                                           WStr("TestApplication.ExampleLibrary"), metadata_import_, typeDef);
+    EXPECT_TRUE(found);
+    EXPECT_NE(typeDef, mdTypeDefNil);
+}
+
+TEST_F(CLRHelperTest, DoesNotFindMissingNestedTypeDefsByName)
+{
+    for (const auto& name : {WStr("TestApplication.ExampleLibrary.NotARealClass"),
+                             WStr("TestApplication.ExampleLibrary.FakeClient.Biscuit+Cookie+NotARealClass")})
+    {
+        mdTypeDef typeDef = mdTypeDefNil;
+        EXPECT_FALSE(FindTypeDefByName(name, WStr("TestApplication.ExampleLibrary"), metadata_import_, typeDef));
+        EXPECT_EQ(typeDef, mdTypeDefNil);
+    }
+}
+
+#ifdef _WIN32
+// Memory-safety regression tests for the managed-metadata signature parser used by
+// FunctionMethodSignature::TryParse. ParseRetType/ParseType historically dereferenced *pbCur
+// before the pbCur < pbEnd bounds check, reading one byte past a truncated signature blob.
+// The signature bytes are placed at the end of a committed page backed by a PAGE_NOACCESS
+// guard page, so any over-read faults deterministically (caught via SEH).
+namespace
+{
+
+class GuardedSignatureBuffer
+{
+public:
+    explicit GuardedSignatureBuffer(const unsigned char* bytes, size_t size)
+    {
+        SYSTEM_INFO si{};
+        GetSystemInfo(&si);
+        const size_t page = si.dwPageSize;
+
+        // The signature must fit within the committed page so that its final byte abuts the
+        // guard page; a larger request cannot be represented by this helper.
+        if (size == 0 || size > page)
+        {
+            return;
+        }
+
+        auto* base = static_cast<unsigned char*>(VirtualAlloc(nullptr, page * 2, MEM_RESERVE, PAGE_NOACCESS));
+        if (base == nullptr)
+        {
+            return;
+        }
+
+        if (VirtualAlloc(base, page, MEM_COMMIT, PAGE_READWRITE) == nullptr)
+        {
+            VirtualFree(base, 0, MEM_RELEASE);
+            return;
+        }
+
+        // Only publish base_/data_ once both allocations succeeded; on failure data() stays null
+        // and the test asserts on it rather than computing an invalid pointer / copying into it.
+        base_ = base;
+        data_ = base_ + page - size; // last byte abuts the guard page
+        memcpy(data_, bytes, size);
+    }
+
+    ~GuardedSignatureBuffer()
+    {
+        if (base_ != nullptr)
+        {
+            VirtualFree(base_, 0, MEM_RELEASE);
+        }
+    }
+
+    GuardedSignatureBuffer(const GuardedSignatureBuffer&)            = delete;
+    GuardedSignatureBuffer& operator=(const GuardedSignatureBuffer&) = delete;
+
+    const unsigned char* data() const
+    {
+        return data_;
+    }
+
+private:
+    unsigned char* base_ = nullptr;
+    unsigned char* data_ = nullptr;
+};
+
+// SEH wrapper - must not own any C++ objects requiring unwinding.
+bool TryParseAccessesGuardPage(FunctionMethodSignature& signature, HRESULT& hrOut)
+{
+    __try
+    {
+        hrOut = signature.TryParse();
+        return false;
+    }
+    __except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH)
+    {
+        return true;
+    }
+}
+
+} // namespace
+
+TEST(CLRHelperSignatureSafetyTest, TruncatedSignatureBeforeReturnTypeDoesNotReadPastEnd)
+{
+    // [callconv = IMAGE_CEE_CS_CALLCONV_DEFAULT (0x00)] [param count = 1] and nothing else:
+    // after consuming both bytes pbCur == pbEnd, so ParseRetType must not dereference.
+    const unsigned char sig[] = {IMAGE_CEE_CS_CALLCONV_DEFAULT, 0x01};
+
+    GuardedSignatureBuffer buffer(sig, sizeof(sig));
+    ASSERT_NE(buffer.data(), nullptr) << "Failed to set up the guard-page buffer for the test.";
+    FunctionMethodSignature signature(buffer.data(), static_cast<unsigned>(sizeof(sig)));
+
+    HRESULT    hr      = E_UNEXPECTED;
+    const bool faulted = TryParseAccessesGuardPage(signature, hr);
+
+    ASSERT_FALSE(faulted) << "ParseRetType read one byte past the end of the signature buffer.";
+    ASSERT_EQ(hr, E_FAIL) << "A truncated signature must be rejected without reading past the buffer.";
+}
+
+TEST(CLRHelperSignatureSafetyTest, TrailingSzArrayElementDoesNotReadPastEnd)
+{
+    // [callconv 0x00] [param count 1] [ret type = ELEMENT_TYPE_SZARRAY (0x1D)] with no element type.
+    const unsigned char sig[] = {IMAGE_CEE_CS_CALLCONV_DEFAULT, 0x01, ELEMENT_TYPE_SZARRAY};
+
+    GuardedSignatureBuffer buffer(sig, sizeof(sig));
+    ASSERT_NE(buffer.data(), nullptr) << "Failed to set up the guard-page buffer for the test.";
+    FunctionMethodSignature signature(buffer.data(), static_cast<unsigned>(sizeof(sig)));
+
+    HRESULT    hr      = E_UNEXPECTED;
+    const bool faulted = TryParseAccessesGuardPage(signature, hr);
+
+    ASSERT_FALSE(faulted) << "ParseType (SZARRAY) read one byte past the end of the signature buffer.";
+    ASSERT_EQ(hr, E_FAIL) << "A signature ending in SZARRAY must be rejected without reading past the buffer.";
+}
+#endif

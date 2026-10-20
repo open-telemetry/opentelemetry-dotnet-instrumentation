@@ -4,9 +4,8 @@ This document defines the stability guarantees offered by
 the OpenTelemetry .NET Automatic Instrumentation,
 along with the rules and procedures for meeting those guarantees.
 
-This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
-with one exception described under [Compatibility with OpenTelemetry .NET and
-other dependencies](#compatibility-with-opentelemetry-net-and-other-dependencies).
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html),
+subject to the exceptions described in this document.
 
 ## Release candidates
 
@@ -31,6 +30,22 @@ This may be seen as a "breaking change" from the user
 perspective, but unfortunately it is currently unavoidable
 and bumping a major version during each dependency version bump
 would be an overkill.
+
+## Plugin API compatibility
+
+The plugin system and all public contracts exposed by the
+`OpenTelemetry.AutoInstrumentation.PluginApi` package are experimental. They do
+not carry Semantic Versioning compatibility guarantees.
+
+Plugin API changes may be source or binary incompatible in any release,
+including a patch release. Such changes do not, by themselves, require a major
+or minor version bump. Plugin authors must build and distribute their plugins
+against the exact same `OpenTelemetry.AutoInstrumentation.PluginApi` version as
+the OpenTelemetry .NET Automatic Instrumentation distribution that loads them.
+
+The Plugin API is tracked by public API tooling to make changes deliberate and
+reviewable. This tracking does not make the API stable or grant additional
+compatibility guarantees.
 
 ## Semantic Conventions stability
 
@@ -73,6 +88,8 @@ Changes related to the experimental features:
 
 Patch versions make no changes that would require recompilation
 or potentially break application code.
+The experimental [Plugin API](#plugin-api-compatibility) is an exception to
+this rule.
 The following are examples of patch fixes.
 
 * Bug fixes that do not require minor version bumps per rules above.

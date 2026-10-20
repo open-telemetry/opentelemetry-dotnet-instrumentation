@@ -9,7 +9,8 @@ internal static class StackExchangeRedisConstants
 
     public const string MinimumVersion = "2.0.0"; // 2.* packages use assembly version 2.0.0.0
 #if NET
-    public const string MaximumVersion = "3.65535.65535"; // 3.0.2-preview uses assembly version 3.0.0.0
+    public const string MinimumVersion3 = "3.0.0"; // 3.* packages use assembly version 3.0.0.0
+    public const string MaximumVersion = "3.65535.65535";
 #else
     public const string MaximumVersion = "2.65535.65535";
 #endif
@@ -21,6 +22,9 @@ internal static class StackExchangeRedisConstants
     public const string TaskConnectionMultiplexerTypeName = $"System.Threading.Tasks.Task`1[{ConnectionMultiplexerTypeName}]";
     public const string NullableServerTypeTypeName = $"System.Nullable`1[{ServerTypeTypeName}]";
     public const string EndPointCollectionTypeName = "StackExchange.Redis.EndPointCollection";
+#if NET
+    public const string CircuitBreakerTypeName = "StackExchange.Redis.Availability.CircuitBreaker";
+#endif
 
     public const string ConnectImplMethodName = "ConnectImpl";
     public const string ConnectImplAsyncMethodName = "ConnectImplAsync";

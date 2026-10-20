@@ -1,6 +1,7 @@
 appcmd
 AWSSDK
 AZUREAPPSERVICE
+AZURECONTAINERAPPS
 bazel
 bazelized
 bazelversion
@@ -28,7 +29,9 @@ ifdef
 ILOGGER
 inetsrv
 JIT
+LASTEXITCODE
 LINQ
+libstdc
 longdate
 MASSTRANSIT
 metricsexporter
@@ -62,12 +65,14 @@ protos
 RABBITMQ
 Serilog
 Sonoma
+specstrings
 spdlog
 SQLCLIENT
 sqlserver
 srcs
 STACKEXCHANGEREDIS
 TMPDIR
+traceparent
 tracesexporter
 unencrypted
 UNENCRYPTEDSUPPORT

@@ -1,4 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <StartupObject>TestApplication.Plugins.OpAmpProgram</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="config.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <Reference Include="System.Net.Http" />
   </ItemGroup>
@@ -13,6 +23,10 @@
   <ItemGroup>
     <Compile Include="..\TestApplication.Smoke\Program.cs" />
     <Compile Include="..\TestApplication.Smoke\SmokeLoggingExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\OpenTelemetry.AutoInstrumentation.PluginApi\OpenTelemetry.AutoInstrumentation.PluginApi.csproj" />
   </ItemGroup>
 
 </Project>

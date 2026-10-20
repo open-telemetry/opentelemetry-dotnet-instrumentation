@@ -117,7 +117,7 @@ internal class TracerSettings : Settings
 
         var traces = configuration.InstrumentationDevelopment?.DotNet?.Traces;
         EnabledInstrumentations = traces?.GetEnabledInstrumentations() ?? [];
-        InstrumentationOptions = new InstrumentationOptions(traces);
+        InstrumentationOptions = new InstrumentationOptions(traces, configuration.FailFast);
 
         if (traces != null)
         {

@@ -62,12 +62,7 @@ internal static class Program
 
     private static string GetRabbitMqPort(string[] args)
     {
-        if (args.Length > 1)
-        {
-            return args[1];
-        }
-
-        return "5672";
+        return ArgumentHelper.GetArgument(args, "--rabbitmq", "5672");
     }
 #else
     private const string RoutingKey = "hello";
@@ -137,6 +132,28 @@ internal static class Program
         }
 
         syncConsumersModel.BasicCancel(consumerTag);
+
+        Publish(syncConsumersModel, GetTestMessage(), syncConsumersModel.CreateBasicProperties());
+
+        var interfaceConsumer = new SyncImplicitImplementationConsumer(syncConsumersModel);
+
+        using var interfaceMre = new ManualResetEventSlim(false);
+
+        interfaceConsumer.Received += (_, ea) =>
+        {
+            Console.WriteLine("[x] Handling BasicDeliver in SyncImplicitImplementationConsumer.");
+            ProcessReceivedMessage(ea.Body);
+            interfaceMre.Set();
+        };
+
+        var interfaceConsumerTag = syncConsumersModel.BasicConsume(RoutingKey, true, interfaceConsumer);
+        if (!interfaceMre.Wait(DefaultWaitTimeout))
+        {
+            Console.WriteLine("Timed-out waiting for interface callback to complete.");
+            return 1;
+        }
+
+        syncConsumersModel.BasicCancel(interfaceConsumerTag);
         return 0;
     }
 
@@ -173,6 +190,42 @@ internal static class Program
         }
 
         asyncConsumersModel.BasicCancel(asyncConsumerTag);
+
+        Publish(asyncConsumersModel, GetTestMessage(), asyncConsumersModel.CreateBasicProperties());
+
+        var interfaceConsumer = new AsyncExplicitImplementationConsumer(asyncConsumersModel);
+
+        // A same-named public method must not receive the interface instrumentation.
+        interfaceConsumer.HandleBasicDeliver(
+            string.Empty,
+            0,
+            false,
+            string.Empty,
+            RoutingKey,
+            asyncConsumersModel.CreateBasicProperties(),
+#if RABBITMQ_6_0_0_OR_GREATER
+            ReadOnlyMemory<byte>.Empty).GetAwaiter().GetResult();
+#else
+            Array.Empty<byte>()).GetAwaiter().GetResult();
+#endif
+
+        using var interfaceMre = new ManualResetEventSlim(false);
+
+        interfaceConsumer.Received += (_, ea) =>
+        {
+            Console.WriteLine("[x] Handling BasicDeliver in AsyncExplicitImplementationConsumer.");
+            ProcessReceivedMessage(ea.Body);
+            interfaceMre.Set();
+        };
+
+        var interfaceConsumerTag = asyncConsumersModel.BasicConsume(RoutingKey, true, interfaceConsumer);
+        if (!interfaceMre.Wait(DefaultWaitTimeout))
+        {
+            Console.WriteLine("Timed-out waiting for async interface callback to complete.");
+            return 1;
+        }
+
+        asyncConsumersModel.BasicCancel(interfaceConsumerTag);
 
         if (!Close(asyncConsumersModel))
         {
@@ -236,12 +289,7 @@ internal static class Program
 
     private static string GetRabbitMqPort(string[] args)
     {
-        if (args.Length > 1)
-        {
-            return args[1];
-        }
-
-        return "5672";
+        return ArgumentHelper.GetArgument(args, "--rabbitmq", "5672");
     }
 
     // Custom consumer classes, with implementation (simplified) based on EventingBasicConsumer/AsyncEventingBasicConsumer

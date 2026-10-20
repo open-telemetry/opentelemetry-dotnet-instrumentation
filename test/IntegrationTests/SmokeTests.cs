@@ -507,6 +507,10 @@ public class SmokeTests : TestHelper
     [InlineData("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,TestApplication.Smoke,TestApplication.Smoke.exe")]
     public void ApplicationFailFastEnabled(string additionalVariableKey, string additionalVariableValue)
     {
+#if NETFRAMEWORK
+        var logsDirectory = DirectoryHelpers.CreateTempDirectory();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", logsDirectory.FullName);
+#endif
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true");
         SetEnvironmentVariable(additionalVariableKey, additionalVariableValue);
 
@@ -523,13 +527,20 @@ public class SmokeTests : TestHelper
         Assert.False(processTimeout, "Test application timed out");
 
         Assert.NotEqual(0, process.ExitCode);
+#if NETFRAMEWORK
+        if (additionalVariableKey == "OTEL_TRACES_EXPORTER")
+        {
+            var nativeLog = logsDirectory.GetFiles("otel-dotnet-auto-*-Native.log").Single();
+            Assert.Contains("An error occurred in the managed loader:", File.ReadAllText(nativeLog.FullName), StringComparison.Ordinal);
+        }
+#endif
     }
 
     [Fact]
     public void NativeLogsHaveNoSensitiveData()
     {
         var tempLogsDirectory = DirectoryHelpers.CreateTempDirectory();
-        var secretIdentificators = new[] { "API", "TOKEN", "SECRET", "KEY", "PASSWORD", "PASS", "PWD", "HEADER", "CREDENTIALS" };
+        var secretIdentificators = new[] { "API", "TOKEN", "SECRET", "KEY", "PASSWORD", "PASS", "PWD", "HEADER", "HEADERS", "CREDENTIALS" };
 
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", tempLogsDirectory.FullName);

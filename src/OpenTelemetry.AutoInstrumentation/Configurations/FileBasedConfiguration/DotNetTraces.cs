@@ -144,7 +144,7 @@ internal class DotNetTraces
     /// Gets or sets the Npgsql traces instrumentation configuration.
     /// </summary>
     [YamlMember(Alias = "npgsql")]
-    public object? Npgsql { get; set; }
+    public NpgsqlConfiguration? Npgsql { get; set; }
 
     /// <summary>
     /// Gets or sets the NServiceBus traces instrumentation configuration.

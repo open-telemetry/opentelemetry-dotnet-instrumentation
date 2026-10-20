@@ -22,7 +22,7 @@ public static class CallTargetInvoker
     /// <param name="instance">Instance value</param>
     /// <returns>Call target state</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetState BeginMethod<TIntegration, TTarget>(TTarget instance)
+    public static CallTargetState BeginMethod<TIntegration, TTarget>(TTarget? instance)
     {
         if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
         {
@@ -42,7 +42,7 @@ public static class CallTargetInvoker
     /// <param name="arg1">First argument value</param>
     /// <returns>Call target state</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1>(TTarget instance, ref TArg1 arg1)
+    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1>(TTarget? instance, ref TArg1? arg1)
     {
         if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
         {
@@ -64,7 +64,7 @@ public static class CallTargetInvoker
     /// <param name="arg2">Second argument value</param>
     /// <returns>Call target state</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1, TArg2>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2)
+    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1, TArg2>(TTarget? instance, ref TArg1? arg1, ref TArg2? arg2)
     {
         if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
         {
@@ -88,7 +88,7 @@ public static class CallTargetInvoker
     /// <param name="arg3">Third argument value</param>
     /// <returns>Call target state</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3)
+    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3>(TTarget? instance, ref TArg1? arg1, ref TArg2? arg2, ref TArg3? arg3)
     {
         if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
         {
@@ -114,7 +114,7 @@ public static class CallTargetInvoker
     /// <param name="arg4">Fourth argument value</param>
     /// <returns>Call target state</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4)
+    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4>(TTarget? instance, ref TArg1? arg1, ref TArg2? arg2, ref TArg3? arg3, ref TArg4? arg4)
     {
         if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
         {
@@ -142,7 +142,7 @@ public static class CallTargetInvoker
     /// <param name="arg5">Fifth argument value</param>
     /// <returns>Call target state</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5)
+    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5>(TTarget? instance, ref TArg1? arg1, ref TArg2? arg2, ref TArg3? arg3, ref TArg4? arg4, ref TArg5? arg5)
     {
         if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
         {
@@ -172,7 +172,7 @@ public static class CallTargetInvoker
     /// <param name="arg6">Sixth argument value</param>
     /// <returns>Call target state</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5, ref TArg6 arg6)
+    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6>(TTarget? instance, ref TArg1? arg1, ref TArg2? arg2, ref TArg3? arg3, ref TArg4? arg4, ref TArg5? arg5, ref TArg6? arg6)
     {
         if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
         {
@@ -204,7 +204,7 @@ public static class CallTargetInvoker
     /// <param name="arg7">Seventh argument value</param>
     /// <returns>Call target state</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5, ref TArg6 arg6, ref TArg7 arg7)
+    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7>(TTarget? instance, ref TArg1? arg1, ref TArg2? arg2, ref TArg3? arg3, ref TArg4? arg4, ref TArg5? arg5, ref TArg6? arg6, ref TArg7? arg7)
     {
         if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
         {
@@ -238,7 +238,7 @@ public static class CallTargetInvoker
     /// <param name="arg8">Eighth argument value</param>
     /// <returns>Call target state</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5, ref TArg6 arg6, ref TArg7 arg7, ref TArg8 arg8)
+    public static CallTargetState BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8>(TTarget? instance, ref TArg1? arg1, ref TArg2? arg2, ref TArg3? arg3, ref TArg4? arg4, ref TArg5? arg5, ref TArg6? arg6, ref TArg7? arg7, ref TArg8? arg8)
     {
         if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
         {
@@ -257,7 +257,7 @@ public static class CallTargetInvoker
     /// <param name="arguments">Object arguments array</param>
     /// <returns>Call target state</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetState BeginMethod<TIntegration, TTarget>(TTarget instance, object[] arguments)
+    public static CallTargetState BeginMethod<TIntegration, TTarget>(TTarget? instance, object[] arguments)
     {
         if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
         {
@@ -277,11 +277,11 @@ public static class CallTargetInvoker
     /// <param name="state">CallTarget state</param>
     /// <returns>CallTarget return structure</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetReturn EndMethod<TIntegration, TTarget>(TTarget instance, Exception exception, in CallTargetState state)
+    public static CallTargetReturn EndMethod<TIntegration, TTarget>(TTarget? instance, Exception? exception, in CallTargetState state)
     {
         if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
         {
-            return EndMethodHandler<TIntegration, TTarget>.Invoke(instance, exception, in state);
+            EndMethodHandler<TIntegration, TTarget>.Invoke(instance, exception, in state);
         }
 
         return CallTargetReturn.GetDefault();
@@ -299,11 +299,12 @@ public static class CallTargetInvoker
     /// <param name="state">CallTarget state</param>
     /// <returns>CallTarget return structure</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetReturn<TReturn?> EndMethod<TIntegration, TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception exception, in CallTargetState state)
+    public static CallTargetReturn<TReturn?> EndMethod<TIntegration, TTarget, TReturn>(TTarget? instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
     {
         if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
         {
-            return EndMethodHandler<TIntegration, TTarget, TReturn>.Invoke(instance, returnValue, exception, in state);
+            var result = EndMethodHandler<TIntegration, TTarget, TReturn>.Invoke(instance, returnValue, exception, in state);
+            return new CallTargetReturn<TReturn?>(result.GetReturnValue());
         }
 
         return new CallTargetReturn<TReturn?>(returnValue);
@@ -330,4 +331,14 @@ public static class CallTargetInvoker
     /// <returns>Default value of T</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T? GetDefaultValue<T>() => default;
+
+    /// <summary>
+    /// Creates a CallTarget container for a ref struct during a synchronous callback.
+    /// </summary>
+    /// <param name="refStructPointer">The pointer to the ref struct on the caller's stack.</param>
+    /// <param name="refStructTypeHandle">The runtime type handle of the ref struct.</param>
+    /// <returns>The ref struct container.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static unsafe CallTargetRefStruct CreateRefStruct(void* refStructPointer, RuntimeTypeHandle refStructTypeHandle)
+        => CallTargetRefStruct.Create(refStructPointer, refStructTypeHandle);
 }

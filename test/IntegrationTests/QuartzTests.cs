@@ -19,7 +19,8 @@ public class QuartzTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect("OpenTelemetry.Instrumentation.Quartz");
+
+        collector.Expect(Quartz4Plus(packageVersion) ? "Quartz" : "OpenTelemetry.Instrumentation.Quartz");
 
         RunTestApplication(new TestSettings
         {
@@ -30,5 +31,47 @@ public class QuartzTests : TestHelper
         });
 
         collector.AssertExpectations();
+    }
+
+#if NET10_0_OR_GREATER
+    [SkippableTheory]
+    [Trait("Category", "EndToEnd")]
+    [MemberData(nameof(LibraryVersion.Quartz), MemberType = typeof(LibraryVersion))]
+    public void SubmitsMetrics(string packageVersion)
+    {
+        SkipIfLegacyQuartz(packageVersion);
+
+        using var collector = new MockMetricsCollector(Output);
+        SetExporter(collector);
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED", "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_QUARTZ_INSTRUMENTATION_ENABLED", "true");
+
+        collector.Expect("Quartz");
+
+        RunTestApplication(new TestSettings
+        {
+            PackageVersion = packageVersion
+        });
+
+        collector.AssertExpectations();
+    }
+
+    private static void SkipIfLegacyQuartz(string packageVersion)
+    {
+        if (!Quartz4Plus(packageVersion))
+        {
+            throw new SkipException("Quartz < 4.0.0. Metrics are not supported.");
+        }
+    }
+#endif
+
+    private static bool Quartz4Plus(string packageVersion)
+    {
+#if NET10_0_OR_GREATER
+        return string.IsNullOrEmpty(packageVersion) || new Version(packageVersion) >= new Version(4, 0, 0);
+#else
+        return false;
+#endif
     }
 }

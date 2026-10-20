@@ -22,7 +22,7 @@ public readonly struct CallTargetState
     /// Initializes a new instance of the <see cref="CallTargetState"/> struct.
     /// </summary>
     /// <param name="activity">Activity instance</param>
-    public CallTargetState(Activity activity)
+    public CallTargetState(Activity? activity)
     {
         _previousActivity = null;
         _activity = activity;

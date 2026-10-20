@@ -8,6 +8,12 @@
 
 #include "class_factory.h"
 
-extern HINSTANCE DllHandle;
+#ifdef _WIN32
+#define EXTERN extern
+#else
+#define EXTERN extern __attribute__((visibility("default")))
+#endif
+
+EXTERN HINSTANCE DllHandle;
 
 #endif // OTEL_CLR_PROFILER_DLLMAIN_H_

@@ -12,7 +12,7 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        var redisPort = GetRedisPort(args);
+        var redisPort = ArgumentHelper.GetArgument(args, "--redis", "6379");
 
         var connectionString = $@"127.0.0.1:{redisPort}";
 
@@ -79,15 +79,5 @@ internal static class Program
 
             await db.PingAsync().ConfigureAwait(false);
         }
-    }
-
-    private static string GetRedisPort(string[] args)
-    {
-        if (args.Length > 1)
-        {
-            return args[1];
-        }
-
-        return "6379";
     }
 }

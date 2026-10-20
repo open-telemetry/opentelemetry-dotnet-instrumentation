@@ -1,143 +1,402 @@
 # Plugins
 
-**Status**: [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md).
+**Status**:
+[Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md).
 
-You can use `OTEL_DOTNET_AUTO_PLUGINS` environment variable to extend the
-configuration and overwrite options of the OpenTelemetry .NET SDK Tracer, Meter
-or Logs. No more than one instance of each plugin type will be created.
-A plugin must be a non-static, non-abstract class which has a default
-constructor and that implements at least one of the configuration methods below
-showed in an example plugin class:
+Plugins extend OpenTelemetry .NET Automatic Instrumentation by customizing SDK
+setup, signal options, OpAMP, selective sampling, and continuous profiling.
+
+Set `OTEL_DOTNET_AUTO_PLUGINS` to a colon-separated list of plugin type names,
+specified with the
+[assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname).
+This list is colon-separated because type names can contain commas.
+
+Every plugin type is instantiated at most once. A plugin must:
+
+* reference the `OpenTelemetry.AutoInstrumentation.PluginApi` package version
+  that matches the OpenTelemetry .NET Automatic Instrumentation version in use;
+* be a concrete class with a public parameterless constructor;
+* implement `OpenTelemetry.AutoInstrumentation.PluginApi.IPlugin`;
+* optionally implement extension interfaces for additional capabilities.
+
+Convention-based plugin methods are no longer discovered. Implementing `IPlugin`
+is required for a plugin to function.
+
+## Core lifecycle
+
+All plugins implement `IPlugin`. The two lifecycle methods can use empty
+implementations if the plugin only uses other extension points. These lifecycle
+methods are called on every configured plugin.
 
 ```csharp
+using OpenTelemetry.AutoInstrumentation.PluginApi;
 
-public class MyPlugin 
+public class MyPlugin : IPlugin
 {
-    // To configure plugin, before OTel SDK configuration is called.
     public void Initializing()
     {
-        // My custom logic here
+        // Called when auto instrumentation setup begins.
     }
 
-    // To configure plugin, after auto instrumentation is initialized.
     public void Initialized()
     {
-        // My custom logic here
+        // Called after auto instrumentation setup is finalized.
+    }
+}
+```
+
+## Telemetry SDK customization
+
+Implement `ITelemetryPlugin` to customize tracer and meter provider builders,
+access built providers, or customize the resource builder.
+
+```csharp
+using OpenTelemetry.AutoInstrumentation.PluginApi;
+using OpenTelemetry.AutoInstrumentation.PluginApi.Telemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+
+public class MyTelemetryPlugin : IPlugin, ITelemetryPlugin
+{
+    public void Initializing()
+    {
     }
 
-    // To access TracerProvider right after TracerProviderBuilder.Build() is executed.
+    public void Initialized()
+    {
+    }
+
+    public TracerProviderBuilder BeforeConfigureTracerProvider(TracerProviderBuilder builder)
+    {
+        // Called before automatic instrumentation configures tracing.
+        return builder;
+    }
+
+    public TracerProviderBuilder AfterConfigureTracerProvider(TracerProviderBuilder builder)
+    {
+        // Called after automatic instrumentation configures tracing, before Build().
+        return builder;
+    }
+
     public void TracerProviderInitialized(TracerProvider tracerProvider)
     {
-        // My custom logic here
+        // Called after TracerProviderBuilder.Build().
     }
 
-    // To access MeterProvider right after MeterProviderBuilder.Build() is executed.
+    public MeterProviderBuilder BeforeConfigureMeterProvider(MeterProviderBuilder builder)
+    {
+        // Called before automatic instrumentation configures metrics.
+        return builder;
+    }
+
+    public MeterProviderBuilder AfterConfigureMeterProvider(MeterProviderBuilder builder)
+    {
+        // Called after automatic instrumentation configures metrics, before Build().
+        return builder;
+    }
+
     public void MeterProviderInitialized(MeterProvider meterProvider)
     {
-        // My custom logic here
+        // Called after MeterProviderBuilder.Build().
     }
 
-    // To configure tracing SDK before Auto Instrumentation configured SDK
-    public OpenTelemetry.Trace.TracerProviderBuilder BeforeConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
+    public ResourceBuilder ConfigureResource(ResourceBuilder builder)
     {
-        // My custom logic here
-
-        return builder;
-    }
-
-    // To configure tracing SDK after Auto Instrumentation configured SDK
-    public OpenTelemetry.Trace.TracerProviderBuilder AfterConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
-    {
-        // My custom logic here
-
-        return builder;
-    }
-        
-    // To configure any traces options used by OpenTelemetry .NET Automatic Instrumentation
-    public void ConfigureTracesOptions(OpenTelemetry.NameSpace.OptionType options)
-    {
-        // My custom logic here
-        // Find supported options below
-    }
-
-    // To configure metrics SDK before Auto Instrumentation configured SDK
-    public OpenTelemetry.Metrics.MeterProviderBuilder BeforeConfigureMeterProvider(OpenTelemetry.Metrics.MeterProviderBuilder builder)
-    {
-        // My custom logic here
-
-        return builder;
-    }
-
-    // To configure metrics SDK after Auto Instrumentation configured SDK
-    public OpenTelemetry.Metrics.MeterProviderBuilder AfterConfigureMeterProvider(OpenTelemetry.Metrics.MeterProviderBuilder builder)
-    {
-        // My custom logic here
-
-        return builder;
-    }
-    
-    // To configure any metrics options used by OpenTelemetry .NET Automatic Instrumentation
-    public void ConfigureMetricsOptions(OpenTelemetry.NameSpace.OptionType options)
-    {
-        // My custom logic here
-        // Find supported options below
-    }
-
-    // To configure logs SDK (the method name is the same as for other logs options)
-    public void ConfigureLogsOptions(OpenTelemetry.Logs.OpenTelemetryLoggerOptions options)
-    {
-        // My custom logic here
-    }
-
-    // To configure any logs options used by OpenTelemetry .NET Automatic Instrumentation
-    public void ConfigureLogsOptions(OpenTelemetry.NameSpace.OptionType options)
-    {
-        // My custom logic here
-        // Find supported options below
-    }
-
-    // To configure Resource
-    public OpenTelemetry.Resources.ResourceBuilder ConfigureResource(OpenTelemetry.Resources.ResourceBuilder builder)
-    {
-        // My custom logic here
-        // Please note this method is common to set the resource for trace, logs and metrics.
-        // This method could be overridden by ConfigureTracesOptions, ConfigureMeterProvider and ConfigureLogsOptions
-        // by calling SetResourceBuilder with new object.
-
+        // Common resource customization for traces, metrics, and logs.
         return builder;
     }
 }
 ```
 
+`BeforeConfigureTracerProvider`, `AfterConfigureTracerProvider`,
+`BeforeConfigureMeterProvider`, `AfterConfigureMeterProvider`, and
+`ConfigureResource` return the builder that automatic instrumentation continues
+to use. Only the first configured plugin implementing `ITelemetryPlugin` is used
+for these builder-returning and resource-returning hooks.
+
+`TracerProviderInitialized` and `MeterProviderInitialized` are called on every
+configured plugin implementing `ITelemetryPlugin`.
+
+## Signal options customization
+
+Implement the generic options interfaces for each supported options type that
+the plugin needs to configure:
+
+* `IConfigureTracesOptions<TOptions>`
+* `IConfigureMetricsOptions<TOptions>`
+* `IConfigureLogsOptions<TOptions>`
+
+The generic `TOptions` type must match one of the supported options types listed
+below. All configured plugins implementing a matching options interface are
+called in configuration order.
+
 ```csharp
-public class MyOpAmpPlugin 
+using OpenTelemetry.AutoInstrumentation.PluginApi;
+using OpenTelemetry.AutoInstrumentation.PluginApi.Telemetry;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Instrumentation.Http;
+using OpenTelemetry.Logs;
+
+public class MyOptionsPlugin : IPlugin,
+    IConfigureTracesOptions<HttpClientTraceInstrumentationOptions>,
+    IConfigureMetricsOptions<OtlpExporterOptions>,
+    IConfigureLogsOptions<OpenTelemetryLoggerOptions>
 {
-    // To configure OpAMP client
-    public void ConfigureOpAmpOptions(OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings options)
+    public void Initializing()
     {
-        // My custom logic here
     }
 
-    // To get the OpAMP client instance after client is created and started
-    public void AfterOpAmpClientStarted(OpenTelemetry.OpAmp.Client.OpAmpClient client)
+    public void Initialized()
     {
-        // My custom logic here
     }
 
-    // To get the final callback before OpAMP client shuts down
-    public void BeforeOpAmpClientStopped()
+    public void ConfigureTracesOptions(HttpClientTraceInstrumentationOptions options)
     {
-        // My custom logic here
-        // WARNING: This is already in application OnExit() cycle, do not add long running tasks.
+        // Configure HTTP client trace instrumentation options.
+    }
+
+    public void ConfigureMetricsOptions(OtlpExporterOptions options)
+    {
+        // Configure OTLP metrics exporter options.
+    }
+
+    public void ConfigureLogsOptions(OpenTelemetryLoggerOptions options)
+    {
+        // Configure OpenTelemetry logger options.
     }
 }
 ```
 
 > [!NOTE]
 > Automatic Instrumentation can configure particular properties before calling
-> `Configure{Signal}Options`. It is plugin responsibility to not override this behavior.
-> Example: `OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions.EnrichWithHttpWebRequest`
+> `Configure{Signal}Options`. It is the plugin's responsibility to not override
+> this behavior.
+> Example:
+> `OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions.EnrichWithHttpWebRequest`
 > is conditionally set by this project.
+
+## OpAMP
+
+Implement `IOpAmpPlugin` to customize the OpAMP client and observe its
+lifecycle.
+The first configured plugin implementing `IOpAmpPlugin` controls OpAMP. Others
+still participate through their other plugin interfaces. For file-based
+configuration, `plugins` entries precede `plugins_list`; otherwise configured
+list order applies.
+
+> [!NOTE]
+> The OpAMP client is owned by automatic instrumentation. Plugins receive a
+> restricted client interface and cannot start, stop, or dispose the client.
+> Unsupported capabilities are not advertised.
+
+```csharp
+using OpenTelemetry.AutoInstrumentation.PluginApi;
+using OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
+using OpenTelemetry.OpAmp.Client.Settings;
+
+public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
+{
+    private IOpAmpClient? _client;
+
+    public void Initializing()
+    {
+    }
+
+    public void Initialized()
+    {
+    }
+
+    public void ConfigureOpAmpOptions(OpAmpClientSettings settings)
+    {
+        // Configure settings before client creation.
+    }
+
+    public void ConfigureOpAmpClient(IOpAmpClient client)
+    {
+        // Subscribe to messages here.
+        _client = client;
+    }
+
+    public void AfterOpAmpClientStarted()
+    {
+        // Startup completed; connectivity is not guaranteed.
+    }
+
+    public void BeforeOpAmpClientStopped()
+    {
+        // Release resources and unsubscribe here.
+    }
+}
+```
+
+Initialization invokes `ConfigureOpAmpOptions`, `ConfigureOpAmpClient`, ordinary
+`IPlugin.Initialized` callbacks, and client startup in that order. Subscribe in
+`ConfigureOpAmpClient` to receive messages from the initial server response.
+Client startup is asynchronous.
+
+`AfterOpAmpClientStarted` means the client start operation completed; it does not
+guarantee connectivity or initial-message delivery. It is skipped if startup
+throws, is cancelled, or loses a race with shutdown. When invoked, it completes
+before `BeforeOpAmpClientStopped` begins.
+
+`BeforeOpAmpClientStopped` may run without `AfterOpAmpClientStarted`. Release
+resources and unsubscribe there, including resources acquired before
+`ConfigureOpAmpClient` throws. Lifecycle callbacks must return promptly and
+tolerate client disposal during forced shutdown.
+
+OpAMP requests do not produce application spans. Listener callbacks must return
+promptly. A blocking listener can delay other listeners and subsequent OpAMP
+message processing. Hand off lengthy work and return from the callback promptly.
+
+### Remote configuration status reporting
+
+The selected OpAMP plugin can implement `IProvideRemoteConfigStatus` and set
+`settings.RemoteConfiguration.ReportsRemoteConfigStatus = true` in
+`ConfigureOpAmpOptions`. Reporting requires both the provider and this explicit
+opt-in. To receive remote configuration offers, separately set
+`settings.RemoteConfiguration.AcceptsRemoteConfig = true` and subscribe to
+`RemoteConfigMessage` in `ConfigureOpAmpClient`. Both settings default to `false`.
+The plugin owns configuration processing and application.
+
+Implement `GetRemoteConfigStatus()` to return a `RemoteConfigStatusReport` with
+the received configuration hash, its application status, and an optional error
+message for a failed application. The getter can run before any configuration
+offer arrives or before application finishes. Return `null` when no status is
+available; that omits the status from the report. While applying a received
+configuration, return `RemoteConfigStatusCode.Applying` with its hash.
+
+Call `client.NotifyRemoteConfigStatusChanged()` after publishing a new status.
+Status reporting continues if the server stops offering remote configuration.
+The getter may be called while a reporting notification is in progress and must
+return promptly. Publish status safely across threads and provide a stable
+snapshot, including its hash buffer. Do not issue reporting notifications or
+synchronously wait for OpAMP callbacks from the getter. Reads may overlap plugin
+lifecycle callbacks, including cleanup.
+
+Repeated notifications can resend unchanged status. The provider may be queried
+independently of change notifications, including when responding to a full-state
+request. Getter and reporting failures are logged; later notifications or server
+requests can retry. A failed getter omits status from a full-state response while
+other state is still reported.
+Returning from a notification does not confirm delivery to the server. Do not rely
+on delivery during shutdown.
+
+### Effective configuration reporting
+
+The selected OpAMP plugin can implement `IProvideEffectiveConfig` and set
+`settings.EffectiveConfigurationReporting.EnableReporting = true` in
+`ConfigureOpAmpOptions`. Reporting is disabled when the selected plugin does not
+provide this interface or does not enable the setting.
+
+Implement `GetEffectiveConfig()` to return the complete current configuration as
+an `IReadOnlyCollection<EffectiveConfigFile>`. File names must be unique.
+An empty collection reports an empty configuration. Contents are transmitted
+without redaction, so the plugin is responsible for removing sensitive values.
+
+Retain the client passed to `ConfigureOpAmpClient` and call
+`client.NotifyEffectiveConfigChanged()` when the effective configuration changes.
+Repeated notifications can resend unchanged configuration.
+
+A notification caller must allow `GetEffectiveConfig()` running on another thread
+to complete. The plugin must also provide current configuration when reporting
+becomes available or the server requests full state; those reads do not require
+a notification.
+
+`GetEffectiveConfig()` must be read-only and return promptly. It must tolerate
+concurrent configuration updates and plugin lifecycle callbacks, including
+cleanup. Publish configuration safely across threads and return a stable snapshot,
+including its buffers, that remains valid after the getter returns. Do not issue
+reporting notifications or synchronously wait for OpAMP callbacks from the getter.
+
+Reporting requires server support. Getter and reporting failures are logged;
+a later notification or server request can attempt reporting again.
+If configuration retrieval fails during a full-state request, the other
+available state is still reported. Effective configuration is omitted;
+this does not report an empty configuration.
+
+## Selective sampling
+
+Implement `ISelectiveSamplerPlugin` to provide selective sampling configuration.
+Only the first configured plugin implementing `ISelectiveSamplerPlugin` is used.
+
+```csharp
+using System;
+using OpenTelemetry.AutoInstrumentation.PluginApi;
+using OpenTelemetry.AutoInstrumentation.PluginApi.SelectiveSampling;
+
+public class MySelectiveSamplerPlugin : IPlugin, ISelectiveSamplerPlugin
+{
+    public void Initializing()
+    {
+    }
+
+    public void Initialized()
+    {
+    }
+
+    public SelectiveSamplerConfiguration? GetFirstSelectiveSamplingConfiguration()
+    {
+        return new SelectiveSamplerConfiguration
+        {
+            SamplingInterval = 200,
+            ExportInterval = TimeSpan.FromMilliseconds(50),
+            ExportTimeout = TimeSpan.FromSeconds(5),
+            Exporter = new MySelectiveSamplerExporter()
+        };
+    }
+}
+```
+
+`Exporter` must implement `ISelectiveSamplerExporter`.
+
+## Continuous profiling
+
+Implement `IContinuousProfilerPlugin` to provide continuous profiler
+configuration. Only the first configured plugin implementing
+`IContinuousProfilerPlugin` is used. If no plugin provides a configuration, the
+default continuous profiler configuration is used.
+
+```csharp
+using System;
+using OpenTelemetry.AutoInstrumentation.PluginApi;
+using OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling;
+
+public class MyContinuousProfilerPlugin : IPlugin, IContinuousProfilerPlugin
+{
+    public void Initializing()
+    {
+    }
+
+    public void Initialized()
+    {
+    }
+
+    public ContinuousProfilerConfiguration GetFirstContinuousProfilerConfiguration()
+    {
+        return new ContinuousProfilerConfiguration
+        {
+            ThreadSamplingEnabled = true,
+            ThreadSamplingInterval = 1000,
+            AllocationSamplingEnabled = false,
+            MaxMemorySamplesPerMinute = 200,
+            ExportInterval = TimeSpan.FromMilliseconds(500),
+            ExportTimeout = TimeSpan.FromSeconds(5),
+            Exporter = new MyContinuousProfilerExporter()
+        };
+    }
+}
+```
+
+`Exporter` must implement `IContinuousProfilerExporter`.
+Its `ExportThreadSamples(byte[], int, uint, CancellationToken)` method receives
+the CPU sampling interval in milliseconds for each native batch. Use that
+interval to set the exported profile period. Existing exporters must update
+their `ExportThreadSamples` implementation to accept the interval.
+
+An exporter and a nonzero CPU interval or allocation limit prepare the
+corresponding managed handler even when its `Enabled` setting is false. Native
+sampling remains disabled until a runtime configuration enables that feature.
 
 ## Supported Options
 
@@ -145,47 +404,48 @@ public class MyOpAmpPlugin
 
 | Options type                                                                              | NuGet package                                     | NuGet version |
 |-------------------------------------------------------------------------------------------|---------------------------------------------------|---------------|
-| OpenTelemetry.Exporter.ConsoleExporterOptions                                             | OpenTelemetry.Exporter.Console                    | 1.15.3        |
-| OpenTelemetry.Exporter.ZipkinExporterOptions  **Deprecated**                              | OpenTelemetry.Exporter.Zipkin                     | 1.15.3        |
-| OpenTelemetry.Exporter.OtlpExporterOptions                                                | OpenTelemetry.Exporter.OpenTelemetryProtocol      | 1.15.3        |
-| OpenTelemetry.Instrumentation.AspNet.AspNetTraceInstrumentationOptions                    | OpenTelemetry.Instrumentation.AspNet              | 1.15.2        |
-| OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreTraceInstrumentationOptions            | OpenTelemetry.Instrumentation.AspNetCore          | 1.15.2        |
-| OpenTelemetry.Instrumentation.EntityFrameworkCore.EntityFrameworkInstrumentationOptions   | OpenTelemetry.Instrumentation.EntityFrameworkCore | 1.15.1-beta.1 |
-| OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientTraceInstrumentationOptions         | OpenTelemetry.Instrumentation.GrpcNetClient       | 1.15.1-beta.1 |
-| OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions                  | OpenTelemetry.Instrumentation.Http                | 1.15.1        |
-| OpenTelemetry.Instrumentation.Quartz.QuartzInstrumentationOptions                         | OpenTelemetry.Instrumentation.Quartz              | 1.15.1-beta.1 |
-| OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions              | OpenTelemetry.Instrumentation.SqlClient           | 1.15.2        |
-| OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions | OpenTelemetry.Instrumentation.StackExchangeRedis  | 1.15.1-beta.1 |
-| OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                               | OpenTelemetry.Instrumentation.Wcf                 | 1.15.1-beta.2 |
+| OpenTelemetry.Exporter.ConsoleExporterOptions                                             | OpenTelemetry.Exporter.Console                    | 1.20.0        |
+| OpenTelemetry.Exporter.ZipkinExporterOptions  **Deprecated**                              | OpenTelemetry.Exporter.Zipkin                     | 1.20.0        |
+| OpenTelemetry.Exporter.OtlpExporterOptions                                                | OpenTelemetry.Exporter.OpenTelemetryProtocol      | 1.20.0        |
+| OpenTelemetry.Instrumentation.AspNet.AspNetTraceInstrumentationOptions                    | OpenTelemetry.Instrumentation.AspNet              | 1.20.0        |
+| OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreTraceInstrumentationOptions            | OpenTelemetry.Instrumentation.AspNetCore          | 1.20.0        |
+| OpenTelemetry.Instrumentation.EntityFrameworkCore.EntityFrameworkInstrumentationOptions   | OpenTelemetry.Instrumentation.EntityFrameworkCore | 1.20.0-beta.1 |
+| OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientTraceInstrumentationOptions         | OpenTelemetry.Instrumentation.GrpcNetClient       | 1.20.0-beta.1 |
+| OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions                  | OpenTelemetry.Instrumentation.Http                | 1.20.0        |
+| OpenTelemetry.Instrumentation.Quartz.QuartzInstrumentationOptions                         | OpenTelemetry.Instrumentation.Quartz              | 1.20.0-beta.1 |
+| OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions              | OpenTelemetry.Instrumentation.SqlClient           | 1.20.0        |
+| OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions | OpenTelemetry.Instrumentation.StackExchangeRedis  | 1.20.0-beta.1 |
+| OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                               | OpenTelemetry.Instrumentation.Wcf                 | 1.20.0-beta.1 |
 
 ### Metrics
 
 | Options type                                                             | NuGet package                                  | NuGet version |
 |--------------------------------------------------------------------------|------------------------------------------------|---------------|
-| OpenTelemetry.Metrics.MetricReaderOptions                                | OpenTelemetry                                  | 1.15.3        |
-| OpenTelemetry.Exporter.ConsoleExporterOptions                            | OpenTelemetry.Exporter.Console                 | 1.15.3        |
-| OpenTelemetry.Exporter.PrometheusExporterOptions                         | OpenTelemetry.Exporter.Prometheus.HttpListener | 1.15.3-beta.1 |
-| OpenTelemetry.Exporter.OtlpExporterOptions                               | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.15.3        |
-| OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions | OpenTelemetry.Instrumentation.AspNet           | 1.15.2        |
-| OpenTelemetry.Instrumentation.Runtime.RuntimeInstrumentationOptions      | OpenTelemetry.Instrumentation.Runtime          | 1.15.1        |
+| OpenTelemetry.Metrics.MetricReaderOptions                                | OpenTelemetry                                  | 1.20.0        |
+| OpenTelemetry.Exporter.ConsoleExporterOptions                            | OpenTelemetry.Exporter.Console                 | 1.20.0        |
+| OpenTelemetry.Exporter.PrometheusExporterOptions                         | OpenTelemetry.Exporter.Prometheus.HttpListener | 1.20.0-beta.1 |
+| OpenTelemetry.Exporter.OtlpExporterOptions                               | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.20.0        |
+| OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions | OpenTelemetry.Instrumentation.AspNet           | 1.20.0        |
 
 ### Logs
 
 | Options type                                  | NuGet package                                | NuGet version |
 |-----------------------------------------------|----------------------------------------------|---------------|
-| OpenTelemetry.Logs.OpenTelemetryLoggerOptions | OpenTelemetry                                | 1.15.3        |
-| OpenTelemetry.Exporter.ConsoleExporterOptions | OpenTelemetry.Exporter.Console               | 1.15.3        |
-| OpenTelemetry.Exporter.OtlpExporterOptions    | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.15.3        |
+| OpenTelemetry.Logs.OpenTelemetryLoggerOptions | OpenTelemetry                                | 1.20.0        |
+| OpenTelemetry.Exporter.ConsoleExporterOptions | OpenTelemetry.Exporter.Console               | 1.20.0        |
+| OpenTelemetry.Exporter.OtlpExporterOptions    | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.20.0        |
 
 ### OpAMP
 
 | Settings type                                           | NuGet package              | NuGet version |
 |---------------------------------------------------------|----------------------------|---------------|
-| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.4.0-alpha.1 |
+| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.8.0-alpha.1 |
 
 ## Requirements
 
-* The plugin must use the same version of the `OpenTelemetry` as the
-OpenTelemetry .NET Automatic Instrumentation.
-* The plugin must use the same options versions as the
-OpenTelemetry .NET Automatic Instrumentation (found in the table above).
+* The plugin must use the same `OpenTelemetry.AutoInstrumentation.PluginApi`
+  version as OpenTelemetry .NET Automatic Instrumentation.
+* The plugin must use the same `OpenTelemetry` version as OpenTelemetry .NET
+  Automatic Instrumentation.
+* The plugin must use the same options versions as OpenTelemetry .NET Automatic
+  Instrumentation (found in the table above).

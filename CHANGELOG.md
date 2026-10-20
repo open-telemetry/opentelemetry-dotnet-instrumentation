@@ -5,7 +5,213 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.16.0-beta.1..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.17.0..HEAD)
+
+### Added
+
+- Added scripts to standalone distributions that prepare an on-demand
+  `DOTNET_ADDITIONAL_DEPS` and `DOTNET_SHARED_STORE` assembly-conflict
+  workaround from the instrumentation dependencies already included in the
+  distribution. This lets framework-dependent applications make those
+  dependencies available to the .NET host when automatic assembly redirection
+  cannot resolve a conflict.
+
+- Added experimental OpAMP effective configuration reporting for plugins through
+  `IProvideEffectiveConfig` and `IOpAmpClient.NotifyEffectiveConfigChanged()`.
+  See the
+  [plugin documentation](./docs/plugins.md#effective-configuration-reporting).
+
+- Added experimental OpAMP remote configuration status reporting for plugins through
+  `IProvideRemoteConfigStatus` and `IOpAmpClient.NotifyRemoteConfigStatusChanged()`.
+  Plugins can also opt into receiving remote configuration offers. See the
+  [plugin documentation](./docs/plugins.md#remote-configuration-status-reporting).
+
+### Changed
+
+- **Breaking change:** `IContinuousProfilerExporter.ExportThreadSamples` now
+  requires the CPU sampling interval for each batch as a `uint` argument in
+  milliseconds.
+- Reworked the experimental OpAMP plugin lifecycle with pre-start listener
+  registration and manager-owned client lifetime. Only the first configured
+  `IOpAmpPlugin` controls OpAMP. Hardened OpAMP startup and cleanup, including
+  after plugin configuration failure. See the
+  [OpAMP plugin documentation](./docs/plugins.md#opamp).
+
+#### Dependency updates
+
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/core-1.20.0/VERSIONING.md#core-components):
+  [`1.20.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.20.0).
+- Following packages updated
+  - `OpenTelemetry.Exporter.Prometheus.HttpListener`
+    from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.GrpcNetClient`
+    from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.19.0` to `1.20.0`,
+  - `OpenTelemetry.Instrumentation.Process` from `1.19.0-rc.1` to `1.20.0-rc.1`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.19.0-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.19.0` to `1.20.0`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.19.0` to `1.20.0`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis`
+    from `1.19.0-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.OpAmp.Client` from `0.7.0-alpha.2` to `0.8.0-alpha.1`,
+  - `OpenTelemetry.Shims.OpenTracing` from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Resources.Azure` from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Resources.Container` from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Resources.Host` from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Resources.OperatingSystem`
+    from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Resources.Process` from `1.19.1-rc.1` to `1.20.0-rc.1`,
+  - `OpenTelemetry.Resources.ProcessRuntime`
+    from `1.19.1-beta.1` to `1.20.0-beta.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.19.0` to `1.20.0`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
+    from `1.19.0-beta.1` to `1.20.0-beta.1`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Configuration` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Configuration.EnvironmentVariables`
+    from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions`
+    from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Logging` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Options` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions`
+    from `10.0.12` to `10.0.13`,
+  - `Microsoft.Extensions.Primitives` from `10.0.12` to `10.0.13`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.19.0` to `1.20.0`,
+  - `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
+    from `1.19.0` to `1.20.0`,
+  - `System.Diagnostics.DiagnosticSource` from `10.0.12` to `10.0.13`,
+  - `System.IO.Pipelines` from `10.0.12` to `10.0.13`,
+  - `System.Text.Encodings.Web` from `10.0.12` to `10.0.13`,
+  - `System.Text.Json` from `10.0.12` to `10.0.13`.
+
+### Deprecated
+
+### Removed
+
+- Removed plugin configuration support for `RuntimeInstrumentationOptions`.
+  These options were always a no-op and are deprecated in the
+  `OpenTelemetry.Instrumentation.Runtime` package.
+
+### Fixed
+
+- Fix missing or incomplete SqlClient traces when `System.Data`,
+  `System.Data.SqlClient`, or `Microsoft.Data.SqlClient` is already loaded at
+  startup, including in .NET Framework applications hosted in IIS.
+- Invalid plugin type names no longer stop automatic instrumentation or crash
+  .NET Framework applications unless fail-fast is enabled.
+
+## [v1.17.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.17.0)
+
+### Added
+
+- GitHub immutable release and artifact attestation verification for the
+  PowerShell installation and update commands and the shell installer. Use
+  `-SkipReleaseVerification` with `Install-OpenTelemetryCore` or
+  `Update-OpenTelemetryCore`, or set `SKIP_RELEASE_VERIFICATION=true` for the
+  shell installer, to explicitly skip verification.
+- Experimental Npgsql trace context propagation to PostgreSQL through
+  `application_name`, enabled with `OTEL_DOTNET_AUTO_NPGSQL_CONTEXT_PROPAGATION`.
+- Configuration for the maximum number and aggregate payload size of pending
+  OpAMP custom messages.
+- Support for [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)
+  traces instrumentation for versions `3.1.x`+ for .NET only.
+- Added support for [Quartz](https://www.nuget.org/packages/Quartz)
+  traces and metrics instrumentation for version `4`+ for .NET 10 only.
+- `AZURECONTAINERAPPS` resource detector, detecting Azure Container Apps
+  resource information for .NET only.
+
+### Changed
+
+- [BREAKING] The PowerShell installation and update commands and the shell
+  installer now require the [GitHub CLI](https://cli.github.com/) by default.
+- [BREAKING] `OpenTelemetry.OpAmp.Client` now queues outgoing messages. Its
+  `Send*Async` methods were replaced by corresponding `Send*` methods. OpAMP
+  plugins can call `FlushAsync` to wait until the queue is empty.
+
+#### Dependency updates
+
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.19.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.19.1).
+- Following packages updated
+  - `Google.Protobuf` updated from `3.35.0` to `3.36.2`,
+  - `OpenTelemetry.Exporter.Prometheus.HttpListener` from `1.18.0-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.16.0-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.16.0` to `1.19.0`,
+  - `OpenTelemetry.Instrumentation.Process` from `1.16.0-beta.1` to `1.19.0-rc.1`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.15.1-beta.1` to `1.19.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.15.1` to `1.19.0`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.16.0` to `1.19.0`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.16.0-beta.1` to `1.19.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.16.0-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.OpAmp.Client` from `0.6.0-alpha.1` to `0.7.0-alpha.2`,
+  - `OpenTelemetry.Shims.OpenTracing` from `1.18.0-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.Resources.Azure` from `1.15.1-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.Resources.Container` from `1.15.1-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.Resources.Host` from `1.15.1-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.Resources.OperatingSystem` from `1.15.1-beta.1` to `1.19.1-beta.1`,
+  - `OpenTelemetry.Resources.Process` from `1.15.1-beta.2` to `1.19.1-rc.1`,
+  - `OpenTelemetry.Resources.ProcessRuntime` from `1.15.1-beta.1` to `1.19.1-beta.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.16.0` to `1.19.0`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
+    from `1.16.0-beta.1` to `1.19.0-beta.1`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Configuration` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Configuration.EnvironmentVariables` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions`
+    from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Logging` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Options` from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions`
+    from `10.0.9` to `10.0.12`,
+  - `Microsoft.Extensions.Primitives` from `10.0.9` to `10.0.12`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.16.0` to `1.19.0`,
+  - `System.Diagnostics.DiagnosticSource` from `10.0.9` to `10.0.12`,
+  - `System.IO.Pipelines` from `10.0.9` to `10.0.12`,
+  - `System.Text.Encodings.Web` from `10.0.9` to `10.0.12`,
+  - `System.Text.Json` from `10.0.9` to `10.0.12`.
+
+### Deprecated
+
+- Deprecate support for [Quartz](https://www.nuget.org/packages/Quartz)
+  traces instrumentation for version `3.x.x`.
+
+### Fixed
+
+- StackExchange.Redis trace instrumentation for asynchronous connections with
+  version `3.3.0`+ for .NET only.
+- Handle YAML null values consistently in file-based configuration and
+  distinguish them from quoted empty strings.
+- Allow an empty `opamp/development` section in file-based configuration to
+  enable the OpAMP client with default settings.
+- Prevent the shell installer from using a predictable path for temporary
+  downloads.
+- Use the standard `service.namespace` resource attribute instead of `service.namespace.name`
+  when identifying an application through OpAMP.
+- Fixed CallTarget bytecode instrumentation for methods declared on nested types,
+  including nested types inside generic parents.
+
+## [v1.16.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.16.0)
+
+This release includes all changes from [1.16.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.16.0-beta.1)
+release.
 
 ### Added
 
@@ -13,40 +219,66 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Data.Sqlite`,
   - `Microsoft.Extensions.Logging`,
   - `System.Data.Common`.
+- Support for `SQLCLIENT` context propagation for .NET Framework
+  configurable by `OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_CONTEXT_PROPAGATION`
+  environment variable.
+- Support for OTLP exporter `gzip` compression in file-based configuration.
+  Compression can also be configured through the OpenTelemetry .NET SDK
+  environment variables `OTEL_EXPORTER_OTLP_COMPRESSION`,
+  `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION`,
+  `OTEL_EXPORTER_OTLP_METRICS_COMPRESSION` and
+  `OTEL_EXPORTER_OTLP_LOGS_COMPRESSION`.
+- Support for Database OpenTelemetry Tracing for [Oracle.ManagedDataAccess.Core](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core)
+  and [Oracle.ManagedDataAccess](https://www.nuget.org/packages/Oracle.ManagedDataAccess).
 
 ### Changed
 
 - OpAMP default port changed from 4318 to 4320.
+- [BREAKING] Plugin architecture overhaul: All plugins must now implement
+  the new API (OpenTelemetry.AutoInstrumentation.PluginApi) to function.
 
 #### Dependency updates
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.16.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.16.0).
 - Following packages updated
   - `Google.Protobuf` updated from `3.31.1` to `3.35.0`,
-  - `OpenTelemetry.OpAmp.Client` from `0.3.0-alpha.1` to `0.4.0-alpha.1`.
+  - `OpenTelemetry.Instrumentation.GrpcNetClient` from `1.15.1-beta.1` to `1.16.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.15.1` to `1.16.0`,
+  - `OpenTelemetry.Instrumentation.Process` from `1.15.1-beta.1` to `1.16.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.15.2` to `1.16.0`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis` from `1.15.1-beta.2` to `1.16.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.15.1-beta.2` to `1.16.0-beta.1`,
+  - `OpenTelemetry.OpAmp.Client` from `0.3.0-alpha.1` to `0.6.0-alpha.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.15.2` to `1.16.0`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
+    from `1.15.1-beta.1` to `1.16.0-beta.1`.
 - .NET Framework only, following packages updated
-  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.7` to `10.0.8`,
-  - `Microsoft.Extensions.Configuration` from `10.0.7` to `10.0.8`,
-  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.7` to `10.0.8`,
-  - `Microsoft.Extensions.Configuration.Binder` from `10.0.7` to `10.0.8`,
-  - `Microsoft.Extensions.DependencyInjection` from `10.0.7` to `10.0.8`,
+  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.7` to `10.0.9`,
+  - `Microsoft.Extensions.Configuration` from `10.0.7` to `10.0.9`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.7` to `10.0.9`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.7` to `10.0.9`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.7` to `10.0.9`,
   - `Microsoft.Extensions.DependencyInjection.Abstractions`
-    from `10.0.7` to `10.0.8`,
-  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.7` to `10.0.8`,
-  - `Microsoft.Extensions.Logging` from `10.0.7` to `10.0.8`,
-  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.7` to `10.0.8`,
-  - `Microsoft.Extensions.Logging.Configuration` from `10.0.7` to `10.0.8`,
-  - `Microsoft.Extensions.Options` from `10.0.7` to `10.0.8`,
+    from `10.0.7` to `10.0.9`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.7` to `10.0.9`,
+  - `Microsoft.Extensions.Logging` from `10.0.7` to `10.0.9`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.7` to `10.0.9`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.7` to `10.0.9`,
+  - `Microsoft.Extensions.Options` from `10.0.7` to `10.0.9`,
   - `Microsoft.Extensions.Options.ConfigurationExtensions`
-    from `10.0.7` to `10.0.8`,
-  - `Microsoft.Extensions.Primitives` from `10.0.7` to `10.0.8`,
-  - `System.Diagnostics.DiagnosticSource` from `10.0.7` to `10.0.8`,
-  - `System.IO.Pipelines` from `10.0.7` to `10.0.8`,
-  - `System.Text.Encodings.Web` from `10.0.7` to `10.0.8`,
-  - `System.Text.Json` from `10.0.7` to `10.0.8`.
-
-### Deprecated
+    from `10.0.7` to `10.0.9`,
+  - `Microsoft.Extensions.Primitives` from `10.0.7` to `10.0.9`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.15.2` to `1.16.0`,
+  - `System.Diagnostics.DiagnosticSource` from `10.0.7` to `10.0.9`,
+  - `System.IO.Pipelines` from `10.0.7` to `10.0.9`,
+  - `System.Text.Encodings.Web` from `10.0.7` to `10.0.9`,
+  - `System.Text.Json` from `10.0.7` to `10.0.9`.
 
 ### Removed
+
+- Remove support for `OTEL_EXPERIMENTAL_CONFIG_FILE`.
 
 ### Fixed
 
@@ -55,6 +287,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   environment variables. This change allows services in a shared IIS
   Application Pool to have service-specific resource attributes instead
   of inheriting the same values for all services.
+- Suppress instrumentation while starting the OpAMP client to prevent internal
+  OpAMP transport calls from being collected as traces.
 
 ## [v1.16.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.16.0-beta.1)
 

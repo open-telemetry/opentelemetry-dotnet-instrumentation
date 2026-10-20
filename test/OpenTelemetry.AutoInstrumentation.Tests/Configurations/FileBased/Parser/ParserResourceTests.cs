@@ -66,7 +66,7 @@ public class ParserResourceTests
 
 #if NET
         string[] expectedDetecors = [
-            "azureappservice", "container", "host", "operatingsystem", "process", "processruntime"
+            "azureappservice", "azurecontainerapps", "container", "host", "operatingsystem", "process", "processruntime"
                 ];
 #endif
 #if NETFRAMEWORK

@@ -75,6 +75,10 @@ internal static class Program
         _ = await noCodeTestingClass.GenericTestMethodAsync<int>().ConfigureAwait(false);
         _ = genericNoCodeTestingClass.GenericTestMethod(string.Empty, new object(), 123, 456L);
 
+        NestedTypeTargets.Invoke();
+        RefStructTargets.Invoke();
+        GenericNestedTypeTargets<int>.Invoke();
+
         // Dynamic attribute tests - extracting values from method parameters
         dynamicAttrTestingClass.ProcessOrder("ORD-12345", 5);
         dynamicAttrTestingClass.ProcessCustomer(new Customer

@@ -16,10 +16,14 @@ namespace trace
 class TracerTokens : public CallTargetTokens
 {
 private:
+    const ComPtr<ICorProfilerInfo4> _profiler_info;
+    mdMemberRef                     createRefStructMemberRef = mdMemberRefNil;
     mdMemberRef beginArrayMemberRef = mdMemberRefNil;
     mdMemberRef beginMethodFastPathRefs[FASTPATH_COUNT];
     mdMemberRef endVoidMemberRef = mdMemberRefNil;
     mdMemberRef logExceptionRef = mdMemberRefNil;
+    mdTypeRef bubbleUpExceptionTypeRef = mdTypeRefNil;
+    mdMemberRef bubbleUpExceptionFunctionRef = mdMemberRefNil;
 
     HRESULT WriteBeginMethodWithArgumentsArray(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
                                                const TypeInfo* currentType, ILInstr** instruction);
@@ -29,13 +33,22 @@ protected:
     const WSTRING& GetCallTargetStateType() override;
     const WSTRING& GetCallTargetReturnType() override;
     const WSTRING& GetCallTargetReturnGenericType() override;
+    const WSTRING& GetCallTargetRefStructType() override;
+    HRESULT EnsureBaseCalltargetTokens() override;
+    void AddAdditionalLocals(TypeSignature*                    methodReturnValue,
+                                       const std::vector<TypeSignature>* methodTypeArguments,
+                                       COR_SIGNATURE (&signatureBuffer)[500], ULONG& signatureOffset,
+                             ULONG& signatureSize) override;
 
 public:
-    TracerTokens(ModuleMetadata* module_metadata_ptr);
+    TracerTokens(ModuleMetadata* module_metadata_ptr, const WSTRING& bytecode_instrumentation_name,
+                 const ComPtr<ICorProfilerInfo4>& profilerInfo);
+
+    int GetAdditionalLocalsCount(const std::vector<TypeSignature>& methodTypeArguments) override;
 
     HRESULT WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
                              const std::vector<TypeSignature>& methodArguments,
-                             const bool ignoreByRefInstrumentation, ILInstr** instruction);
+                             bool ignoreByRefInstrumentation, ILInstr** instruction);
 
     HRESULT WriteEndVoidReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
                                         const TypeInfo* currentType, ILInstr** instruction);
@@ -45,6 +58,11 @@ public:
 
     HRESULT WriteLogException(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
                               ILInstr** instruction);
+
+    HRESULT WriteRefStructCall(void* rewriterWrapperPtr, mdTypeRef refStructTypeRef, int refStructIndex);
+
+    mdTypeRef GetBubbleUpExceptionTypeRef() const;
+    mdMemberRef GetBubbleUpExceptionFunctionDef() const;
 };
 
 } // namespace trace

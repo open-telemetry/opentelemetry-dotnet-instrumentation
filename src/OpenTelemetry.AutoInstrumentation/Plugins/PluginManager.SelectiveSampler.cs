@@ -1,17 +1,18 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
+using OpenTelemetry.AutoInstrumentation.PluginApi.SelectiveSampling;
+
 namespace OpenTelemetry.AutoInstrumentation.Plugins;
 
 internal partial class PluginManager
 {
-    public (uint SelectiveSamplingInterval, TimeSpan ExportInterval, TimeSpan ExportTimeou, object? SelectiveSamplingExporter)? GetFirstSelectiveSamplingConfiguration()
+    public SelectiveSamplerConfiguration? GetFirstSelectiveSamplingConfiguration()
     {
         foreach (var plugin in _plugins)
         {
-            var mi = plugin.Type.GetMethod("GetSelectiveSamplingConfiguration");
-            if (mi?.Invoke(plugin.Instance, null) is Tuple<uint, TimeSpan, TimeSpan, object?> selectiveSamplingConfiguration)
+            if (plugin.Instance is ISelectiveSamplerPlugin samplerPlugin)
             {
-                return (selectiveSamplingConfiguration.Item1, selectiveSamplingConfiguration.Item2, selectiveSamplingConfiguration.Item3, selectiveSamplingConfiguration.Item4);
+                return samplerPlugin.GetFirstSelectiveSamplingConfiguration();
             }
         }
 

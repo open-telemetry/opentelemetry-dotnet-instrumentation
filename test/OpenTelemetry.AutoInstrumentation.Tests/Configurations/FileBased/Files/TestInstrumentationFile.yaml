@@ -45,6 +45,7 @@ instrumentation/development:
       netruntime:
       nservicebus:
       process:
+      quartz:
       sqlclient:
     logs:
       ilogger:

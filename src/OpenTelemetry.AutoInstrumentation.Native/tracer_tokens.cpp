@@ -9,6 +9,7 @@
 #include "il_rewriter_wrapper.h"
 #include "logger.h"
 #include "module_metadata.h"
+#include "cor_profiler.h"
 
 namespace trace
 {
@@ -27,9 +28,12 @@ static const WSTRING managed_profiler_calltarget_returntype =
     WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn");
 static const WSTRING managed_profiler_calltarget_returntype_generics =
     WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn`1");
-static const WSTRING managed_profiler_calltarget_beginmethod_name  = WStr("BeginMethod");
-static const WSTRING managed_profiler_calltarget_endmethod_name    = WStr("EndMethod");
-static const WSTRING managed_profiler_calltarget_logexception_name = WStr("LogException");
+static const WSTRING managed_profiler_calltarget_refstruct =
+    WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetRefStruct");
+static const WSTRING managed_profiler_calltarget_createrefstruct_name = WStr("CreateRefStruct");
+static const WSTRING managed_profiler_calltarget_beginmethod_name     = WStr("BeginMethod");
+static const WSTRING managed_profiler_calltarget_endmethod_name       = WStr("EndMethod");
+static const WSTRING managed_profiler_calltarget_logexception_name    = WStr("LogException");
 
 /**
  * PRIVATE
@@ -89,6 +93,11 @@ HRESULT TracerTokens::WriteBeginMethodWithArgumentsArray(void*           rewrite
 
     bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
+    if (currentTypeRef == mdTokenNil)
+    {
+        isValueType    = false;
+        currentTypeRef = GetObjectTypeRef();
+    }
 
     unsigned currentTypeBuffer;
     ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
@@ -150,11 +159,171 @@ const WSTRING& TracerTokens::GetCallTargetReturnGenericType()
     return managed_profiler_calltarget_returntype_generics;
 }
 
+const WSTRING& TracerTokens::GetCallTargetRefStructType()
+{
+    return managed_profiler_calltarget_refstruct;
+}
+
+HRESULT TracerTokens::EnsureBaseCalltargetTokens()
+{
+    std::lock_guard<std::recursive_mutex> guard(metadata_mutex);
+    auto                                  hr = CallTargetTokens::EnsureBaseCalltargetTokens();
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    // The type may be unavailable when a newer native profiler is used with an older managed assembly.
+    if (profiler->IsCallTargetBubbleUpExceptionTypeAvailable() && bubbleUpExceptionTypeRef == mdTypeRefNil)
+    {
+        const ModuleMetadata* module_metadata = GetMetadata();
+        const auto            typeHr =
+            module_metadata->metadata_emit->DefineTypeRefByName(profilerAssemblyRef,
+                                                                calltarget_bubble_up_exception_type_name.data(),
+                                                                &bubbleUpExceptionTypeRef);
+        if (SUCCEEDED(typeHr))
+        {
+            if (profiler->IsCallTargetBubbleUpFunctionAvailable() && bubbleUpExceptionFunctionRef == mdMemberRefNil)
+            {
+                COR_SIGNATURE  createInstanceSig[32];
+                COR_SIGNATURE* sigBuilder = createInstanceSig;
+                sigBuilder += CorSigCompressData(IMAGE_CEE_CS_CALLCONV_DEFAULT, sigBuilder);
+                sigBuilder += CorSigCompressData(1, sigBuilder);
+                sigBuilder += CorSigCompressElementType(ELEMENT_TYPE_BOOLEAN, sigBuilder);
+                sigBuilder += CorSigCompressElementType(ELEMENT_TYPE_CLASS, sigBuilder);
+                sigBuilder += CorSigCompressToken(exTypeRef, sigBuilder);
+
+                const auto memberHr =
+                    module_metadata->metadata_emit->DefineMemberRef(bubbleUpExceptionTypeRef,
+                                                                    calltarget_bubble_up_exception_function_name.data(),
+                                                                    createInstanceSig,
+                                                                    static_cast<ULONG>(sigBuilder - createInstanceSig),
+                                                                    &bubbleUpExceptionFunctionRef);
+                if (FAILED(memberHr))
+                {
+                    bubbleUpExceptionFunctionRef = mdMemberRefNil;
+                }
+            }
+        }
+        else
+        {
+            bubbleUpExceptionTypeRef = mdTypeRefNil;
+        }
+    }
+
+    if (callTargetTypeRef != mdTypeRefNil && createRefStructMemberRef == mdMemberRefNil)
+    {
+        const auto     module_metadata = GetMetadata();
+        COR_SIGNATURE  createInstanceSig[32];
+        COR_SIGNATURE* sigBuilder = createInstanceSig;
+        sigBuilder += CorSigCompressData(IMAGE_CEE_CS_CALLCONV_DEFAULT, sigBuilder); // static
+        sigBuilder += CorSigCompressData(2, sigBuilder);                             // arguments count
+        sigBuilder += CorSigCompressElementType(ELEMENT_TYPE_VALUETYPE, sigBuilder); // return type
+        sigBuilder += CorSigCompressToken(callTargetRefStructTypeRef, sigBuilder);
+        sigBuilder += CorSigCompressElementType(ELEMENT_TYPE_PTR, sigBuilder);       // ptr
+        sigBuilder += CorSigCompressElementType(ELEMENT_TYPE_VOID, sigBuilder);      // void
+        sigBuilder += CorSigCompressElementType(ELEMENT_TYPE_VALUETYPE, sigBuilder); // RuntimeTypeHandle type
+        sigBuilder += CorSigCompressToken(GetRuntimeTypeHandleTypeRef(), sigBuilder);
+
+        auto hr =
+            module_metadata->metadata_emit->DefineMemberRef(callTargetTypeRef,
+                                                            managed_profiler_calltarget_createrefstruct_name.data(),
+                                                            createInstanceSig,
+                                                            static_cast<ULONG>(sigBuilder - createInstanceSig),
+                                                            &createRefStructMemberRef);
+        if (FAILED(hr))
+        {
+            Logger::Warn("Wrapper CreateRefStruct could not be defined.");
+            return hr;
+        }
+    }
+
+    return hr;
+}
+
+int TracerTokens::GetAdditionalLocalsCount(const std::vector<TypeSignature>& methodTypeArguments)
+{
+    int refStructCount = 0;
+    if (enable_by_ref_instrumentation)
+    {
+        const auto module_metadata = GetMetadata();
+        for (auto const& typeArgument : methodTypeArguments)
+        {
+            bool isByRefLike = false;
+            if (SUCCEEDED(IsTypeByRefLike(_profiler_info.Get(), *module_metadata, typeArgument, GetCorLibAssemblyRef(),
+                                          isByRefLike)) &&
+                isByRefLike)
+            {
+                refStructCount++;
+            }
+        }
+    }
+
+    // 2 for the exception variable caught by the filter CallTargetBubbleUpException for begin and end methods
+    // with a filter, the catch handler needs to load the exception in the eval. stack, it's not available by default
+    // anymore
+    return 2 + refStructCount;
+}
+
+void TracerTokens::AddAdditionalLocals(TypeSignature*                    methodReturnValue,
+                                       const std::vector<TypeSignature>* methodTypeArguments,
+                                       COR_SIGNATURE (&signatureBuffer)[500],
+                                       ULONG& signatureOffset,
+                                       ULONG& signatureSize)
+{
+    unsigned   exTypeRefBuffer;
+    const auto exTypeRefSize           = CorSigCompressToken(exTypeRef, &exTypeRefBuffer);
+    const auto additionalSignatureSize = 2 * (1 + exTypeRefSize);
+    signatureSize += additionalSignatureSize;
+
+    if (signatureSize > signatureBufferSize)
+    {
+        return;
+    }
+
+    // Exception value for the BeginMethod CallTarget exception filter.
+    signatureBuffer[signatureOffset++] = ELEMENT_TYPE_CLASS;
+    memcpy(&signatureBuffer[signatureOffset], &exTypeRefBuffer, exTypeRefSize);
+    signatureOffset += exTypeRefSize;
+
+    // Exception value for the EndMethod CallTarget exception filter.
+    signatureBuffer[signatureOffset++] = ELEMENT_TYPE_CLASS;
+    memcpy(&signatureBuffer[signatureOffset], &exTypeRefBuffer, exTypeRefSize);
+    signatureOffset += exTypeRefSize;
+
+    if (enable_by_ref_instrumentation)
+    {
+        unsigned   refStructTokenBuffer;
+        const auto refStructTokenSize = CorSigCompressToken(callTargetRefStructTypeRef, &refStructTokenBuffer);
+        const auto module_metadata    = GetMetadata();
+        for (const auto& argument : *methodTypeArguments)
+        {
+            bool isByRefLike = false;
+            if (SUCCEEDED(IsTypeByRefLike(_profiler_info.Get(), *module_metadata, argument, GetCorLibAssemblyRef(),
+                                          isByRefLike)) &&
+                isByRefLike)
+            {
+                signatureSize += 1 + refStructTokenSize;
+                if (signatureSize > signatureBufferSize)
+                {
+                    return;
+                }
+                signatureBuffer[signatureOffset++] = ELEMENT_TYPE_VALUETYPE;
+                memcpy(&signatureBuffer[signatureOffset], &refStructTokenBuffer, refStructTokenSize);
+                signatureOffset += refStructTokenSize;
+            }
+        }
+    }
+}
+
 /**
  * PUBLIC
  **/
 
-TracerTokens::TracerTokens(ModuleMetadata* module_metadata_ptr) : CallTargetTokens(module_metadata_ptr)
+TracerTokens::TracerTokens(ModuleMetadata*                  module_metadata_ptr,
+                           const WSTRING&                   bytecode_instrumentation_name,
+                           const ComPtr<ICorProfilerInfo4>& profilerInfo)
+    : CallTargetTokens(module_metadata_ptr, bytecode_instrumentation_name), _profiler_info(profilerInfo)
 {
     for (int i = 0; i < FASTPATH_COUNT; i++)
     {
@@ -253,19 +422,44 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
 
     bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
+    if (currentTypeRef == mdTokenNil)
+    {
+        isValueType    = false;
+        currentTypeRef = GetObjectTypeRef();
+    }
 
     unsigned currentTypeBuffer;
     ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
 
     auto signatureLength = 4 + integrationTypeSize + currentTypeSize;
 
+    std::vector<std::vector<COR_SIGNATURE>> dynamicSignatureAllocation;
+    dynamicSignatureAllocation.reserve(FASTPATH_COUNT);
     PCCOR_SIGNATURE argumentsSignatureBuffer[FASTPATH_COUNT];
     ULONG           argumentsSignatureSize[FASTPATH_COUNT];
     for (auto i = 0; i < numArguments; i++)
     {
         const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
 
-        if (enable_by_ref_instrumentation && (argTypeFlags & TypeFlagByRef))
+        bool isByRefLike = false;
+        if (FAILED(IsTypeByRefLike(_profiler_info.Get(), *module_metadata, methodArguments[i], GetCorLibAssemblyRef(),
+                                   isByRefLike)))
+        {
+            isByRefLike = false;
+        }
+
+        if (enable_by_ref_instrumentation && isByRefLike)
+        {
+            unsigned   refStructTokenBuffer;
+            const auto refStructTokenSize = CorSigCompressToken(callTargetRefStructTypeRef, &refStructTokenBuffer);
+            auto&      argumentSignature  = dynamicSignatureAllocation.emplace_back(refStructTokenSize + 1);
+            argumentSignature[0]          = ELEMENT_TYPE_VALUETYPE;
+            memcpy(argumentSignature.data() + 1, &refStructTokenBuffer, refStructTokenSize);
+            argumentsSignatureBuffer[i] = argumentSignature.data();
+            argumentsSignatureSize[i]   = static_cast<ULONG>(argumentSignature.size());
+            signatureLength += argumentsSignatureSize[i];
+        }
+        else if (enable_by_ref_instrumentation && (argTypeFlags & TypeFlagByRef))
         {
             PCCOR_SIGNATURE argSigBuff;
             auto            signatureSize = methodArguments[i].GetSignature(argSigBuff);
@@ -288,6 +482,13 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
             argumentsSignatureSize[i] = signatureSize;
             signatureLength += signatureSize;
         }
+    }
+
+    if (signatureLength > signatureBufferSize)
+    {
+        Logger::Warn("WriteBeginMethod: begin method signature (", signatureLength, " bytes) exceeds the buffer size ",
+                     signatureBufferSize, "; skipping instrumentation of this method to avoid a buffer overflow.");
+        return E_FAIL;
     }
 
     COR_SIGNATURE signature[signatureBufferSize];
@@ -315,6 +516,12 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
     {
         memcpy(&signature[offset], argumentsSignatureBuffer[i], argumentsSignatureSize[i]);
         offset += argumentsSignatureSize[i];
+    }
+
+    if (offset != signatureLength)
+    {
+        Logger::Warn("WriteBeginMethod: signature size mismatch.");
+        return E_FAIL;
     }
 
     hr = module_metadata->metadata_emit->DefineMethodSpec(beginMethodFastPathRef, signature, signatureLength,
@@ -404,6 +611,11 @@ HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void*           rewriterWrappe
 
     bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
+    if (currentTypeRef == mdTokenNil)
+    {
+        isValueType    = false;
+        currentTypeRef = GetObjectTypeRef();
+    }
 
     unsigned currentTypeBuffer;
     ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
@@ -527,6 +739,11 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
 
     bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
+    if (currentTypeRef == mdTokenNil)
+    {
+        isValueType    = false;
+        currentTypeRef = GetObjectTypeRef();
+    }
 
     unsigned currentTypeBuffer;
     ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
@@ -535,7 +752,14 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
     auto            returnSignatureLength = returnArgument->GetSignature(returnSignatureBuffer);
 
     signatureLength = 4 + integrationTypeSize + currentTypeSize + returnSignatureLength;
-    offset          = 0;
+    if (signatureLength > signatureBufferSize)
+    {
+        Logger::Warn("WriteEndReturnMemberRef: end method signature (", signatureLength,
+                     " bytes) exceeds the buffer size ", signatureBufferSize,
+                     "; skipping instrumentation of this method to avoid a buffer overflow.");
+        return E_FAIL;
+    }
+    offset = 0;
 
     signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERICINST;
     signature[offset++] = 0x03;
@@ -557,6 +781,12 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
 
     memcpy(&signature[offset], returnSignatureBuffer, returnSignatureLength);
     offset += returnSignatureLength;
+
+    if (offset != signatureLength)
+    {
+        Logger::Warn("WriteEndReturnMemberRef: signature size mismatch.");
+        return E_FAIL;
+    }
 
     hr = module_metadata->metadata_emit->DefineMethodSpec(endMethodMemberRef, signature, signatureLength,
                                                           &endMethodSpec);
@@ -619,6 +849,11 @@ HRESULT TracerTokens::WriteLogException(void*           rewriterWrapperPtr,
 
     bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
+    if (currentTypeRef == mdTokenNil)
+    {
+        isValueType    = false;
+        currentTypeRef = GetObjectTypeRef();
+    }
 
     unsigned currentTypeBuffer;
     ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
@@ -652,7 +887,46 @@ HRESULT TracerTokens::WriteLogException(void*           rewriterWrapperPtr,
         return hr;
     }
 
-    *instruction = rewriterWrapper->CallMember(logExceptionMethodSpec, false);
+    ILInstr* callInstruction = rewriterWrapper->CallMember(logExceptionMethodSpec, false);
+    // A filter handler does not provide the exception on the evaluation stack in the same way as a typed catch.
+    // Preserve the POP/LDLOC sequence emitted by the rewriter as the handler's first instruction.
+    if (*instruction == nullptr)
+    {
+        *instruction = callInstruction;
+    }
+    return S_OK;
+}
+
+mdTypeRef TracerTokens::GetBubbleUpExceptionTypeRef() const
+{
+    return bubbleUpExceptionTypeRef;
+}
+
+mdMemberRef TracerTokens::GetBubbleUpExceptionFunctionDef() const
+{
+    return bubbleUpExceptionFunctionRef;
+}
+
+HRESULT TracerTokens::WriteRefStructCall(void* rewriterWrapperPtr, mdTypeRef refStructTypeRef, int refStructIndex)
+{
+    auto hr = EnsureBaseCalltargetTokens();
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+    ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*)rewriterWrapperPtr;
+
+    if (createRefStructMemberRef == mdMemberRefNil)
+    {
+        Logger::Error("CreateRefStruct memberRef is null.");
+        return E_FAIL;
+    }
+
+    rewriterWrapper->CreateInstr(CEE_CONV_U);
+    rewriterWrapper->LoadToken(refStructTypeRef);
+    rewriterWrapper->CallMember(createRefStructMemberRef, false);
+    rewriterWrapper->StLocal(refStructIndex);
+    rewriterWrapper->LoadLocalAddress(refStructIndex);
     return S_OK;
 }
 

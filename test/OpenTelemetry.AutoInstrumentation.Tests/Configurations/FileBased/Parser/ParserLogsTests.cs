@@ -39,6 +39,7 @@ public class ParserLogsTests
         Assert.Equal("api-key", httpExporter.Headers[0].Name);
         Assert.Equal("1234", httpExporter.Headers[0].Value);
         Assert.Equal("api-key=1234", httpExporter.HeadersList);
+        Assert.Equal("gzip", httpExporter.Compression);
 
         var grpcProcessor = config.LoggerProvider.Processors[1].Batch;
         Assert.NotNull(grpcProcessor);
@@ -51,6 +52,7 @@ public class ParserLogsTests
         Assert.Equal("api-key", grpcExporter.Headers[0].Name);
         Assert.Equal("1234", grpcExporter.Headers[0].Value);
         Assert.Equal("api-key=1234", grpcExporter.HeadersList);
+        Assert.Equal("none", grpcExporter.Compression);
 
         var simpleProcessor = config.LoggerProvider.Processors[2].Simple;
         Assert.NotNull(simpleProcessor);

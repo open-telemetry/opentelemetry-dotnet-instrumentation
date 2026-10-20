@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\CommonExcludedAssets.props" />
+
+  <PropertyGroup>
+    <Description>Provides extension points for an OpenTelemetry.AutoInstrumentation plugin</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry" />
+    <PackageReference Include="OpenTelemetry.Api" />
+    <PackageReference Include="OpenTelemetry.OpAmp.Client" />
+  </ItemGroup>
+
+</Project>

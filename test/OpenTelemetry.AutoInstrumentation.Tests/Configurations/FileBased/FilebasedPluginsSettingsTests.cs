@@ -61,9 +61,12 @@ public class FilebasedPluginsSettingsTests
 
         settings.LoadFile(conf);
 
-        Assert.Equal(3, settings.Plugins.Count);
-        Assert.Contains("Test1.Plugins.Plugin, Test1.Plugins", settings.Plugins);
-        Assert.Contains("Test2.Plugins.Plugin, Test2.Plugins", settings.Plugins);
-        Assert.Contains("Test3.Plugins.Plugin, Test3.Plugins", settings.Plugins);
+        Assert.Equal(
+            [
+                "Test1.Plugins.Plugin, Test1.Plugins",
+                "Test2.Plugins.Plugin, Test2.Plugins",
+                "Test3.Plugins.Plugin, Test3.Plugins"
+            ],
+            settings.Plugins);
     }
 }

@@ -193,6 +193,8 @@ ClientBin/
 *.dbproj.schemaview
 *.jfm
 *.pfx
+# Strong-name key files are generated from Base64 source during build.
+*.snk
 *.publishsettings
 node_modules/
 orleans.codegen.cs

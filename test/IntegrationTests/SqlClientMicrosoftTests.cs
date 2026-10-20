@@ -17,6 +17,21 @@ public class SqlClientMicrosoftTests : TestHelper
         _sqlServerFixture = sqlServerFixture;
     }
 
+#if NETFRAMEWORK
+    public static TheoryData<string, bool> TraceContextPropagationTestData()
+    {
+        var theoryData = new TheoryData<string, bool>();
+
+        foreach (var version in LibraryVersion.SqlClientMicrosoft)
+        {
+            theoryData.Add(version, false);
+            theoryData.Add(version, true);
+        }
+
+        return theoryData;
+    }
+#endif
+
     [SkippableTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
@@ -32,12 +47,45 @@ public class SqlClientMicrosoftTests : TestHelper
 
         RunTestApplication(new()
         {
-            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}",
+            Arguments = $"--password {_sqlServerFixture.Password} --port {_sqlServerFixture.Port}",
             PackageVersion = packageVersion
         });
 
         collector.AssertExpectations();
     }
+
+#if NETFRAMEWORK
+    [SkippableTheory]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Linux")]
+    [MemberData(nameof(TraceContextPropagationTestData))]
+    public void PropagatesTraceContext(string packageVersion, bool enableTransaction)
+    {
+        // Skip the test if fixture does not support current platform
+        _sqlServerFixture.SkipIfUnsupportedPlatform();
+
+        SetEnvironmentVariable(SqlClientTraceContextPropagationTestHelper.ContextPropagationEnvVar, bool.TrueString);
+
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+
+        var (standardOutput, _, _) = RunTestApplication(new()
+        {
+            Arguments = $"--password {_sqlServerFixture.Password} --port {_sqlServerFixture.Port} {SqlClientTraceContextPropagationTestHelper.GetContextInfoCommandArguments(enableTransaction)}",
+            PackageVersion = packageVersion
+        });
+
+        var contextInfo = SqlClientTraceContextPropagationTestHelper.ExtractContextInfo(standardOutput);
+
+        collector.Expect(
+            SqlClientTraceContextPropagationTestHelper.ScopeName,
+            span => SqlClientTraceContextPropagationTestHelper.MatchesContextInfo(span, contextInfo),
+            "SqlClient span matching propagated CONTEXT_INFO.");
+        collector.ExpectAllCollected(
+            collected => collected.Count(item => item.Scope.Name == SqlClientTraceContextPropagationTestHelper.ScopeName) == 1);
+        collector.AssertExpectations();
+    }
+#endif
 
     [SkippableTheory]
     [Trait("Category", "EndToEnd")]
@@ -59,7 +107,7 @@ public class SqlClientMicrosoftTests : TestHelper
 
         using var process = StartTestApplication(new TestSettings
         {
-            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}",
+            Arguments = $"--password {_sqlServerFixture.Password} --port {_sqlServerFixture.Port}",
             PackageVersion = packageVersion
         });
 

@@ -1,1 +1,1 @@
-FROM mcr.microsoft.com/mssql/server:2022-CU17-ubuntu-22.04@sha256:d252932ef839c24c61c1139cc98f69c85ca774fa7c6bfaaa0015b7eb02b9dc87
+FROM mcr.microsoft.com/mssql/server:2025-latest@sha256:cee0f4db03b5192de777d37a22455949d1c2c230bb48c0a732b88b0933117a72

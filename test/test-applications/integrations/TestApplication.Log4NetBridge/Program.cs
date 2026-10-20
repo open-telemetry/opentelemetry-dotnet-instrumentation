@@ -18,25 +18,18 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        if (args.Length == 2)
+        var logApiName = ArgumentHelper.GetRequiredArgument(args, "--api");
+        log4net.GlobalContext.Properties["test_key"] = "test_value";
+        switch (logApiName)
         {
-            log4net.GlobalContext.Properties["test_key"] = "test_value";
-            var logApiName = args[1];
-            switch (logApiName)
-            {
-                case "log4net":
-                    LogUsingLog4NetDirectly();
-                    break;
-                case "ILogger":
-                    LogUsingILogger();
-                    break;
-                default:
-                    throw new NotSupportedException($"{logApiName} is not supported.");
-            }
-        }
-        else
-        {
-            throw new ArgumentException("Invalid arguments.");
+            case "log4net":
+                LogUsingLog4NetDirectly();
+                break;
+            case "ILogger":
+                LogUsingILogger();
+                break;
+            default:
+                throw new NotSupportedException($"{logApiName} is not supported.");
         }
     }
 

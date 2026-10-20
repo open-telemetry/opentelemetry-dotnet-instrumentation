@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Net.Http;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Exporter;
@@ -14,6 +15,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 internal class OtlpSettings
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+    private static readonly Func<HttpClient> DefaultHttpClientFactory = static () => new HttpClient();
 
     public OtlpSettings(OtlpSignalType signalType, Configuration configuration)
     {
@@ -33,6 +35,8 @@ internal class OtlpSettings
     {
         Protocol = OtlpExportProtocol.HttpProtobuf;
 
+        Compression = GetCompression(configuration.Compression);
+
         Headers = CombineHeaders(configuration.Headers, configuration.HeadersList);
 
         TimeoutMilliseconds = configuration.Timeout;
@@ -45,6 +49,8 @@ internal class OtlpSettings
 #pragma warning disable CS0618 // OtlpExportProtocol.Grpc is obsolete
         Protocol = OtlpExportProtocol.Grpc;
 #pragma warning restore CS0618 // OtlpExportProtocol.Grpc is obsolete
+
+        Compression = GetCompression(configuration.Compression);
 
         Headers = CombineHeaders(configuration.Headers, configuration.HeadersList);
 
@@ -74,6 +80,11 @@ internal class OtlpSettings
     /// </summary>
     public Uri? Endpoint { get; private set; }
 
+    /// <summary>
+    /// Gets the optional OTLP export compression.
+    /// </summary>
+    public OtlpExportCompression? Compression { get; private set; }
+
     public void CopyTo(OtlpExporterOptions options)
     {
         if (Protocol.HasValue)
@@ -95,6 +106,18 @@ internal class OtlpSettings
         if (TimeoutMilliseconds.HasValue)
         {
             options.TimeoutMilliseconds = TimeoutMilliseconds.Value;
+        }
+
+        if (Compression.HasValue)
+        {
+            options.Compression = Compression.Value;
+        }
+
+        if (Protocol == OtlpExportProtocol.HttpProtobuf)
+        {
+            // Avoid the SDK's DI-backed IHttpClientFactory fallback, which can resolve
+            // services after the application IServiceProvider has been disposed.
+            options.HttpClientFactory = DefaultHttpClientFactory;
         }
     }
 
@@ -155,6 +178,25 @@ internal class OtlpSettings
         return headerDict.Count == 0
             ? null
             : string.Join(",", headerDict.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+    }
+
+    private static OtlpExportCompression GetCompression(string? compression)
+    {
+        if (string.IsNullOrWhiteSpace(compression))
+        {
+            return OtlpExportCompression.None;
+        }
+
+        switch (compression)
+        {
+            case "gzip":
+                return OtlpExportCompression.GZip;
+            case "none":
+                return OtlpExportCompression.None;
+            default:
+                Logger.Warning($"Invalid OTLP compression value '{compression}' in file-based configuration. Supported values are 'gzip' and 'none'. Defaulting to 'none'.");
+                return OtlpExportCompression.None;
+        }
     }
 
     private static OtlpExportProtocol? GetExporterOtlpProtocol(OtlpSignalType signalType, Configuration configuration)

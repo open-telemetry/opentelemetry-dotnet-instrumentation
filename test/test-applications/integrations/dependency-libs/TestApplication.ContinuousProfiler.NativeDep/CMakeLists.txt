@@ -100,14 +100,8 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 # Compiler options
 # ******************************************************
 
-# Sets the compiler
-if(ISLINUX)
-    SET (CMAKE_C_COMPILER   ${FOUND_CLANG})
-    SET (CMAKE_CXX_COMPILER ${FOUND_CLANGPP})
-endif()
-
 # Sets compiler options
-add_compile_options(-std=c++17 -fPIC -fms-extensions)
+add_compile_options(-std=c++20 -fPIC -fms-extensions)
 add_compile_options(-DPAL_STDCPP_COMPAT -DPLATFORM_UNIX -DUNICODE)
 add_compile_options(-Wno-invalid-noreturn -Wno-macro-redefined)
 if (ISMACOS)

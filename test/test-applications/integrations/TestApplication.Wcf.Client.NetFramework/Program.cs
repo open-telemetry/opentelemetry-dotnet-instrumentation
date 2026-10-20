@@ -25,22 +25,17 @@ internal static class Program
             netTcpAddress = "net.tcp://127.0.0.1:9090/Telemetry";
             httpAddress = "http://127.0.0.1:9009/Telemetry";
         }
-        else if (args.Length == 2)
+        else if (ArgumentHelper.HasArgument(args, "--iis"))
         {
             // Addresses of a service hosted in IIS inside container
-            netTcpAddress = $"net.tcp://localhost:{args[0]}/StatusService.svc";
-            httpAddress = $"http://localhost:{args[1]}/StatusService.svc";
-        }
-        else if (args.Length == 4)
-        {
-            // Self-hosted service addresses
-            netTcpAddress = $"net.tcp://127.0.0.1:{args[1]}/Telemetry";
-            httpAddress = $"http://127.0.0.1:{args[3]}/Telemetry";
+            netTcpAddress = $"net.tcp://localhost:{ArgumentHelper.GetRequiredArgument(args, "--tcpPort")}/StatusService.svc";
+            httpAddress = $"http://localhost:{ArgumentHelper.GetRequiredArgument(args, "--httpPort")}/StatusService.svc";
         }
         else
         {
-            throw new InvalidOperationException(
-                "TestApplication.Wcf.Client.NetFramework application requires either 0, 2, or 4 arguments.");
+            // Self-hosted service addresses
+            netTcpAddress = $"net.tcp://127.0.0.1:{ArgumentHelper.GetRequiredArgument(args, "--tcpPort")}/Telemetry";
+            httpAddress = $"http://127.0.0.1:{ArgumentHelper.GetRequiredArgument(args, "--httpPort")}/Telemetry";
         }
 
         using var parent = Source.StartActivity("Parent");

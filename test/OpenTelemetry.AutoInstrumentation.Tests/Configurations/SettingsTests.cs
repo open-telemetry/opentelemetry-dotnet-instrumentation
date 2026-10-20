@@ -4,7 +4,12 @@
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Reflection;
+#if NETFRAMEWORK
+using System.Net.Http;
+#endif
 using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
+using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using OpenTelemetry.Exporter;
 using AutoOtlpDefinitions = OpenTelemetry.AutoInstrumentation.Configurations.Otlp.OtlpSpecConfigDefinitions;
@@ -73,6 +78,7 @@ public sealed class SettingsTests
         Assert.Empty(settings.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata);
         Assert.Empty(settings.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders);
         Assert.Empty(settings.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders);
+        Assert.False(settings.InstrumentationOptions.NpgsqlContextPropagation);
         Assert.False(settings.InstrumentationOptions.OracleMdaSetDbStatementForText);
 
         Assert.NotNull(settings.OtlpSettings);
@@ -387,9 +393,12 @@ public sealed class SettingsTests
     [InlineData("ASPNETCORE", MetricInstrumentation.AspNetCore)]
 #endif
     [InlineData("SQLCLIENT", MetricInstrumentation.SqlClient)]
+#if NET
+    [InlineData("QUARTZ", MetricInstrumentation.Quartz)]
+#endif
     internal void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
     {
-        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
         {
             { ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, "false" },
             { string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, meterInstrumentation), "true" }
@@ -406,7 +415,7 @@ public sealed class SettingsTests
     [InlineData("NLOG", LogInstrumentation.NLog)]
     internal void LogSettings_Instrumentations_SupportedValues(string logInstrumentation, LogInstrumentation expectedLogInstrumentation)
     {
-        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
         {
             { ConfigurationKeys.Logs.LogsInstrumentationEnabled, "false" },
             { string.Format(CultureInfo.InvariantCulture, ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation), "true" }
@@ -422,7 +431,7 @@ public sealed class SettingsTests
     [InlineData("false", false)]
     internal void IncludeFormattedMessage_DependsOnCorrespondingEnvVariable(string includeFormattedMessage, bool expectedValue)
     {
-        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
         {
             { ConfigurationKeys.Logs.IncludeFormattedMessage, includeFormattedMessage }
         });
@@ -444,7 +453,7 @@ public sealed class SettingsTests
     [InlineData("nonExistingProtocol", OtlpExportProtocol.HttpProtobuf)]
     internal void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string? otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)
     {
-        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
         {
             { AutoOtlpDefinitions.DefaultProtocolEnvVarName, otlpProtocol }
         });
@@ -454,6 +463,107 @@ public sealed class SettingsTests
         // null values for expected data will be handled by OTel .NET SDK
         Assert.NotNull(settings.OtlpSettings);
         Assert.Equal(expectedOtlpExportProtocol, settings.OtlpSettings.Protocol);
+    }
+
+    [Theory]
+    [InlineData("http/protobuf", true)]
+#if NETFRAMEWORK
+    [InlineData("grpc", true)]
+#else
+    [InlineData("grpc", false)]
+#endif
+    internal void OtlpSettings_CopyTo_OverridesHttpClientFactoryForHttpProtobufOnly(string otlpProtocol, bool expectHttpClientFactoryOverride)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { AutoOtlpDefinitions.DefaultProtocolEnvVarName, otlpProtocol }
+        });
+
+        var settings = Settings.FromDefaultSources<TracerSettings>(false).OtlpSettings;
+        var options = new OtlpExporterOptions();
+        Func<HttpClient> originalHttpClientFactory = static () => new HttpClient();
+        options.HttpClientFactory = originalHttpClientFactory;
+
+        settings?.CopyTo(options);
+
+        if (expectHttpClientFactoryOverride)
+        {
+            Assert.NotSame(originalHttpClientFactory, options.HttpClientFactory);
+        }
+        else
+        {
+            Assert.Same(originalHttpClientFactory, options.HttpClientFactory);
+        }
+    }
+
+    [Theory]
+    [InlineData("gzip", OtlpExportCompression.GZip)]
+    [InlineData("none", OtlpExportCompression.None)]
+    internal void OtlpSettings_FileBasedHttpCompression_CopyTo(string compression, OtlpExportCompression expectedCompression)
+    {
+        var settings = new OtlpSettings(OtlpSignalType.Traces, new OtlpHttpExporterConfig
+        {
+            Compression = compression
+        });
+
+        var options = new OtlpExporterOptions();
+
+        settings.CopyTo(options);
+
+        Assert.Equal(expectedCompression, settings.Compression);
+        Assert.Equal(expectedCompression, options.Compression);
+    }
+
+    [Theory]
+    [InlineData("gzip", OtlpExportCompression.GZip)]
+    [InlineData("none", OtlpExportCompression.None)]
+    internal void OtlpSettings_FileBasedGrpcCompression_CopyTo(string compression, OtlpExportCompression expectedCompression)
+    {
+        var settings = new OtlpSettings(new OtlpGrpcExporterConfig
+        {
+            Compression = compression
+        });
+
+        var options = new OtlpExporterOptions();
+
+        settings.CopyTo(options);
+
+        Assert.Equal(expectedCompression, settings.Compression);
+        Assert.Equal(expectedCompression, options.Compression);
+    }
+
+    [Fact]
+    internal void OtlpSettings_FileBasedCompression_DefaultsToNone()
+    {
+        var settings = new OtlpSettings(OtlpSignalType.Traces, new OtlpHttpExporterConfig());
+        var options = new OtlpExporterOptions
+        {
+            Compression = OtlpExportCompression.GZip
+        };
+
+        settings.CopyTo(options);
+
+        Assert.Equal(OtlpExportCompression.None, settings.Compression);
+        Assert.Equal(OtlpExportCompression.None, options.Compression);
+    }
+
+    [Fact]
+    internal void OtlpSettings_FileBasedCompression_UppercaseGzipDefaultsToNone()
+    {
+        var settings = new OtlpSettings(OtlpSignalType.Traces, new OtlpHttpExporterConfig
+        {
+            Compression = "GZIP"
+        });
+
+        var options = new OtlpExporterOptions
+        {
+            Compression = OtlpExportCompression.GZip
+        };
+
+        settings.CopyTo(options);
+
+        Assert.Equal(OtlpExportCompression.None, settings.Compression);
+        Assert.Equal(OtlpExportCompression.None, options.Compression);
     }
 
     [Theory]
@@ -556,6 +666,7 @@ public sealed class SettingsTests
     [Theory]
 #if NET
     [InlineData("CONTAINER", ResourceDetector.Container)]
+    [InlineData("AZURECONTAINERAPPS", ResourceDetector.AzureContainerApps)]
 #endif
     [InlineData("AZUREAPPSERVICE", ResourceDetector.AzureAppService)]
     [InlineData("PROCESSRUNTIME", ResourceDetector.ProcessRuntime)]

@@ -34,14 +34,14 @@ internal static class BeginMethodHandler<TIntegration, TTarget, TArg1, TArg2>
         }
         finally
         {
-            _invokeDelegate ??= (TTarget instance, ref TArg1 arg1, ref TArg2 arg2) => CallTargetState.GetDefault();
+            _invokeDelegate ??= (TTarget? instance, ref TArg1? arg1, ref TArg2? arg2) => CallTargetState.GetDefault();
         }
     }
 
-    internal delegate CallTargetState InvokeDelegate(TTarget instance, ref TArg1 arg1, ref TArg2 arg2);
+    internal delegate CallTargetState InvokeDelegate(TTarget? instance, ref TArg1? arg1, ref TArg2? arg2);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static CallTargetState Invoke(TTarget instance, ref TArg1 arg1, ref TArg2 arg2)
+    internal static CallTargetState Invoke(TTarget? instance, ref TArg1? arg1, ref TArg2? arg2)
     {
         return new CallTargetState(Activity.Current, _invokeDelegate(instance, ref arg1, ref arg2));
     }

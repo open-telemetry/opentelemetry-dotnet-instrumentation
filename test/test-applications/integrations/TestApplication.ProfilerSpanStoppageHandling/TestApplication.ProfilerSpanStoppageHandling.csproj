@@ -18,6 +18,9 @@
       <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\ThreadSample.cs">
         <Link>ThreadSample.cs</Link>
       </Compile>
+      <Compile Include="..\TestApplication.SelectiveSampler\Plugins\BasePlugin.cs">
+        <Link>Plugins\BasePlugin.cs</Link>
+      </Compile>
       <Compile Include="..\TestApplication.SelectiveSampler\Plugins\JsonConsoleExporter.cs">
         <Link>Plugins\JsonConsoleExporter.cs</Link>
       </Compile>
@@ -33,6 +36,10 @@
       <Compile Include="..\TestApplication.SelectiveSampler\Plugins\FrequentSamplingProcessor.cs">
         <Link>FrequentSamplingProcessor.cs</Link>
       </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\..\src\OpenTelemetry.AutoInstrumentation.PluginApi\OpenTelemetry.AutoInstrumentation.PluginApi.csproj" />
     </ItemGroup>
 
 </Project>

@@ -12,6 +12,13 @@
 namespace trace
 {
 
+std::string PadLeft(const std::string& txt, std::size_t len, char c)
+{
+    std::stringstream str;
+    str << std::right << std::setfill(c) << std::setw(len) << txt;
+    return str.str();
+}
+
 std::string ToString(const std::string& str)
 {
     return str;
@@ -26,25 +33,51 @@ std::string ToString(const uint64_t i)
 }
 std::string ToString(const WSTRING& wstr)
 {
+    return ToString(wstr.data(), wstr.size());
+}
+std::string ToString(const WCHAR* wstr)
+{
+    if (wstr == nullptr || *wstr == WStr('\0'))
+        return std::string();
+    return ToString(wstr, WStrLen(wstr));
+}
+std::string ToString(const WCHAR* wstr, std::size_t nbChars)
+{
 #ifdef _WIN32
-    if (wstr.empty())
+    if (nbChars == 0)
         return std::string();
 
-    std::string tmpStr(tmp_buffer_size, 0);
-    int         size_needed =
-        WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &tmpStr[0], tmp_buffer_size, NULL, NULL);
-    if (size_needed < tmp_buffer_size)
+    char tmpStr[tmp_buffer_size];
+    int  charsWritten = WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, tmpStr, tmp_buffer_size, nullptr, nullptr);
+    if (charsWritten < tmp_buffer_size && charsWritten != 0)
     {
-        return tmpStr.substr(0, size_needed);
+        return std::string(tmpStr, charsWritten);
     }
 
-    std::string strTo(size_needed, 0);
-    WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
+    const auto  sizeNeeded = WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, nullptr, 0, nullptr, nullptr);
+    std::string strTo(sizeNeeded, 0);
+    WideCharToMultiByte(CP_UTF8, 0, wstr, (int)nbChars, strTo.data(), sizeNeeded, nullptr, nullptr);
     return strTo;
 #else
-    std::u16string ustr(reinterpret_cast<const char16_t*>(wstr.c_str()));
+    // WCHAR is UTF-16 on non-Windows platforms in the CoreCLR PAL.
+    std::u16string ustr(reinterpret_cast<const char16_t*>(wstr), nbChars);
     return miniutf::to_utf8(ustr);
 #endif
+}
+
+std::string ToString(const GUID& uid)
+{
+    std::stringstream txt;
+    // {821CFB0A-7847-490F-B8BC-F9E913BC2CA6}
+    txt << "{";
+    txt << Hex(uid.Data1, 8, "") << "-";
+    txt << Hex(uid.Data2, 4, "") << "-";
+    txt << Hex(uid.Data3, 4, "") << "-";
+    txt << Hex(uid.Data4[0], 2, "") << Hex(uid.Data4[1], 2, "") << "-";
+    txt << Hex(uid.Data4[2], 2, "") << Hex(uid.Data4[3], 2, "") << Hex(uid.Data4[4], 2, "") << Hex(uid.Data4[5], 2, "")
+        << Hex(uid.Data4[6], 2, "") << Hex(uid.Data4[7], 2, "");
+    txt << "}";
+    return txt.str();
 }
 
 WSTRING ToWSTRING(const std::string& str)
@@ -53,15 +86,16 @@ WSTRING ToWSTRING(const std::string& str)
     if (str.empty())
         return std::wstring();
 
-    std::wstring tmpStr(tmp_buffer_size, 0);
-    int          size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &tmpStr[0], tmp_buffer_size);
-    if (size_needed < tmp_buffer_size)
+    WCHAR tmpStr[tmp_buffer_size];
+    int   charsWritten = MultiByteToWideChar(CP_UTF8, 0, str.data(), (int)str.size(), tmpStr, tmp_buffer_size);
+    if (charsWritten < tmp_buffer_size && charsWritten != 0)
     {
-        return tmpStr.substr(0, size_needed);
+        return WSTRING(tmpStr, charsWritten);
     }
 
-    std::wstring wstrTo(size_needed, 0);
-    MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
+    const auto sizeNeeded = MultiByteToWideChar(CP_UTF8, 0, str.data(), (int)str.size(), nullptr, 0);
+    WSTRING    wstrTo(sizeNeeded, 0);
+    MultiByteToWideChar(CP_UTF8, 0, str.data(), (int)str.size(), wstrTo.data(), sizeNeeded);
     return wstrTo;
 #else
     auto ustr = miniutf::to_utf16(str);
@@ -69,9 +103,33 @@ WSTRING ToWSTRING(const std::string& str)
 #endif
 }
 
-WSTRING ToWSTRING(const uint64_t i)
+// Taken from
+// https://chromium.googlesource.com/chromium/src/base/+/refs/heads/main/strings/string_number_conversions_internal.h
+// static STR IntToStringT(INT value)
+// simplified for our case
+WSTRING ToWSTRING(const uint64_t value)
 {
-    return WSTRING(reinterpret_cast<const WCHAR*>(std::to_wstring(i).c_str()));
+    // log10(2) ~= 0.3 bytes needed per bit or per byte log10(2**8) ~= 2.4.
+    const size_t bufferSize = 3 * sizeof(uint64_t);
+
+    // Create the string in a temporary buffer, write it back to front, and
+    // then return the substr of what we ended up using.
+    WCHAR  outbuf[bufferSize];
+    WCHAR* end = outbuf + bufferSize;
+    WCHAR* i   = end;
+    auto   res = value;
+    do
+    {
+        --i;
+        *i = static_cast<WCHAR>((res % 10) + WStr('0'));
+        res /= 10;
+    } while (res != 0);
+    return WSTRING(i, end);
+}
+
+bool StartsWith(const WSTRING& str, const WSTRING& prefix)
+{
+    return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0;
 }
 
 } // namespace trace

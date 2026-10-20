@@ -17,6 +17,7 @@ internal class InstrumentationOptions
         AspNetInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
         AspNetInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
         SqlClientNetFxIlRewriteEnabled = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled) ?? false;
+        SqlClientNetFxExperimentalContextPropagation = GetSqlClientNetFxExperimentalContextPropagation(configuration);
 #endif
 #if NET
         AspNetCoreInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetCoreInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
@@ -28,10 +29,12 @@ internal class InstrumentationOptions
         GrpcNetClientInstrumentationCaptureResponseMetadata = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.GrpcNetClientInstrumentationCaptureResponseMetadata, AdditionalTag.CreateGrpcResponseCache);
         HttpInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
         HttpInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.HttpInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
+        NpgsqlContextPropagation = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.NpgsqlContextPropagation) ?? false;
+        OracleMdaDatabaseOpenTelemetryTracing = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaDatabaseOpenTelemetryTracing) ?? true;
         OracleMdaSetDbStatementForText = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.OracleMdaSetDbStatementForText) ?? false;
     }
 
-    internal InstrumentationOptions(DotNetTraces? instrumentationConfiguration)
+    internal InstrumentationOptions(DotNetTraces? instrumentationConfiguration, bool failFast)
     {
         if (instrumentationConfiguration != null)
         {
@@ -45,6 +48,7 @@ internal class InstrumentationOptions
             if (instrumentationConfiguration.SqlClient != null)
             {
                 SqlClientNetFxIlRewriteEnabled = instrumentationConfiguration.SqlClient.NetFxIlRewriteEnabled;
+                SqlClientNetFxExperimentalContextPropagation = GetSqlClientNetFxExperimentalContextPropagation(new Configuration(failFast, new EnvironmentConfigurationSource(failFast)));
             }
 #endif
 #if NET
@@ -72,8 +76,14 @@ internal class InstrumentationOptions
                 HttpInstrumentationCaptureResponseHeaders = HeaderConfigurationExtensions.ParseHeaders(instrumentationConfiguration.HttpClient.CaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
             }
 
+            if (instrumentationConfiguration.Npgsql != null)
+            {
+                NpgsqlContextPropagation = instrumentationConfiguration.Npgsql.ContextPropagation;
+            }
+
             if (instrumentationConfiguration.OracleMda != null)
             {
+                OracleMdaDatabaseOpenTelemetryTracing = instrumentationConfiguration.OracleMda.DatabaseOpenTelemetryTracing;
                 OracleMdaSetDbStatementForText = instrumentationConfiguration.OracleMda.SetDbStatementForText;
             }
         }
@@ -95,6 +105,12 @@ internal class InstrumentationOptions
     /// to ensure CommandText is available.
     /// </summary>
     public bool SqlClientNetFxIlRewriteEnabled { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the SqlClient instrumentation on .NET Framework should propagate
+    /// context to the server.
+    /// </summary>
+    public bool SqlClientNetFxExperimentalContextPropagation { get; }
 #endif
 
 #if NET
@@ -135,7 +151,24 @@ internal class InstrumentationOptions
     public IReadOnlyList<AdditionalTag> HttpInstrumentationCaptureResponseHeaders { get; } = [];
 
     /// <summary>
+    /// Gets a value indicating whether the Npgsql instrumentation should propagate trace context to PostgreSQL.
+    /// </summary>
+    public bool NpgsqlContextPropagation { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the Oracle Client instrumentation should enable database OpenTelemetry tracing.
+    /// </summary>
+    public bool OracleMdaDatabaseOpenTelemetryTracing { get; }
+
+    /// <summary>
     /// Gets a value indicating whether text query in Oracle Client can be passed as a db.statement tag.
     /// </summary>
     public bool OracleMdaSetDbStatementForText { get; }
+
+#if NETFRAMEWORK
+    private static bool GetSqlClientNetFxExperimentalContextPropagation(Configuration configuration)
+    {
+        return configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxExperimentalContextPropagation) ?? false;
+    }
+#endif
 }
