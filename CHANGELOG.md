@@ -39,11 +39,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
-- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/core-1.20.0/VERSIONING.md#core-components):
-  [`1.20.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.20.0).
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/core-1.20.1/VERSIONING.md#core-components):
+  [`1.20.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.20.1).
 - Following packages updated
   - `OpenTelemetry.Exporter.Prometheus.HttpListener`
-    from `1.19.1-beta.1` to `1.20.0-beta.1`,
+    from `1.19.1-beta.1` to `1.20.1-beta.1`,
   - `OpenTelemetry.Instrumentation.GrpcNetClient`
     from `1.19.1-beta.1` to `1.20.0-beta.1`,
   - `OpenTelemetry.Instrumentation.Http` from `1.19.0` to `1.20.0`,
@@ -55,7 +55,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
     from `1.19.0-beta.1` to `1.20.0-beta.1`,
   - `OpenTelemetry.Instrumentation.Wcf` from `1.19.1-beta.1` to `1.20.0-beta.1`,
   - `OpenTelemetry.OpAmp.Client` from `0.7.0-alpha.2` to `0.8.0-alpha.1`,
-  - `OpenTelemetry.Shims.OpenTracing` from `1.19.1-beta.1` to `1.20.0-beta.1`,
+  - `OpenTelemetry.Shims.OpenTracing` from `1.19.1-beta.1` to `1.20.1-beta.1`,
   - `OpenTelemetry.Resources.Azure` from `1.19.1-beta.1` to `1.20.0-beta.1`,
   - `OpenTelemetry.Resources.Container` from `1.19.1-beta.1` to `1.20.0-beta.1`,
   - `OpenTelemetry.Resources.Host` from `1.19.1-beta.1` to `1.20.0-beta.1`,
