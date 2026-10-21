@@ -324,7 +324,7 @@ public static partial class LibraryVersion
                 "23.5.1",
 #endif
 #if NET462
-                "23.26.301",
+                "23.26.400",
 #endif
 #endif
             ];
@@ -341,7 +341,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "23.5.1",
-                "23.26.301",
+                "23.26.400",
 #endif
             ];
             return theoryData;
