@@ -17,9 +17,8 @@ namespace trace
 {
 
 // Rewrites every mapped assembly qualifier, including qualifiers in nested generic arguments. Missing or lower versions
-// are raised to the configured target; equal or higher versions are preserved. True means rewritten output was
-// produced; false leaves both outputs empty. redirected_assembly_names contains one entry per rewritten qualifier and
-// can therefore contain duplicate names.
+// are raised to the configured target; equal or higher versions are preserved. False leaves both outputs empty.
+// redirected_assembly_names contains one entry per rewritten qualifier and can therefore contain duplicate names.
 bool TryRewriteTypeNameAssemblyRedirections(std::string_view                                         type_name,
                                             std::unordered_map<WSTRING, AssemblyVersionRedirection>& assembly_redirects,
                                             std::string&          rewritten_type_name,

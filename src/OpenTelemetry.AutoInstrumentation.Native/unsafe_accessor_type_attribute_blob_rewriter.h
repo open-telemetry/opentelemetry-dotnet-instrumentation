@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "clr_helpers.h"
+#include "type_name_assembly_redirection_rewriter.h"
 
 namespace trace
 {

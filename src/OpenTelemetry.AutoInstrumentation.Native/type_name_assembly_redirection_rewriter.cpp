@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "ascii_string_utils.h"
+#include "logger.h"
 #include "string_utils.h"
 #include "type_name_assembly_reference_parser.h"
 
@@ -24,27 +25,41 @@ namespace trace
 namespace
 {
 
+constexpr USHORT unspecified_version_component = (std::numeric_limits<USHORT>::max)();
+
 bool TryParseVersion(const std::string_view value, ASSEMBLYMETADATA& version)
 {
     // Assembly display names accept two to four version components. Missing build and revision components are zero
     // when compared with the four-part versions in the redirection map.
     USHORT     parsed[4]{};
-    size_t     component_count = 0;
-    bool       fully_consumed  = false;
-    auto       current         = value.data();
-    const auto end             = current + value.size();
+    size_t     component_count           = 0;
+    bool       fully_consumed            = false;
+    auto       current                   = value.data();
+    const auto end                       = current + value.size();
+    bool       has_unspecified_component = false;
     for (size_t index = 0; index < 4; index++)
     {
         const auto   separator        = std::find(current, end, '.');
         unsigned int parsed_component = 0;
         const auto   result           = std::from_chars(current, separator, parsed_component);
         if (current == separator || result.ec != std::errc{} || result.ptr != separator ||
-            parsed_component > (std::numeric_limits<USHORT>::max)())
+            parsed_component > unspecified_version_component)
         {
             return false;
         }
 
-        parsed[index] = static_cast<USHORT>(parsed_component);
+        const auto component = static_cast<USHORT>(parsed_component);
+        // The runtime accepts 65535 only for build and revision, where it means unspecified. Normalize it and every
+        // following component to zero so comparison follows the runtime's assembly display-name semantics.
+        if (component == unspecified_version_component)
+        {
+            if (index < 2)
+            {
+                return false;
+            }
+            has_unspecified_component = true;
+        }
+        parsed[index] = has_unspecified_component ? 0 : component;
         component_count++;
         if (separator == end)
         {
@@ -77,10 +92,14 @@ bool TryRewriteTypeNameAssemblyRedirections(const std::string_view              
     redirected_assembly_names.clear();
 
     std::vector<ParsedAssemblyReference> references;
+    Logger::Debug("TypeNameAssemblyRedirectionRewriter: parsing type name '", type_name, "'.");
     if (!ParseTypeNameAssemblyReferences(type_name, references))
     {
+        Logger::Debug("TypeNameAssemblyRedirectionRewriter: failed to parse type name.");
         return false;
     }
+    Logger::Debug("TypeNameAssemblyRedirectionRewriter: parsed ", references.size(),
+                  " assembly reference(s) from type name '", type_name, "'.");
 
     struct Edit
     {
@@ -92,11 +111,10 @@ bool TryRewriteTypeNameAssemblyRedirections(const std::string_view              
     std::vector<Edit> edits;
     for (const auto& reference : references)
     {
-        ASSEMBLYMETADATA parsed_version{};
-        if (reference.version_span && !TryParseVersion(reference.version_span->View(type_name), parsed_version))
-        {
-            return false;
-        }
+        const auto version =
+            reference.version_span ? reference.version_span->View(type_name) : std::string_view{"<missing>"};
+        Logger::Debug("TypeNameAssemblyRedirectionRewriter: parsed assembly reference '", reference.assembly_name,
+                      "', Version='", version, "'.");
         const auto assembly_name = ToWSTRING(reference.assembly_name);
         auto       redirect      = assembly_redirects.find(assembly_name);
         if (redirect == assembly_redirects.end())
@@ -105,28 +123,44 @@ bool TryRewriteTypeNameAssemblyRedirections(const std::string_view              
                                     [&assembly_name](const auto& entry)
                                     { return EqualsIgnoreAsciiCase<WCHAR>(entry.first, assembly_name); });
         }
-        if (redirect != assembly_redirects.end())
+        if (redirect == assembly_redirects.end())
         {
-            if (reference.version_span && redirect->second.CompareToAssemblyVersion(parsed_version) <= 0)
-            {
-                // Preserve equal or higher requests. In particular, do not redirect a higher application request
-                // downward to the profiler's configured version.
-                continue;
-            }
+            Logger::Debug("TypeNameAssemblyRedirectionRewriter: no redirect is configured for assembly '",
+                          reference.assembly_name, "'.");
+            continue;
+        }
 
-            const auto target_version = ToString(redirect->second.VersionStr());
-            if (!reference.version_span)
-            {
-                // An explicit version prevents a lower TPA copy from binding before the managed resolver can
-                // participate.
-                edits.push_back({reference.insert_version_at, reference.insert_version_at,
-                                 ", Version=" + target_version, redirect->first});
-            }
-            else
-            {
-                edits.push_back(
-                    {reference.version_span->begin, reference.version_span->end, target_version, redirect->first});
-            }
+        ASSEMBLYMETADATA parsed_version{};
+        if (reference.version_span && !TryParseVersion(reference.version_span->View(type_name), parsed_version))
+        {
+            Logger::Warn("TypeNameAssemblyRedirectionRewriter: cannot redirect assembly '", reference.assembly_name,
+                         "' because Version='", version,
+                         "' is invalid. Enable Debug logging for the attribute source and parsed type-name details.");
+            return false;
+        }
+        if (reference.version_span && redirect->second.CompareToAssemblyVersion(parsed_version) <= 0)
+        {
+            // Preserve equal or higher requests. In particular, do not redirect a higher application request
+            // downward to the profiler's configured version.
+            Logger::Debug("TypeNameAssemblyRedirectionRewriter: preserving assembly '", reference.assembly_name,
+                          "' with Version='", version, "'.");
+            continue;
+        }
+
+        const auto target_version = ToString(redirect->second.VersionStr());
+        Logger::Debug("TypeNameAssemblyRedirectionRewriter: rewriting assembly '", reference.assembly_name,
+                      "' from Version='", version, "' to Version='", target_version, "'.");
+        if (!reference.version_span)
+        {
+            // An explicit version prevents a lower TPA copy from binding before the managed resolver can
+            // participate.
+            edits.push_back({reference.insert_version_at, reference.insert_version_at, ", Version=" + target_version,
+                             redirect->first});
+        }
+        else
+        {
+            edits.push_back(
+                {reference.version_span->begin, reference.version_span->end, target_version, redirect->first});
         }
     }
 
@@ -157,6 +191,8 @@ bool TryRewriteTypeNameAssemblyRedirections(const std::string_view              
     rewritten.append(type_name.data() + copied, type_name.size() - copied);
     rewritten_type_name       = std::move(rewritten);
     redirected_assembly_names = std::move(rewritten_assembly_names);
+    Logger::Debug("TypeNameAssemblyRedirectionRewriter: rewrote ", redirected_assembly_names.size(),
+                  " assembly reference(s) in type name '", type_name, "'.");
     return true;
 }
 

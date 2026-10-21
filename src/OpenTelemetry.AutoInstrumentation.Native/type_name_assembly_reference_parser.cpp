@@ -5,6 +5,7 @@
 
 #include "type_name_assembly_reference_parser.h"
 
+#include <algorithm>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -45,6 +46,7 @@ bool TryFindUnescaped(const std::string_view value,
                       std::optional<size_t>& position)
 {
     position.reset();
+    bool in_quotes        = false;
     auto current_position = span.begin;
     while (current_position < span.end)
     {
@@ -57,12 +59,21 @@ bool TryFindUnescaped(const std::string_view value,
                 }
                 current_position += 2;
                 break;
+            case '"':
+                in_quotes = !in_quotes;
+                current_position++;
+                break;
             case '[':
             case ']':
                 // Brackets in an assembly qualification must be escaped.
-                return false;
+                if (!in_quotes)
+                {
+                    return false;
+                }
+                current_position++;
+                break;
             default:
-                if (value[current_position] == expected)
+                if (!in_quotes && value[current_position] == expected)
                 {
                     position = current_position;
                     return true;
@@ -71,7 +82,7 @@ bool TryFindUnescaped(const std::string_view value,
                 break;
         }
     }
-    return true;
+    return !in_quotes;
 }
 
 bool TryFindTopLevelSeparator(const std::string_view type_name,
@@ -81,6 +92,7 @@ bool TryFindTopLevelSeparator(const std::string_view type_name,
 {
     position.reset();
     size_t bracket_depth    = 0;
+    bool   in_quotes        = false;
     auto   current_position = span.begin;
     while (current_position < span.end)
     {
@@ -94,18 +106,27 @@ bool TryFindTopLevelSeparator(const std::string_view type_name,
                 }
                 current_position += 2;
                 continue;
+            case '"':
+                in_quotes = !in_quotes;
+                break;
             case '[':
-                bracket_depth++;
+                if (!in_quotes)
+                {
+                    bracket_depth++;
+                }
                 break;
             case ']':
-                if (bracket_depth == 0)
+                if (!in_quotes)
                 {
-                    return false;
+                    if (bracket_depth == 0)
+                    {
+                        return false;
+                    }
+                    bracket_depth--;
                 }
-                bracket_depth--;
                 break;
             default:
-                if (current == separator && bracket_depth == 0)
+                if (!in_quotes && current == separator && bracket_depth == 0)
                 {
                     position = current_position;
                     return true;
@@ -115,7 +136,7 @@ bool TryFindTopLevelSeparator(const std::string_view type_name,
         current_position++;
     }
 
-    return bracket_depth == 0;
+    return !in_quotes && bracket_depth == 0;
 }
 
 std::optional<size_t> FindClosingBracket(const std::string_view type_name,
@@ -127,8 +148,9 @@ std::optional<size_t> FindClosingBracket(const std::string_view type_name,
         return std::nullopt;
     }
 
-    size_t depth    = 1;
-    auto   position = opening_bracket + 1;
+    size_t depth     = 1;
+    bool   in_quotes = false;
+    auto   position  = opening_bracket + 1;
     while (position < end)
     {
         switch (type_name[position])
@@ -140,11 +162,17 @@ std::optional<size_t> FindClosingBracket(const std::string_view type_name,
                 }
                 position += 2;
                 continue;
+            case '"':
+                in_quotes = !in_quotes;
+                break;
             case '[':
-                depth++;
+                if (!in_quotes)
+                {
+                    depth++;
+                }
                 break;
             case ']':
-                if (--depth == 0)
+                if (!in_quotes && --depth == 0)
                 {
                     return position;
                 }
@@ -156,6 +184,30 @@ std::optional<size_t> FindClosingBracket(const std::string_view type_name,
     }
 
     return std::nullopt;
+}
+
+// Returns the content of an optionally quoted display-name entry:
+// MyAssembly -> MyAssembly, "MyAssembly" -> MyAssembly.
+bool TryGetUnquoted(const std::string_view value, Span& entry)
+{
+    if (entry.Empty())
+    {
+        return true;
+    }
+
+    if (value[entry.begin] != '"')
+    {
+        return std::find(value.begin() + entry.begin, value.begin() + entry.end, '"') == value.begin() + entry.end;
+    }
+
+    if (entry.end - entry.begin < 2 || value[entry.end - 1] != '"')
+    {
+        return false;
+    }
+
+    entry.begin++;
+    entry.end--;
+    return true;
 }
 
 bool TryGetNextQualifierPart(const std::string_view value, Span& remaining, Span& part)
@@ -253,7 +305,14 @@ bool ParseAssemblyQualification(const std::string_view                type_name,
         return true;
     }
 
-    ParsedAssemblyReference reference{Unescape(assembly_name.View(type_name)), assembly_name.end};
+    const auto insert_version_at = assembly_name.end;
+    // Assembly simple names may be quoted, for example: Test.Type, "Test.Redirected.Assembly", Version=1.0.0.0.
+    // Unquote only for map lookup; retain the original endpoint when adding a missing Version qualifier.
+    if (!TryGetUnquoted(type_name, assembly_name))
+    {
+        return false;
+    }
+    ParsedAssemblyReference reference{Unescape(assembly_name.View(type_name)), insert_version_at};
     while (!qualification.Empty())
     {
         Span qualifier;
@@ -266,11 +325,22 @@ bool ParseAssemblyQualification(const std::string_view                type_name,
         {
             return false;
         }
-        if (!reference.version_span && equals &&
-            EqualsIgnoreAsciiCase(Span::Trimmed(type_name, {qualifier.begin, *equals}).View(type_name),
-                                  std::string_view("Version")))
+        auto key = Span::Trimmed(type_name, {qualifier.begin, equals.value_or(qualifier.end)});
+        // Attribute type names may quote the Version key and value, for example:
+        // Test.Type, Test.Redirected.Assembly, "Version"="1.0.0.0". Unquote the key for recognition and retain the
+        // value's inner span so rewriting preserves its quotes.
+        if (!TryGetUnquoted(type_name, key))
         {
-            const auto value       = Span::Trimmed(type_name, {*equals + 1, qualifier.end});
+            return false;
+        }
+        if (!reference.version_span && equals &&
+            EqualsIgnoreAsciiCase(key.View(type_name), std::string_view("Version")))
+        {
+            auto value = Span::Trimmed(type_name, {*equals + 1, qualifier.end});
+            if (!TryGetUnquoted(type_name, value))
+            {
+                return false;
+            }
             reference.version_span = value;
         }
     }

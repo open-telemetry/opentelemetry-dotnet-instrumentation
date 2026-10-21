@@ -154,6 +154,8 @@ void UpdateUnsafeAccessorTypeAttributes(const ModuleMetadata&                   
         }
 
         applicable_count++;
+        Logger::Debug("UnsafeAccessorTypeAttributeUpdater: processing applicable attribute in ",
+                      module_metadata.assemblyName, ", method token=", method, ", parameter token=", owner, ".");
 
         const auto*          blob = static_cast<const BYTE*>(blob_data);
         std::vector<BYTE>    rewritten_blob;
