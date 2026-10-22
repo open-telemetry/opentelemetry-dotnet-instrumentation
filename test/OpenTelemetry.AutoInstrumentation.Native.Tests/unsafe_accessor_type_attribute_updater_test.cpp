@@ -121,7 +121,15 @@ TEST(TypeNameAssemblyRedirectionRewriterTest, RewritesQuotedDisplayNameEntries)
           std::pair{"Test.Type, Test.Redirected.Assembly, Version=\"1.0.0.0\"",
                     "Test.Type, Test.Redirected.Assembly, Version=\"11.0.0.0\""},
           std::pair{"Test.Type, \"Test.Redirected.Assembly\", \"Version\"=\"1.0.0.0\"",
-                    "Test.Type, \"Test.Redirected.Assembly\", \"Version\"=\"11.0.0.0\""}})
+                    "Test.Type, \"Test.Redirected.Assembly\", \"Version\"=\"11.0.0.0\""},
+          std::pair{"Test.Type, 'Test.Redirected.Assembly', Version=1.0.0.0",
+                    "Test.Type, 'Test.Redirected.Assembly', Version=11.0.0.0"},
+          std::pair{"Test.Type, Test.Redirected.Assembly, 'Version'=1.0.0.0",
+                    "Test.Type, Test.Redirected.Assembly, 'Version'=11.0.0.0"},
+          std::pair{"Test.Type, Test.Redirected.Assembly, Version='1.0.0.0'",
+                    "Test.Type, Test.Redirected.Assembly, Version='11.0.0.0'"},
+          std::pair{"Test.Type, 'Test.Redirected.Assembly', 'Version'='1.0.0.0'",
+                    "Test.Type, 'Test.Redirected.Assembly', 'Version'='11.0.0.0'"}})
     {
         SCOPED_TRACE(input_type_name);
         std::string          rewritten_type_name;

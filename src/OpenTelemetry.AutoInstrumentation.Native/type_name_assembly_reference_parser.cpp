@@ -46,7 +46,8 @@ bool TryFindUnescaped(const std::string_view value,
                       std::optional<size_t>& position)
 {
     position.reset();
-    bool in_quotes        = false;
+    // '\0' is outside quotes; otherwise this is the active single or double quote delimiter.
+    char active_quote     = '\0';
     auto current_position = span.begin;
     while (current_position < span.end)
     {
@@ -59,21 +60,29 @@ bool TryFindUnescaped(const std::string_view value,
                 }
                 current_position += 2;
                 break;
+            case '\'':
             case '"':
-                in_quotes = !in_quotes;
+                if (active_quote == '\0')
+                {
+                    active_quote = value[current_position];
+                }
+                else if (active_quote == value[current_position])
+                {
+                    active_quote = '\0';
+                }
                 current_position++;
                 break;
             case '[':
             case ']':
                 // Brackets in an assembly qualification must be escaped.
-                if (!in_quotes)
+                if (active_quote == '\0')
                 {
                     return false;
                 }
                 current_position++;
                 break;
             default:
-                if (!in_quotes && value[current_position] == expected)
+                if (active_quote == '\0' && value[current_position] == expected)
                 {
                     position = current_position;
                     return true;
@@ -82,7 +91,7 @@ bool TryFindUnescaped(const std::string_view value,
                 break;
         }
     }
-    return !in_quotes;
+    return active_quote == '\0';
 }
 
 bool TryFindTopLevelSeparator(const std::string_view type_name,
@@ -91,9 +100,10 @@ bool TryFindTopLevelSeparator(const std::string_view type_name,
                               std::optional<size_t>& position)
 {
     position.reset();
-    size_t bracket_depth    = 0;
-    bool   in_quotes        = false;
-    auto   current_position = span.begin;
+    size_t bracket_depth = 0;
+    // '\0' is outside quotes; otherwise this is the active single or double quote delimiter.
+    char active_quote     = '\0';
+    auto current_position = span.begin;
     while (current_position < span.end)
     {
         const auto current = type_name[current_position];
@@ -106,17 +116,25 @@ bool TryFindTopLevelSeparator(const std::string_view type_name,
                 }
                 current_position += 2;
                 continue;
+            case '\'':
             case '"':
-                in_quotes = !in_quotes;
+                if (active_quote == '\0')
+                {
+                    active_quote = current;
+                }
+                else if (active_quote == current)
+                {
+                    active_quote = '\0';
+                }
                 break;
             case '[':
-                if (!in_quotes)
+                if (active_quote == '\0')
                 {
                     bracket_depth++;
                 }
                 break;
             case ']':
-                if (!in_quotes)
+                if (active_quote == '\0')
                 {
                     if (bracket_depth == 0)
                     {
@@ -126,7 +144,7 @@ bool TryFindTopLevelSeparator(const std::string_view type_name,
                 }
                 break;
             default:
-                if (!in_quotes && current == separator && bracket_depth == 0)
+                if (active_quote == '\0' && current == separator && bracket_depth == 0)
                 {
                     position = current_position;
                     return true;
@@ -136,7 +154,7 @@ bool TryFindTopLevelSeparator(const std::string_view type_name,
         current_position++;
     }
 
-    return !in_quotes && bracket_depth == 0;
+    return active_quote == '\0' && bracket_depth == 0;
 }
 
 std::optional<size_t> FindClosingBracket(const std::string_view type_name,
@@ -148,9 +166,10 @@ std::optional<size_t> FindClosingBracket(const std::string_view type_name,
         return std::nullopt;
     }
 
-    size_t depth     = 1;
-    bool   in_quotes = false;
-    auto   position  = opening_bracket + 1;
+    size_t depth = 1;
+    // '\0' is outside quotes; otherwise this is the active single or double quote delimiter.
+    char active_quote = '\0';
+    auto position     = opening_bracket + 1;
     while (position < end)
     {
         switch (type_name[position])
@@ -162,17 +181,25 @@ std::optional<size_t> FindClosingBracket(const std::string_view type_name,
                 }
                 position += 2;
                 continue;
+            case '\'':
             case '"':
-                in_quotes = !in_quotes;
+                if (active_quote == '\0')
+                {
+                    active_quote = type_name[position];
+                }
+                else if (active_quote == type_name[position])
+                {
+                    active_quote = '\0';
+                }
                 break;
             case '[':
-                if (!in_quotes)
+                if (active_quote == '\0')
                 {
                     depth++;
                 }
                 break;
             case ']':
-                if (!in_quotes && --depth == 0)
+                if (active_quote == '\0' && --depth == 0)
                 {
                     return position;
                 }
@@ -187,7 +214,7 @@ std::optional<size_t> FindClosingBracket(const std::string_view type_name,
 }
 
 // Returns the content of an optionally quoted display-name entry:
-// MyAssembly -> MyAssembly, "MyAssembly" -> MyAssembly.
+// MyAssembly -> MyAssembly, "MyAssembly" -> MyAssembly, 'MyAssembly' -> MyAssembly.
 bool TryGetUnquoted(const std::string_view value, Span& entry)
 {
     if (entry.Empty())
@@ -195,12 +222,15 @@ bool TryGetUnquoted(const std::string_view value, Span& entry)
         return true;
     }
 
-    if (value[entry.begin] != '"')
+    const auto quote = value[entry.begin];
+    if (quote != '\'' && quote != '"')
     {
-        return std::find(value.begin() + entry.begin, value.begin() + entry.end, '"') == value.begin() + entry.end;
+        return std::find_if(value.begin() + entry.begin, value.begin() + entry.end,
+                            [](const char character)
+                            { return character == '\'' || character == '"'; }) == value.begin() + entry.end;
     }
 
-    if (entry.end - entry.begin < 2 || value[entry.end - 1] != '"')
+    if (entry.end - entry.begin < 2 || value[entry.end - 1] != quote)
     {
         return false;
     }
