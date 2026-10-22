@@ -632,7 +632,11 @@ TEST(TypeNameAssemblyRedirectionRewriterTest, RejectsMalformedTypeSyntax)
     std::unordered_map<WSTRING, AssemblyVersionRedirection> redirects     = {{assembly_name, {11, 0, 0, 0}}};
     for (const auto* input_type_name : {"Test.Type[, Test.Redirected.Assembly", "Test.Type], Test.Redirected.Assembly",
                                         "Test.Type, Test.Redirected.Assembly]",
-                                        "Test.Type, Test.Redirected.Assembly, Version=1.0.0.0, Culture=neutral\\"})
+                                        "Test.Type, Test.Redirected.Assembly, Version=1.0.0.0, Culture=neutral\\",
+                                        "Test.Type, Test.Redirected.Assembly, Version='1.0.0.0",
+                                        "Test.Type, Test.Redirected.Assembly, Version=\"1.0.0.0",
+                                        "Test.Type, Test.Redirected.Assembly, 'Version\"=1.0.0.0",
+                                        "Test.Type, Test.Redirected.Assembly, \"Version'=1.0.0.0"})
     {
         SCOPED_TRACE(input_type_name);
         std::string          rewritten_type_name;
