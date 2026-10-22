@@ -42,8 +42,9 @@ with environment variables taking precedence over `App.config` or `Web.config` f
 
     > [!NOTE]
     > On .NET Framework, `OTEL_*` values from `Web.config` or `App.config` are
-    > promoted to process-level environment variables at startup, and the OTel
-    > SDK is initialized only once per process. In IIS, where multiple
+    > promoted to process-level environment variables at startup, except for
+    > the [YAML enable flag and file path](file-based-configuration.md) in IIS.
+    > The OTel SDK is initialized only once per process. In IIS, where multiple
     > applications can share a single worker process (Application Pool), this
     > means the first application to start determines the configuration for all
     > applications in that pool.
