@@ -10,6 +10,7 @@ using OpenTelemetry.AutoInstrumentation.OpAmp;
 using OpenTelemetry.AutoInstrumentation.PluginApi;
 using OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
 using OpenTelemetry.AutoInstrumentation.Plugins;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using OpenTelemetry.OpAmp.Client.Messages;
 using OpenTelemetry.OpAmp.Client.Settings;
 using OpenTelemetry.Resources;
@@ -18,7 +19,6 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.OpAmp;
 
 public class OpAmpLoaderTests
 {
-    private static readonly TimeSpan TestTimeout = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan LoaderShutdownTimeout = TimeSpan.FromMilliseconds(100);
     private readonly OpAmpLoader _loader = new();
 
@@ -35,7 +35,7 @@ public class OpAmpLoaderTests
             _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
             pluginManager.Initialized();
             _loader.StartOpAmpClient();
-            await AssertCompletes(plugin.AfterStarted);
+            await TaskAssertions.CompletesAsync(plugin.AfterStarted);
 
             var configuredSettings = Assert.IsType<OpAmpClientSettings>(plugin.ConfiguredSettings);
             Assert.False(configuredSettings.EffectiveConfigurationReporting.EnableReporting);
@@ -81,7 +81,7 @@ public class OpAmpLoaderTests
             _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
             pluginManager.Initialized();
             _loader.StartOpAmpClient();
-            await AssertCompletes(plugin.InitialRequestBody);
+            await TaskAssertions.CompletesAsync(plugin.InitialRequestBody);
 
             var capabilities = ReadAgentCapabilities(await plugin.InitialRequestBody.ConfigureAwait(true));
             Assert.Equal(reportStatus, (capabilities & reportsRemoteConfigCapability) != 0);
@@ -123,17 +123,17 @@ public class OpAmpLoaderTests
         try
         {
             prepareTask = Task.Run(() => _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager));
-            await AssertCompletes(configurationEntered.Task);
+            await TaskAssertions.CompletesAsync(configurationEntered.Task);
             stopTask = Task.Run(() =>
             {
                 _loader.StopOpAmpClientIfRunning(LoaderShutdownTimeout);
                 _loader.StartOpAmpClient();
             });
-            await AssertCompletes(stopTask);
+            await TaskAssertions.CompletesAsync(stopTask);
             Assert.False(prepareTask.IsCompleted);
 
             releaseConfiguration.Set();
-            await AssertCompletes(prepareTask);
+            await TaskAssertions.CompletesAsync(prepareTask);
             Assert.True(plugin.HandlerDisposed.IsCompleted);
             Assert.Equal(
                 [nameof(RecordingOpAmpPlugin.ConfigureOpAmpClient), nameof(RecordingOpAmpPlugin.BeforeOpAmpClientStopped)],
@@ -146,12 +146,12 @@ public class OpAmpLoaderTests
             _loader.StopOpAmpClientIfRunning();
             if (prepareTask != null)
             {
-                await AssertCompletes(prepareTask);
+                await TaskAssertions.CompletesAsync(prepareTask);
             }
 
             if (stopTask != null)
             {
-                await AssertCompletes(stopTask);
+                await TaskAssertions.CompletesAsync(stopTask);
             }
         }
     }
@@ -179,10 +179,10 @@ public class OpAmpLoaderTests
             _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
 
             loaderStopTask = Task.Run(() => _loader.StopOpAmpClientIfRunning(LoaderShutdownTimeout));
-            await AssertCompletes(beforeStopEntered.Task);
-            await AssertCompletes(loaderStopTask);
+            await TaskAssertions.CompletesAsync(beforeStopEntered.Task);
+            await TaskAssertions.CompletesAsync(loaderStopTask);
 
-            await AssertCompletes(plugin.HandlerDisposed);
+            await TaskAssertions.CompletesAsync(plugin.HandlerDisposed);
             Assert.False(beforeStopCompleted.Task.IsCompleted);
         }
         finally
@@ -190,12 +190,12 @@ public class OpAmpLoaderTests
             releaseBeforeStop.Set();
             if (loaderStopTask != null)
             {
-                await AssertCompletes(loaderStopTask);
+                await TaskAssertions.CompletesAsync(loaderStopTask);
             }
 
             if (beforeStopEntered.Task.IsCompleted)
             {
-                await AssertCompletes(beforeStopCompleted.Task);
+                await TaskAssertions.CompletesAsync(beforeStopCompleted.Task);
             }
         }
 
@@ -251,15 +251,15 @@ public class OpAmpLoaderTests
             _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
             loaderStartTask = Task.Run(_loader.StartOpAmpClient);
 
-            await AssertCompletes(plugin.AfterStarted);
-            await AssertCompletes(loaderStartTask);
+            await TaskAssertions.CompletesAsync(plugin.AfterStarted);
+            await TaskAssertions.CompletesAsync(loaderStartTask);
         }
         finally
         {
             releaseAfterStarted.Set();
             if (loaderStartTask != null)
             {
-                await AssertCompletes(loaderStartTask);
+                await TaskAssertions.CompletesAsync(loaderStartTask);
             }
 
             _loader.StopOpAmpClientIfRunning();
@@ -286,11 +286,11 @@ public class OpAmpLoaderTests
         {
             _loader.PrepareOpAmpClient(Resource.Empty, new OpAmpSettings(), pluginManager);
             _loader.StartOpAmpClient();
-            await AssertCompletes(plugin.AfterStarted);
+            await TaskAssertions.CompletesAsync(plugin.AfterStarted);
 
             loaderStopTask = Task.Run(() => _loader.StopOpAmpClientIfRunning(LoaderShutdownTimeout));
-            await AssertCompletes(handlerDisposalEntered.Task);
-            await AssertCompletes(loaderStopTask);
+            await TaskAssertions.CompletesAsync(handlerDisposalEntered.Task);
+            await TaskAssertions.CompletesAsync(loaderStopTask);
             Assert.False(plugin.HandlerDisposed.IsCompleted);
         }
         finally
@@ -298,13 +298,13 @@ public class OpAmpLoaderTests
             releaseHandlerDisposal.Set();
             if (loaderStopTask != null)
             {
-                await AssertCompletes(loaderStopTask);
+                await TaskAssertions.CompletesAsync(loaderStopTask);
             }
 
             _loader.StopOpAmpClientIfRunning();
         }
 
-        await AssertCompletes(plugin.HandlerDisposed);
+        await TaskAssertions.CompletesAsync(plugin.HandlerDisposed);
     }
 
     private static ulong ReadAgentCapabilities(byte[] requestBody)
@@ -323,30 +323,6 @@ public class OpAmpLoaderTests
         }
 
         throw new InvalidOperationException("The initial OpAMP request did not include capabilities.");
-    }
-
-    private static async Task AssertCompletes(Task task)
-    {
-        using var timeoutCancellation = new CancellationTokenSource();
-
-        try
-        {
-            var completedTask = await Task.WhenAny(
-                task,
-                Task.Delay(TestTimeout, timeoutCancellation.Token))
-                .ConfigureAwait(false);
-
-            Assert.Same(task, completedTask);
-            await task.ConfigureAwait(false);
-        }
-        finally
-        {
-#if NET
-            await timeoutCancellation.CancelAsync().ConfigureAwait(false);
-#else
-            timeoutCancellation.Cancel();
-#endif
-        }
     }
 }
 

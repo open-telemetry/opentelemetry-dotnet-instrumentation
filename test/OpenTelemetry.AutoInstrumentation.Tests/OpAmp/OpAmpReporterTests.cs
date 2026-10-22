@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Text;
 using OpenTelemetry.AutoInstrumentation.OpAmp;
 using OpenTelemetry.AutoInstrumentation.PluginApi.OpAmp;
+using OpenTelemetry.AutoInstrumentation.Tests.Util;
 using OpenTelemetry.OpAmp.Client.Messages;
 using OpenTelemetry.OpAmp.Client.Settings;
 
@@ -13,7 +14,6 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.OpAmp;
 public class OpAmpReporterTests
 {
     private const ServerSentCapabilities ServerCapabilities = ServerSentCapabilities.AcceptsStatus | ServerSentCapabilities.AcceptsEffectiveConfig;
-    private static readonly TimeSpan TestTimeout = TimeSpan.FromSeconds(5);
     private readonly TestReportingPlugin _plugin = new();
     private readonly RecordingOpAmpReportSender _reportSender = new();
     private readonly OpAmpReporter _reporter;
@@ -297,7 +297,7 @@ public class OpAmpReporterTests
         Task? capabilitiesTask = null;
         try
         {
-            await AssertCompletes(enqueueEntered.Task);
+            await TaskAssertions.CompletesAsync(enqueueEntered.Task);
             capabilitiesTask = Task.Run(() =>
             {
                 capabilitiesStarted.TrySetResult(true);
@@ -305,12 +305,12 @@ public class OpAmpReporterTests
                 _reporter.ReportFullState();
             });
 
-            await AssertCompletes(capabilitiesStarted.Task);
+            await TaskAssertions.CompletesAsync(capabilitiesStarted.Task);
         }
         finally
         {
             releaseEnqueue.Set();
-            await AssertCompletes(Task.WhenAll(reportTask, capabilitiesTask ?? Task.CompletedTask));
+            await TaskAssertions.CompletesAsync(Task.WhenAll(reportTask, capabilitiesTask ?? Task.CompletedTask));
         }
 
         Assert.Equal(1, _plugin.GetterCalls);
@@ -363,7 +363,7 @@ public class OpAmpReporterTests
         Task? stopTask = null;
         try
         {
-            await AssertCompletes(reportEntered.Task);
+            await TaskAssertions.CompletesAsync(reportEntered.Task);
             stopTask = Task.Run(() =>
             {
                 _reporter.Stop();
@@ -373,14 +373,14 @@ public class OpAmpReporterTests
                 _reporter.HandleServerCapabilities(ServerSentCapabilities.AcceptsStatus);
             });
 
-            await AssertCompletes(stopTask);
+            await TaskAssertions.CompletesAsync(stopTask);
             Assert.Empty(_reportSender.EffectiveConfigReports);
             Assert.Empty(_reportSender.RemoteConfigStatusReports);
         }
         finally
         {
             releaseReport.Set();
-            await AssertCompletes(Task.WhenAll(reportTask, stopTask ?? Task.CompletedTask));
+            await TaskAssertions.CompletesAsync(Task.WhenAll(reportTask, stopTask ?? Task.CompletedTask));
         }
 
         Assert.Equal(1, remoteStatus ? _plugin.RemoteStatusGetterCalls : _plugin.GetterCalls);
@@ -398,12 +398,6 @@ public class OpAmpReporterTests
         }
 
         Assert.Empty(_reportSender.FullStateReports);
-    }
-
-    private static async Task AssertCompletes(Task task)
-    {
-        Assert.Same(task, await Task.WhenAny(task, Task.Delay(TestTimeout)).ConfigureAwait(false));
-        await task.ConfigureAwait(false);
     }
 
     private static string GetConfigContent(IEnumerable<EffectiveConfigFile>? files)
