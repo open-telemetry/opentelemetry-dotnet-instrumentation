@@ -5,7 +5,7 @@ New-Website -Name 'App B' -PhysicalPath 'C:\inetpub\app-b' -Port 80 -HostHeader 
 
 $apps = @(
     @{ Config = 'C:\inetpub\wwwroot\Web.config'; EnableKey = 'OTEL_experimental_file_based_configuration_enabled'; FileKey = 'OTEL_config_file'; File = 'C:\inetpub\wwwroot\app-a.yaml' },
-    @{ Config = 'C:\inetpub\app-b\Web.config'; EnableKey = 'OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED'; FileKey = 'OTEL_CONFIG_FILE'; File = 'C:\inetpub\app-b\app-b.yaml' }
+    @{ Config = 'C:\inetpub\app-b\Web.config'; EnableKey = 'OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED'; FileKey = 'OTEL_CONFIG_FILE'; File = 'app-b.yaml' }
 )
 
 foreach ($app in $apps) {
