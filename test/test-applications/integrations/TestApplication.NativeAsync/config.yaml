@@ -1,0 +1,174 @@
+file_format: "1.0"
+
+tracer_provider:
+  processors:
+    - batch:
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
+
+instrumentation/development:
+  dotnet:
+    no_code:
+      targets:
+        - target:
+            assembly:
+              name: TestApplication.NativeAsync
+            type: TestApplication.NativeAsync.RuntimeAsyncTarget
+            method: TaskAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+          span:
+             name: RuntimeAsync-Task
+        - target:
+            assembly:
+              name: TestApplication.NativeAsync
+            type: TestApplication.NativeAsync.RuntimeAsyncTarget
+            method: TaskOfTAsync
+            signature:
+              return_type: System.Threading.Tasks.Task`1[System.Int32]
+              parameter_types:
+          span:
+             name: RuntimeAsync-TaskOfT
+        - target:
+            assembly:
+              name: TestApplication.NativeAsync
+            type: TestApplication.NativeAsync.RuntimeAsyncTarget
+            method: ValueTaskAsync
+            signature:
+              return_type: System.Threading.Tasks.ValueTask
+              parameter_types:
+          span:
+             name: RuntimeAsync-ValueTask
+        - target:
+            assembly:
+              name: TestApplication.NativeAsync
+            type: TestApplication.NativeAsync.RuntimeAsyncTarget
+            method: ValueTaskOfTAsync
+            signature:
+              return_type: System.Threading.Tasks.ValueTask`1[System.String]
+              parameter_types:
+          span:
+             name: RuntimeAsync-ValueTaskOfT
+        - target:
+            assembly:
+              name: TestApplication.NativeAsync
+            type: TestApplication.NativeAsync.RuntimeAsyncTarget
+            method: MultidimensionalArrayTaskAsync
+            signature:
+              return_type: System.Threading.Tasks.Task`1[System.Int32[,]]
+              parameter_types:
+          span:
+             name: RuntimeAsync-MultidimensionalArray
+        - target:
+            assembly:
+              name: TestApplication.NativeAsync
+            type: TestApplication.NativeAsync.RuntimeAsyncTarget
+            method: GenericTaskAsync
+            signature:
+              return_type: System.Threading.Tasks.Task`1[System.Int32]
+              parameter_types:
+                - '!!0'
+          span:
+             name: RuntimeAsync-GenericTask
+        - target:
+            assembly:
+              name: TestApplication.NativeAsync
+            type: TestApplication.NativeAsync.RuntimeAsyncTarget
+            method: FaultedTaskAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+          span:
+             name: RuntimeAsync-FaultedTask
+        - target:
+            assembly:
+              name: TestApplication.NativeAsync
+            type: TestApplication.NativeAsync.RuntimeAsyncTarget
+            method: FaultedTaskOfTAsync
+            signature:
+              return_type: System.Threading.Tasks.Task`1[System.Int32]
+              parameter_types:
+          span:
+             name: RuntimeAsync-FaultedTaskOfT
+        - target:
+            assembly:
+              name: TestApplication.NativeAsync
+            type: TestApplication.NativeAsync.RuntimeAsyncTarget
+            method: FaultedValueTaskAsync
+            signature:
+              return_type: System.Threading.Tasks.ValueTask
+              parameter_types:
+          span:
+             name: RuntimeAsync-FaultedValueTask
+        - target:
+            assembly:
+              name: TestApplication.NativeAsync
+            type: TestApplication.NativeAsync.RuntimeAsyncTarget
+            method: FaultedValueTaskOfTAsync
+            signature:
+              return_type: System.Threading.Tasks.ValueTask`1[System.String]
+              parameter_types:
+          span:
+             name: RuntimeAsync-FaultedValueTaskOfT
+        - target:
+            assembly:
+              name: TestLibrary.NativeAsync
+            type: TestLibrary.NativeAsync.ConventionalAsyncTarget
+            method: TaskAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+          span:
+             name: ConventionalAsync-Task
+        - target:
+            assembly:
+              name: TestLibrary.NativeAsync
+            type: TestLibrary.NativeAsync.ConventionalAsyncTarget
+            method: TaskOfTAsync
+            signature:
+              return_type: System.Threading.Tasks.Task`1[System.Int32]
+              parameter_types:
+          span:
+             name: ConventionalAsync-TaskOfT
+        - target:
+            assembly:
+              name: TestLibrary.NativeAsync
+            type: TestLibrary.NativeAsync.ConventionalAsyncTarget
+            method: ValueTaskAsync
+            signature:
+              return_type: System.Threading.Tasks.ValueTask
+              parameter_types:
+          span:
+             name: ConventionalAsync-ValueTask
+        - target:
+            assembly:
+              name: TestLibrary.NativeAsync
+            type: TestLibrary.NativeAsync.ConventionalAsyncTarget
+            method: ValueTaskOfTAsync
+            signature:
+              return_type: System.Threading.Tasks.ValueTask`1[System.String]
+              parameter_types:
+          span:
+             name: ConventionalAsync-ValueTaskOfT
+        - target:
+            assembly:
+              name: TestLibrary.NativeAsync
+            type: TestLibrary.NativeAsync.ConventionalAsyncTarget
+            method: FaultedTaskAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types:
+          span:
+             name: ConventionalAsync-FaultedTask
+        - target:
+            assembly:
+              name: TestLibrary.NativeAsync
+            type: TestLibrary.NativeAsync.ConventionalAsyncTarget
+            method: FaultedValueTaskOfTAsync
+            signature:
+              return_type: System.Threading.Tasks.ValueTask`1[System.String]
+              parameter_types:
+          span:
+             name: ConventionalAsync-FaultedValueTaskOfT
