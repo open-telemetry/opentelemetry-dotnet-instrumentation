@@ -51,5 +51,28 @@ public class MultipleAppDomainsTests : TestHelper
         Assert.Contains("PartialTrustDomainIsFullyTrusted=False", standardOutput, StringComparison.Ordinal);
         Assert.Contains("PartialTrustDomainLoaderLoaded=False", standardOutput, StringComparison.Ordinal);
     }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void UsesConfigurationFromEachAppDomain()
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", null);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestLibrary.InstrumentationTarget.Plugin, TestLibrary.InstrumentationTarget, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c0db600a13f60b51");
+
+        collector.Expect("ByteCode.Plugin.StrongNamedValidation");
+        collector.Expect("ByteCode.Plugin.StrongNamedValidation");
+        collector.ExpectCollected(spans =>
+        {
+            var resources = spans.Select(span => span.Resource.Attributes.ToDictionary(attribute => attribute.Key, attribute => attribute.Value.StringValue)).ToList();
+            return resources.Any(resource => resource["service.name"] == "domain-1" && resource["domain.number"] == "1")
+                && resources.Any(resource => resource["service.name"] == "domain-2" && resource["domain.number"] == "2");
+        });
+
+        RunTestApplication(new() { Arguments = "--configured-app-domains" });
+
+        collector.AssertExpectations();
+    }
 }
 #endif
