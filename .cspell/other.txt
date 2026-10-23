@@ -79,6 +79,7 @@ UNENCRYPTEDSUPPORT
 uninstallation
 unregistration
 vcpkg
+windir
 WCFCLIENT
 WCFSERVICE
 LOGRECORD
