@@ -212,6 +212,45 @@ public class AspNetTests(ITestOutputHelper output)
     [WindowsAdministratorFact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
+    public async Task AppsInOnePoolUseTheirOwnYamlResources()
+    {
+        using var appACollector = new MockSpansCollector(Output, host: "*");
+        using var appBCollector = new MockSpansCollector(Output, host: "*");
+        using var appAFirewallPort = FirewallHelper.OpenWinPort(appACollector.Port, Output);
+        using var appBFirewallPort = FirewallHelper.OpenWinPort(appBCollector.Port, Output);
+        appACollector.Expect("OpenTelemetry.Instrumentation.AspNet");
+        appBCollector.Expect("OpenTelemetry.Instrumentation.AspNet");
+        appACollector.ResourceExpector.Expect("service.name", "app-a");
+        appBCollector.ResourceExpector.Expect("service.name", "app-b");
+        appACollector.ResourceExpector.Expect("deployment.environment.name", "app-a");
+        appBCollector.ResourceExpector.Expect("deployment.environment.name", "app-b");
+
+        Dictionary<string, string> environmentVariables = new()
+        {
+            ["OTEL_TEST_APP_A_ENDPOINT"] = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{appACollector.Port}/v1/traces",
+            ["OTEL_TEST_APP_B_ENDPOINT"] = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{appBCollector.Port}/v1/traces"
+        };
+
+        var webPort = TcpPortProvider.GetOpenPort();
+#pragma warning disable CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+        await using var container = await IISContainerTestHelper.StartContainerAsync("testapplication-aspnet-netframework-integrated-appdomains", webPort, environmentVariables, Output);
+#pragma warning restore CA2007 // Do not directly await a Task. https://github.com/dotnet/roslyn-analyzers/issues/7185
+
+        await CallTestApplicationEndpoint(webPort).ConfigureAwait(true);
+        using var appBRequest = new HttpRequestMessage(HttpMethod.Get, new Uri($"http://localhost:{webPort}/"));
+        appBRequest.Headers.Host = "app-b.local";
+        var appBResponse = await Client.SendAsync(appBRequest).ConfigureAwait(false);
+        appBResponse.EnsureSuccessStatusCode();
+
+        appACollector.AssertExpectations();
+        appBCollector.AssertExpectations();
+        appACollector.ResourceExpector.AssertExpectations();
+        appBCollector.ResourceExpector.AssertExpectations();
+    }
+
+    [WindowsAdministratorFact]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Windows")]
     public async Task SubmitMetrics()
     {
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint

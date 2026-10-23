@@ -15,6 +15,15 @@ internal class EnvironmentInitializer
 
     public static void Initialize(NameValueCollection nameValueCollection)
     {
+#if NETFRAMEWORK
+        Initialize(nameValueCollection, System.Web.Hosting.HostingEnvironment.IsHosted);
+#else
+        Initialize(nameValueCollection, false);
+#endif
+    }
+
+    internal static void Initialize(NameValueCollection nameValueCollection, bool isHosted)
+    {
         foreach (var setting in nameValueCollection.AllKeys)
         {
             if (setting == null)
@@ -25,6 +34,13 @@ internal class EnvironmentInitializer
             if (!setting.StartsWith(VariablePrefix, StringComparison.Ordinal))
             {
                 // not OTEL_ setting
+                continue;
+            }
+
+            if (isHosted && (setting.Equals(ConfigurationKeys.FileBasedConfiguration.Enabled, StringComparison.OrdinalIgnoreCase)
+                || setting.Equals(ConfigurationKeys.FileBasedConfiguration.FileName, StringComparison.OrdinalIgnoreCase)))
+            {
+                // Each ASP.NET AppDomain selects its own YAML file.
                 continue;
             }
 

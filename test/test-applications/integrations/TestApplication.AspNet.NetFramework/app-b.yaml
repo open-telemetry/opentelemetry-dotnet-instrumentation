@@ -1,0 +1,20 @@
+file_format: "1.0"
+
+resource:
+  attributes:
+    - name: service.name
+      value: app-b
+    - name: deployment.environment.name
+      value: app-b
+
+tracer_provider:
+  processors:
+    - batch:
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_TEST_APP_B_ENDPOINT}
+
+instrumentation/development:
+  dotnet:
+    traces:
+      aspnet:
