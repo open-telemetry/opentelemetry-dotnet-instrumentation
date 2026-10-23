@@ -83,7 +83,8 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
 #if NET10_0
     [InlineData("10.0.13", "10.0.0.0", "10.0.1326.50504")]
 #elif NET11_0
-    [InlineData("10.0.13", "10.0.0.0", "10.0.1326.50504")]
+    // The .NET 11 shared framework supplies DiagnosticSource even when the application references an older package.
+    [InlineData("10.0.13", "11.0.0.0", "11.0.26.50505")]
 #endif
     public void AdditionalDepsFallback(
         string libraryVersion,
