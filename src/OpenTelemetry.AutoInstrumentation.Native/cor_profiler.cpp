@@ -38,6 +38,7 @@
 #include "runtime_sampler_configuration.h"
 #include "runtime_sampler_service.h"
 #include "shutdown_admission.h"
+#include "unsafe_accessor_type_attribute_updater.h"
 
 #ifdef MACOS
 #include <mach-o/dyld.h>
@@ -658,8 +659,8 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id, std::vector<ModuleID>& m
                                   module_info.assembly.name == system_private_corelib_assemblyName))
     {
         ComPtr<IUnknown> metadata_interfaces;
-        auto             hr =
-            this->info_->GetModuleMetaData(module_id, ofRead, IID_IMetaDataImport2, metadata_interfaces.GetAddressOf());
+        auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
+                                                             metadata_interfaces.GetAddressOf());
         if (hr != S_OK)
         {
             Logger::Warn("ModuleLoadFinished failed to get metadata interface for COR assembly ", module_id);
@@ -669,8 +670,9 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id, std::vector<ModuleID>& m
         corlib_module_loaded = true;
         corlib_app_domain_id = app_domain_id;
 
-        // Get the IMetaDataAssemblyImport interface to get metadata from the
-        // managed assembly
+        const auto& metadata_import = metadata_interfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
+
+        // Get the IMetaDataAssemblyImport interface to get metadata from the managed assembly.
         const auto& assembly_import   = metadata_interfaces.As<IMetaDataAssemblyImport>(IID_IMetaDataAssemblyImport);
         const auto& assembly_metadata = GetAssemblyImportMetadata(assembly_import);
 
@@ -693,6 +695,32 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id, std::vector<ModuleID>& m
         if (rejit_handler != nullptr)
         {
             rejit_handler->SetCorAssemblyProfiler(&corAssemblyProperty);
+        }
+
+        // Check whether assembly-qualified type names in UnsafeAccessorTypeAttribute need redirection to support
+        // JIT-level reflection, which is otherwise not covered by AssemblyRef redirection.
+        // UnsafeAccessorTypeAttribute appeared in .NET 10 in System.Private.CoreLib, whose metadata is unavailable
+        // during profiler Initialize, so establish the feature gate when CoreLib finishes loading. UnsafeAccessor
+        // methods can be declared by framework or customer libraries, so scan each subsequent module that participates
+        // in assembly redirection.
+        if (assembly_redirection_enabled_ && module_info.assembly.name == system_private_corelib_assemblyName)
+        {
+            unsafe_accessor_type_redirection_enabled_ = assembly_version_redirect_map_current_framework_ != nullptr &&
+                                                        HasUnsafeAccessorTypeAttribute(metadata_import);
+            Logger::Info("UnsafeAccessorTypeAttribute metadata redirection enabled: ",
+                         unsafe_accessor_type_redirection_enabled_ ? "true" : "false");
+            // This one-time CoreLib branch returns below and can never reach the regular AssemblyRef/attribute
+            // redirection path. Keeping this special case local avoids moving writable-metadata work ahead of the
+            // safety exits for other kinds of modules.
+            if (unsafe_accessor_type_redirection_enabled_)
+            {
+                const auto& metadata_emit = metadata_interfaces.As<IMetaDataEmit2>(IID_IMetaDataEmit);
+                const auto& assembly_emit = metadata_interfaces.As<IMetaDataAssemblyEmit>(IID_IMetaDataAssemblyEmit);
+                const auto& module_metadata =
+                    ModuleMetadata(metadata_import, metadata_emit, assembly_import, assembly_emit,
+                                   module_info.assembly.name, module_info.assembly.app_domain_id, &corAssemblyProperty);
+                UpdateUnsafeAccessorTypeAttributes(module_metadata, *assembly_version_redirect_map_current_framework_);
+            }
         }
 
 #ifdef _WIN32
@@ -854,6 +882,11 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id, std::vector<ModuleID>& m
             //  - for .NET Frameworks - the ones under netfx/ folder
             //  - for .NET (Core) - the ones under net/ folder
             RedirectAssemblyReferences(assembly_import, assembly_emit);
+            // Apply the same redirection policy to UnsafeAccessorType attributes in methods declared by this module.
+            if (unsafe_accessor_type_redirection_enabled_)
+            {
+                UpdateUnsafeAccessorTypeAttributes(module_metadata, *assembly_version_redirect_map_current_framework_);
+            }
         }
 
         if (module_info.assembly.name == managed_profiler_name)
