@@ -163,7 +163,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.3.0",
-                "8.5.11",
+                "8.5.12",
 #endif
             ];
             return theoryData;
@@ -227,7 +227,7 @@ public static partial class LibraryVersion
                 "3.7.0",
 #endif
 #if NET10_0 || NET9_0 || NET8_0 || NET462
-                "3.12.0",
+                "3.13.0",
 #endif
 #endif
             ];
@@ -260,7 +260,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "9.0.0",
-                "26.7.0",
+                "26.10.0",
 #endif
             ];
             return theoryData;
@@ -499,6 +499,35 @@ public static partial class LibraryVersion
             return theoryData;
         }
     }
+    public static TheoryData<string> UnsafeAccessorTypeRedirection
+    {
+        get
+        {
+            TheoryData<string> theoryData =
+            [
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+                string.Empty,
+#else
+#if NET10_0
+                "null",
+#endif
+#if NET10_0
+                "9.0.0.0",
+#endif
+#if NET10_0
+                "10.0.0.0",
+#endif
+#if NET10_0
+                "11.0.0.0",
+#endif
+#if NET10_0
+                "1.0.0.0-incomplete",
+#endif
+#endif
+            ];
+            return theoryData;
+        }
+    }
     public static TheoryData<string> WCFCoreServer
     {
         get
@@ -546,6 +575,7 @@ public static partial class LibraryVersion
        { "WCFCoreClient", WCFCoreClient },
        { "Kafka", Kafka },
        { "AssemblyRedirection", AssemblyRedirection },
+       { "UnsafeAccessorTypeRedirection", UnsafeAccessorTypeRedirection },
        { "WCFCoreServer", WCFCoreServer },
     };
 }
