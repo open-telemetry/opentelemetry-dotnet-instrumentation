@@ -502,19 +502,19 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-#if NET10_0
+#if NET11_0 || NET10_0
                 "null",
 #endif
-#if NET10_0
+#if NET11_0 || NET10_0
                 "9.0.0.0",
 #endif
-#if NET10_0
+#if NET11_0 || NET10_0
                 "10.0.0.0",
 #endif
-#if NET10_0
+#if NET11_0 || NET10_0
                 "11.0.0.0",
 #endif
-#if NET10_0
+#if NET11_0 || NET10_0
                 "1.0.0.0-incomplete",
 #endif
 #endif
