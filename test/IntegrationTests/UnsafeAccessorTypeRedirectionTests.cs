@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // UnsafeAccessorTypeAttribute overrides should work starting from net10.0
-#if NET10_0_OR_GREATER
+#if NET
 
 using IntegrationTests.Helpers;
 
@@ -25,12 +25,10 @@ public class UnsafeAccessorTypeRedirectionTests(ITestOutputHelper output)
     /// <param name="expectedVersion">The assembly version expected after the profiler processes the module.</param>
     [Theory]
     [Trait("Category", "EndToEnd")]
-#if NET10_0
-    [InlineData("Microsoft.Extensions.DependencyInjection.Abstractions", null, "10.0.0.0")]
-    [InlineData("Microsoft.Extensions.DependencyInjection.Abstractions", "9.0.0.0", "10.0.0.0")]
-    [InlineData("Microsoft.Extensions.DependencyInjection.Abstractions", "10.0.0.0", "10.0.0.0")]
-    [InlineData("Microsoft.Extensions.DependencyInjection.Abstractions", "11.0.0.0", "11.0.0.0")]
-#endif
+    [InlineData("Microsoft.Extensions.DependencyInjection", null, "10.0.0.0")]
+    [InlineData("Microsoft.Extensions.DependencyInjection", "9.0.0.0", "10.0.0.0")]
+    [InlineData("Microsoft.Extensions.DependencyInjection", "10.0.0.0", "10.0.0.0")]
+    [InlineData("Microsoft.Extensions.DependencyInjection", "11.0.0.0", "11.0.0.0")]
     public void NativeRewriteAttributeMetadata(string assemblyName, string? compiledVersion, string expectedVersion)
     {
         EnableBytecodeInstrumentation();
@@ -52,7 +50,7 @@ public class UnsafeAccessorTypeRedirectionTests(ITestOutputHelper output)
         EnableBytecodeInstrumentation();
 
         var packageVersion = "1.0.0.0-incomplete";
-        var arguments = $"--assembly-name Microsoft.Extensions.DependencyInjection.Abstractions --expected-version 1.0.0.0";
+        var arguments = $"--assembly-name Microsoft.Extensions.DependencyInjection --expected-version 1.0.0.0";
 
         RunTestApplication(new TestSettings { PackageVersion = packageVersion, Arguments = arguments });
     }
