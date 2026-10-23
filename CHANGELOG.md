@@ -109,6 +109,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   startup, including in .NET Framework applications hosted in IIS.
 - Invalid plugin type names no longer stop automatic instrumentation or crash
   .NET Framework applications unless fail-fast is enabled.
+- Auto-instrumentation messages are no longer written twice to the managed log
+  file, and loader messages are no longer copied into it.
 - Support native profiler assembly redirection for
   `UnsafeAccessorTypeAttribute` metadata on .NET 10 and later.
 
