@@ -46,11 +46,11 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
         return this;
     }
 
-    public override CSharpFileBuilder AddVersionWithDependencies(string version, Dictionary<string, string> dependencies, string[] supportedFrameworks, string[] supportedPlatforms)
+    public override CSharpFileBuilder AddVersionWithMetadata(string version, Dictionary<string, string> metadata, string[] supportedFrameworks, string[] supportedPlatforms)
     {
         AddVersion(version, supportedFrameworks, supportedPlatforms, appendEnd: false);
 
-        Builder.AppendLine(CultureInfo.InvariantCulture, $", additionalMetaData: {SerializeDictionary(dependencies)}),");
+        Builder.AppendLine(CultureInfo.InvariantCulture, $", additionalMetaData: {SerializeDictionary(metadata)}),");
         return this;
     }
 

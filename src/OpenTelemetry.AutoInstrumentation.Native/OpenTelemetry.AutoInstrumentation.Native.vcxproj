@@ -341,6 +341,11 @@
     <ClInclude Include="tracer_method_rewriter.h" />
     <ClInclude Include="tracer_rejit_preprocessor.h" />
     <ClInclude Include="tracer_tokens.h" />
+    <ClInclude Include="ascii_string_utils.h" />
+    <ClInclude Include="type_name_assembly_reference_parser.h" />
+    <ClInclude Include="type_name_assembly_redirection_rewriter.h" />
+    <ClInclude Include="unsafe_accessor_type_attribute_blob_rewriter.h" />
+    <ClInclude Include="unsafe_accessor_type_attribute_updater.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="version.h" />
   </ItemGroup>
@@ -385,6 +390,10 @@
     <ClCompile Include="tracer_method_rewriter.cpp" />
     <ClCompile Include="tracer_rejit_preprocessor.cpp" />
     <ClCompile Include="tracer_tokens.cpp" />
+    <ClCompile Include="type_name_assembly_reference_parser.cpp" />
+    <ClCompile Include="type_name_assembly_redirection_rewriter.cpp" />
+    <ClCompile Include="unsafe_accessor_type_attribute_blob_rewriter.cpp" />
+    <ClCompile Include="unsafe_accessor_type_attribute_updater.cpp" />
     <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>

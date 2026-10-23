@@ -359,6 +359,69 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "UnsafeAccessorTypeRedirection",
+            NugetPackageName = "Microsoft.Extensions.DependencyInjection.Abstractions",
+            TestApplicationName = "TestApplication.UnsafeAccessorTypeRedirection",
+            Versions =
+            [
+                new(
+                    "null",
+                    supportedTargetFrameworks: ["net10.0"],
+                    supportedExecutionFrameworks: ["net10.0"],
+                    buildProperties: new Dictionary<string, string>
+                    {
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorPackageVersion"] = "10.0.0",
+                        ["UnsafeAccessorComplete"] = "true"
+                    }),
+                new(
+                    "9.0.0.0",
+                    supportedTargetFrameworks: ["net10.0"],
+                    supportedExecutionFrameworks: ["net10.0"],
+                    buildProperties: new Dictionary<string, string>
+                    {
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorAssemblyVersion"] = "9.0.0.0",
+                        ["UnsafeAccessorPackageVersion"] = "9.0.0",
+                        ["UnsafeAccessorComplete"] = "true"
+                    }),
+                new(
+                    "10.0.0.0",
+                    supportedTargetFrameworks: ["net10.0"],
+                    supportedExecutionFrameworks: ["net10.0"],
+                    buildProperties: new Dictionary<string, string>
+                    {
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorAssemblyVersion"] = "10.0.0.0",
+                        ["UnsafeAccessorPackageVersion"] = "10.0.0",
+                        ["UnsafeAccessorComplete"] = "true"
+                    }),
+                new(
+                    "11.0.0.0",
+                    supportedTargetFrameworks: ["net10.0"],
+                    supportedExecutionFrameworks: ["net10.0"],
+                    buildProperties: new Dictionary<string, string>
+                    {
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorAssemblyVersion"] = "11.0.0.0",
+                        ["UnsafeAccessorPackageVersion"] = "11.0.0-rc.1.26425.128",
+                        ["UnsafeAccessorComplete"] = "true"
+                    }),
+                new(
+                    "1.0.0.0-incomplete",
+                    supportedTargetFrameworks: ["net10.0"],
+                    supportedExecutionFrameworks: ["net10.0"],
+                    buildProperties: new Dictionary<string, string>
+                    {
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorAssemblyVersion"] = "1.0.0.0",
+                        ["UnsafeAccessorPackageVersion"] = "10.0.0",
+                        ["UnsafeAccessorComplete"] = "false"
+                    })
+            ]
+        },
+        new()
+        {
             IntegrationName = "WCFCoreServer",
             NugetPackageName = "CoreWCF.Primitives",
             TestApplicationName = "TestApplication.Wcf.Core",
