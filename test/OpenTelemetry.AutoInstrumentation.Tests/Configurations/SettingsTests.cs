@@ -29,7 +29,7 @@ public sealed class SettingsTests
     {
         using var envScope = new EnvironmentScope(new Dictionary<string, string?>
         {
-            { key, null },
+            { key, "process" },
         });
 
         var firstApp = new NameValueCollection { { key, "first" } };
@@ -37,7 +37,9 @@ public sealed class SettingsTests
 
         Assert.Equal("first", Settings.GetYamlConfigurationValue(key, firstApp, isHosted: true));
         Assert.Equal("second", Settings.GetYamlConfigurationValue(key, secondApp, isHosted: true));
-        Assert.Null(Environment.GetEnvironmentVariable(key));
+
+        // the per-app values must not leak into process-level selection.
+        Assert.Equal("process", Settings.GetYamlConfigurationValue(key, [], isHosted: true));
     }
 
     [Theory]
@@ -102,6 +104,11 @@ public sealed class SettingsTests
     [Fact]
     internal void HostedRootedYamlFileFromAppSettingsIsUnchanged()
     {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { ConfigurationKeys.FileBasedConfiguration.FileName, null },
+        });
+
         var appSettings = new NameValueCollection { { ConfigurationKeys.FileBasedConfiguration.FileName, @"D:\config\otel.yaml" } };
 
         Assert.Equal(@"D:\config\otel.yaml", Settings.GetYamlConfigurationFilePath(appSettings, isHosted: true, @"C:\app"));

@@ -47,21 +47,24 @@ internal abstract class Settings
     }
 
 #if NETFRAMEWORK
+    // Each ASP.NET application selects its own YAML file, so in hosted applications
+    // the Web.config value takes precedence over the process environment variable.
     internal static string? GetYamlConfigurationValue(string key, System.Collections.Specialized.NameValueCollection appSettings, bool isHosted)
     {
-        return GetYamlConfigurationValue(key, appSettings, isHosted, out _);
+        return ProvidedByAppSettings(key, appSettings, isHosted) ? appSettings[key] : Environment.GetEnvironmentVariable(key);
     }
 
     internal static string GetYamlConfigurationFilePath(System.Collections.Specialized.NameValueCollection appSettings, bool isHosted, string applicationDirectory)
     {
-        var configFile = GetYamlConfigurationValue(ConfigurationKeys.FileBasedConfiguration.FileName, appSettings, isHosted, out var resolveFromApplication);
+        var configFile = GetYamlConfigurationValue(ConfigurationKeys.FileBasedConfiguration.FileName, appSettings, isHosted);
+        var resolveFromApplication = ProvidedByAppSettings(ConfigurationKeys.FileBasedConfiguration.FileName, appSettings, isHosted);
 
         if (string.IsNullOrEmpty(configFile))
         {
             configFile = DefaultConfigFile;
 
             // The default file belongs to the application that enabled YAML in its Web.config.
-            GetYamlConfigurationValue(ConfigurationKeys.FileBasedConfiguration.Enabled, appSettings, isHosted, out resolveFromApplication);
+            resolveFromApplication = ProvidedByAppSettings(ConfigurationKeys.FileBasedConfiguration.Enabled, appSettings, isHosted);
         }
 
         // Resolve Web.config paths against the application root, like other Web.config paths.
@@ -119,12 +122,9 @@ internal abstract class Settings
     }
 
 #if NETFRAMEWORK
-    private static string? GetYamlConfigurationValue(string key, System.Collections.Specialized.NameValueCollection appSettings, bool isHosted, out bool fromAppSettings)
+    private static bool ProvidedByAppSettings(string key, System.Collections.Specialized.NameValueCollection appSettings, bool isHosted)
     {
-        // Each ASP.NET application selects its own YAML file, so its Web.config takes precedence.
-        var value = isHosted ? appSettings[key] : null;
-        fromAppSettings = !string.IsNullOrEmpty(value);
-        return fromAppSettings ? value : Environment.GetEnvironmentVariable(key);
+        return isHosted && !string.IsNullOrEmpty(appSettings[key]);
     }
 #endif
 }
