@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Central package management disables the SDK's implicit FSharp.Core package reference. -->
+    <PackageReference Include="FSharp.Core" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="ClassFs.fs" />
   </ItemGroup>
 
