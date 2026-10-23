@@ -8,6 +8,7 @@
     <PackageVersion Include="CoreWCF.Primitives" Version="1.9.1" />
     <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="9.5.3" />
     <PackageVersion Include="FsCheck.Xunit" Version="3.6.0" />
+    <PackageVersion Include="FSharp.Core" Version="11.0.101-rc2.26504.105" />
     <PackageVersion Include="Google.Protobuf" Version="3.36.2" />
     <PackageVersion Include="GraphQL" Version="8.8.5" />
     <PackageVersion Include="GraphQL.MicrosoftDI" Version="8.8.5" />
