@@ -354,60 +354,60 @@ internal static class PackageVersionDefinitions
         new()
         {
             IntegrationName = "UnsafeAccessorTypeRedirection",
-            NugetPackageName = "Microsoft.Extensions.DependencyInjection.Abstractions",
+            NugetPackageName = "Microsoft.Extensions.DependencyInjection",
             TestApplicationName = "TestApplication.UnsafeAccessorTypeRedirection",
             Versions =
             [
                 new(
                     "null",
-                    supportedTargetFrameworks: ["net10.0"],
-                    supportedExecutionFrameworks: ["net10.0"],
+                    supportedTargetFrameworks: ["net11.0", "net10.0"],
+                    supportedExecutionFrameworks: ["net11.0", "net10.0"],
                     buildProperties: new Dictionary<string, string>
                     {
-                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection",
                         ["UnsafeAccessorPackageVersion"] = "10.0.0",
                         ["UnsafeAccessorComplete"] = "true"
                     }),
                 new(
                     "9.0.0.0",
-                    supportedTargetFrameworks: ["net10.0"],
-                    supportedExecutionFrameworks: ["net10.0"],
+                    supportedTargetFrameworks: ["net11.0", "net10.0"],
+                    supportedExecutionFrameworks: ["net11.0", "net10.0"],
                     buildProperties: new Dictionary<string, string>
                     {
-                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection",
                         ["UnsafeAccessorAssemblyVersion"] = "9.0.0.0",
                         ["UnsafeAccessorPackageVersion"] = "9.0.0",
                         ["UnsafeAccessorComplete"] = "true"
                     }),
                 new(
                     "10.0.0.0",
-                    supportedTargetFrameworks: ["net10.0"],
-                    supportedExecutionFrameworks: ["net10.0"],
+                    supportedTargetFrameworks: ["net11.0", "net10.0"],
+                    supportedExecutionFrameworks: ["net11.0", "net10.0"],
                     buildProperties: new Dictionary<string, string>
                     {
-                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection",
                         ["UnsafeAccessorAssemblyVersion"] = "10.0.0.0",
                         ["UnsafeAccessorPackageVersion"] = "10.0.0",
                         ["UnsafeAccessorComplete"] = "true"
                     }),
                 new(
                     "11.0.0.0",
-                    supportedTargetFrameworks: ["net10.0"],
-                    supportedExecutionFrameworks: ["net10.0"],
+                    supportedTargetFrameworks: ["net11.0", "net10.0"],
+                    supportedExecutionFrameworks: ["net11.0", "net10.0"],
                     buildProperties: new Dictionary<string, string>
                     {
-                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection",
                         ["UnsafeAccessorAssemblyVersion"] = "11.0.0.0",
-                        ["UnsafeAccessorPackageVersion"] = "11.0.0-rc.1.26425.128",
+                        ["UnsafeAccessorPackageVersion"] = "11.0.0-rc.2.26504.105",
                         ["UnsafeAccessorComplete"] = "true"
                     }),
                 new(
                     "1.0.0.0-incomplete",
-                    supportedTargetFrameworks: ["net10.0"],
-                    supportedExecutionFrameworks: ["net10.0"],
+                    supportedTargetFrameworks: ["net11.0", "net10.0"],
+                    supportedExecutionFrameworks: ["net11.0", "net10.0"],
                     buildProperties: new Dictionary<string, string>
                     {
-                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection",
                         ["UnsafeAccessorAssemblyVersion"] = "1.0.0.0",
                         ["UnsafeAccessorPackageVersion"] = "10.0.0",
                         ["UnsafeAccessorComplete"] = "false"
