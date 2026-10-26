@@ -41,9 +41,9 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
 #elif NETFRAMEWORK
     // Case 1: Lower version should be redirected (native profiler mandatory)
-    [InlineData("6.0.0", AssemblyName, "10.0.0.13", "10.0.1426.52326")]
+    [InlineData("6.0.0", AssemblyName, "10.0.0.14", "10.0.1426.52326")]
     // Case 2: Equal version, should NOT be redirected (native profiler mandatory)
-    [InlineData("10.0.14", AssemblyName, "10.0.0.13", "10.0.1426.52326")]
+    [InlineData("10.0.14", AssemblyName, "10.0.0.14", "10.0.1426.52326")]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
 #endif
     public void DefaultRedirection(
