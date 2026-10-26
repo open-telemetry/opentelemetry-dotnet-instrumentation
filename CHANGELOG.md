@@ -54,7 +54,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.StackExchangeRedis`
     from `1.19.0-beta.1` to `1.20.1-beta.1`,
   - `OpenTelemetry.Instrumentation.Wcf` from `1.19.1-beta.1` to `1.20.1-beta.1`,
-  - `OpenTelemetry.OpAmp.Client` from `0.7.0-alpha.2` to `0.8.0-alpha.2`,
+  - `OpenTelemetry.OpAmp.Client` from `0.7.0-alpha.2` to `0.9.0-alpha.1`,
   - `OpenTelemetry.Shims.OpenTracing` from `1.19.1-beta.1` to `1.20.1-beta.1`,
   - `OpenTelemetry.Resources.Azure` from `1.19.1-beta.1` to `1.20.1-beta.1`,
   - `OpenTelemetry.Resources.Container` from `1.19.1-beta.1` to `1.20.1-beta.1`,
