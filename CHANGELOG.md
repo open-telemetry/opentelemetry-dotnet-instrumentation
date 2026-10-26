@@ -69,30 +69,30 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
     from `1.19.0-beta.1` to `1.20.1-beta.1`.
 - .NET Framework only, following packages updated
-  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Configuration` from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Configuration.Binder` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.13` to `10.0.14`,
+  - `Microsoft.Extensions.Configuration` from `10.0.13` to `10.0.14`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.13` to `10.0.14`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.13` to `10.0.14`,
   - `Microsoft.Extensions.Configuration.EnvironmentVariables`
-    from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.DependencyInjection` from `10.0.12` to `10.0.13`,
+    from `10.0.13` to `10.0.14`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.13` to `10.0.14`,
   - `Microsoft.Extensions.DependencyInjection.Abstractions`
-    from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Logging` from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Logging.Configuration` from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Options` from `10.0.12` to `10.0.13`,
+    from `10.0.13` to `10.0.14`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.13` to `10.0.14`,
+  - `Microsoft.Extensions.Logging` from `10.0.13` to `10.0.14`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.13` to `10.0.14`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.13` to `10.0.14`,
+  - `Microsoft.Extensions.Options` from `10.0.13` to `10.0.14`,
   - `Microsoft.Extensions.Options.ConfigurationExtensions`
-    from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Primitives` from `10.0.12` to `10.0.13`,
+    from `10.0.13` to `10.0.14`,
+  - `Microsoft.Extensions.Primitives` from `10.0.13` to `10.0.14`,
   - `OpenTelemetry.Instrumentation.AspNet` from `1.19.0` to `1.20.1`,
   - `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
     from `1.19.0` to `1.20.1`,
-  - `System.Diagnostics.DiagnosticSource` from `10.0.12` to `10.0.13`,
-  - `System.IO.Pipelines` from `10.0.12` to `10.0.13`,
-  - `System.Text.Encodings.Web` from `10.0.12` to `10.0.13`,
-  - `System.Text.Json` from `10.0.12` to `10.0.13`.
+  - `System.Diagnostics.DiagnosticSource` from `10.0.13` to `10.0.14`,
+  - `System.IO.Pipelines` from `10.0.13` to `10.0.14`,
+  - `System.Text.Encodings.Web` from `10.0.13` to `10.0.14`,
+  - `System.Text.Json` from `10.0.13` to `10.0.14`.
 
 ### Deprecated
 
@@ -109,6 +109,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   startup, including in .NET Framework applications hosted in IIS.
 - Invalid plugin type names no longer stop automatic instrumentation or crash
   .NET Framework applications unless fail-fast is enabled.
+- Auto-instrumentation messages are no longer written twice to the managed log
+  file, and loader messages are no longer copied into it.
 - Support native profiler assembly redirection for
   `UnsafeAccessorTypeAttribute` metadata on .NET 10 and later.
 

@@ -6,7 +6,7 @@
     <PackageVersion Include="NuGet.ProjectModel" Version="7.9.0" />
     <PackageVersion Include="System.IO.Abstractions" Version="22.3.0" />
     <!-- System.Security.Cryptography.Pkcs is a transitive package from NuGet.ProjectModel. Needs update to fix https://github.com/advisories/GHSA-846f-f764-76mx -->
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
     <PackageVersion Include="Valleysoft.DockerfileModel" Version="4.0.0" />
     <PackageVersion Include="YamlDotNet" Version="18.1.0" />
   </ItemGroup>
