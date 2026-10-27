@@ -2050,5 +2050,5 @@ built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelem
   `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS`.
 - `OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED` environment variable
   which enables `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`.
-  See the [official Microsoft documentation](https://docs.microsoft.com/en-us/aspnet/core/grpc/troubleshoot?view=aspnetcore-6.0#call-insecure-grpc-services-with-net-core-client)
+  See the [official Microsoft documentation](https://docs.microsoft.com/aspnet/core/grpc/troubleshoot?view=aspnetcore-6.0#call-insecure-grpc-services-with-net-core-client)
   for more details.

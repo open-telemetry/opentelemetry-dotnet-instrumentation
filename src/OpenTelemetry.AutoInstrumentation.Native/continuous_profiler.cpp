@@ -1723,7 +1723,7 @@ ThreadState* ContinuousProfiler::GetCurrentThreadState(ThreadID tid)
 }
 
 // You can read about the ETW event format for AllocationTick at
-// https://docs.microsoft.com/en-us/dotnet/framework/performance/garbage-collection-etw-events#gcallocationtick_v3-event
+// https://docs.microsoft.com/dotnet/framework/performance/garbage-collection-etw-events#gcallocationtick_v3-event
 // or, if that is not working, a search for "GCAllocationTick ETW" will get you there.
 // As of this comment, the above link only documents v3 of the event, with v4 undocumented but
 // by source traversal differs only by the addition of the actual size of the just-allocated object

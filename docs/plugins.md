@@ -8,7 +8,7 @@ setup, signal options, OpAMP, selective sampling, and continuous profiling.
 
 Set `OTEL_DOTNET_AUTO_PLUGINS` to a colon-separated list of plugin type names,
 specified with the
-[assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname).
+[assembly-qualified name](https://docs.microsoft.com/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname).
 This list is colon-separated because type names can contain commas.
 
 Every plugin type is instantiated at most once. A plugin must:
