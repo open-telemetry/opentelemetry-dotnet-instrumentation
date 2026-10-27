@@ -79,9 +79,9 @@ internal static class AdoNetInstrumentation
                 {
                     tags.Add(NetworkAttributes.Keys.ServerAddress, serverAddress);
 
-                    if (connectionDetails.Port.HasValue)
+                    if (connectionDetails.BoxedPort is not null)
                     {
-                        tags.Add(NetworkAttributes.Keys.ServerPort, connectionDetails.Port.Value);
+                        tags.Add(NetworkAttributes.Keys.ServerPort, connectionDetails.BoxedPort);
                     }
                 }
             }

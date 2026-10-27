@@ -148,7 +148,7 @@ can parse dense thread sampling data and export it.
 ### How does the thread sampler work?
 
 The profiler uses the
-[.NET profiler](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
+[.NET profiler](https://docs.microsoft.com/dotnet/framework/unmanaged-api/profiling/)
 to perform periodic call stack sampling. For every sampling period, the runtime
 suspends execution and the samples for all managed threads are saved in the buffer,
 then the runtime resumes.
@@ -306,7 +306,7 @@ in an observability back end that supports profiling.
 
 ### How does the memory profiler work?
 
-The profiler leverages [.NET profiling](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
+The profiler leverages [.NET profiling](https://docs.microsoft.com/dotnet/framework/unmanaged-api/profiling/)
 to perform allocation sampling.
 For every sampled allocation, allocation amount together with stack trace of
 the thread that triggered the allocation, and associated span context, are saved

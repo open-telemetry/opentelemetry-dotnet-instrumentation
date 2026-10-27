@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.17.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.18.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [v1.18.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.18.0)
 
 ### Added
 
@@ -54,7 +68,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.StackExchangeRedis`
     from `1.19.0-beta.1` to `1.20.1-beta.1`,
   - `OpenTelemetry.Instrumentation.Wcf` from `1.19.1-beta.1` to `1.20.1-beta.1`,
-  - `OpenTelemetry.OpAmp.Client` from `0.7.0-alpha.2` to `0.8.0-alpha.2`,
+  - `OpenTelemetry.OpAmp.Client` from `0.7.0-alpha.2` to `0.9.0-alpha.1`,
   - `OpenTelemetry.Shims.OpenTracing` from `1.19.1-beta.1` to `1.20.1-beta.1`,
   - `OpenTelemetry.Resources.Azure` from `1.19.1-beta.1` to `1.20.1-beta.1`,
   - `OpenTelemetry.Resources.Container` from `1.19.1-beta.1` to `1.20.1-beta.1`,
@@ -69,32 +83,30 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
     from `1.19.0-beta.1` to `1.20.1-beta.1`.
 - .NET Framework only, following packages updated
-  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Configuration` from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Configuration.Binder` from `10.0.12` to `10.0.13`,
+  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.12` to `10.0.14`,
+  - `Microsoft.Extensions.Configuration` from `10.0.12` to `10.0.14`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `10.0.12` to `10.0.14`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.12` to `10.0.14`,
   - `Microsoft.Extensions.Configuration.EnvironmentVariables`
-    from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.DependencyInjection` from `10.0.12` to `10.0.13`,
+    from `10.0.12` to `10.0.14`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.12` to `10.0.14`,
   - `Microsoft.Extensions.DependencyInjection.Abstractions`
-    from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Logging` from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Logging.Configuration` from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Options` from `10.0.12` to `10.0.13`,
+    from `10.0.12` to `10.0.14`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.12` to `10.0.14`,
+  - `Microsoft.Extensions.Logging` from `10.0.12` to `10.0.14`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.12` to `10.0.14`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.12` to `10.0.14`,
+  - `Microsoft.Extensions.Options` from `10.0.12` to `10.0.14`,
   - `Microsoft.Extensions.Options.ConfigurationExtensions`
-    from `10.0.12` to `10.0.13`,
-  - `Microsoft.Extensions.Primitives` from `10.0.12` to `10.0.13`,
+    from `10.0.12` to `10.0.14`,
+  - `Microsoft.Extensions.Primitives` from `10.0.12` to `10.0.14`,
   - `OpenTelemetry.Instrumentation.AspNet` from `1.19.0` to `1.20.1`,
   - `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
     from `1.19.0` to `1.20.1`,
-  - `System.Diagnostics.DiagnosticSource` from `10.0.12` to `10.0.13`,
-  - `System.IO.Pipelines` from `10.0.12` to `10.0.13`,
-  - `System.Text.Encodings.Web` from `10.0.12` to `10.0.13`,
-  - `System.Text.Json` from `10.0.12` to `10.0.13`.
-
-### Deprecated
+  - `System.Diagnostics.DiagnosticSource` from `10.0.12` to `10.0.14`,
+  - `System.IO.Pipelines` from `10.0.12` to `10.0.14`,
+  - `System.Text.Encodings.Web` from `10.0.12` to `10.0.14`,
+  - `System.Text.Json` from `10.0.12` to `10.0.14`.
 
 ### Removed
 
@@ -109,6 +121,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   startup, including in .NET Framework applications hosted in IIS.
 - Invalid plugin type names no longer stop automatic instrumentation or crash
   .NET Framework applications unless fail-fast is enabled.
+- Auto-instrumentation messages are no longer written twice to the managed log
+  file, and loader messages are no longer copied into it.
 - Support native profiler assembly redirection for
   `UnsafeAccessorTypeAttribute` metadata on .NET 10 and later.
 
@@ -2036,5 +2050,5 @@ built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelem
   `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS`.
 - `OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED` environment variable
   which enables `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`.
-  See the [official Microsoft documentation](https://docs.microsoft.com/en-us/aspnet/core/grpc/troubleshoot?view=aspnetcore-6.0#call-insecure-grpc-services-with-net-core-client)
+  See the [official Microsoft documentation](https://docs.microsoft.com/aspnet/core/grpc/troubleshoot?view=aspnetcore-6.0#call-insecure-grpc-services-with-net-core-client)
   for more details.

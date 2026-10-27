@@ -8,7 +8,7 @@ setup, signal options, OpAMP, selective sampling, and continuous profiling.
 
 Set `OTEL_DOTNET_AUTO_PLUGINS` to a colon-separated list of plugin type names,
 specified with the
-[assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname).
+[assembly-qualified name](https://docs.microsoft.com/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname).
 This list is colon-separated because type names can contain commas.
 
 Every plugin type is instantiated at most once. A plugin must:
@@ -439,7 +439,7 @@ sampling remains disabled until a runtime configuration enables that feature.
 
 | Settings type                                           | NuGet package              | NuGet version |
 |---------------------------------------------------------|----------------------------|---------------|
-| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.8.0-alpha.2 |
+| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.9.0-alpha.1 |
 
 ## Requirements
 

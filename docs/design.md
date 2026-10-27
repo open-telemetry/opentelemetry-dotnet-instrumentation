@@ -32,7 +32,7 @@ and its initialization can also be delegated to the application code.
 
 - **Applications using Ahead-of-Time (AOT) compilation**:
 The current implementation relies on the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
-or the [CLR Profiler API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling)
+or the [CLR Profiler API](https://docs.microsoft.com/dotnet/framework/unmanaged-api/profiling)
 and neither is supported when publishing AOT compiled applications.
 - **Side-by-side usage with other CLR Profiler based tools**: Various tools for
 .NET are also implemented using a CLR Profiler. However, only a single CLR Profiler
@@ -70,7 +70,7 @@ section for more information.
 #### **.NET Framework** applications
 
 .NET Framework doesn't support the host startup hook. The OpenTelemetry .NET SDK
-is injected using the [CLR Profiler APIs](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/),
+is injected using the [CLR Profiler APIs](https://docs.microsoft.com/dotnet/framework/unmanaged-api/profiling/),
 which allow modifying application code during execution.
 
 ### Library instrumentations
@@ -90,7 +90,7 @@ library or framework that they instrument. Some examples include:
 or frameworks that lack proper hooks or callbacks to allow the collection
 of observability data. These instrumentations are enabled by modifying
 the application [IL code](https://en.wikipedia.org/wiki/Common_Intermediate_Language)
-during runtime using the [CLR Profiler API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/).
+during runtime using the [CLR Profiler API](https://docs.microsoft.com/dotnet/framework/unmanaged-api/profiling/).
 Bytecode instrumentations must be implemented following
 the proper attribute annotation so that the native CLR Profiler implementation
 can inject them at runtime. Some examples include:
@@ -133,7 +133,7 @@ creating one instance of the `OpenTelemetry.AutoInstrumentation.Loader.Startup`
 class from the Loader assembly. When creating the instance, the static constructor
 of the type performs the following actions:
 
-1. Adds a handler to the [`AssemblyResolve` event](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.assemblyresolve?view=net-5.0),
+1. Adds a handler to the [`AssemblyResolve` event](https://docs.microsoft.com/dotnet/api/system.appdomain.assemblyresolve?view=net-5.0),
 so that it can add any assembly needed by the SDK itself or by any instrumentation.
 2. Runs, through reflection, the `Initialization` method from
   the `OpenTelemetry.AutoInstrumentation.Instrumentation` type
@@ -152,7 +152,7 @@ assembly and creates the `OpenTelemetry.AutoInstrumentation.Loader.Startup` inst
 
 #### .NET Framework bootstrapping
 
-.NET Framework bootstrapping is performed on the [CorProfiler::JITCompilationStarted](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/icorprofilercallback-jitcompilationstarted-method)
+.NET Framework bootstrapping is performed on the [CorProfiler::JITCompilationStarted](https://docs.microsoft.com/dotnet/framework/unmanaged-api/profiling/icorprofilercallback-jitcompilationstarted-method)
 callback. When that callback happens the CLR Profiler DLL takes
 the following actions:
 
@@ -181,14 +181,14 @@ to invoke instrumentation included in this project, and wraps the calls with
 try-catch blocks to prevent instrumentation errors from affecting the normal operation
 of the application. This IL code rewrite happens in the following steps:
 
-1. On the [CorProfiler::ModuleLoadFinished](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/icorprofilercallback-moduleloadfinished-method)
+1. On the [CorProfiler::ModuleLoadFinished](https://docs.microsoft.com/dotnet/framework/unmanaged-api/profiling/icorprofilercallback-moduleloadfinished-method)
 callback, the CLR Profiler DLL takes the following actions:
 
    - If the loaded module is in the set of modules for which there is bytecode instrumentation,
    the profiler adds the module to a map of modules to be instrumented.
    - The profiler then requests
    a Re-JIT recompilation using
-   [ICorProfilerInfo::RequestReJIT](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/icorprofilerinfo4-requestrejit-method)
+   [ICorProfilerInfo::RequestReJIT](https://docs.microsoft.com/dotnet/framework/unmanaged-api/profiling/icorprofilerinfo4-requestrejit-method)
    for the methods targeted by the bytecode instrumentation.
 
 2. On the ReJIT callback the CLR Profiler DLL finds the corresponding
@@ -201,7 +201,7 @@ of shipped files.
 
 When operating with parameters and return values of the targeted methods,
 the instrumentation methods must use [DuckTyping](../src/OpenTelemetry.AutoInstrumentation/DuckTyping/README.md)
-or [reflection](https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/reflection)
+or [reflection](https://docs.microsoft.com/dotnet/framework/reflection-and-codedom/reflection)
 to access objects from the APIs being instrumented.
 
 ### Assembly conflict resolution
@@ -210,7 +210,7 @@ The injection of the OpenTelemetry .NET SDK and any source instrumentation
 brings the risk of assembly version conflicts. This issue is more likely with
 packages like
 [`System.Diagnostics.DiagnosticSource`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/)
-which contains the [`Activity` type](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.activity?view=net-5.0)
+which contains the [`Activity` type](https://docs.microsoft.com/dotnet/api/system.diagnostics.activity?view=net-5.0)
 used by the OpenTelemetry .NET API to represent a span. If not handled,
 conflicts can lead to:
 
@@ -245,6 +245,6 @@ OpenTelemetry:
 
 Microsoft .NET Profiling APIs:
 
-- [Profiling API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
-- [Metadata API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/metadata/)
+- [Profiling API](https://docs.microsoft.com/dotnet/framework/unmanaged-api/profiling/)
+- [Metadata API](https://docs.microsoft.com/dotnet/framework/unmanaged-api/metadata/)
 - [The Book of the Runtime - Profiling](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/botr/profiling.md)
