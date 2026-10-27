@@ -11,7 +11,6 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 #endif
 using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
 using static IntegrationTests.Helpers.DockerFileHelper;
@@ -32,9 +31,7 @@ public sealed class OracleFixture : IAsyncLifetime, IDisposable
     private const string OracleDatabaseServiceName = "myatp_low";
     private const string OracleClientServiceName = "myatp_low";
     private const string OracleWalletDirectory = "/u01/app/oracle/wallets/tls_wallet";
-    private const string OracleEntrypointPath = "/u01/scripts/entrypoint-with-kstrc.sh";
     private const string OracleOpenTelemetryTraceHost = "host.docker.internal";
-    private const UnixFileModes ExecutableFileMode = UnixFileModes.UserRead | UnixFileModes.UserWrite | UnixFileModes.UserExecute | UnixFileModes.GroupRead | UnixFileModes.GroupExecute | UnixFileModes.OtherRead | UnixFileModes.OtherExecute;
 
     // Overall budget for making the Oracle container ready (container start + DB accepting
     // SQL*Plus). Kept safely below the integration tests' `--blame-hang 10m` timeout so that a
@@ -621,8 +618,9 @@ exit 1
                 .WithName($"oracle-adb-{port}-{attempt}")
                 .WithPrivileged(true)
                 .WithExtraHost(OracleOpenTelemetryTraceHost, "host-gateway")
-                .WithResourceMapping(Encoding.UTF8.GetBytes(CreateOracleEntrypointScript()), OracleEntrypointPath, 0, 0, ExecutableFileMode)
-                .WithEntrypoint(OracleEntrypointPath)
+                // Resource mapping can truncate the final tar block on .NET Framework, so pass the script directly to Bash.
+                .WithEntrypoint("bash")
+                .WithCommand("-c", CreateOracleEntrypointScript())
                 .WithPortBinding(port, OraclePort)
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(OraclePort));
 
