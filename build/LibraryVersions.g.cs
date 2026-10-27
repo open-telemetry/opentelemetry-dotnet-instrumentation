@@ -163,7 +163,7 @@ public static partial class LibraryVersion
                 new("3.6.0"),
                 new("3.22.7"),
                 new("4.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("4.6.0", supportedFrameworks: [ "net10.0" ]),
+                new("4.6.2", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
