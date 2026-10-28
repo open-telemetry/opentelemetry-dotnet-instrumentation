@@ -8,6 +8,7 @@
     <PackageVersion Include="CoreWCF.Primitives" Version="1.9.1" />
     <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="9.5.3" />
     <PackageVersion Include="FsCheck.Xunit" Version="3.6.0" />
+    <PackageVersion Include="FSharp.Core" Version="11.0.101-rc3.26522.148" />
     <PackageVersion Include="Google.Protobuf" Version="3.36.2" />
     <PackageVersion Include="GraphQL" Version="8.8.5" />
     <PackageVersion Include="GraphQL.MicrosoftDI" Version="8.8.5" />
@@ -26,7 +27,7 @@
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.14" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.14" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.14" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.14" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.14" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />

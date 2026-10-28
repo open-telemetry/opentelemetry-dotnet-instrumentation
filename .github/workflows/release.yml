@@ -17,14 +17,14 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 jobs:
-  build-ubuntu1604-native:
-    uses: $/.github/workflows/build-ubuntu1604-native-container.yml
+  build-ubuntu1804-native:
+    uses: $/.github/workflows/build-ubuntu1804-native-container.yml
 
   build-windows:
     uses: $/.github/workflows/build-windows.yml
 
   build:
-    needs: [ build-windows, build-ubuntu1604-native ]
+    needs: [ build-windows, build-ubuntu1804-native ]
     uses: $/.github/workflows/build.yml
 
   build-nuget-packages:
@@ -97,7 +97,7 @@ jobs:
             "alpine-arm64 linux-musl-arm64"
             "ubuntu-22.04 linux-glibc-x64"
             "ubuntu-22.04-arm linux-glibc-arm64"
-            "windows-2022 windows"
+            "windows-2025 windows"
             "macos-14 macos"
             "nuget-packages nuget-packages"
           )
@@ -122,7 +122,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          src="./installation-scripts-windows-2022"
+          src="./installation-scripts-windows-2025"
           files=(
             "otel-dotnet-auto-install.sh"
             "OpenTelemetry.DotNet.Auto.psm1"
@@ -188,10 +188,10 @@ jobs:
         with:
           subject-path: ./bin-ubuntu-22.04-arm/**/*
 
-      - name: Attest bin-windows-2022
+      - name: Attest bin-windows-2025
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
-          subject-path: ./bin-windows-2022/**/*
+          subject-path: ./bin-windows-2025/**/*
 
       - name: Attest bin-macos-14
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
@@ -322,7 +322,7 @@ jobs:
           cd testapp
           Set-Content Directory.Build.props '<Project />'
           dotnet new console
-          dotnet publish -f net10.0 -c Release
+          dotnet publish -f net11.0 -c Release
           $module_url = "https://github.com/$env:GITHUB_REPOSITORY_NAME/releases/download/$env:RELEASE_TAG_NAME/OpenTelemetry.DotNet.Auto.psm1"
           $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
           $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\*"
@@ -338,12 +338,12 @@ jobs:
           Install-OpenTelemetryCore -ErrorAction Stop
           $install_dir = Get-OpenTelemetryInstallDirectory
           Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
-          ./bin/Release/net10.0/publish/testapp
+          ./bin/Release/net11.0/publish/testapp
           if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
           if (-not (Test-Path $log_path)) { throw "Log file does not exist. Instrumentation test failed." }
           Remove-Item $log_path
           Unregister-OpenTelemetryForCurrentSession
-          ./bin/Release/net10.0/publish/testapp
+          ./bin/Release/net11.0/publish/testapp
           if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
           if (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
           Uninstall-OpenTelemetryCore
@@ -404,7 +404,7 @@ jobs:
           cd testapp
           echo "<Project />" > Directory.Build.props
           dotnet new console
-          dotnet publish -f net10.0 -c Release
+          dotnet publish -f net11.0 -c Release
           curl -sSfL "https://github.com/${GITHUB_REPOSITORY_NAME}/releases/download/${RELEASE_TAG_NAME}/otel-dotnet-auto-install.sh" -O
           gh release verify-asset "${RELEASE_TAG_NAME}" ./otel-dotnet-auto-install.sh --repo "${GITHUB_REPOSITORY_NAME}"
           gh attestation verify ./otel-dotnet-auto-install.sh \
@@ -415,7 +415,7 @@ jobs:
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
           curl -sSfL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY_NAME}/${GITHUB_COMMIT_SHA}/instrument.sh" -O
           . ./instrument.sh
-          ./bin/Release/net10.0/publish/testapp
+          ./bin/Release/net11.0/publish/testapp
             test "$(ls -A "${LOG_DIRECTORY}" )"
 
   validate-release-container:
@@ -431,11 +431,11 @@ jobs:
           # renovate: datasource=github-runners depType=github-runner
           - machine: ubuntu-26.04
             base-image: alpine
-            net-version: net10.0
+            net-version: net11.0
           # renovate: datasource=github-runners depType=github-runner
           - machine: ubuntu-26.04-arm
             base-image: alpine
-            net-version: net10.0
+            net-version: net11.0
     runs-on: ${{ matrix.machine }}
     steps:
 

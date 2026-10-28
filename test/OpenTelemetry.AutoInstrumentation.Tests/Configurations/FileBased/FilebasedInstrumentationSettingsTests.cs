@@ -4,7 +4,9 @@
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.HeadersCapture;
+#if NETFRAMEWORK
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
+#endif
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased;
 

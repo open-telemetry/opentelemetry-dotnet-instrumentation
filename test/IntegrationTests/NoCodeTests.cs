@@ -12,6 +12,9 @@ public class NoCodeTests : TestHelper
     public NoCodeTests(ITestOutputHelper output)
         : base("NoCode", output)
     {
+#if NET10_0
+        SetEnvironmentVariable("DOTNET_RuntimeAsync", "1");
+#endif
     }
 
     [Fact]
@@ -93,6 +96,7 @@ public class NoCodeTests : TestHelper
         collector.ExpectAsyncNoCode("Span-TestMethod9Async");
 
         collector.ExpectAsyncNoCode("Span-IntTaskTestMethodAsync");
+        collector.ExpectAsyncNoCode("Span-MultiDimensionalArrayTaskTestMethodAsync");
 #if NET
         collector.ExpectAsyncNoCode("Span-ValueTaskTestMethodAsync");
         collector.ExpectAsyncNoCode("Span-IntValueTaskTestMethodAsync");
