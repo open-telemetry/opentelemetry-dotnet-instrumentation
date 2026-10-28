@@ -26,9 +26,9 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     // Case 1: Lower version is not possible for DiagnosticSource on .NET 11,
     //         msbuild will ignore a lower version of this package since it's part of .NET 11 SDK
     // Case 2: Equal version, should NOT be redirected with/without native profiler
-    // RC2 ships DiagnosticSource with file version 11.0.26.50505.
-    [InlineData("11.0.0-rc.2.26504.105", AssemblyName, "11.0.0.0", "11.0.26.50505", true)]
-    [InlineData("11.0.0-rc.2.26504.105", AssemblyName, "11.0.0.0", "11.0.26.50505", false)]
+    // RC3 ships DiagnosticSource with file version 11.0.26.52348.
+    [InlineData("11.0.0-rc.3.26522.148", AssemblyName, "11.0.0.0", "11.0.26.52348", true)]
+    [InlineData("11.0.0-rc.3.26522.148", AssemblyName, "11.0.0.0", "11.0.26.52348", false)]
     // TODO NET11TODO adjust expectedAssemblyFileVersion to the final .NET 11 release version
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 11, the instrumentation tool is already using the highest possible version
 #elif NETFRAMEWORK
@@ -84,7 +84,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     [InlineData("10.0.14", "10.0.0.0", "10.0.1426.52326")]
 #elif NET11_0
     // The .NET 11 shared framework supplies DiagnosticSource even when the application references an older package.
-    [InlineData("10.0.14", "10.0.0.0", "10.0.1426.52326")]
+    [InlineData("10.0.14", "11.0.0.0", "11.0.26.52348")]
 #endif
     public void AdditionalDepsFallback(
         string libraryVersion,
