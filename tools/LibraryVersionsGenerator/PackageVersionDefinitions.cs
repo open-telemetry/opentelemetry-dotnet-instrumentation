@@ -348,7 +348,7 @@ internal static class PackageVersionDefinitions
                 // net462: 10.0.13 (equal to instrumentation 10.0.13)
                 // net10.0: 10.0.13 (framework override to 10.0.0, validates build parameter was respected)
                 new("10.0.14", supportedTargetFrameworks: ["net462", "net11.0", "net10.0"], supportedExecutionFrameworks: ["net462", "net11.0", "net10.0"]),
-                new("11.0.0-rc.2.26504.105", supportedTargetFrameworks: ["net462", "net11.0", "net10.0"], supportedExecutionFrameworks: ["net462", "net11.0", "net10.0"]), // TODO NET11TODO adjust to the final .NET 11 release version
+                new("11.0.0-rc.3.26522.148", supportedTargetFrameworks: ["net462", "net11.0", "net10.0"], supportedExecutionFrameworks: ["net462", "net11.0", "net10.0"]), // TODO NET11TODO adjust to the final .NET 11 release version
             ]
         },
         new()
@@ -398,7 +398,7 @@ internal static class PackageVersionDefinitions
                     {
                         ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection",
                         ["UnsafeAccessorAssemblyVersion"] = "11.0.0.0",
-                        ["UnsafeAccessorPackageVersion"] = "11.0.0-rc.2.26504.105",
+                        ["UnsafeAccessorPackageVersion"] = "11.0.0-rc.3.26522.148",
                         ["UnsafeAccessorComplete"] = "true"
                     }),
                 new(
