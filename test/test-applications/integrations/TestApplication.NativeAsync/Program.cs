@@ -16,6 +16,13 @@ internal static class Program
         ConsoleHelper.WriteSplashScreen(args);
         VerifyCompilationModes();
 
+        EnsureEqual(42, await new RuntimeAsyncStructTarget(41).TaskOfTAsync().ConfigureAwait(false));
+#if NET10_0
+        EnsureEqual(false, RuntimeAsyncStructTarget.WasInstrumented);
+#else
+        EnsureEqual(true, RuntimeAsyncStructTarget.WasInstrumented);
+#endif
+
         var runtimeTarget = new RuntimeAsyncTarget();
         await RuntimeAsyncTarget.TaskAsync().ConfigureAwait(false);
         EnsureEqual(42, await runtimeTarget.TaskOfTAsync().ConfigureAwait(false));
@@ -45,6 +52,7 @@ internal static class Program
         const bool runtimeAsyncExpected = false;
 #endif
         VerifyCompilationMode(typeof(RuntimeAsyncTarget), runtimeAsyncExpected);
+        VerifyCompilationMode(typeof(RuntimeAsyncStructTarget), runtimeAsyncExpected);
         VerifyCompilationMode(typeof(ConventionalAsyncTarget), runtimeAsyncExpected: false);
     }
 

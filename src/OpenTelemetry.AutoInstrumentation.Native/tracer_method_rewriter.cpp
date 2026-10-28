@@ -151,6 +151,17 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     const auto [retFuncElementType, retTypeFlags] = retFuncArg.GetElementTypeAndFlags();
     bool isVoid                                   = (retTypeFlags & TypeFlagVoid) > 0;
     bool isStatic = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);
+
+    if (isRuntimeAsync && !isStatic && caller->type.valueType)
+    {
+        // The `this` argument of a value-type instance method is a byref. Runtime async does not preserve byrefs
+        // across suspension, so the end callback cannot safely reload the instance after an await.
+        Logger::Warn("*** CallTarget_RewriterCallback() skipping method: runtime-async instance methods in a "
+                     "ValueType cannot be instrumented. token=",
+                     function_token, " caller_name=", caller->type.name, ".", caller->name, "()");
+        return S_FALSE;
+    }
+
     std::vector<trace::TypeSignature> methodArguments = caller->method_signature.GetMethodArguments();
     std::vector<trace::TypeSignature> traceAnnotationArguments;
     COR_SIGNATURE                     runtimeMethodHandleBuffer[10];

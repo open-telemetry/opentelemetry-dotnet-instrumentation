@@ -35,6 +35,9 @@ public class NativeAsyncTests : TestHelper
             "RuntimeAsync-ValueTask",
             "RuntimeAsync-ValueTaskOfT",
             "RuntimeAsync-GenericTask",
+#if !NET10_0
+            "RuntimeAsync-StructTaskOfT",
+#endif
             "ConventionalAsync-Task",
             "ConventionalAsync-TaskOfT",
             "ConventionalAsync-ValueTask",

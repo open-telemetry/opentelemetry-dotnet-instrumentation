@@ -75,6 +75,16 @@ instrumentation/development:
         - target:
             assembly:
               name: TestApplication.NativeAsync
+            type: TestApplication.NativeAsync.RuntimeAsyncStructTarget
+            method: TaskOfTAsync
+            signature:
+              return_type: System.Threading.Tasks.Task`1[System.Int32]
+              parameter_types:
+          span:
+            name: RuntimeAsync-StructTaskOfT
+        - target:
+            assembly:
+              name: TestApplication.NativeAsync
             type: TestApplication.NativeAsync.RuntimeAsyncTarget
             method: FaultedTaskOfTAsync
             signature:
