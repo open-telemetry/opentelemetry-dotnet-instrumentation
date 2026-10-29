@@ -14,7 +14,7 @@ public class NativeAsyncTests : TestHelper
     public NativeAsyncTests(ITestOutputHelper output)
         : base("NativeAsync", output)
     {
-#if NET10_0
+#if NET10_0_OR_GREATER
         SetEnvironmentVariable("DOTNET_RuntimeAsync", "1");
 #endif
     }
@@ -35,7 +35,7 @@ public class NativeAsyncTests : TestHelper
             "RuntimeAsync-ValueTask",
             "RuntimeAsync-ValueTaskOfT",
             "RuntimeAsync-GenericTask",
-#if !NET10_0
+#if !NET10_0_OR_GREATER
             "RuntimeAsync-StructTaskOfT",
 #endif
             "ConventionalAsync-Task",

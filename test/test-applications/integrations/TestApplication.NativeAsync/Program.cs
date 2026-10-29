@@ -17,7 +17,7 @@ internal static class Program
         VerifyCompilationModes();
 
         EnsureEqual(42, await new RuntimeAsyncStructTarget(41).TaskOfTAsync().ConfigureAwait(false));
-#if NET10_0
+#if NET10_0_OR_GREATER
         EnsureEqual(false, RuntimeAsyncStructTarget.WasInstrumented);
 #else
         EnsureEqual(true, RuntimeAsyncStructTarget.WasInstrumented);
@@ -46,7 +46,7 @@ internal static class Program
 
     private static void VerifyCompilationModes()
     {
-#if NET10_0
+#if NET10_0_OR_GREATER
         const bool runtimeAsyncExpected = true;
 #else
         const bool runtimeAsyncExpected = false;
