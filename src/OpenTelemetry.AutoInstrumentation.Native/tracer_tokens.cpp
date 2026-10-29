@@ -31,11 +31,11 @@ static const WSTRING managed_profiler_calltarget_returntype_generics =
     WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn`1");
 static const WSTRING managed_profiler_calltarget_refstruct =
     WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetRefStruct");
-static const WSTRING managed_profiler_calltarget_createrefstruct_name = WStr("CreateRefStruct");
-static const WSTRING managed_profiler_calltarget_beginmethod_name     = WStr("BeginMethod");
-static const WSTRING managed_profiler_calltarget_endmethod_name       = WStr("EndMethod");
+static const WSTRING managed_profiler_calltarget_createrefstruct_name        = WStr("CreateRefStruct");
+static const WSTRING managed_profiler_calltarget_beginmethod_name            = WStr("BeginMethod");
+static const WSTRING managed_profiler_calltarget_endmethod_name              = WStr("EndMethod");
 static const WSTRING managed_profiler_calltarget_endmethod_runtimeasync_name = WStr("EndMethodRuntimeAsync");
-static const WSTRING managed_profiler_calltarget_logexception_name    = WStr("LogException");
+static const WSTRING managed_profiler_calltarget_logexception_name           = WStr("LogException");
 
 /**
  * PRIVATE
@@ -539,10 +539,10 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
 }
 
 // endmethod with void return
-HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void*           rewriterWrapperPtr,
-                                                  mdTypeRef       integrationTypeRef,
-                                                  const TypeInfo* currentType,
-                                                  ILInstr**       instruction,
+HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void*                rewriterWrapperPtr,
+                                                  mdTypeRef            integrationTypeRef,
+                                                  const TypeInfo*      currentType,
+                                                  ILInstr**            instruction,
                                                   const TypeSignature* declaredRuntimeAsyncReturn)
 {
     auto hr = EnsureBaseCalltargetTokens();
@@ -553,10 +553,10 @@ HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void*           rewriterWrappe
     ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*)rewriterWrapperPtr;
     ModuleMetadata*    module_metadata = GetMetadata();
 
-    const bool isRuntimeAsync = declaredRuntimeAsyncReturn != nullptr;
-    mdMemberRef& cachedEndVoidMemberRef = isRuntimeAsync ? endVoidRuntimeAsyncMemberRef : endVoidMemberRef;
-    const WSTRING& endMethodName = isRuntimeAsync ? managed_profiler_calltarget_endmethod_runtimeasync_name
-                                                   : managed_profiler_calltarget_endmethod_name;
+    const bool     isRuntimeAsync         = declaredRuntimeAsyncReturn != nullptr;
+    mdMemberRef&   cachedEndVoidMemberRef = isRuntimeAsync ? endVoidRuntimeAsyncMemberRef : endVoidMemberRef;
+    const WSTRING& endMethodName          = isRuntimeAsync ? managed_profiler_calltarget_endmethod_runtimeasync_name
+                                                           : managed_profiler_calltarget_endmethod_name;
 
     if (cachedEndVoidMemberRef == mdMemberRefNil)
     {
@@ -628,7 +628,7 @@ HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void*           rewriterWrappe
     ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
 
     PCCOR_SIGNATURE declaredReturnSignatureBuffer = nullptr;
-    ULONG declaredReturnSignatureLength = 0;
+    ULONG           declaredReturnSignatureLength = 0;
     if (isRuntimeAsync)
     {
         declaredReturnSignatureLength = declaredRuntimeAsyncReturn->GetSignature(declaredReturnSignatureBuffer);
@@ -665,11 +665,11 @@ HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void*           rewriterWrappe
 }
 
 // endmethod with return type
-HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr,
-                                              mdTypeRef       integrationTypeRef,
-                                              const TypeInfo* currentType,
-                                              TypeSignature*  returnArgument,
-                                              ILInstr**       instruction,
+HRESULT TracerTokens::WriteEndReturnMemberRef(void*                rewriterWrapperPtr,
+                                              mdTypeRef            integrationTypeRef,
+                                              const TypeInfo*      currentType,
+                                              TypeSignature*       returnArgument,
+                                              ILInstr**            instruction,
                                               const TypeSignature* declaredRuntimeAsyncReturn)
 {
     auto hr = EnsureBaseCalltargetTokens();
@@ -736,7 +736,7 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
     offset += callTargetStateSize;
 
     const WSTRING& endMethodName = isRuntimeAsync ? managed_profiler_calltarget_endmethod_runtimeasync_name
-                                                   : managed_profiler_calltarget_endmethod_name;
+                                                  : managed_profiler_calltarget_endmethod_name;
     hr = module_metadata->metadata_emit->DefineMemberRef(callTargetTypeRef, endMethodName.data(), signature,
                                                          signatureLength, &endMethodMemberRef);
     if (FAILED(hr))
@@ -767,7 +767,7 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
     auto            returnSignatureLength = returnArgument->GetSignature(returnSignatureBuffer);
 
     PCCOR_SIGNATURE declaredReturnSignatureBuffer = nullptr;
-    ULONG declaredReturnSignatureLength = 0;
+    ULONG           declaredReturnSignatureLength = 0;
     if (isRuntimeAsync)
     {
         declaredReturnSignatureLength = declaredRuntimeAsyncReturn->GetSignature(declaredReturnSignatureBuffer);
@@ -793,8 +793,7 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr
     }
 
     hr = module_metadata->metadata_emit->DefineMethodSpec(endMethodMemberRef, methodSpecSignature.Head(),
-                                                          methodSpecSignature.Size(),
-                                                          &endMethodSpec);
+                                                          methodSpecSignature.Size(), &endMethodSpec);
     if (FAILED(hr))
     {
         Logger::Warn("Error creating end method member spec.");

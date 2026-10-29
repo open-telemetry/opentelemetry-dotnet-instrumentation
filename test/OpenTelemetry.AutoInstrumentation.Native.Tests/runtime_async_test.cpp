@@ -41,13 +41,13 @@ TEST(RuntimeAsyncTest, ParsesNonGenericTaskShapes)
         builder.PushRawByte(elementType).PushToken(kOuterTypeToken);
         const auto bytes = Bytes(builder);
 
-        mdToken openTypeToken = mdTokenNil;
-        bool isGenericInst = true;
-        bool isValueTypeShape = false;
+        mdToken       openTypeToken    = mdTokenNil;
+        bool          isGenericInst    = true;
+        bool          isValueTypeShape = false;
         TypeSignature typeArg{};
 
-        ASSERT_TRUE(ParseTaskLikeReturnShape(Signature(bytes), openTypeToken, isGenericInst, isValueTypeShape,
-                                             typeArg));
+        ASSERT_TRUE(
+            ParseTaskLikeReturnShape(Signature(bytes), openTypeToken, isGenericInst, isValueTypeShape, typeArg));
         EXPECT_EQ(kOuterTypeToken, openTypeToken);
         EXPECT_FALSE(isGenericInst);
         EXPECT_EQ(elementType == ELEMENT_TYPE_VALUETYPE, isValueTypeShape);
@@ -68,9 +68,9 @@ TEST(RuntimeAsyncTest, ParsesGenericTaskAndSlicesNestedTypeArgument)
         .PushRawByte(ELEMENT_TYPE_STRING);
     const auto bytes = Bytes(builder);
 
-    mdToken openTypeToken = mdTokenNil;
-    bool isGenericInst = false;
-    bool isValueTypeShape = true;
+    mdToken       openTypeToken    = mdTokenNil;
+    bool          isGenericInst    = false;
+    bool          isValueTypeShape = true;
     TypeSignature typeArg{};
 
     ASSERT_TRUE(ParseTaskLikeReturnShape(Signature(bytes), openTypeToken, isGenericInst, isValueTypeShape, typeArg));
@@ -94,13 +94,12 @@ TEST(RuntimeAsyncTest, ParsesMethodGenericTypeArgumentWithBlobOffset)
         .PushCompressedData(0);
     const auto bytes = Bytes(builder);
 
-    mdToken openTypeToken = mdTokenNil;
-    bool isGenericInst = false;
-    bool isValueTypeShape = false;
+    mdToken       openTypeToken    = mdTokenNil;
+    bool          isGenericInst    = false;
+    bool          isValueTypeShape = false;
     TypeSignature typeArg{};
 
-    ASSERT_TRUE(ParseTaskLikeReturnShape(Signature(bytes, 3), openTypeToken, isGenericInst, isValueTypeShape,
-                                         typeArg));
+    ASSERT_TRUE(ParseTaskLikeReturnShape(Signature(bytes, 3), openTypeToken, isGenericInst, isValueTypeShape, typeArg));
     EXPECT_TRUE(isGenericInst);
     EXPECT_TRUE(isValueTypeShape);
     EXPECT_EQ(bytes.data(), typeArg.pbBase);
@@ -112,8 +111,8 @@ TEST(RuntimeAsyncTest, RejectsUnsupportedOrMalformedShapes)
 {
     std::vector<std::vector<COR_SIGNATURE>> rejected;
 
-    for (const auto elementType : {ELEMENT_TYPE_VOID, ELEMENT_TYPE_I4, ELEMENT_TYPE_STRING,
-                                   ELEMENT_TYPE_OBJECT, ELEMENT_TYPE_SZARRAY, ELEMENT_TYPE_BYREF})
+    for (const auto elementType : {ELEMENT_TYPE_VOID, ELEMENT_TYPE_I4, ELEMENT_TYPE_STRING, ELEMENT_TYPE_OBJECT,
+                                   ELEMENT_TYPE_SZARRAY, ELEMENT_TYPE_BYREF})
     {
         SignatureBuilder builder;
         builder.PushRawByte(elementType);
@@ -133,18 +132,18 @@ TEST(RuntimeAsyncTest, RejectsUnsupportedOrMalformedShapes)
 
     for (const auto& bytes : rejected)
     {
-        mdToken openTypeToken = mdTokenNil;
-        bool isGenericInst = false;
-        bool isValueTypeShape = false;
+        mdToken       openTypeToken    = mdTokenNil;
+        bool          isGenericInst    = false;
+        bool          isValueTypeShape = false;
         TypeSignature typeArg{};
 
-        EXPECT_FALSE(ParseTaskLikeReturnShape(Signature(bytes), openTypeToken, isGenericInst, isValueTypeShape,
-                                              typeArg));
+        EXPECT_FALSE(
+            ParseTaskLikeReturnShape(Signature(bytes), openTypeToken, isGenericInst, isValueTypeShape, typeArg));
     }
 
-    mdToken openTypeToken = mdTokenNil;
-    bool isGenericInst = false;
-    bool isValueTypeShape = false;
+    mdToken       openTypeToken    = mdTokenNil;
+    bool          isGenericInst    = false;
+    bool          isValueTypeShape = false;
     TypeSignature typeArg{};
     EXPECT_FALSE(ParseTaskLikeReturnShape(TypeSignature{}, openTypeToken, isGenericInst, isValueTypeShape, typeArg));
 }

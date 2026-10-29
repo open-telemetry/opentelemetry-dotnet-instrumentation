@@ -196,8 +196,12 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
 
     final_signature_bytes = GetSignatureByteRepresentation(raw_signature_len, raw_signature);
 
-    return {token, WSTRING(function_name), type_info, MethodSignature(final_signature_bytes),
-            FunctionMethodSignature(raw_signature, raw_signature_len), method_impl_flags};
+    return {token,
+            WSTRING(function_name),
+            type_info,
+            MethodSignature(final_signature_bytes),
+            FunctionMethodSignature(raw_signature, raw_signature_len),
+            method_impl_flags};
 }
 
 ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id)

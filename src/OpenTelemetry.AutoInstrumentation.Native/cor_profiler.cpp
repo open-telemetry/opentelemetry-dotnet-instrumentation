@@ -2230,9 +2230,9 @@ bool CorProfiler::EnsureIsCallTargetBubbleUpExceptionFunctionAvailable(const Mod
 
 bool CorProfiler::EnsureCallTargetRuntimeAsyncEndMethodAvailable(const ModuleMetadata& module_metadata)
 {
-    mdTypeDef typeDef = mdTypeDefNil;
-    const auto typeFound = module_metadata.metadata_import->FindTypeDefByName(calltargetinvoker_type_name.data(),
-                                                                              mdTokenNil, &typeDef);
+    mdTypeDef  typeDef = mdTypeDefNil;
+    const auto typeFound =
+        module_metadata.metadata_import->FindTypeDefByName(calltargetinvoker_type_name.data(), mdTokenNil, &typeDef);
     if (FAILED(typeFound))
     {
         Logger::Debug("CallTargetInvoker.EndMethodRuntimeAsync type not found: ", typeFound);
@@ -2240,7 +2240,7 @@ bool CorProfiler::EnsureCallTargetRuntimeAsyncEndMethodAvailable(const ModuleMet
     }
 
     mdMethodDef methodDef = mdMethodDefNil;
-    const auto methodFound =
+    const auto  methodFound =
         module_metadata.metadata_import->FindMethod(typeDef,
                                                     calltargetinvoker_endmethod_runtimeasync_function_name.data(),
                                                     nullptr, 0, &methodDef);

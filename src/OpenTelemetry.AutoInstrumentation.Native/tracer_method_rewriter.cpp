@@ -118,7 +118,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
     bool                   is_integration_method =
         integration_definition->target_method.type.assembly.name != tracemethodintegration_assemblyname;
-    bool ignoreByRefInstrumentation               = !is_integration_method;
+    bool ignoreByRefInstrumentation = !is_integration_method;
 
     // Runtime-async methods declare Task/ValueTask, but their bodies return the unwrapped result.
     // Keep both views together here: the effective type drives the rewritten IL, while the
@@ -135,8 +135,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
         }
 
         TypeSignature effectiveRetFuncArg{};
-        if (!TryGetRuntimeAsyncEffectiveReturnType(retFuncArg, module_metadata.metadata_import,
-                                                   effectiveRetFuncArg))
+        if (!TryGetRuntimeAsyncEffectiveReturnType(retFuncArg, module_metadata.metadata_import, effectiveRetFuncArg))
         {
             Logger::Error("*** CallTarget_RewriterCallback() skipping method: unsupported runtime-async return type. "
                           "token=",
@@ -599,7 +598,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
         reWriterWrapper.LoadLocal(callTargetStateIndex);
     }
 
-    ILInstr* endMethodCallInstr;
+    ILInstr*             endMethodCallInstr;
     const TypeSignature* declaredRuntimeAsyncReturn = isRuntimeAsync ? &declaredRetFuncArg : nullptr;
     if (isVoid)
     {
