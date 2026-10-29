@@ -180,7 +180,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MySqlConnector",
             Versions =
             [
-                new("2.0.0"),
+                // new("2.0.0"), - moderate vulnerability https://github.com/advisories/GHSA-473q-m89c-ghf8, < 2.6.1
+                new("2.6.1"),
                 new("*")
             ]
         },
