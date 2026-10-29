@@ -3,6 +3,7 @@
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
+using Vendors.YamlDotNet.Core;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
@@ -10,6 +11,40 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parse
 [Collection("Non-Parallel Collection")]
 public class ParserGeneralTests
 {
+    [Theory]
+    [InlineData("file_format: []")]
+    [InlineData("file_format: {}")]
+    [InlineData("disabled: [true]")]
+    [InlineData("disabled: {value: true}")]
+    [InlineData("opamp/development:\n  max_pending_custom_messages: []")]
+    [InlineData("opamp/development:\n  max_pending_custom_messages: {}")]
+    public void Parse_NonScalarValueForScalarField_ShouldThrowYamlException(string yaml)
+    {
+        var exception = Assert.Throws<YamlException>(() => YamlParser.ParseYamlContent<YamlConfiguration>(yaml));
+
+        Assert.Contains("Scalar", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Parse_ObjectCollections_ShouldPreserveStructureAndExpandEnvVars()
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "YAMLPARSER_TESTS_COLLECTION_VALUE", "expanded" }
+        });
+
+        const string yaml = """
+            values:
+              - key: ${YAMLPARSER_TESTS_COLLECTION_VALUE}
+            """;
+
+        var config = YamlParser.ParseYamlContent<Dictionary<string, object>>(yaml);
+
+        var sequence = Assert.IsType<List<object>>(config["values"]);
+        var mapping = Assert.IsType<Dictionary<object, object>>(Assert.Single(sequence));
+        Assert.Equal("expanded", mapping["key"]);
+    }
+
     [Fact]
     public void Parse_FullConfigYaml_ShouldPopulateModelCorrectly()
     {
