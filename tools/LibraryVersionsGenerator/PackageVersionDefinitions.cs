@@ -180,7 +180,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MySqlConnector",
             Versions =
             [
-                new("2.0.0"),
+                // new("2.0.0"), - moderate vulnerability https://github.com/advisories/GHSA-473q-m89c-ghf8, < 2.6.1
+                new("2.6.1"),
                 new("*")
             ]
         },
@@ -260,7 +261,7 @@ internal static class PackageVersionDefinitions
             [
                 // new("3.4.0"), - transitive vulnerability https://github.com/advisories/GHSA-rxg9-xrhp-64gj, <= 3.5.0
                 new("3.6.0"),
-                new("3.22.7"),
+                new("3.22.9"),
                 new("4.0.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]),
                 new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
             ]

@@ -60,7 +60,7 @@ public static partial class LibraryVersion
             "TestApplication.GrpcNetClient",
             [
                 new("2.52.0"),
-                new("2.84.0"),
+                new("2.85.0"),
             ]
         },
         {
@@ -115,7 +115,7 @@ public static partial class LibraryVersion
         {
             "TestApplication.MySqlConnector",
             [
-                new("2.0.0"),
+                new("2.6.1"),
                 new("2.6.2"),
             ]
         },
@@ -161,9 +161,9 @@ public static partial class LibraryVersion
             "TestApplication.Quartz",
             [
                 new("3.6.0"),
-                new("3.22.7"),
+                new("3.22.9"),
                 new("4.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("4.6.0", supportedFrameworks: [ "net10.0" ]),
+                new("4.6.2", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
