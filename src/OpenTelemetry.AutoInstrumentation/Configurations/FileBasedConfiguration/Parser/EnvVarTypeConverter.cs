@@ -32,15 +32,13 @@ internal partial class EnvVarTypeConverter : IYamlTypeConverter
 
     public object? ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
     {
-        if (parser.Current is not Scalar scalar)
-        {
-            return rootDeserializer(type);
-        }
+        // YamlDotNet resolves sequences and mappings declared as object to collection types before
+        // converter selection, so they bypass this converter. All other supported types require scalars.
+        var scalar = parser.Consume<Scalar>();
 
         var rawValue = scalar.Value ?? throw new InvalidOperationException("Scalar value is null.");
 
         var replacedValue = ReplaceEnvVariables(rawValue);
-        parser.MoveNext();
 
         try
         {

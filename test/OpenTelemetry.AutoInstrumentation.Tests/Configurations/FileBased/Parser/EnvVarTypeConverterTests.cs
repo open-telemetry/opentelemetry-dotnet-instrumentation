@@ -3,6 +3,8 @@
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
+using Vendors.YamlDotNet.Core;
+using Vendors.YamlDotNet.Core.Events;
 using YamlParser = Vendors.YamlDotNet.Core.Parser;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
@@ -72,7 +74,9 @@ public class EnvVarTypeConverterTests
     [InlineData("0.0", typeof(float), 0.0f)]
     [InlineData("-1.0", typeof(double), -1.0)]
     [InlineData("false", typeof(bool), false)]
-    [InlineData("", typeof(string), null)]
+    [InlineData("\"\"", typeof(string), "")]
+    [InlineData("\"\"", typeof(int?), null)]
+    [InlineData("\"\"", typeof(uint?), null)]
     public void ReadYaml_ParsesPrimitives(string yaml, Type type, object? expected)
     {
         var parser = new YamlParser(new StringReader(yaml));
@@ -90,5 +94,17 @@ public class EnvVarTypeConverterTests
         FileBasedTestHelper.MoveParserToScalar(parser);
 
         Assert.Throws<FormatException>(() => _converter.ReadYaml(parser, typeof(int), _ => null));
+    }
+
+    [Theory]
+    [InlineData("[]")]
+    [InlineData("{}")]
+    public void ReadYaml_NonScalar_ThrowsYamlException(string yaml)
+    {
+        var parser = new YamlParser(new StringReader(yaml));
+        parser.Consume<StreamStart>();
+        parser.Consume<DocumentStart>();
+
+        Assert.Throws<YamlException>(() => _converter.ReadYaml(parser, typeof(string), _ => null));
     }
 }
