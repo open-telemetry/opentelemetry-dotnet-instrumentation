@@ -19,6 +19,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Prevent other local processes from blocking .NET Framework continuous profiling
+  by pre-creating its reader mutex.
+
 ## [v1.18.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.18.0)
 
 ### Added

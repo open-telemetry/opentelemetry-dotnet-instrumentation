@@ -30,6 +30,10 @@
 
 extern "C"
 {
+#ifdef _WIN32
+    // Returns an owned, non-inheritable handle to the process-private reader mutex.
+    EXPORTTHIS HANDLE STDAPICALLTYPE GetContinuousProfilerReaderMutex();
+#endif
     EXPORTTHIS int32_t                ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf);
     EXPORTTHIS int32_t STDAPICALLTYPE ContinuousProfilerReadThreadSamplesV2(int32_t        len,
                                                                             unsigned char* buf,
