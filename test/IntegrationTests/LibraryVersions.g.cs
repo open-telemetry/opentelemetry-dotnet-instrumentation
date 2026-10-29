@@ -243,7 +243,7 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "2.0.0",
+                "2.6.1",
                 "2.6.2",
 #endif
             ];
