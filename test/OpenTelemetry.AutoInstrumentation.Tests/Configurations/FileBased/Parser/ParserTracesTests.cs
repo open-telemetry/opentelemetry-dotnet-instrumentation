@@ -189,6 +189,39 @@ public class ParserTracesTests
         Assert.NotNull(sampler.ParentBased.LocalParentNotSampled.AlwaysOff);
     }
 
+    [Theory]
+    [InlineData(null, "${YAMLPARSER_TESTS_TIMEOUT}", null)]
+    [InlineData("", "${YAMLPARSER_TESTS_TIMEOUT}", null)]
+    [InlineData(null, "${YAMLPARSER_TESTS_TIMEOUT:-5000}", 5000)]
+    [InlineData("", "${YAMLPARSER_TESTS_TIMEOUT:-5000}", 5000)]
+    [InlineData("7000", "${YAMLPARSER_TESTS_TIMEOUT:-5000}", 7000)]
+    public void Parse_ExporterTimeoutWithEnvVar_ShouldResolveBeforeParsing(string? envValue, string substitution, int? expected)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "YAMLPARSER_TESTS_TIMEOUT", envValue }
+        });
+
+        var yaml = $$"""
+            tracer_provider:
+              processors:
+                - batch:
+                    exporter:
+                      otlp_http:
+                        timeout: {{substitution}}
+            """;
+
+        var config = YamlParser.ParseYamlContent<YamlConfiguration>(yaml);
+
+        Assert.NotNull(config.TracerProvider);
+        Assert.NotNull(config.TracerProvider.Processors);
+        var processor = Assert.Single(config.TracerProvider.Processors);
+        Assert.NotNull(processor.Batch);
+        Assert.NotNull(processor.Batch.Exporter);
+        Assert.NotNull(processor.Batch.Exporter.OtlpHttp);
+        Assert.Equal(expected, processor.Batch.Exporter.OtlpHttp.Timeout);
+    }
+
     [Fact]
     public void Parse_EnvVarYaml_ShouldPopulateModelCompletely()
     {

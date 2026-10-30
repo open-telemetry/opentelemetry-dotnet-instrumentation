@@ -25,6 +25,8 @@ instead of a fixed value.
 
 You can also use `${ENVIRONMENT_VARIABLE:-value}`, where `value` is the fallback
 if the environment variable is empty or not set.
+Without a fallback, an empty or unset environment variable is replaced with an
+empty value.
 
 For more details, see: [OpenTelemetry YAML File Format Specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.49.0/specification/configuration/data-model.md#yaml-file-format).
 
