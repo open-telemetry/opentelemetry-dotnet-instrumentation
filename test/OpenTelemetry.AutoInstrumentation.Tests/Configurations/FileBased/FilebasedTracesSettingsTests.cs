@@ -545,6 +545,110 @@ public class FilebasedTracesSettingsTests
         Assert.True(decision == SamplingDecision.Drop || decision == SamplingDecision.RecordAndSample);
     }
 
+    [Fact]
+    public void LoadFile_TraceIdRatioSamplerWithoutRatio_UsesDefaultRatio()
+    {
+        var conf = new YamlConfiguration
+        {
+            TracerProvider = new TracerProviderConfiguration
+            {
+                Sampler = new SamplerConfig
+                {
+                    TraceIdRatio = new TraceIdRatioSamplerConfig()
+                }
+            }
+        };
+
+        var settings = new TracerSettings();
+        settings.LoadFile(conf);
+
+        var sampler = Assert.IsType<TraceIdRatioBasedSampler>(settings.Sampler);
+        Assert.Equal(SamplingDecision.RecordAndSample, sampler.ShouldSample(CreateSamplingParameters(default)).Decision);
+    }
+
+    [Fact]
+    public void LoadFile_ParentBasedTraceIdRatioSamplerWithoutRatio_UsesDefaultRatio()
+    {
+        var conf = new YamlConfiguration
+        {
+            TracerProvider = new TracerProviderConfiguration
+            {
+                Sampler = new SamplerConfig
+                {
+                    ParentBased = new ParentBasedSamplerConfig
+                    {
+                        Root = new SamplerVariantsConfig
+                        {
+                            TraceIdRatio = new TraceIdRatioSamplerConfig()
+                        }
+                    }
+                }
+            }
+        };
+
+        var settings = new TracerSettings();
+        settings.LoadFile(conf);
+
+        var sampler = Assert.IsType<ParentBasedSampler>(settings.Sampler);
+        Assert.Equal(SamplingDecision.RecordAndSample, sampler.ShouldSample(CreateSamplingParameters(default)).Decision);
+    }
+
+    [Theory]
+    [InlineData(-0.1)]
+    [InlineData(1.1)]
+    [InlineData(double.NaN)]
+    [InlineData(double.PositiveInfinity)]
+    [InlineData(double.NegativeInfinity)]
+    public void LoadFile_InvalidTraceIdRatio_ThrowsWhenFailFastIsEnabled(double ratio)
+    {
+        var conf = new YamlConfiguration
+        {
+            FailFast = true,
+            TracerProvider = new TracerProviderConfiguration
+            {
+                Sampler = new SamplerConfig
+                {
+                    TraceIdRatio = new TraceIdRatioSamplerConfig { Ratio = ratio }
+                }
+            }
+        };
+
+        var settings = new TracerSettings();
+
+        Assert.Throws<InvalidOperationException>(() => settings.LoadFile(conf));
+    }
+
+    [Fact]
+    public void LoadFile_InvalidParentBasedTraceIdRatio_FallsBackWithoutDiscardingOtherSamplers()
+    {
+        var conf = new YamlConfiguration
+        {
+            TracerProvider = new TracerProviderConfiguration
+            {
+                Sampler = new SamplerConfig
+                {
+                    ParentBased = new ParentBasedSamplerConfig
+                    {
+                        Root = new SamplerVariantsConfig { AlwaysOff = new object() },
+                        RemoteParentSampled = new SamplerVariantsConfig
+                        {
+                            TraceIdRatio = new TraceIdRatioSamplerConfig { Ratio = double.NaN }
+                        }
+                    }
+                }
+            }
+        };
+
+        var settings = new TracerSettings();
+        settings.LoadFile(conf);
+
+        var sampler = Assert.IsType<ParentBasedSampler>(settings.Sampler);
+        Assert.Equal(SamplingDecision.Drop, sampler.ShouldSample(CreateSamplingParameters(default)).Decision);
+
+        var remoteSampledParent = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded, traceState: null, isRemote: true);
+        Assert.Equal(SamplingDecision.RecordAndSample, sampler.ShouldSample(CreateSamplingParameters(remoteSampledParent)).Decision);
+    }
+
     private static SamplingParameters CreateSamplingParameters(ActivityContext parentContext)
     {
         return new SamplingParameters(parentContext, ActivityTraceId.CreateRandom(), "span", ActivityKind.Internal, default(TagList), []);

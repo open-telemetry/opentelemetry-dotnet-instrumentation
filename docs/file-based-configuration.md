@@ -405,6 +405,7 @@ logger_provider:
            # Configure sampler to be always_on.
            trace_id_ratio:
              # Configure ratio between 0.0 and 1.0.
+             # If omitted or null, 1.0 is used.
              ratio: 0.25
    ```
 
