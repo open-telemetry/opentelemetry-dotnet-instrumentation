@@ -11,6 +11,21 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Kafka instrumentation is updated to comply with v1.44.0 Semantic Convention
+  - Renamed the `messaging.operation` attribute to `messaging.operation.name`,
+  - Renamed the `messaging.client_id` attribute to `messaging.client.id`,
+  - Renamed the `messaging.kafka.consumer.group` attribute to
+    `messaging.consumer.group.name`,
+  - Renamed the `messaging.kafka.destination.partition` attribute to
+    `messaging.destination.partition.id`, whose type is `string`,
+  - Renamed the `messaging.kafka.message.offset` attribute to
+    `messaging.kafka.offset`,
+  - Added the `messaging.operation.type` attribute,
+  - Added the `error.type` attribute to failed produce and consume spans,
+  - Changed the producer operation name from `publish` to `send`,
+  - Changed the span name format from `{destination} {operation}` to
+    `{operation} {destination}`.
+
 #### Dependency updates
 
 ### Deprecated
