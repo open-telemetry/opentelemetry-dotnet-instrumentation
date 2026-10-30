@@ -84,8 +84,13 @@ internal static class RuntimeAsyncEndMethodHandler<TIntegration, TTarget, TDecla
 
         if (OnMethodEnd is not null)
         {
-            var handed = exception is null ? CompletedValue : default;
-            var returned = OnMethodEnd(instance, handed, exception, in state).GetReturnValue();
+            // Match the declared async contract seen by conventional CallTarget instrumentation:
+            // OnMethodEnd receives an awaitable carrying the completion state, while failures are
+            // observed through OnAsyncMethodEnd rather than the synchronous exception argument.
+            var handed = exception is null
+                ? CompletedValue
+                : RuntimeAsyncHelper.CreateFromException<TDeclaredReturn>(exception);
+            var returned = OnMethodEnd(instance, handed, null, in state).GetReturnValue();
             if (exception is null && !RuntimeAsyncHelper.IsUnchanged(returned, handed))
             {
                 ReportUnsupportedSubstitution();

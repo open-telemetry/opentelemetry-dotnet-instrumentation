@@ -39,6 +39,10 @@ internal static class Program
         EnsureEqual(1, TaskReturningNonGenericAsyncCallbackIntegration.BeginCalls);
         EnsureEqual(1, TaskReturningNonGenericAsyncCallbackIntegration.AsyncCalls);
 #endif
+        await ExpectFailureAsync(() => runtimeTarget.FaultedTaskOfTWithOnMethodEndAsync()).ConfigureAwait(false);
+        EnsureEqual(1, FaultedTaskOfTOnMethodEndIntegration.Calls);
+        EnsureEqual(true, FaultedTaskOfTOnMethodEndIntegration.ExceptionWasNull);
+        EnsureEqual(true, FaultedTaskOfTOnMethodEndIntegration.ReceivedTaskIsFaulted);
         await runtimeTarget.ValueTaskAsync().ConfigureAwait(false);
         EnsureEqual("runtime", await runtimeTarget.ValueTaskOfTAsync().ConfigureAwait(false));
         EnsureEqual(73, await runtimeTarget.GenericTaskAsync(73).ConfigureAwait(false));

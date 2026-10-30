@@ -58,6 +58,21 @@ public sealed class Plugin : IPlugin
                     typeof(TaskReturningAsyncCallbackIntegration).FullName!,
                     DirectCallTargetKind,
                     TracingCategory),
+                new(
+                    "TestApplication.NativeAsync",
+                    "TestApplication.NativeAsync.RuntimeAsyncTarget",
+                    "FaultedTaskOfTWithOnMethodEndAsync",
+                    ["System.Threading.Tasks.Task`1<System.Int32>"],
+                    1,
+                    0,
+                    0,
+                    1,
+                    ushort.MaxValue,
+                    ushort.MaxValue,
+                    typeof(FaultedTaskOfTOnMethodEndIntegration).Assembly.FullName!,
+                    typeof(FaultedTaskOfTOnMethodEndIntegration).FullName!,
+                    DirectCallTargetKind,
+                    TracingCategory),
             ]
         };
     }

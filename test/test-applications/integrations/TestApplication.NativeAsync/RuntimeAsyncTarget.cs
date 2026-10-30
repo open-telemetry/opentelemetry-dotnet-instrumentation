@@ -37,6 +37,13 @@ internal sealed class RuntimeAsyncTarget
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
+    public async Task<int> FaultedTaskOfTWithOnMethodEndAsync()
+    {
+        await Task.Delay(_asyncDelay).ConfigureAwait(false);
+        throw new InvalidOperationException("Runtime Task<T> OnMethodEnd failure");
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public async ValueTask ValueTaskAsync()
     {
         await Task.Delay(_asyncDelay).ConfigureAwait(false);
