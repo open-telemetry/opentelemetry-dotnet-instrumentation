@@ -22,6 +22,7 @@ internal partial class EnvVarTypeConverter : IYamlTypeConverter
         typeof(bool),
         typeof(int?),
         typeof(uint?),
+        typeof(double?),
         typeof(object),
     ];
 
@@ -42,12 +43,22 @@ internal partial class EnvVarTypeConverter : IYamlTypeConverter
 
         try
         {
-            if (string.IsNullOrWhiteSpace(replacedValue))
+            if (type == typeof(double?))
             {
-                if (Nullable.GetUnderlyingType(type) != null)
+                if (IsYamlNull(scalar, replacedValue))
                 {
                     return null;
                 }
+
+                if (scalar.Style != ScalarStyle.Plain)
+                {
+                    throw new FormatException("Expected a YAML number or null.");
+                }
+            }
+            else if (Nullable.GetUnderlyingType(type) != null &&
+                     (string.IsNullOrWhiteSpace(replacedValue) || IsYamlNull(scalar, replacedValue)))
+            {
+                return null;
             }
 
             return type switch
@@ -61,6 +72,7 @@ internal partial class EnvVarTypeConverter : IYamlTypeConverter
                 Type t when t == typeof(bool) => bool.Parse(replacedValue),
                 Type t when t == typeof(int?) => int.Parse(replacedValue, CultureInfo.InvariantCulture),
                 Type t when t == typeof(uint?) => uint.Parse(replacedValue, CultureInfo.InvariantCulture),
+                Type t when t == typeof(double?) => double.Parse(replacedValue, NumberStyles.Float, YamlFormatter.Default.NumberFormat),
                 Type t when t == typeof(object) => replacedValue,
                 _ => throw new NotSupportedException($"Type {type.FullName} is not supported by the converter")
             };
@@ -76,6 +88,18 @@ internal partial class EnvVarTypeConverter : IYamlTypeConverter
         emitter.Emit(new Scalar(value?.ToString() ?? string.Empty));
     }
 
+    private static bool IsYamlNull(Scalar scalar, string value)
+    {
+        if (scalar.Tag == "tag:yaml.org,2002:null")
+        {
+            return true;
+        }
+
+        return scalar.Style == ScalarStyle.Plain &&
+               !scalar.IsKey &&
+               (string.IsNullOrWhiteSpace(value) || value is "~" or "null" or "Null" or "NULL");
+    }
+
     private static string ReplaceEnvVariables(string input)
     {
         return GetEnvVarRegex().Replace(input, match =>
@@ -83,7 +107,7 @@ internal partial class EnvVarTypeConverter : IYamlTypeConverter
             var varName = match.Groups[1].Value;
             var fallback = match.Groups[2].Success ? match.Groups[2].Value : null;
             var envValue = Environment.GetEnvironmentVariable(varName);
-            return envValue ?? fallback ?? match.Value;
+            return string.IsNullOrEmpty(envValue) ? fallback ?? string.Empty : envValue;
         });
     }
 

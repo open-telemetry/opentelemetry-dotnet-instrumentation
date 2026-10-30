@@ -30,9 +30,16 @@ public class EnvVarTypeConverterTests
         Assert.Equal("HelloWorld", result);
     }
 
-    [Fact]
-    public void ReadYaml_WithFallback_UsesFallbackIfEnvNotSet()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void ReadYaml_WithFallback_UsesFallbackIfEnvNullOrEmpty(string? envValue)
     {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "YAMLPARSER_TESTS_NOT_EXIST_ENV", envValue }
+        });
+
         var parser = new YamlParser(new StringReader("${YAMLPARSER_TESTS_NOT_EXIST_ENV:-FallbackValue}"));
         FileBasedTestHelper.MoveParserToScalar(parser);
 
@@ -41,12 +48,14 @@ public class EnvVarTypeConverterTests
         Assert.Equal("FallbackValue", result);
     }
 
-    [Fact]
-    public void ReadYaml_WithEnvVarPresent_IgnoresFallback()
+    [Theory]
+    [InlineData("RealValue")]
+    [InlineData(" ")]
+    public void ReadYaml_WithEnvVarPresent_IgnoresFallback(string envValue)
     {
         using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
-            { "YAMLPARSER_TESTS_MY_ENV", "RealValue" }
+            { "YAMLPARSER_TESTS_MY_ENV", envValue }
         });
 
         var parser = new YamlParser(new StringReader("${YAMLPARSER_TESTS_MY_ENV:-FallbackValue}"));
@@ -54,18 +63,49 @@ public class EnvVarTypeConverterTests
 
         var result = _converter.ReadYaml(parser, typeof(string), _ => null);
 
-        Assert.Equal("RealValue", result);
+        Assert.Equal(envValue, result);
     }
 
-    [Fact]
-    public void ReadYaml_UnknownEnvVarWithoutFallback_KeepsOriginalPattern()
+    [Theory]
+    [InlineData(null, "${YAMLPARSER_TESTS_UNKNOWN_ENV}", "")]
+    [InlineData("", "${YAMLPARSER_TESTS_UNKNOWN_ENV}", "")]
+    [InlineData(null, "${YAMLPARSER_TESTS_UNKNOWN_ENV:-}", "")]
+    [InlineData("", "${YAMLPARSER_TESTS_UNKNOWN_ENV:-}", "")]
+    [InlineData(null, "prefix-${YAMLPARSER_TESTS_UNKNOWN_ENV}-suffix", "prefix--suffix")]
+    public void ReadYaml_EnvVarNullOrEmpty_ReplacesWithEmptyValue(string? envValue, string yaml, string expected)
     {
-        var parser = new YamlParser(new StringReader("${YAMLPARSER_TESTS_UNKNOWN_ENV}"));
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "YAMLPARSER_TESTS_UNKNOWN_ENV", envValue }
+        });
+
+        var parser = new YamlParser(new StringReader(yaml));
         FileBasedTestHelper.MoveParserToScalar(parser);
 
         var result = _converter.ReadYaml(parser, typeof(string), _ => null);
 
-        Assert.Equal("${YAMLPARSER_TESTS_UNKNOWN_ENV}", result);
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData(null, "${YAMLPARSER_TESTS_NUMBER_ENV}", typeof(int?), null)]
+    [InlineData("", "${YAMLPARSER_TESTS_NUMBER_ENV}", typeof(int?), null)]
+    [InlineData(null, "${YAMLPARSER_TESTS_NUMBER_ENV:-0.5}", typeof(double), 0.5)]
+    [InlineData("", "${YAMLPARSER_TESTS_NUMBER_ENV:-0.5}", typeof(double), 0.5)]
+    [InlineData("0.25", "${YAMLPARSER_TESTS_NUMBER_ENV:-0.5}", typeof(double), 0.25)]
+    public void ReadYaml_NumericEnvVar_SubstitutesBeforeParsing(string? envValue, string yaml, Type type, object? expected)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "YAMLPARSER_TESTS_NUMBER_ENV", envValue }
+        });
+
+        var parser = new YamlParser(new StringReader(yaml));
+        FileBasedTestHelper.MoveParserToScalar(parser);
+
+        var result = _converter.ReadYaml(parser, type, _ => null);
+
+        Assert.Equal(expected, result);
     }
 
     [Theory]
