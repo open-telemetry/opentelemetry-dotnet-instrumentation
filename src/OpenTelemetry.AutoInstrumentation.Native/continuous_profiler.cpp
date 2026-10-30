@@ -114,6 +114,31 @@ static std::atomic<ICorProfilerInfo7*> profiler_info{nullptr}; // After feature 
                                                                // be refactored and have a single static instance of
                                                                // ThreadSampler
 
+#ifdef _WIN32
+HANDLE STDAPICALLTYPE GetContinuousProfilerReaderMutex()
+{
+    // The native module is shared by all AppDomains. An unnamed mutex cannot be pre-created or opened by name
+    // in another process, and each AppDomain owns a duplicate so unloading one cannot close another's handle.
+    static const std::unique_ptr<void, decltype(&::CloseHandle)> readerMutex(::CreateMutexW(nullptr, FALSE, nullptr),
+                                                                             &::CloseHandle);
+    if (readerMutex == nullptr)
+    {
+        trace::Logger::Error("Failed to create the continuous profiler reader mutex.");
+        return nullptr;
+    }
+
+    HANDLE duplicate = nullptr;
+    if (!::DuplicateHandle(::GetCurrentProcess(), readerMutex.get(), ::GetCurrentProcess(), &duplicate, 0, FALSE,
+                           DUPLICATE_SAME_ACCESS))
+    {
+        trace::Logger::Error("Failed to duplicate the continuous profiler reader mutex. Error: ", ::GetLastError());
+        return nullptr;
+    }
+
+    return duplicate;
+}
+#endif
+
 // Dirt-simple back pressure system to save overhead if managed code is not reading fast enough
 bool ThreadSamplingShouldProduceThreadSample()
 {
