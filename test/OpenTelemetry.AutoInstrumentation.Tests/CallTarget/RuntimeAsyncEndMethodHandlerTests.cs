@@ -66,16 +66,36 @@ public sealed class RuntimeAsyncEndMethodHandlerTests
     }
 
     [Fact]
-    public void AsyncCallbackDisablesIntegrationForTarget()
+    public void AsyncCallbackDisablesIntegrationBeforeBeginCallback()
     {
         var target = new Target();
-        var state = CallTargetState.GetDefault();
+        CallTargetInvoker.EnsureRuntimeAsyncCallbacksSupported<TaskReturningAsyncIntegration, Target, int, Task<int>>();
 
-        var result = CallTargetInvoker.EndMethodRuntimeAsync<UnsupportedAsyncIntegration, Target, int, Task<int>>(
+        var state = CallTargetInvoker.BeginMethod<TaskReturningAsyncIntegration, Target>(target);
+
+        var result = CallTargetInvoker.EndMethodRuntimeAsync<TaskReturningAsyncIntegration, Target, int, Task<int>>(
             target, 7, null, in state);
 
         Assert.Equal(7, result.GetReturnValue());
-        Assert.False(IntegrationOptions<UnsupportedAsyncIntegration, Target>.IsIntegrationEnabled);
+        Assert.Equal(0, TaskReturningAsyncIntegration.BeginCalls);
+        Assert.Equal(0, TaskReturningAsyncIntegration.AsyncCalls);
+        Assert.False(IntegrationOptions<TaskReturningAsyncIntegration, Target>.IsIntegrationEnabled);
+    }
+
+    [Fact]
+    public void NonGenericAsyncCallbackDisablesIntegrationBeforeBeginCallback()
+    {
+        var target = new Target();
+        CallTargetInvoker.EnsureRuntimeAsyncCallbacksSupported<TaskReturningNonGenericAsyncIntegration, Target, Task>();
+
+        var state = CallTargetInvoker.BeginMethod<TaskReturningNonGenericAsyncIntegration, Target>(target);
+
+        CallTargetInvoker.EndMethodRuntimeAsync<TaskReturningNonGenericAsyncIntegration, Target, Task>(
+            target, null, in state);
+
+        Assert.Equal(0, TaskReturningNonGenericAsyncIntegration.BeginCalls);
+        Assert.Equal(0, TaskReturningNonGenericAsyncIntegration.AsyncCalls);
+        Assert.False(IntegrationOptions<TaskReturningNonGenericAsyncIntegration, Target>.IsIntegrationEnabled);
     }
 
     [Fact]
@@ -170,10 +190,42 @@ public sealed class RuntimeAsyncEndMethodHandlerTests
         }
     }
 
-    private sealed class UnsupportedAsyncIntegration
+    private sealed class TaskReturningAsyncIntegration
     {
+        internal static int BeginCalls { get; private set; }
+
+        internal static int AsyncCalls { get; private set; }
+
+        internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
+        {
+            BeginCalls++;
+            return CallTargetState.GetDefault();
+        }
+
         internal static Task<int> OnAsyncMethodEnd<TTarget>(TTarget instance, int returnValue, Exception? exception, in CallTargetState state)
-            => Task.FromResult(returnValue + 1);
+        {
+            AsyncCalls++;
+            return Task.FromResult(returnValue + 1);
+        }
+    }
+
+    private sealed class TaskReturningNonGenericAsyncIntegration
+    {
+        internal static int BeginCalls { get; private set; }
+
+        internal static int AsyncCalls { get; private set; }
+
+        internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
+        {
+            BeginCalls++;
+            return CallTargetState.GetDefault();
+        }
+
+        internal static Task<object?> OnAsyncMethodEnd<TTarget>(TTarget instance, object? returnValue, Exception? exception, in CallTargetState state)
+        {
+            AsyncCalls++;
+            return Task.FromResult(returnValue);
+        }
     }
 
     private sealed class NoCallbacksIntegration;

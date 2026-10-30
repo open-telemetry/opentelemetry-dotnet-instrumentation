@@ -24,6 +24,19 @@ internal sealed class RuntimeAsyncTarget
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
+    public async Task<int> TaskOfTWithTaskReturningCallbackAsync()
+    {
+        await Task.Delay(_asyncDelay).ConfigureAwait(false);
+        return 91;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public async Task TaskWithTaskReturningCallbackAsync()
+    {
+        await Task.Delay(_asyncDelay).ConfigureAwait(false);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public async ValueTask ValueTaskAsync()
     {
         await Task.Delay(_asyncDelay).ConfigureAwait(false);

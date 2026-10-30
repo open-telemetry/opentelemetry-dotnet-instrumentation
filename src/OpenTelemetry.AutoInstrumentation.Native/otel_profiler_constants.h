@@ -63,6 +63,8 @@ const WSTRING calltarget_bubble_up_exception_type_name =
 const WSTRING calltarget_bubble_up_exception_function_name = WStr("IsCallTargetBubbleUpException");
 const WSTRING calltargetinvoker_type_name = WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker");
 const WSTRING calltargetinvoker_endmethod_runtimeasync_function_name = WStr("EndMethodRuntimeAsync");
+const WSTRING calltargetinvoker_ensure_runtimeasync_callbacks_supported_function_name =
+    WStr("EnsureRuntimeAsyncCallbacksSupported");
 
 #ifdef _WIN32
 const WSTRING windows_nativemethods_type = WStr("OpenTelemetry.AutoInstrumentation.NativeMethods+Windows");

@@ -312,6 +312,37 @@ public static class CallTargetInvoker
 
 #if NET
     /// <summary>
+    /// Validates callbacks for a runtime-async method declaring a non-generic Task or ValueTask.
+    /// </summary>
+    /// <typeparam name="TIntegration">Integration type</typeparam>
+    /// <typeparam name="TTarget">Target type</typeparam>
+    /// <typeparam name="TDeclaredReturn">The Task or ValueTask declared by the target</typeparam>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void EnsureRuntimeAsyncCallbacksSupported<TIntegration, TTarget, TDeclaredReturn>()
+    {
+        if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
+        {
+            RuntimeAsyncEndMethodHandler<TIntegration, TTarget, TDeclaredReturn>.EnsureCallbacksSupported();
+        }
+    }
+
+    /// <summary>
+    /// Validates callbacks for a runtime-async method declaring Task&lt;T&gt; or ValueTask&lt;T&gt;.
+    /// </summary>
+    /// <typeparam name="TIntegration">Integration type</typeparam>
+    /// <typeparam name="TTarget">Target type</typeparam>
+    /// <typeparam name="TReturn">The unwrapped return type produced by the target body</typeparam>
+    /// <typeparam name="TDeclaredReturn">The Task&lt;T&gt; or ValueTask&lt;T&gt; declared by the target</typeparam>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void EnsureRuntimeAsyncCallbacksSupported<TIntegration, TTarget, TReturn, TDeclaredReturn>()
+    {
+        if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
+        {
+            RuntimeAsyncEndMethodHandler<TIntegration, TTarget, TReturn, TDeclaredReturn>.EnsureCallbacksSupported();
+        }
+    }
+
+    /// <summary>
     /// End Method invoker for a runtime-async method declaring a non-generic Task or ValueTask.
     /// </summary>
     /// <typeparam name="TIntegration">Integration type</typeparam>

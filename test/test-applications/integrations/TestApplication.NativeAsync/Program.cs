@@ -26,6 +26,19 @@ internal static class Program
         var runtimeTarget = new RuntimeAsyncTarget();
         await RuntimeAsyncTarget.TaskAsync().ConfigureAwait(false);
         EnsureEqual(42, await runtimeTarget.TaskOfTAsync().ConfigureAwait(false));
+        EnsureEqual(91, await runtimeTarget.TaskOfTWithTaskReturningCallbackAsync().ConfigureAwait(false));
+        await runtimeTarget.TaskWithTaskReturningCallbackAsync().ConfigureAwait(false);
+#if NET10_0_OR_GREATER
+        EnsureEqual(0, TaskReturningAsyncCallbackIntegration.BeginCalls);
+        EnsureEqual(0, TaskReturningAsyncCallbackIntegration.AsyncCalls);
+        EnsureEqual(0, TaskReturningNonGenericAsyncCallbackIntegration.BeginCalls);
+        EnsureEqual(0, TaskReturningNonGenericAsyncCallbackIntegration.AsyncCalls);
+#else
+        EnsureEqual(1, TaskReturningAsyncCallbackIntegration.BeginCalls);
+        EnsureEqual(1, TaskReturningAsyncCallbackIntegration.AsyncCalls);
+        EnsureEqual(1, TaskReturningNonGenericAsyncCallbackIntegration.BeginCalls);
+        EnsureEqual(1, TaskReturningNonGenericAsyncCallbackIntegration.AsyncCalls);
+#endif
         await runtimeTarget.ValueTaskAsync().ConfigureAwait(false);
         EnsureEqual("runtime", await runtimeTarget.ValueTaskOfTAsync().ConfigureAwait(false));
         EnsureEqual(73, await runtimeTarget.GenericTaskAsync(73).ConfigureAwait(false));

@@ -906,8 +906,7 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id, std::vector<ModuleID>& m
                     EnsureIsCallTargetBubbleUpExceptionFunctionAvailable(module_metadata, bubbleUpTypeDef);
             }
 
-            call_target_runtime_async_endmethod_available =
-                EnsureCallTargetRuntimeAsyncEndMethodAvailable(module_metadata);
+            call_target_runtime_async_methods_available = EnsureCallTargetRuntimeAsyncMethodsAvailable(module_metadata);
         }
 
         if (Logger::IsDebugEnabled())
@@ -2228,24 +2227,33 @@ bool CorProfiler::EnsureIsCallTargetBubbleUpExceptionFunctionAvailable(const Mod
     return SUCCEEDED(hr);
 }
 
-bool CorProfiler::EnsureCallTargetRuntimeAsyncEndMethodAvailable(const ModuleMetadata& module_metadata)
+bool CorProfiler::EnsureCallTargetRuntimeAsyncMethodsAvailable(const ModuleMetadata& module_metadata)
 {
     mdTypeDef  typeDef = mdTypeDefNil;
     const auto typeFound =
         module_metadata.metadata_import->FindTypeDefByName(calltargetinvoker_type_name.data(), mdTokenNil, &typeDef);
     if (FAILED(typeFound))
     {
-        Logger::Debug("CallTargetInvoker.EndMethodRuntimeAsync type not found: ", typeFound);
+        Logger::Debug("CallTargetInvoker type not found while checking runtime-async methods: ", typeFound);
         return false;
     }
 
-    mdMethodDef methodDef = mdMethodDefNil;
-    const auto  methodFound =
+    mdMethodDef endMethodDef = mdMethodDefNil;
+    const auto  endMethodFound =
         module_metadata.metadata_import->FindMethod(typeDef,
                                                     calltargetinvoker_endmethod_runtimeasync_function_name.data(),
-                                                    nullptr, 0, &methodDef);
-    Logger::Debug("CallTargetInvoker.EndMethodRuntimeAsync method found: ", SUCCEEDED(methodFound));
-    return SUCCEEDED(methodFound);
+                                                    nullptr, 0, &endMethodDef);
+    Logger::Debug("CallTargetInvoker.EndMethodRuntimeAsync method found: ", SUCCEEDED(endMethodFound));
+
+    mdMethodDef ensureMethodDef = mdMethodDefNil;
+    const auto  ensureMethodFound =
+        module_metadata.metadata_import
+            ->FindMethod(typeDef, calltargetinvoker_ensure_runtimeasync_callbacks_supported_function_name.data(),
+                         nullptr, 0, &ensureMethodDef);
+    Logger::Debug("CallTargetInvoker.EnsureRuntimeAsyncCallbacksSupported method found: ",
+                  SUCCEEDED(ensureMethodFound));
+
+    return SUCCEEDED(endMethodFound) && SUCCEEDED(ensureMethodFound);
 }
 
 #ifdef _WIN32

@@ -35,7 +35,9 @@ static const WSTRING managed_profiler_calltarget_createrefstruct_name        = W
 static const WSTRING managed_profiler_calltarget_beginmethod_name            = WStr("BeginMethod");
 static const WSTRING managed_profiler_calltarget_endmethod_name              = WStr("EndMethod");
 static const WSTRING managed_profiler_calltarget_endmethod_runtimeasync_name = WStr("EndMethodRuntimeAsync");
-static const WSTRING managed_profiler_calltarget_logexception_name           = WStr("LogException");
+static const WSTRING managed_profiler_calltarget_ensure_runtimeasync_callbacks_supported_name =
+    WStr("EnsureRuntimeAsyncCallbacksSupported");
+static const WSTRING managed_profiler_calltarget_logexception_name = WStr("LogException");
 
 /**
  * PRIVATE
@@ -535,6 +537,86 @@ HRESULT TracerTokens::WriteBeginMethod(void*                             rewrite
     }
 
     *instruction = rewriterWrapper->CallMember(beginMethodSpec, false);
+    return S_OK;
+}
+
+HRESULT TracerTokens::WriteEnsureRuntimeAsyncCallbacksSupported(void*                rewriterWrapperPtr,
+                                                                mdTypeRef            integrationTypeRef,
+                                                                const TypeInfo*      currentType,
+                                                                const TypeSignature* returnArgument,
+                                                                const TypeSignature* declaredRuntimeAsyncReturn,
+                                                                ILInstr**            instruction)
+{
+    auto hr = EnsureBaseCalltargetTokens();
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*)rewriterWrapperPtr;
+    ModuleMetadata*    module_metadata = GetMetadata();
+    const bool         hasReturnValue  = returnArgument != nullptr;
+    mdMemberRef&       memberRef =
+        hasReturnValue ? ensureRuntimeAsyncGenericMemberRef : ensureRuntimeAsyncNonGenericMemberRef;
+
+    if (memberRef == mdMemberRefNil)
+    {
+        SignatureBuilder memberRefSignature;
+        memberRefSignature.PushRawByte(IMAGE_CEE_CS_CALLCONV_GENERIC)
+            .PushCompressedData(hasReturnValue ? 4 : 3)
+            .PushCompressedData(0)
+            .PushRawByte(ELEMENT_TYPE_VOID);
+
+        hr = module_metadata->metadata_emit
+                 ->DefineMemberRef(callTargetTypeRef,
+                                   managed_profiler_calltarget_ensure_runtimeasync_callbacks_supported_name.data(),
+                                   memberRefSignature.Head(), memberRefSignature.Size(), &memberRef);
+        if (FAILED(hr))
+        {
+            Logger::Warn("Wrapper EnsureRuntimeAsyncCallbacksSupported member ref could not be defined.");
+            return hr;
+        }
+    }
+
+    bool    isValueType    = currentType->valueType;
+    mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
+    if (currentTypeRef == mdTokenNil)
+    {
+        isValueType    = false;
+        currentTypeRef = GetObjectTypeRef();
+    }
+
+    PCCOR_SIGNATURE declaredReturnSignatureBuffer;
+    const auto declaredReturnSignatureLength = declaredRuntimeAsyncReturn->GetSignature(declaredReturnSignatureBuffer);
+
+    SignatureBuilder methodSpecSignature;
+    methodSpecSignature.PushRawByte(IMAGE_CEE_CS_CALLCONV_GENERICINST)
+        .PushCompressedData(hasReturnValue ? 4 : 3)
+        .PushRawByte(ELEMENT_TYPE_CLASS)
+        .PushToken(integrationTypeRef)
+        .PushRawByte(isValueType ? ELEMENT_TYPE_VALUETYPE : ELEMENT_TYPE_CLASS)
+        .PushToken(currentTypeRef);
+
+    if (hasReturnValue)
+    {
+        PCCOR_SIGNATURE returnSignatureBuffer;
+        const auto      returnSignatureLength = returnArgument->GetSignature(returnSignatureBuffer);
+        methodSpecSignature.PushRawBytes(returnSignatureBuffer, returnSignatureBuffer + returnSignatureLength);
+    }
+
+    methodSpecSignature.PushRawBytes(declaredReturnSignatureBuffer,
+                                     declaredReturnSignatureBuffer + declaredReturnSignatureLength);
+
+    mdMethodSpec methodSpec = mdMethodSpecNil;
+    hr                      = module_metadata->metadata_emit->DefineMethodSpec(memberRef, methodSpecSignature.Head(),
+                                                                               methodSpecSignature.Size(), &methodSpec);
+    if (FAILED(hr))
+    {
+        Logger::Warn("Error creating EnsureRuntimeAsyncCallbacksSupported method spec.");
+        return hr;
+    }
+
+    *instruction = rewriterWrapper->CallMember(methodSpec, false);
     return S_OK;
 }
 

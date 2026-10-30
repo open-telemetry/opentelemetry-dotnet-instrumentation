@@ -22,6 +22,8 @@ private:
     mdMemberRef beginMethodFastPathRefs[FASTPATH_COUNT];
     mdMemberRef endVoidMemberRef = mdMemberRefNil;
     mdMemberRef endVoidRuntimeAsyncMemberRef = mdMemberRefNil;
+    mdMemberRef ensureRuntimeAsyncNonGenericMemberRef = mdMemberRefNil;
+    mdMemberRef ensureRuntimeAsyncGenericMemberRef = mdMemberRefNil;
     mdMemberRef logExceptionRef = mdMemberRefNil;
     mdTypeRef bubbleUpExceptionTypeRef = mdTypeRefNil;
     mdMemberRef bubbleUpExceptionFunctionRef = mdMemberRefNil;
@@ -50,6 +52,12 @@ public:
     HRESULT WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
                              const std::vector<TypeSignature>& methodArguments,
                              bool ignoreByRefInstrumentation, ILInstr** instruction);
+
+    HRESULT WriteEnsureRuntimeAsyncCallbacksSupported(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
+                                                       const TypeInfo* currentType,
+                                                       const TypeSignature* returnArgument,
+                                                       const TypeSignature* declaredRuntimeAsyncReturn,
+                                                       ILInstr** instruction);
 
     // A non-null declaredRuntimeAsyncReturn selects EndMethodRuntimeAsync and carries the declared
     // Task/ValueTask type. returnArgument, when present, remains the effective type that the

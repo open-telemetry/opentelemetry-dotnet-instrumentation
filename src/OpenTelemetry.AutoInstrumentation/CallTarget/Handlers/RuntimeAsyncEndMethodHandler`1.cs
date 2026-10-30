@@ -14,8 +14,9 @@ internal static class RuntimeAsyncEndMethodHandler<TIntegration, TTarget, TRetur
 {
     private static readonly ContinuationGenerator<TTarget, TReturn, TReturn>.ContinuationMethodDelegate? OnAsyncMethodEnd;
     private static readonly EndMethodHandler<TIntegration, TTarget, TDeclaredReturn>.InvokeDelegate? OnMethodEnd;
-    private static readonly Exception? UnsupportedAsyncCallback;
+    private static readonly Exception? IncompatibleTaskReturningCallback;
 
+    private static int _reportedIncompatibleCallback;
     private static bool _reportedUnsupportedSubstitution;
 
 #pragma warning disable CA1810 // Static initialization may throw and must be wrapped for CallTarget.
@@ -29,8 +30,8 @@ internal static class RuntimeAsyncEndMethodHandler<TIntegration, TTarget, TRetur
             {
                 if (asyncResult.IsTaskReturn)
                 {
-                    UnsupportedAsyncCallback = new NotSupportedException(
-                        $"Integration '{typeof(TIntegration).FullName}' has an asynchronous OnAsyncMethodEnd callback, which cannot run in the finally block of runtime-async target '{typeof(TTarget).FullName}'. The integration will be disabled for this target.");
+                    IncompatibleTaskReturningCallback = new NotSupportedException(
+                        $"Task-returning OnAsyncMethodEnd on integration '{typeof(TIntegration).FullName}' is incompatible with runtime-async instrumentation for target '{typeof(TTarget).FullName}': the injected finally block cannot await the callback. The integration will be disabled for this target.");
                 }
                 else
                 {
@@ -52,14 +53,30 @@ internal static class RuntimeAsyncEndMethodHandler<TIntegration, TTarget, TRetur
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool EnsureCallbacksSupported()
+    {
+        if (IncompatibleTaskReturningCallback is not { } incompatible)
+        {
+            return true;
+        }
+
+        IntegrationOptions<TIntegration, TTarget>.DisableIntegration();
+        if (System.Threading.Interlocked.Exchange(ref _reportedIncompatibleCallback, 1) == 0)
+        {
+            IntegrationOptions<TIntegration, TTarget>.LogException(new CallTargetInvokerException(incompatible));
+        }
+
+        return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static CallTargetReturn<TReturn?> Invoke(TTarget? instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
     {
         // Unlike compiler-lowered async, runtime async has no state-machine stub whose prologue
         // runs outside the runtime's ExecutionContext save/restore region. Restoring the Activity
         // here would therefore overwrite context legitimately established by the method body.
-        if (UnsupportedAsyncCallback is { } unsupported)
+        if (!EnsureCallbacksSupported())
         {
-            IntegrationOptions<TIntegration, TTarget>.LogException(new CallTargetInvokerException(unsupported));
             return new CallTargetReturn<TReturn?>(returnValue);
         }
 

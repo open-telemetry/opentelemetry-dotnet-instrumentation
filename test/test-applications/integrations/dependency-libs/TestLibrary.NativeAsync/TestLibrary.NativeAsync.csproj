@@ -2,5 +2,12 @@
   <PropertyGroup>
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
     <OutputType>Library</OutputType>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- These references are provided by tracer-home at runtime. Copying them beside the app can shadow the tested distribution. -->
+    <ProjectReference Include="..\..\..\..\..\src\OpenTelemetry.AutoInstrumentation.PluginApi\OpenTelemetry.AutoInstrumentation.PluginApi.csproj" Private="false" />
+    <ProjectReference Include="..\..\..\..\..\src\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" Private="false" />
+  </ItemGroup>
 </Project>

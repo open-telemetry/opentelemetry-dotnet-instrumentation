@@ -1,5 +1,9 @@
 file_format: "1.0"
 
+plugins/development:
+  plugins:
+    - TestLibrary.NativeAsync.Plugin, TestLibrary.NativeAsync, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c0db600a13f60b51
+
 tracer_provider:
   processors:
     - batch:

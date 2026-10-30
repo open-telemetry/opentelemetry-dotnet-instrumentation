@@ -125,10 +125,11 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     // declared type is passed to the managed handler so integrations keep their existing shape.
     if (isRuntimeAsync)
     {
-        if (!m_corProfiler->call_target_runtime_async_endmethod_available)
+        if (!m_corProfiler->call_target_runtime_async_methods_available)
         {
             Logger::Warn("*** CallTarget_RewriterCallback() skipping method: the loaded managed profiler has no "
-                         "CallTargetInvoker.EndMethodRuntimeAsync, so runtime-async methods cannot be instrumented. "
+                         "required CallTargetInvoker runtime-async methods, so runtime-async methods cannot be "
+                         "instrumented. "
                          "token=",
                          function_token, " caller_name=", caller->type.name, ".", caller->name, "()");
             return S_FALSE;
@@ -253,6 +254,22 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     // ***
     // BEGIN METHOD PART
     // ***
+
+    if (isRuntimeAsync)
+    {
+        // Initialize the runtime-async end handler before BeginMethod. An integration whose async callback returns
+        // Task cannot be completed synchronously at the end of a runtime-async body, so it must be disabled before
+        // its begin callback can create state that would never be completed.
+        ILInstr*             ensureCallbacksSupportedInstruction;
+        const TypeSignature* returnArgument = isVoid ? nullptr : &retFuncArg;
+        hr = tracerTokens->WriteEnsureRuntimeAsyncCallbacksSupported(&reWriterWrapper, integration_type_ref,
+                                                                     &caller->type, returnArgument, &declaredRetFuncArg,
+                                                                     &ensureCallbacksSupportedInstruction);
+        if (FAILED(hr))
+        {
+            return S_FALSE;
+        }
+    }
 
     // *** Load instance into the stack (if not static)
     if (isStatic)
