@@ -32,12 +32,15 @@ public class ParserTracesTests
     [InlineData("0", null, 0.0)]
     [InlineData("0.5", null, 0.5)]
     [InlineData("1", null, 1.0)]
+    [InlineData("1_0.0e-2", null, 0.1)]
+    [InlineData(".inf", null, double.PositiveInfinity)]
     [InlineData("", null, null)]
     [InlineData("null", null, null)]
     [InlineData("~", null, null)]
     [InlineData("${YAMLPARSER_TESTS_RATIO:-0.5}", null, 0.5)]
     [InlineData("${YAMLPARSER_TESTS_RATIO:-null}", null, null)]
     [InlineData("${YAMLPARSER_TESTS_RATIO}", "0.25", 0.25)]
+    [InlineData("${YAMLPARSER_TESTS_RATIO}", "1_0.0e-2", 0.1)]
     [InlineData("${YAMLPARSER_TESTS_RATIO}", "null", null)]
     [InlineData("${YAMLPARSER_TESTS_RATIO:-}", null, null)]
     public void Parse_TraceIdRatioWithScalarRatio_PopulatesRatio(string ratio, string? envValue, double? expected)
@@ -60,14 +63,16 @@ public class ParserTracesTests
         Assert.Equal(expected, config.TracerProvider.Sampler.TraceIdRatio.Ratio);
     }
 
-    [Fact]
-    public void Parse_TraceIdRatioWithQuotedNull_ThrowsYamlException()
+    [Theory]
+    [InlineData("\"null\"")]
+    [InlineData("0,001")]
+    public void Parse_TraceIdRatioWithInvalidScalar_ThrowsYamlException(string ratio)
     {
-        const string yaml = """
+        var yaml = $$"""
             tracer_provider:
               sampler:
                 trace_id_ratio:
-                  ratio: "null"
+                  ratio: {{ratio}}
             """;
 
         Assert.Throws<YamlException>(() => YamlParser.ParseYamlContent<YamlConfiguration>(yaml));
