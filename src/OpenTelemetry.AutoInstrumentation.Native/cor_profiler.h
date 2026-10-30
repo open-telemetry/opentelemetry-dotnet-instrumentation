@@ -74,6 +74,7 @@ private:
     std::unique_ptr<TracerRejitPreprocessor> tracer_integration_preprocessor = nullptr;
     bool call_target_bubble_up_exception_available = false;
     bool call_target_bubble_up_exception_function_available = false;
+    bool call_target_runtime_async_methods_available = false;
 
     // Cor assembly properties
     AssemblyProperty corAssemblyProperty{};
@@ -136,6 +137,7 @@ private:
     bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);
     static bool EnsureCallTargetBubbleUpExceptionTypeAvailable(const ModuleMetadata& module_metadata, mdTypeDef* typeDef);
     static bool EnsureIsCallTargetBubbleUpExceptionFunctionAvailable(const ModuleMetadata& module_metadata, mdTypeDef typeDef);
+    static bool EnsureCallTargetRuntimeAsyncMethodsAvailable(const ModuleMetadata& module_metadata);
 
     //
     // Initialization methods

@@ -63,6 +63,10 @@ const auto SystemTypeName = WStr("System.Type");
 const auto GetTypeFromHandleMethodName = WStr("GetTypeFromHandle");
 const auto RuntimeTypeHandleTypeName = WStr("System.RuntimeTypeHandle");
 const auto RuntimeMethodHandleTypeName = WStr("System.RuntimeMethodHandle");
+const WSTRING SystemThreadingTasksTask = WStr("System.Threading.Tasks.Task");
+const WSTRING SystemThreadingTasksTaskGeneric = WStr("System.Threading.Tasks.Task`1");
+const WSTRING SystemThreadingTasksValueTask = WStr("System.Threading.Tasks.ValueTask");
+const WSTRING SystemThreadingTasksValueTaskGeneric = WStr("System.Threading.Tasks.ValueTask`1");
 
 template <typename T>
 class EnumeratorIterator;
@@ -594,13 +598,18 @@ struct FunctionInfo
     const mdToken method_def_id;
     FunctionMethodSignature method_signature;
 
+    // CorMethodImpl flags reported by IMetaDataImport::GetMemberProps. MethodSpecs inherit the
+    // flags from their MethodDef; MemberRefs leave this at zero because their bodies are not
+    // rewritten in the current module.
+    DWORD method_impl_flags = 0;
+
     FunctionInfo() : id(0), name(EmptyWStr), type({}), is_generic(false), method_def_id(0), method_signature({})
     {
     }
 
     FunctionInfo(mdToken id, const WSTRING& name, const TypeInfo& type, const MethodSignature& signature,
                  const MethodSignature& function_spec_signature, mdToken method_def_id,
-                 const FunctionMethodSignature& method_signature) :
+                 const FunctionMethodSignature& method_signature, DWORD method_impl_flags) :
         id(id),
         name(name),
         type(type),
@@ -608,19 +617,21 @@ struct FunctionInfo
         signature(signature),
         function_spec_signature(function_spec_signature),
         method_def_id(method_def_id),
-        method_signature(method_signature)
+        method_signature(method_signature),
+        method_impl_flags(method_impl_flags)
     {
     }
 
     FunctionInfo(mdToken id, const WSTRING& name, const TypeInfo& type, const MethodSignature& signature,
-                 const FunctionMethodSignature& method_signature) :
+                 const FunctionMethodSignature& method_signature, DWORD method_impl_flags) :
         id(id),
         name(name),
         type(type),
         is_generic(false),
         signature(signature),
         method_def_id(0),
-        method_signature(method_signature)
+        method_signature(method_signature),
+        method_impl_flags(method_impl_flags)
     {
     }
 

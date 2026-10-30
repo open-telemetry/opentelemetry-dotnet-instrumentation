@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/clr_helpers.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/runtime_async.h"
 #include "test_helpers.h"
 
 #ifdef _WIN32
@@ -13,6 +14,31 @@ using namespace trace;
 class CLRHelperTest : public ::CLRHelperTestBase
 {
 };
+
+TEST_F(CLRHelperTest, GetFunctionInfoPopulatesMethodImplFlags)
+{
+    size_t methodsChecked = 0;
+
+    for (auto& typeDef : EnumTypeDefs(metadata_import_))
+    {
+        for (auto& methodDef : EnumMethods(metadata_import_, typeDef))
+        {
+            DWORD expectedImplFlags = 0;
+            ASSERT_TRUE(SUCCEEDED(metadata_import_->GetMethodProps(methodDef, nullptr, nullptr, 0, nullptr, nullptr,
+                                                                   nullptr, nullptr, nullptr, &expectedImplFlags)));
+
+            const auto functionInfo = GetFunctionInfo(metadata_import_, methodDef);
+            ASSERT_TRUE(functionInfo.IsValid());
+            EXPECT_EQ(expectedImplFlags, functionInfo.method_impl_flags);
+            EXPECT_TRUE(IsMiIL(functionInfo.method_impl_flags));
+            EXPECT_FALSE(IsMiAsync(functionInfo.method_impl_flags));
+            methodsChecked++;
+        }
+    }
+
+    EXPECT_GT(methodsChecked, 0u);
+}
+
 TEST_F(CLRHelperTest, EnumeratesTypeDefs)
 {
     std::vector<std::wstring> expected_types = {L"Microsoft.CodeAnalysis.EmbeddedAttribute",

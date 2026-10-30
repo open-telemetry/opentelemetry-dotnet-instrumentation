@@ -905,6 +905,8 @@ HRESULT CorProfiler::TryRejitModule(ModuleID module_id, std::vector<ModuleID>& m
                 call_target_bubble_up_exception_function_available =
                     EnsureIsCallTargetBubbleUpExceptionFunctionAvailable(module_metadata, bubbleUpTypeDef);
             }
+
+            call_target_runtime_async_methods_available = EnsureCallTargetRuntimeAsyncMethodsAvailable(module_metadata);
         }
 
         if (Logger::IsDebugEnabled())
@@ -2225,6 +2227,35 @@ bool CorProfiler::EnsureIsCallTargetBubbleUpExceptionFunctionAvailable(const Mod
     return SUCCEEDED(hr);
 }
 
+bool CorProfiler::EnsureCallTargetRuntimeAsyncMethodsAvailable(const ModuleMetadata& module_metadata)
+{
+    mdTypeDef  typeDef = mdTypeDefNil;
+    const auto typeFound =
+        module_metadata.metadata_import->FindTypeDefByName(calltargetinvoker_type_name.data(), mdTokenNil, &typeDef);
+    if (FAILED(typeFound))
+    {
+        Logger::Debug("CallTargetInvoker type not found while checking runtime-async methods: ", typeFound);
+        return false;
+    }
+
+    mdMethodDef endMethodDef = mdMethodDefNil;
+    const auto  endMethodFound =
+        module_metadata.metadata_import->FindMethod(typeDef,
+                                                    calltargetinvoker_endmethod_runtimeasync_function_name.data(),
+                                                    nullptr, 0, &endMethodDef);
+    Logger::Debug("CallTargetInvoker.EndMethodRuntimeAsync method found: ", SUCCEEDED(endMethodFound));
+
+    mdMethodDef ensureMethodDef = mdMethodDefNil;
+    const auto  ensureMethodFound =
+        module_metadata.metadata_import
+            ->FindMethod(typeDef, calltargetinvoker_ensure_runtimeasync_callbacks_supported_function_name.data(),
+                         nullptr, 0, &ensureMethodDef);
+    Logger::Debug("CallTargetInvoker.EnsureRuntimeAsyncCallbacksSupported method found: ",
+                  SUCCEEDED(ensureMethodFound));
+
+    return SUCCEEDED(endMethodFound) && SUCCEEDED(ensureMethodFound);
+}
+
 #ifdef _WIN32
 //
 // Loader methods. These are only used on the .NET Framework.
@@ -2453,7 +2484,8 @@ HRESULT CorProfiler::ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef
             mdToken      token = 0;
             TypeInfo     typeInfo{};
             WSTRING      methodName = WStr("CreateDomain");
-            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature(),
+                                miIL | miManaged);
             Logger::Info(GetILCodes("*** ModifyAppDomainCreate: Modified Code: ", &rewriter, caller, metadata_import));
         }
     }
@@ -2510,7 +2542,8 @@ HRESULT CorProfiler::ModifyAppDomainCreate(const ModuleID module_id, mdMethodDef
             mdToken      token = 0;
             TypeInfo     typeInfo{};
             WSTRING      methodName = WStr("CreateDomainHelper");
-            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature(),
+                                miIL | miManaged);
             Logger::Info(GetILCodes("*** ModifyAppDomainCreate: Modified Code: ", &rewriter, caller, metadata_import));
         }
     }
@@ -3225,7 +3258,8 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
             mdToken      token = 0;
             TypeInfo     typeInfo{};
             WSTRING      methodName = WStr(".cctor");
-            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature(),
+                                miIL | miManaged);
             Logger::Info(
                 GetILCodes("*** GenerateLoaderType: Modified Code: ", &rewriter_void, caller, metadata_import));
         }
@@ -3376,7 +3410,8 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
             mdToken      token = 0;
             TypeInfo     typeInfo{};
             WSTRING      methodName = WStr("__DDVoidMethodCall__");
-            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature(),
+                                miIL | miManaged);
             Logger::Info(
                 GetILCodes("*** GenerateLoaderType: Modified Code: ", &rewriter_void, caller, metadata_import));
         }
@@ -3472,7 +3507,8 @@ HRESULT CorProfiler::GenerateLoaderType(const ModuleID module_id,
             mdToken      token = 0;
             TypeInfo     typeInfo{};
             WSTRING      methodName = WStr("__DDPatchAppDomainSetup__");
-            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+            FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature(),
+                                miIL | miManaged);
             Logger::Info(
                 GetILCodes("*** GenerateLoaderType: Modified Code: ", &rewriter_void, caller, metadata_import));
         }
@@ -3609,7 +3645,8 @@ HRESULT CorProfiler::RewriteILSystemDataCommandText(const ModuleID module_id)
         mdToken      token = 0;
         TypeInfo     typeInfo{};
         WSTRING      methodName = WStr("WriteBeginExecuteEvent");
-        FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+        FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature(),
+                            miIL | miManaged);
         Logger::Info(
             GetILCodes("*** ModifyWriteBeginExecuteEvent: Modified Code: ", &rewriter, caller, metadata_import));
     }

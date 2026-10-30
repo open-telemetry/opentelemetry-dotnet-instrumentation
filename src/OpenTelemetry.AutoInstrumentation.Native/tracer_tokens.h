@@ -21,6 +21,9 @@ private:
     mdMemberRef beginArrayMemberRef = mdMemberRefNil;
     mdMemberRef beginMethodFastPathRefs[FASTPATH_COUNT];
     mdMemberRef endVoidMemberRef = mdMemberRefNil;
+    mdMemberRef endVoidRuntimeAsyncMemberRef = mdMemberRefNil;
+    mdMemberRef ensureRuntimeAsyncNonGenericMemberRef = mdMemberRefNil;
+    mdMemberRef ensureRuntimeAsyncGenericMemberRef = mdMemberRefNil;
     mdMemberRef logExceptionRef = mdMemberRefNil;
     mdTypeRef bubbleUpExceptionTypeRef = mdTypeRefNil;
     mdMemberRef bubbleUpExceptionFunctionRef = mdMemberRefNil;
@@ -50,11 +53,22 @@ public:
                              const std::vector<TypeSignature>& methodArguments,
                              bool ignoreByRefInstrumentation, ILInstr** instruction);
 
+    HRESULT WriteEnsureRuntimeAsyncCallbacksSupported(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
+                                                       const TypeInfo* currentType,
+                                                       const TypeSignature* returnArgument,
+                                                       const TypeSignature* declaredRuntimeAsyncReturn,
+                                                       ILInstr** instruction);
+
+    // A non-null declaredRuntimeAsyncReturn selects EndMethodRuntimeAsync and carries the declared
+    // Task/ValueTask type. returnArgument, when present, remains the effective type that the
+    // runtime-async body leaves on the evaluation stack.
     HRESULT WriteEndVoidReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
-                                        const TypeInfo* currentType, ILInstr** instruction);
+                                        const TypeInfo* currentType, ILInstr** instruction,
+                                        const TypeSignature* declaredRuntimeAsyncReturn);
 
     HRESULT WriteEndReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
-                                    TypeSignature* returnArgument, ILInstr** instruction);
+                                    TypeSignature* returnArgument, ILInstr** instruction,
+                                    const TypeSignature* declaredRuntimeAsyncReturn);
 
     HRESULT WriteLogException(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
                               ILInstr** instruction);
