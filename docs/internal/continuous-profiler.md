@@ -38,7 +38,9 @@ Managed startup translates the plugin configuration into a complete Seed and
 sets up the configured exporter. Each CPU batch carries the sampling interval
 used to produce it. The managed reader passes that interval to the exporter.
 On .NET Framework, each AppDomain tracks its Activity context. Prepared readers
-share a process-wide mutex, so one AppDomain consumes native buffers at a time.
+share an unnamed, process-private mutex created by the native profiler, so one
+AppDomain consumes native buffers at a time. Each reader owns a non-inheritable
+duplicate handle; no session-visible mutex name is exposed.
 Readers take and retain the mutex only while they have exporters for every
 currently enabled native sampler. A reader releases it when a runtime update
 makes its exporters incompatible, allowing a compatible AppDomain to take over.
@@ -46,7 +48,8 @@ Takeover after AppDomain unload also requires a compatible exporter. A canary
 thread supports periodic stack capture in the active reader's AppDomain.
 
 The managed reader requires the native runtime sampler configuration and V2
-thread-sample exports. An older native profiler cannot report the committed
+thread-sample exports. On .NET Framework, it also requires the native reader
+mutex export. An older native profiler cannot report the committed
 configuration or the sampling interval of each batch, so managed profiling
 initialization fails instead of publishing an unverified period.
 
