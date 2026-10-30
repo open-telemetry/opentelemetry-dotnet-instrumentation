@@ -30,17 +30,18 @@ public class ParserTracesTests
 
     [Theory]
     [InlineData("0", null, 0.0)]
+    [InlineData(".5", null, 0.5)]
     [InlineData("0.5", null, 0.5)]
+    [InlineData("5e-1", null, 0.5)]
     [InlineData("1", null, 1.0)]
-    [InlineData("1_0.0e-2", null, 0.1)]
     [InlineData(".inf", null, double.PositiveInfinity)]
+    [InlineData(".nan", null, double.NaN)]
     [InlineData("", null, null)]
     [InlineData("null", null, null)]
     [InlineData("~", null, null)]
     [InlineData("${YAMLPARSER_TESTS_RATIO:-0.5}", null, 0.5)]
     [InlineData("${YAMLPARSER_TESTS_RATIO:-null}", null, null)]
     [InlineData("${YAMLPARSER_TESTS_RATIO}", "0.25", 0.25)]
-    [InlineData("${YAMLPARSER_TESTS_RATIO}", "1_0.0e-2", 0.1)]
     [InlineData("${YAMLPARSER_TESTS_RATIO}", "null", null)]
     [InlineData("${YAMLPARSER_TESTS_RATIO:-}", null, null)]
     public void Parse_TraceIdRatioWithScalarRatio_PopulatesRatio(string ratio, string? envValue, double? expected)
@@ -65,7 +66,11 @@ public class ParserTracesTests
 
     [Theory]
     [InlineData("\"null\"")]
+    [InlineData("\"\"")]
+    [InlineData("\" \"")]
+    [InlineData("\"0.5\"")]
     [InlineData("0,001")]
+    [InlineData("1_0.0e-2")]
     public void Parse_TraceIdRatioWithInvalidScalar_ThrowsYamlException(string ratio)
     {
         var yaml = $$"""
@@ -73,6 +78,27 @@ public class ParserTracesTests
               sampler:
                 trace_id_ratio:
                   ratio: {{ratio}}
+            """;
+
+        Assert.Throws<YamlException>(() => YamlParser.ParseYamlContent<YamlConfiguration>(yaml));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("0.5")]
+    public void Parse_TraceIdRatioWithQuotedEnvironmentFallback_ThrowsYamlException(string fallback)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "YAMLPARSER_TESTS_RATIO", null }
+        });
+
+        var yaml = $$"""
+            tracer_provider:
+              sampler:
+                trace_id_ratio:
+                  ratio: "${YAMLPARSER_TESTS_RATIO:-{{fallback}}}"
             """;
 
         Assert.Throws<YamlException>(() => YamlParser.ParseYamlContent<YamlConfiguration>(yaml));

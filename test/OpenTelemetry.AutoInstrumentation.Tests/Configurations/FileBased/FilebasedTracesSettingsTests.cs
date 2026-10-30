@@ -598,6 +598,7 @@ public class FilebasedTracesSettingsTests
     [InlineData(1.1)]
     [InlineData(double.NaN)]
     [InlineData(double.PositiveInfinity)]
+    [InlineData(double.NegativeInfinity)]
     public void LoadFile_InvalidTraceIdRatio_ThrowsWhenFailFastIsEnabled(double ratio)
     {
         var conf = new YamlConfiguration
