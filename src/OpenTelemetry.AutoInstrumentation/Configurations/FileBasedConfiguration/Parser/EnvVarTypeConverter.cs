@@ -22,6 +22,7 @@ internal partial class EnvVarTypeConverter : IYamlTypeConverter
         typeof(bool),
         typeof(int?),
         typeof(uint?),
+        typeof(double?),
         typeof(object),
     ];
 
@@ -42,12 +43,10 @@ internal partial class EnvVarTypeConverter : IYamlTypeConverter
 
         try
         {
-            if (string.IsNullOrWhiteSpace(replacedValue))
+            if (Nullable.GetUnderlyingType(type) != null &&
+                (string.IsNullOrWhiteSpace(replacedValue) || IsYamlNull(scalar, replacedValue)))
             {
-                if (Nullable.GetUnderlyingType(type) != null)
-                {
-                    return null;
-                }
+                return null;
             }
 
             return type switch
@@ -61,6 +60,7 @@ internal partial class EnvVarTypeConverter : IYamlTypeConverter
                 Type t when t == typeof(bool) => bool.Parse(replacedValue),
                 Type t when t == typeof(int?) => int.Parse(replacedValue, CultureInfo.InvariantCulture),
                 Type t when t == typeof(uint?) => uint.Parse(replacedValue, CultureInfo.InvariantCulture),
+                Type t when t == typeof(double?) => double.Parse(replacedValue, CultureInfo.InvariantCulture),
                 Type t when t == typeof(object) => replacedValue,
                 _ => throw new NotSupportedException($"Type {type.FullName} is not supported by the converter")
             };
@@ -74,6 +74,18 @@ internal partial class EnvVarTypeConverter : IYamlTypeConverter
     public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
     {
         emitter.Emit(new Scalar(value?.ToString() ?? string.Empty));
+    }
+
+    private static bool IsYamlNull(Scalar scalar, string value)
+    {
+        if (scalar.Tag == "tag:yaml.org,2002:null")
+        {
+            return true;
+        }
+
+        return scalar.Style == ScalarStyle.Plain &&
+               !scalar.IsKey &&
+               value is "~" or "null" or "Null" or "NULL";
     }
 
     private static string ReplaceEnvVariables(string input)
