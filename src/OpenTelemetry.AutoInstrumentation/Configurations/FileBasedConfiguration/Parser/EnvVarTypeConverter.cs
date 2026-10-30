@@ -83,7 +83,7 @@ internal partial class EnvVarTypeConverter : IYamlTypeConverter
             var varName = match.Groups[1].Value;
             var fallback = match.Groups[2].Success ? match.Groups[2].Value : null;
             var envValue = Environment.GetEnvironmentVariable(varName);
-            return envValue ?? fallback ?? match.Value;
+            return string.IsNullOrEmpty(envValue) ? fallback ?? string.Empty : envValue;
         });
     }
 

@@ -24,6 +24,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Reject sequences and mappings supplied for scalar fields in file-based
   YAML configuration.
+- Use fallback values for empty environment variables and replace undefined
+  variables without a fallback with an empty value in file-based YAML configuration.
 
 ## [v1.18.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.18.0)
 
