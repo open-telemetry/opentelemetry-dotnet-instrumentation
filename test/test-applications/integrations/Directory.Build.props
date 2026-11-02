@@ -6,6 +6,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)\dependency-libs\TestApplication.Shared\ArgumentHelper.cs" Link="Shared\ArgumentHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)\dependency-libs\TestApplication.Shared\ConsoleHelper.cs" Link="Shared\ConsoleHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)\dependency-libs\TestApplication.Shared\EnvironmentHelper.cs" Link="Shared\EnvironmentHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)\dependency-libs\TestApplication.Shared\ProfilerHelper.cs" Link="Shared\ProfilerHelper.cs" />
   </ItemGroup>
   
