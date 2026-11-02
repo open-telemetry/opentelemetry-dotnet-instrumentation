@@ -29,6 +29,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fix instrumentation errors and unfinished Kafka `ProduceAsync` spans when no
+  delivery result is available.
 - Reject sequences and mappings supplied for scalar fields in file-based
   YAML configuration.
 - Apply scalar validation to file-based trace ID sampling ratios, use `1.0` when
