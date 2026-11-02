@@ -14,6 +14,7 @@ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 ###########################################################################
 
 $BuildProjectFile = "$PSScriptRoot\build\_build.csproj"
+$BuildAssemblyFile = "$PSScriptRoot\build\bin\Debug\_build.dll"
 $TempDirectory = "$PSScriptRoot\\.nuke\temp"
 
 $DotNetGlobalFile = "$PSScriptRoot\\global.json"
@@ -67,4 +68,6 @@ else {
 Write-Output "Microsoft (R) .NET SDK version $(& $env:DOTNET_EXE --version)"
 
 ExecSafe { & $env:DOTNET_EXE build $BuildProjectFile /nodeReuse:false /p:UseSharedCompilation=false -nologo -clp:NoSummary --verbosity quiet }
-ExecSafe { & $env:DOTNET_EXE run --project $BuildProjectFile --no-build -- $BuildArguments }
+# Invoke the build DLL through dotnet so Environment.GetCommandLineArgs()[0]
+# remains aligned with the assembly path used by Nuke's build-assembly check.
+ExecSafe { & $env:DOTNET_EXE $BuildAssemblyFile $BuildArguments }
