@@ -32,6 +32,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Use fallback values for empty environment variables and replace undefined
   variables without a fallback with an empty value in file-based YAML configuration.
 
+- Improved OpAMP plugin-state report scheduling by coalescing server-requested
+  full-state reports and ensuring at least five seconds between consecutive sends.
+
 ## [v1.18.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.18.0)
 
 ### Added
