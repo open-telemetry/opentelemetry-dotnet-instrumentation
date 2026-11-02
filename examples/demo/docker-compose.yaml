@@ -81,6 +81,7 @@ services:
       - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
     environment:
       GF_AUTH_ANONYMOUS_ENABLED: "true"
-      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+      GF_USERS_VIEWERS_CAN_EDIT: "true"
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
