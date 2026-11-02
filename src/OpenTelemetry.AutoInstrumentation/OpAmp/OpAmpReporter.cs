@@ -23,9 +23,9 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
     private readonly IOpAmpReportTimer _fullStateTimer;
     private readonly IOpAmpReportTimer _pluginReportTimer;
 
-    // Protected by _stateLock. A claimed report captures effective-config support before
-    // invoking plugin code. The state and reporting locks are never held together.
-    private bool _serverAcceptsEffectiveConfig;
+    // Capability reads are independent of scheduling state and must remain current while a
+    // report waits for _reportLock. The remaining fields are protected by _stateLock.
+    private volatile bool _serverAcceptsEffectiveConfig;
     private PluginReportKind _pendingPluginReports;
     private bool _fullStatePending;
     private FullStatePhase _fullStatePhase;
@@ -208,7 +208,6 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
         try
         {
             PluginReportKind reports;
-            bool serverAcceptsEffectiveConfig;
             lock (_stateLock)
             {
                 if (_stopped || !_pluginReportDrainActive)
@@ -217,7 +216,6 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
                 }
 
                 drainClaimed = true;
-                serverAcceptsEffectiveConfig = _serverAcceptsEffectiveConfig;
                 reports = GetEligiblePluginReports(_pendingPluginReports);
                 _pendingPluginReports &= ~reports;
             }
@@ -229,7 +227,7 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
 
             lock (_reportLock)
             {
-                ReportPluginState(reports, serverAcceptsEffectiveConfig);
+                ReportPluginState(reports);
             }
         }
         catch (Exception ex)
@@ -252,11 +250,11 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
         }
     }
 
-    private void ReportPluginState(PluginReportKind reports, bool serverAcceptsEffectiveConfig)
+    private void ReportPluginState(PluginReportKind reports)
     {
         if ((reports & PluginReportKind.EffectiveConfig) != 0)
         {
-            ReportEffectiveConfig(serverAcceptsEffectiveConfig);
+            ReportEffectiveConfig();
         }
 
         if ((reports & PluginReportKind.RemoteConfigStatus) != 0)
@@ -269,7 +267,6 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
     {
         try
         {
-            bool serverAcceptsEffectiveConfig;
             lock (_stateLock)
             {
                 if (_stopped || _fullStatePhase != FullStatePhase.Waiting)
@@ -285,10 +282,9 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
 
                 _fullStatePending = false;
                 _fullStatePhase = FullStatePhase.Reporting;
-                serverAcceptsEffectiveConfig = _serverAcceptsEffectiveConfig;
             }
 
-            ReportScheduledFullState(serverAcceptsEffectiveConfig);
+            ReportScheduledFullState();
         }
         catch (Exception ex)
         {
@@ -296,13 +292,13 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
         }
     }
 
-    private void ReportScheduledFullState(bool serverAcceptsEffectiveConfig)
+    private void ReportScheduledFullState()
     {
         try
         {
             lock (_reportLock)
             {
-                ReportFullStateCore(serverAcceptsEffectiveConfig);
+                ReportFullStateCore();
             }
         }
         catch (Exception ex)
@@ -327,17 +323,23 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
         }
     }
 
-    private void ReportEffectiveConfig(bool serverAcceptsEffectiveConfig)
+    private void ReportEffectiveConfig()
     {
-        var files = ReadEffectiveConfig(serverAcceptsEffectiveConfig);
-        if (_stopped || files == null)
+        if (!TryUseEffectiveConfigCapability())
+        {
+            return;
+        }
+
+        var files = ReadEffectiveConfig();
+        if (files == null || !TryUseEffectiveConfigCapability())
         {
             return;
         }
 
         try
         {
-            // Shutdown may begin after this check; an admitted submission is allowed to finish.
+            // The last capability read is the submission admission point. A later shutdown or
+            // capability revocation does not cancel a submission that has already been admitted.
             _reportSender.SendEffectiveConfig(files);
         }
         catch (Exception ex)
@@ -346,13 +348,20 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
         }
     }
 
-    private void ReportFullStateCore(bool serverAcceptsEffectiveConfig)
+    private void ReportFullStateCore()
     {
-        var files = ReadEffectiveConfig(serverAcceptsEffectiveConfig);
+        var files = _serverAcceptsEffectiveConfig ? ReadEffectiveConfig() : null;
         var remoteConfigStatus = ReadRemoteConfigStatus();
         if (_stopped)
         {
             return;
+        }
+
+        // Recheck after provider reads so a processed revocation is reflected in the
+        // message even when it arrived while a provider was running.
+        if (!_serverAcceptsEffectiveConfig)
+        {
+            files = null;
         }
 
         try
@@ -387,9 +396,9 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
         }
     }
 
-    private EffectiveConfigFile[]? ReadEffectiveConfig(bool serverAcceptsEffectiveConfig)
+    private EffectiveConfigFile[]? ReadEffectiveConfig()
     {
-        if (_stopped || _effectiveConfigProvider == null || !serverAcceptsEffectiveConfig)
+        if (_stopped || _effectiveConfigProvider == null)
         {
             return null;
         }
@@ -405,6 +414,30 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
         {
             Logger.Error(ex, "An error occurred while preparing effective configuration for OpAmp reporting.");
             return null;
+        }
+    }
+
+    private bool TryUseEffectiveConfigCapability()
+    {
+        if (_serverAcceptsEffectiveConfig && !_stopped)
+        {
+            return true;
+        }
+
+        lock (_stateLock)
+        {
+            if (_stopped)
+            {
+                return false;
+            }
+
+            if (_serverAcceptsEffectiveConfig)
+            {
+                return true;
+            }
+
+            _pendingPluginReports |= PluginReportKind.EffectiveConfig;
+            return false;
         }
     }
 

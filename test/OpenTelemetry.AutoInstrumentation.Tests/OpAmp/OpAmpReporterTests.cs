@@ -324,6 +324,77 @@ public sealed class OpAmpReporterTests : IDisposable
     }
 
     [Fact]
+    public async Task EffectiveConfigNotificationRemainsPendingWhenCapabilityIsRevokedDuringRead()
+    {
+        using var releaseRead = new ManualResetEventSlim();
+        var readEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var blockFirstRead = 1;
+        _plugin.ReadConfig = () =>
+        {
+            if (Interlocked.Exchange(ref blockFirstRead, 0) == 1)
+            {
+                readEntered.TrySetResult(true);
+                releaseRead.Wait();
+            }
+
+            return CreateConfig("initial");
+        };
+
+        _reporter.HandleServerCapabilities(ServerCapabilities);
+        _reporter.NotifyEffectiveConfigChanged();
+        var reportTask = Task.Run(_timers[1].FireIfDue);
+        try
+        {
+            await TaskAssertions.CompletesAsync(readEntered.Task);
+            _reporter.HandleServerCapabilities(ServerSentCapabilities.AcceptsStatus);
+        }
+        finally
+        {
+            releaseRead.Set();
+            await TaskAssertions.CompletesAsync(reportTask);
+        }
+
+        Assert.Empty(_reportSender.EffectiveConfigReports);
+        Assert.Equal(1, _plugin.GetterCalls);
+
+        _reporter.HandleServerCapabilities(ServerCapabilities);
+        RunDueTimers();
+
+        Assert.Equal(2, _plugin.GetterCalls);
+        Assert.Equal("initial", GetConfigContent(Assert.Single(_reportSender.EffectiveConfigReports)));
+    }
+
+    [Fact]
+    public async Task FullStateOmitsEffectiveConfigWhenCapabilityIsRevokedDuringRead()
+    {
+        using var releaseRead = new ManualResetEventSlim();
+        var readEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _plugin.ReadConfig = () =>
+        {
+            readEntered.TrySetResult(true);
+            releaseRead.Wait();
+            return CreateConfig("initial");
+        };
+
+        _reporter.HandleServerCapabilities(ServerCapabilities);
+        _reporter.ReportFullState();
+        var reportTask = Task.Run(RunDueTimers);
+        try
+        {
+            await TaskAssertions.CompletesAsync(readEntered.Task);
+            _reporter.HandleServerCapabilities(ServerSentCapabilities.AcceptsStatus);
+        }
+        finally
+        {
+            releaseRead.Set();
+            await TaskAssertions.CompletesAsync(reportTask);
+        }
+
+        Assert.Equal(1, _plugin.GetterCalls);
+        Assert.Null(Assert.Single(_reportSender.FullStateReports).EffectiveConfigFiles);
+    }
+
+    [Fact]
     public async Task NotificationDuringActiveReportReturnsBeforeFollowUpDrain()
     {
         using var releaseEnqueue = new ManualResetEventSlim();
