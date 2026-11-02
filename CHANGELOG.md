@@ -37,6 +37,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   the ratio is omitted or null, and reject invalid values.
 - Use fallback values for empty environment variables and replace undefined
   variables without a fallback with an empty value in file-based YAML configuration.
+- Prevent .NET Framework assembly redirection from hanging or reusing stale
+  references when assembly-reference enumeration fails.
 
 ## [v1.18.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.18.0)
 
