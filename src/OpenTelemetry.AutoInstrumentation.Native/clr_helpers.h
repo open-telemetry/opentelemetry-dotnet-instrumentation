@@ -9,6 +9,7 @@
 #include <corhlpr.h>
 #include <corprof.h>
 #include <functional>
+#include <unordered_map>
 #include <utility>
 
 #include "com_ptr.h"
@@ -704,6 +705,10 @@ TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdTo
 
 mdAssemblyRef FindAssemblyRef(const ComPtr<IMetaDataAssemblyImport>& assembly_import,
                               const WSTRING& assembly_name, const Version& version);
+
+void RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImport>&                   assembly_import,
+                                const ComPtr<IMetaDataAssemblyEmit>&                     assembly_emit,
+                                std::unordered_map<WSTRING, AssemblyVersionRedirection>& redirects);
 
 HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit, const AssemblyProperty& corAssemblyProperty,
                              mdAssemblyRef* corlib_ref);
