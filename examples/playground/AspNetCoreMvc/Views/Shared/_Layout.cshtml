@@ -11,17 +11,5 @@
     <div>
         @RenderBody()
     </div>
-    @if (ViewBag.StackTrace != null)
-    {
-        <h3>Stack trace: </h3>
-        <div style="padding-left: 10px;">
-            <pre>
-                @foreach (string entry in ViewBag.StackTrace)
-                {
-                    @(entry)
-                }
-            </pre>
-        </div>
-    }
 </body>
 </html>
