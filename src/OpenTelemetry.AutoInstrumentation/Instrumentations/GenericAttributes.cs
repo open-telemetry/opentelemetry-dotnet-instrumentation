@@ -7,6 +7,7 @@ internal static class GenericAttributes
 {
     public const string SchemaUrl1390 = "https://opentelemetry.io/schemas/1.39.0";
     public const string SchemaUrl1400 = "https://opentelemetry.io/schemas/1.40.0";
+    public const string SchemaUrl1440 = "https://opentelemetry.io/schemas/1.44.0";
 
     internal static class Keys
     {

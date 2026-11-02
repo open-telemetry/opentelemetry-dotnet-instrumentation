@@ -56,7 +56,7 @@ public static class ConsumerConstructorIntegration
         if (consumerGroupId is not null)
         {
             // Store the association between consumer instance and "group.id" from configuration,
-            // will be used to populate "messaging.kafka.consumer.group" attribute value
+            // will be used to populate "messaging.consumer.group.name" attribute value
             ConsumerCache.Add(instance!, consumerGroupId);
         }
 
