@@ -17,7 +17,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 #### Dependency updates
 
 - Following packages updated
-  - `OpenTelemetry.OpAmp.Client` from `0.9.0-alpha.1` to `0.9.0-alpha.2`.
+  - `OpenTelemetry.OpAmp.Client` from `0.9.0-alpha.1` to `0.9.0-alpha.3`.
 - .NET Framework only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNet` from `1.20.1` to `1.20.2`,
   - `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
