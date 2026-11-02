@@ -1,8 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Collections;
-using Examples.AspNetCoreMvc.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Examples.AspNetCoreMvc.Controllers;
@@ -12,27 +10,15 @@ public class HomeController : Controller
     public IActionResult Index()
     {
         var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation");
-        ViewBag.TracerAssemblyLocation = Type.GetType("OpenTelemetry.Trace.Tracer, OpenTelemetry.Api")?.Assembly.Location;
-        ViewBag.ClrProfilerAssemblyLocation = instrumentationType?.Assembly.Location;
-        ViewBag.StackTrace = StackTraceHelper.GetUsefulStack();
+        ViewBag.TracerAssemblyLoaded = Type.GetType("OpenTelemetry.Trace.Tracer, OpenTelemetry.Api") is not null;
+        ViewBag.ClrProfilerAssemblyLoaded = instrumentationType is not null;
 
-        var prefixes = new[] { "COR_", "CORECLR_", "DOTNET_", "OTEL_" };
-
-        var envVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()
-                      from prefix in prefixes
-                      let key = (envVar.Key as string)?.ToUpperInvariant()
-                      let value = envVar.Value as string
-                      where key.StartsWith(prefix, StringComparison.Ordinal)
-                      orderby key
-                      select new KeyValuePair<string, string>(key, value);
-
-        return View(envVars.ToList());
+        return View();
     }
 
     [Route("delay/{seconds}")]
     public IActionResult Delay(int seconds)
     {
-        ViewBag.StackTrace = StackTraceHelper.GetUsefulStack();
         Thread.Sleep(TimeSpan.FromSeconds(seconds));
         return View(seconds);
     }
@@ -40,7 +26,6 @@ public class HomeController : Controller
     [Route("delay-async/{seconds}")]
     public async Task<IActionResult> DelayAsync(int seconds)
     {
-        ViewBag.StackTrace = StackTraceHelper.GetUsefulStack();
         await Task.Delay(TimeSpan.FromSeconds(seconds)).ConfigureAwait(false);
         return View("Delay", seconds);
     }
