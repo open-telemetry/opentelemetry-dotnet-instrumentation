@@ -33,8 +33,8 @@
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Zipkin"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Extensions.Propagators"), {1, 0, 0, 0} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 20, 1, 1523} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 20, 1, 1523} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 20, 2, 1550} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 20, 2, 1550} }, \
         { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 20, 1, 1506} }, \
         { _W("OpenTelemetry.Instrumentation.Http"), {1, 20, 1, 1498} }, \
         { _W("OpenTelemetry.Instrumentation.Process"), {1, 20, 1, 1526} }, \
@@ -182,8 +182,8 @@
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Zipkin"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Extensions.Propagators"), {1, 0, 0, 0} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 20, 1, 1523} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 20, 1, 1523} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 20, 2, 1550} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 20, 2, 1550} }, \
         { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 20, 1, 1506} }, \
         { _W("OpenTelemetry.Instrumentation.Http"), {1, 20, 1, 1498} }, \
         { _W("OpenTelemetry.Instrumentation.Process"), {1, 20, 1, 1526} }, \
@@ -330,8 +330,8 @@
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Zipkin"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Extensions.Propagators"), {1, 0, 0, 0} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 20, 1, 1523} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 20, 1, 1523} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 20, 2, 1550} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 20, 2, 1550} }, \
         { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 20, 1, 1506} }, \
         { _W("OpenTelemetry.Instrumentation.Http"), {1, 20, 1, 1498} }, \
         { _W("OpenTelemetry.Instrumentation.Process"), {1, 20, 1, 1526} }, \
@@ -396,8 +396,8 @@
         { _W("OpenTelemetry.Exporter.Prometheus.HttpListener"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Exporter.Zipkin"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Extensions.Propagators"), {1, 0, 0, 0} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 20, 1, 1523} }, \
-        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 20, 1, 1523} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet"), {1, 20, 2, 1550} }, \
+        { _W("OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"), {1, 20, 2, 1550} }, \
         { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 20, 1, 1506} }, \
         { _W("OpenTelemetry.Instrumentation.Http"), {1, 20, 1, 1498} }, \
         { _W("OpenTelemetry.Instrumentation.Process"), {1, 20, 1, 1526} }, \
