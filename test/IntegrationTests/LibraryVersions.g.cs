@@ -55,8 +55,8 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "6.0.36",
-                "8.0.23",
-                "9.0.12",
+                "8.0.33",
+                "9.0.22",
 #if NET10_0
                 "10.0.0",
 #endif

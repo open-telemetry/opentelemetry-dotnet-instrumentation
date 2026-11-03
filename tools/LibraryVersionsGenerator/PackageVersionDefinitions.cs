@@ -47,8 +47,8 @@ internal static class PackageVersionDefinitions
             [
                 new("6.0.36"),
                 // new("7.0.20"), all versions contains references to vulnerable packages https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
-                new("8.0.23"),
-                new("9.0.12"),
+                new("8.0.33"),
+                new("9.0.22"),
                 new("10.0.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]),
                 new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
             ]
