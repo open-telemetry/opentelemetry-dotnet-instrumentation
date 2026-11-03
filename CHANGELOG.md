@@ -17,7 +17,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 #### Dependency updates
 
 - Following packages updated
-  - `OpenTelemetry.OpAmp.Client` from `0.9.0-alpha.1` to `0.9.0-alpha.2`.
+  - `OpenTelemetry.OpAmp.Client` from `0.9.0-alpha.1` to `0.9.0-alpha.3`.
+- .NET Framework only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.20.1` to `1.20.2`,
+  - `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
+    from `1.20.1` to `1.20.2`.
 
 ### Deprecated
 
@@ -25,12 +29,16 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fix instrumentation errors and unfinished Kafka `ProduceAsync` spans when no
+  delivery result is available.
 - Reject sequences and mappings supplied for scalar fields in file-based
   YAML configuration.
 - Apply scalar validation to file-based trace ID sampling ratios, use `1.0` when
   the ratio is omitted or null, and reject invalid values.
 - Use fallback values for empty environment variables and replace undefined
   variables without a fallback with an empty value in file-based YAML configuration.
+- Prevent .NET Framework assembly redirection from hanging or reusing stale
+  references when assembly-reference enumeration fails.
 
 - Improved OpAMP plugin-state report scheduling by coalescing server-requested
   full-state reports and ensuring at least five seconds between consecutive sends.

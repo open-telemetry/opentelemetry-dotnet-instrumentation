@@ -1,4 +1,4 @@
-﻿// Copyright The OpenTelemetry Authors
+// Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
 #include "cor_profiler.h"
@@ -380,128 +380,8 @@ void CorProfiler::RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImpor
         return;
     }
 
-    HRESULT       hr               = S_FALSE;
-    HCORENUM      core_enum_handle = NULL;
-    const ULONG   assembly_refs_sz = 16;
-    mdAssemblyRef assembly_refs[assembly_refs_sz];
-    ULONG         assembly_refs_count;
-
-    // Inspect all assembly references and make any necessary redirects.
-    while (true)
-    {
-        hr = assembly_import.Get()->EnumAssemblyRefs(&core_enum_handle, assembly_refs, assembly_refs_sz,
-                                                     &assembly_refs_count);
-        if (hr == S_FALSE)
-        {
-            // This is expected when the enumeration finished.
-            Logger::Debug("RedirectAssemblyReferences: EnumAssemblyRefs returned S_FALSE assembly_refs_count=",
-                          assembly_refs_count);
-            break;
-        }
-
-        // Loop and process each AssemblyRef
-        for (ULONG i = 0; i < assembly_refs_count; i++)
-        {
-            const void*      public_key_or_token;
-            ULONG            public_key_or_token_sz;
-            WCHAR            name[kNameMaxSize];
-            ULONG            name_len = 0;
-            ASSEMBLYMETADATA assembly_metadata{};
-            const void*      hash_value;
-            ULONG            hash_value_sz;
-            DWORD            assembly_flags = 0;
-
-            hr = assembly_import->GetAssemblyRefProps(assembly_refs[i], &public_key_or_token, &public_key_or_token_sz,
-                                                      name, kNameMaxSize, &name_len, &assembly_metadata, &hash_value,
-                                                      &hash_value_sz, &assembly_flags);
-            if (FAILED(hr) || name_len == 0)
-            {
-                Logger::Warn("RedirectAssemblyReferences: GetAssemblyRefProps failed HRESULT=", HResultStr(hr));
-                continue;
-            }
-
-            const auto wsz_name = WSTRING(name);
-            if (Logger::IsDebugEnabled())
-            {
-                Logger::Debug("RedirectAssemblyReferences: AssemblyRef for [", wsz_name,
-                              "] version=", AssemblyVersionStr(assembly_metadata));
-            }
-
-            const auto found_redirect = assembly_version_redirect_map_current_framework_->find(wsz_name);
-            if (found_redirect == assembly_version_redirect_map_current_framework_->end())
-            {
-                // No redirection to be applied here.
-                continue;
-            }
-
-            AssemblyVersionRedirection& redirect           = found_redirect->second;
-            auto                        version_comparison = redirect.CompareToAssemblyVersion(assembly_metadata);
-            if (version_comparison > 0)
-            {
-                // Redirection was a higher version, let's proceed with the redirection
-                Logger::Info("RedirectAssemblyReferences: redirecting [", wsz_name,
-                             "] from_version=", AssemblyVersionStr(assembly_metadata),
-                             " to_version=", redirect.VersionStr(),
-                             " previous_redirects=", redirect.ulRedirectionCount);
-                assembly_metadata.usMajorVersion   = redirect.usMajorVersion;
-                assembly_metadata.usMinorVersion   = redirect.usMinorVersion;
-                assembly_metadata.usBuildNumber    = redirect.usBuildNumber;
-                assembly_metadata.usRevisionNumber = redirect.usRevisionNumber;
-                hr = assembly_emit.Get()->SetAssemblyRefProps(assembly_refs[i], public_key_or_token,
-                                                              public_key_or_token_sz, name, &assembly_metadata,
-                                                              hash_value, hash_value_sz, assembly_flags);
-                if (hr != S_OK)
-                {
-                    Logger::Warn("RedirectAssemblyReferences: redirection error: SetAssemblyRefProps HRESULT=",
-                                 HResultStr(hr));
-                }
-                else
-                {
-                    redirect.ulRedirectionCount++;
-                }
-            }
-            else if (version_comparison == 0)
-            {
-                // No need to redirect since it is the same assembly version on the ref and on the map
-                if (Logger::IsDebugEnabled())
-                {
-                    Logger::Debug("RedirectAssemblyReferences: same version for [", wsz_name,
-                                  "] version=", redirect.VersionStr(),
-                                  " previous_redirects=", redirect.ulRedirectionCount);
-                }
-            }
-            else
-            {
-                // Redirection points to a lower version. If no redirection was done yet modify the map to
-                // point to the higher version. If redirection was already applied do not redirect and let
-                // the runtime handle it.
-                if (redirect.ulRedirectionCount == 0)
-                {
-                    // Redirection was not applied yet use the higher version. Also increment the redirection
-                    // count to indicate that this version was already used.
-                    Logger::Info("RedirectAssemblyReferences: redirection update for [", wsz_name,
-                                 "] to_version=", AssemblyVersionStr(assembly_metadata),
-                                 " previous_version_redirection=", redirect.VersionStr());
-                    redirect.usMajorVersion   = assembly_metadata.usMajorVersion;
-                    redirect.usMinorVersion   = assembly_metadata.usMinorVersion;
-                    redirect.usBuildNumber    = assembly_metadata.usBuildNumber;
-                    redirect.usRevisionNumber = assembly_metadata.usRevisionNumber;
-                    redirect.ulRedirectionCount++;
-                }
-                else
-                {
-                    // This is risky: we aren't sure if the reference will be actually be used during the runtime.
-                    // So it is possible that nothing will happen but we can't be sure. Using higher versions on
-                    // the OpenTelemetry.AutoInstrumentation dependencies minimizes the chances of hitting this code
-                    // path.
-                    Logger::Error("RedirectAssemblyReferences: AssemblyRef [", wsz_name,
-                                  "] version=", AssemblyVersionStr(assembly_metadata),
-                                  " has a higher version than an earlier applied redirection to version=",
-                                  redirect.VersionStr());
-                }
-            }
-        }
-    }
+    trace::RedirectAssemblyReferences(assembly_import, assembly_emit,
+                                      *assembly_version_redirect_map_current_framework_);
 }
 
 void CorProfiler::RewritingPInvokeMaps(const ModuleMetadata& module_metadata, const WSTRING& nativemethods_type_name)
