@@ -55,8 +55,8 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "6.0.36",
-                "8.0.23",
-                "9.0.12",
+                "8.0.33",
+                "9.0.22",
 #if NET10_0
                 "10.0.0",
 #endif
@@ -362,7 +362,7 @@ public static partial class LibraryVersion
                 "4.0.0",
 #endif
 #if NET10_0
-                "4.6.2",
+                "4.7.0",
 #endif
 #endif
             ];
@@ -426,7 +426,7 @@ public static partial class LibraryVersion
                 "3.3.0",
 #endif
 #if NET10_0 || NET9_0 || NET8_0
-                "3.4.29",
+                "3.4.31",
 #endif
 #endif
             ];

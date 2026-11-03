@@ -33,8 +33,8 @@ public static partial class LibraryVersion
             "TestApplication.EntityFrameworkCore",
             [
                 new("6.0.36"),
-                new("8.0.23"),
-                new("9.0.12"),
+                new("8.0.33"),
+                new("9.0.22"),
                 new("10.0.0", supportedFrameworks: [ "net10.0" ]),
                 new("10.0.14", supportedFrameworks: [ "net10.0" ]),
             ]
@@ -163,7 +163,7 @@ public static partial class LibraryVersion
                 new("3.6.0"),
                 new("3.22.9"),
                 new("4.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("4.6.2", supportedFrameworks: [ "net10.0" ]),
+                new("4.7.0", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -192,7 +192,7 @@ public static partial class LibraryVersion
                 new("3.0.25", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("3.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("3.3.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("3.4.29", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("3.4.31", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
