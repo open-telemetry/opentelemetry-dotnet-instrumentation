@@ -40,6 +40,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Prevent .NET Framework assembly redirection from hanging or reusing stale
   references when assembly-reference enumeration fails.
 
+- Improved OpAMP plugin-state report scheduling by coalescing server-requested
+  full-state reports and ensuring at least five seconds between consecutive sends.
+
 ## [v1.18.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.18.0)
 
 ### Added

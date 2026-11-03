@@ -30,7 +30,9 @@ public interface IOpAmpPlugin
     /// <param name="client">The OpAMP client instance.</param>
     /// <remarks>
     /// This callback runs before <see cref="IPlugin.Initialized"/>. Register listeners here to receive
-    /// messages from the initial server response. The client may be retained for later use.
+    /// messages from the initial server response. The client may be retained for later use. Listeners
+    /// may receive messages before <see cref="AfterOpAmpClientStarted"/>; publish their state, but defer
+    /// reporting notifications until the client has started.
     /// </remarks>
     void ConfigureOpAmpClient(IOpAmpClient client);
 
@@ -41,6 +43,9 @@ public interface IOpAmpPlugin
     /// This does not guarantee server connectivity or successful initial-message delivery. The callback
     /// is skipped if preparation fails, the start operation throws or is cancelled, or shutdown begins
     /// first. When invoked, it completes before <see cref="BeforeOpAmpClientStopped"/> begins.
+    /// Plugins that report state should publish their initial snapshots and issue the corresponding
+    /// <see cref="IOpAmpClient"/> notifications from this callback. Automatic instrumentation manages
+    /// server capability timing.
     /// </remarks>
     void AfterOpAmpClientStarted();
 

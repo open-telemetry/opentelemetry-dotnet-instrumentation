@@ -22,18 +22,26 @@ internal sealed class MockOpAmpServer : IDisposable
     private readonly TestHttpServer _listener;
     private readonly string _host;
     private readonly ServerCapabilities _capabilities;
+    private readonly Func<AgentToServer, long, ServerToAgent>? _responseFactory;
 
     private readonly List<Expectation> _expectations = new();
     private readonly BlockingCollection<AgentToServer> _frames = new(10); // bounded to avoid memory leak
     private readonly List<NameValueCollection> _receivedHeaders = [];
     private long _pendingFlags;
+    private long _requestCount;
 
-    public MockOpAmpServer(ITestOutputHelper output, string host = "127.0.0.1", ServerCapabilities capabilities = default, ServerToAgentFlags flags = default)
+    public MockOpAmpServer(
+        ITestOutputHelper output,
+        string host = "127.0.0.1",
+        ServerCapabilities capabilities = default,
+        ServerToAgentFlags flags = default,
+        Func<AgentToServer, long, ServerToAgent>? responseFactory = null)
     {
         _output = output;
         _host = host;
         _capabilities = capabilities;
         _pendingFlags = (long)flags;
+        _responseFactory = responseFactory;
 #if NETFRAMEWORK
         _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/opamp/");
 #else
@@ -181,7 +189,6 @@ internal sealed class MockOpAmpServer : IDisposable
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
         var frame = AgentToServer.Parser.ParseFrom(ctx.Request.InputStream);
-        _frames.Add(frame);
 
         var headersCopy = new NameValueCollection();
         foreach (var key in ctx.Request.Headers.AllKeys)
@@ -189,10 +196,7 @@ internal sealed class MockOpAmpServer : IDisposable
             headersCopy.Add(key, ctx.Request.Headers[key]);
         }
 
-        _receivedHeaders.Add(headersCopy);
-
-        var flags = (ulong)Interlocked.Exchange(ref _pendingFlags, 0);
-        var response = GenerateResponse(frame, _capabilities, flags);
+        var response = ProcessFrame(frame, headersCopy);
 
         ctx.Response.StatusCode = (int)HttpStatusCode.OK;
         ctx.Response.ContentType = "application/x-protobuf";
@@ -244,18 +248,13 @@ internal sealed class MockOpAmpServer : IDisposable
             return;
         }
 
-        _frames.Add(frame);
-
         var headersCopy = new NameValueCollection();
         foreach (var key in ctx.Request.Headers.Keys)
         {
             headersCopy.Add(key, ctx.Request.Headers[key]);
         }
 
-        _receivedHeaders.Add(headersCopy);
-
-        var flags = (ulong)Interlocked.Exchange(ref _pendingFlags, 0);
-        var response = GenerateResponse(frame, _capabilities, flags);
+        var response = ProcessFrame(frame, headersCopy);
 
         ctx.Response.StatusCode = (int)HttpStatusCode.OK;
         ctx.Response.ContentType = "application/x-protobuf";
@@ -264,6 +263,22 @@ internal sealed class MockOpAmpServer : IDisposable
         await ctx.Response.CompleteAsync().ConfigureAwait(false);
     }
 #endif
+
+    private byte[] ProcessFrame(AgentToServer frame, NameValueCollection headers)
+    {
+        var requestNumber = Interlocked.Increment(ref _requestCount);
+        if (_responseFactory != null)
+        {
+            // Custom response handling bypasses bounded storage, so backpressure cannot hide reply loops.
+            return _responseFactory(frame, requestNumber).ToByteArray();
+        }
+
+        _frames.Add(frame);
+        _receivedHeaders.Add(headers);
+
+        var flags = (ulong)Interlocked.Exchange(ref _pendingFlags, 0);
+        return GenerateResponse(frame, _capabilities, flags);
+    }
 
     private void WriteOutput(string msg)
     {

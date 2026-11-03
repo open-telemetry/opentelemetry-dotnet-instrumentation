@@ -220,7 +220,8 @@ public class MyOpAmpPlugin : IPlugin, IOpAmpPlugin
 
     public void AfterOpAmpClientStarted()
     {
-        // Startup completed; connectivity is not guaranteed.
+        // Publish initial reporting state and issue enabled reporting notifications here.
+        // Connectivity is not guaranteed.
     }
 
     public void BeforeOpAmpClientStopped()
@@ -249,6 +250,11 @@ OpAMP requests do not produce application spans. Listener callbacks must return
 promptly. A blocking listener can delay other listeners and subsequent OpAMP
 message processing. Hand off lengthy work and return from the callback promptly.
 
+OpAMP plugin-state reports are scheduled asynchronously. Repeated server requests
+for full state are coalesced, ensuring at least five seconds between consecutive
+server-requested full-state sends. Plugin notifications are scheduled independently
+and are not subject to this interval.
+
 ### Remote configuration status reporting
 
 The selected OpAMP plugin can implement `IProvideRemoteConfigStatus` and set
@@ -266,7 +272,9 @@ offer arrives or before application finishes. Return `null` when no status is
 available; that omits the status from the report. While applying a received
 configuration, return `RemoteConfigStatusCode.Applying` with its hash.
 
-Call `client.NotifyRemoteConfigStatusChanged()` after publishing a new status.
+If a status is already available, call `client.NotifyRemoteConfigStatusChanged()`
+from `AfterOpAmpClientStarted` after publishing it. Otherwise, call when the first
+status becomes available and whenever it later changes.
 Status reporting continues if the server stops offering remote configuration.
 The getter may be called while a reporting notification is in progress and must
 return promptly. Publish status safely across threads and provide a stable
@@ -294,14 +302,14 @@ an `IReadOnlyCollection<EffectiveConfigFile>`. File names must be unique.
 An empty collection reports an empty configuration. Contents are transmitted
 without redaction, so the plugin is responsible for removing sensitive values.
 
-Retain the client passed to `ConfigureOpAmpClient` and call
-`client.NotifyEffectiveConfigChanged()` when the effective configuration changes.
+Retain the client passed to `ConfigureOpAmpClient`. From
+`AfterOpAmpClientStarted`, call `client.NotifyEffectiveConfigChanged()` after
+publishing the initial effective configuration and whenever it later changes.
 Repeated notifications can resend unchanged configuration.
 
-A notification caller must allow `GetEffectiveConfig()` running on another thread
-to complete. The plugin must also provide current configuration when reporting
-becomes available or the server requests full state; those reads do not require
-a notification.
+Notifications remain pending while effective configuration reporting is unavailable
+and may be coalesced. The provider may also be queried independently for a
+server-requested full-state report.
 
 `GetEffectiveConfig()` must be read-only and return promptly. It must tolerate
 concurrent configuration updates and plugin lifecycle callbacks, including

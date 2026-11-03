@@ -36,8 +36,6 @@ public partial class Plugin : IPlugin, IProvideEffectiveConfig, IProvideRemoteCo
         ThrowIfMissing(client);
         Console.WriteLine($"{nameof(Plugin)}.{nameof(ConfigureOpAmpClient)}() invoked.");
         _opAmpClient = client;
-        client.NotifyEffectiveConfigChanged();
-        client.NotifyRemoteConfigStatusChanged();
     }
 
     public void AfterOpAmpClientStarted()
