@@ -300,14 +300,14 @@ TEST(ContinuousProfilerCaptureTest, PauseFinishesTheAdmittedCohortForPublication
     TwoFrameStackWalker                  walker(&profiler, MidCaptureAction::Pause);
     profiler.SetStackWalker(&walker);
     profiler.StageThreadSamplingConfiguration(1000, 0);
-    std::unordered_map<ThreadID, std::vector<FunctionIdentifier>> stacks;
+    ThreadStacksBuffer stacks;
 
     EXPECT_TRUE(CaptureFunctionIdentifiersForThreads(&profiler, nullptr, {1, 2}, stacks));
 
     EXPECT_EQ(4, walker.deliveredFrames);
-    ASSERT_EQ(2u, stacks.size());
-    EXPECT_EQ(2u, stacks.at(1).size());
-    EXPECT_EQ(2u, stacks.at(2).size());
+    ASSERT_EQ(2u, stacks.Stacks().size());
+    EXPECT_EQ(2u, stacks.Stacks().at(1).size());
+    EXPECT_EQ(2u, stacks.Stacks().at(2).size());
 }
 
 TEST(ContinuousProfilerCaptureTest, ShutdownAbortsAtAFrameBoundaryAndDiscardsTheCohort)
@@ -316,13 +316,13 @@ TEST(ContinuousProfilerCaptureTest, ShutdownAbortsAtAFrameBoundaryAndDiscardsThe
     ContinuousProfiler                   profiler(allocationSessions);
     TwoFrameStackWalker                  walker(&profiler, MidCaptureAction::Shutdown);
     profiler.SetStackWalker(&walker);
-    std::unordered_map<ThreadID, std::vector<FunctionIdentifier>> stacks;
+    ThreadStacksBuffer stacks;
 
     EXPECT_FALSE(CaptureFunctionIdentifiersForThreads(&profiler, nullptr, {1}, stacks));
 
     EXPECT_EQ(2, walker.deliveredFrames);
     EXPECT_TRUE(walker.stopped);
-    EXPECT_TRUE(stacks.empty());
+    EXPECT_TRUE(stacks.Stacks().empty());
 }
 
 TEST(ContinuousProfilerCaptureTest, ShutdownWaitsForTheStackWalkerWorker)
