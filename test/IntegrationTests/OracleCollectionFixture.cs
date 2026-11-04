@@ -725,7 +725,14 @@ exit
 
         foreach (var fileName in WalletFiles)
         {
-            var bytes = await container.ReadFileAsync($"{OracleWalletDirectory}/{fileName}").ConfigureAwait(false);
+            // Transfer binary wallet files without the TAR reader's exact buffer-size requirement on .NET Framework.
+            var result = await container.ExecAsync(["base64", "-w", "0", $"{OracleWalletDirectory}/{fileName}"]).ConfigureAwait(false);
+            if (result.ExitCode != 0)
+            {
+                throw new InvalidOperationException($"Failed to read Oracle wallet file {fileName}. Exit code: {result.ExitCode}. Stderr: {result.Stderr}");
+            }
+
+            var bytes = Convert.FromBase64String(result.Stdout);
             await WriteAllBytesAsync(Path.Combine(walletDirectory, fileName), bytes).ConfigureAwait(false);
         }
 

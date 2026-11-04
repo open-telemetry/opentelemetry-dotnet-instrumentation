@@ -77,6 +77,10 @@ public class SelectiveSamplerTests : TestHelper
                 samples.Any(sample => sample.SelectedForFrequentSampling && HasSpanContextAssociated(sample)))
                     > 1);
 
+        var lastSpanSampleTimestamp = threadSamples
+            .Where(HasSpanContextAssociated)
+            .Max(sample => sample.TimestampNanoseconds);
+
         // Sampling starts early, at the start of instrumentation init.
         var groupingStartingWithAllThreadSamples = groupedByTimestampAscending
             .SkipWhile(
@@ -84,8 +88,9 @@ public class SelectiveSamplerTests : TestHelper
                     IsSelectiveSamplingSamplesBatch(samples) ||
                     CollectedBeforeSpanStarted(samples) ||
                     CollectedBeforeFrequentSamplingStarted(samples))
-            // Omit last group from verification, as it may be collected after activity stopped.
-            .SkipLast(1);
+            // Continuous profiling can keep exporting during shutdown after the activity has stopped.
+            // Verify the mixed-mode cadence only through the last sample with an active span context.
+            .TakeWhile(samples => samples.Key <= lastSpanSampleTimestamp);
 
         var selectiveSinceLastContinuous = 3;
         var missedSelectiveBetweenContinuous = false;
