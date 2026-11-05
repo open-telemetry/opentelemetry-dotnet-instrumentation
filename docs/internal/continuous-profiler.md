@@ -16,6 +16,16 @@ events:
 
 You can export stack traces to any observability back end that supports profiling.
 
+Stack capture retains at most 512 frames per thread, including managed and native
+frames. CPU and selective sampling share a capture storage budget of 32,768 frame
+slots, including reusable vector capacity, and at most 1,024 cached thread entries.
+Allocation snapshots use the same per-stack depth limit. Excess frames are omitted
+while the captured prefix remains usable. Buffers are reused between captures
+within the storage budget. Before capture, buffers for threads outside the current
+cohort are removed, and cached capacity is reclaimed when needed to admit more
+threads. Initial reservations adapt to the cohort size to avoid exhausting the
+budget on many shallow stacks. These limits are internal and cannot be configured.
+
 ## Native runtime configuration lifecycle
 
 The native sampler is process-wide. Startup configuration is a **Seed**: the
