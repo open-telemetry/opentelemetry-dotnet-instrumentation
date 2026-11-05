@@ -19,6 +19,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Limit string Kafka message keys recorded on spans to 256 characters to prevent
+  oversized keys from being retained until export.
+
 ## [v1.19.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.19.0)
 
 ### Added
