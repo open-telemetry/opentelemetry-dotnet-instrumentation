@@ -3,15 +3,19 @@
 
 using System.Diagnostics;
 using System.Globalization;
+using NSubstitute;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;
 
 public class KafkaInstrumentationTests
 {
+    private const int MaxMessageKeyLength = 256;
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -104,6 +108,85 @@ public class KafkaInstrumentationTests
     {
         var value = new byte[] { 1, 2, 3 };
         Assert.Null(KafkaInstrumentation.ExtractMessageKeyValue(value));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(3)]
+    [InlineData(MaxMessageKeyLength)]
+    public void MessageKeyValueWithinMaximumLengthIsUnchanged(int length)
+    {
+        var key = new string('a', length);
+
+        Assert.Same(key, KafkaInstrumentation.ExtractMessageKeyValue(key));
+    }
+
+    [Theory]
+    [InlineData(MaxMessageKeyLength + 1)]
+    [InlineData(900_000)]
+    public void LongMessageKeyValueIsTruncated(int length)
+    {
+        var key = new string('a', length);
+
+        var actual = KafkaInstrumentation.ExtractMessageKeyValue(key);
+
+        Assert.Equal(new string('a', MaxMessageKeyLength), actual);
+    }
+
+    [Fact]
+    public void MessageKeyTruncationDoesNotSplitSurrogatePair()
+    {
+        var prefix = new string('a', MaxMessageKeyLength - 1);
+        var key = prefix + "\U0001F600" + new string('b', 10);
+
+        Assert.Equal(prefix, KafkaInstrumentation.ExtractMessageKeyValue(key));
+    }
+
+    [Fact]
+    public void MessageKeyTruncationPreservesCompleteSurrogatePair()
+    {
+        var prefix = new string('a', MaxMessageKeyLength - 2) + "\U0001F600";
+        var key = prefix + new string('b', 10);
+
+        Assert.Equal(prefix, KafkaInstrumentation.ExtractMessageKeyValue(key));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void LongMessageKeyValueIsTruncatedOnSpans(bool isProducer)
+    {
+        var key = new string('a', 900_000);
+        var message = Substitute.For<IKafkaMessage>();
+        message.Key.Returns(key);
+
+        using var listener = new ActivityListener
+        {
+            ShouldListenTo = static source => source.Name == "OpenTelemetry.AutoInstrumentation.Kafka",
+            Sample = static (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded
+        };
+        ActivitySource.AddActivityListener(listener);
+
+        var partition = Substitute.For<ITopicPartition>();
+        partition.Topic.Returns("test-topic");
+        var client = Substitute.For<INamedClient>();
+
+        using var activity = isProducer
+            ? KafkaInstrumentation.StartProducerActivity(partition, message, client)
+            : KafkaInstrumentation.StartConsumerActivity(client);
+        Assert.NotNull(activity);
+
+        if (!isProducer)
+        {
+            var consumeResult = Substitute.For<IConsumeResult>();
+            consumeResult.Message.Returns(message);
+            consumeResult.Topic = "test-topic";
+            KafkaInstrumentation.EndConsumerActivity(activity, consumeResult);
+        }
+
+        var actual = Assert.IsType<string>(activity.GetTagItem("messaging.kafka.message.key"));
+        Assert.Equal(new string('a', MaxMessageKeyLength), actual);
+        Assert.Same(key, message.Key);
     }
 
     private static ContinuationGenerator<object, Task<DeliveryResult>> CreateProduceAsyncContinuation()
