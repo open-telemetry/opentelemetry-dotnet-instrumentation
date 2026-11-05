@@ -415,7 +415,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "2.6.122",
-                "2.12.14",
+                "2.13.23",
 #if NET10_0 || NET9_0 || NET8_0
                 "3.0.25",
 #endif
