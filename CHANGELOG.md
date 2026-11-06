@@ -19,6 +19,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Preserve the selective sampling interval from each capture cycle in native
+  selective and CPU batch headers, including when the interval changes before
+  export.
 - Limit string Kafka message keys recorded on spans to 256 characters to prevent
   oversized keys from being retained until export.
 

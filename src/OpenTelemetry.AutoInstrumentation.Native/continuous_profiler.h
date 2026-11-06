@@ -250,8 +250,8 @@ public:
 
     explicit ThreadSamplesBuffer(std::vector<unsigned char>* buf);
     ~ThreadSamplesBuffer();
-    void StartBatch() const;
-    void StartSelectedThreadsBatch() const;
+    void StartBatch(uint32_t selectiveSamplingIntervalMilliseconds) const;
+    void StartSelectedThreadsBatch(uint32_t selectiveSamplingIntervalMilliseconds) const;
     void EndSelectedThreadsBatch() const;
     void WriteSpanContext(const thread_span_context& span_context) const;
     void StartSample(const ThreadState* state, const thread_span_context& span_context) const;

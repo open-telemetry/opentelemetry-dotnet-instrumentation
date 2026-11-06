@@ -3,6 +3,8 @@
 
 using System.Text;
 
+#pragma warning disable CA1031 // Exporter parsing must not propagate failures to the host application.
+
 namespace TestApplication.ContinuousProfiler;
 
 /// <summary>
@@ -30,6 +32,8 @@ internal sealed class SampleNativeFormatParser
         uint batchThreadIndex = 0;
         var samples = new List<ThreadSample>();
         long sampleStartMillis = 0;
+        uint selectiveSamplingIntervalMilliseconds = 0;
+        var frequentSamplingEnabled = _frequentSamplingEnabled;
 
         var position = 0;
 
@@ -45,12 +49,15 @@ internal sealed class SampleNativeFormatParser
                 if (operationCode == OpCodes.StartBatch)
                 {
                     var version = ReadInt(buffer, ref position);
-                    if (version != 1)
+                    if (version != 1 && version != 2)
                     {
                         return null; // not able to parse
                     }
 
                     sampleStartMillis = ReadInt64(buffer, ref position);
+                    selectiveSamplingIntervalMilliseconds = version == 2 ? (uint)ReadInt(buffer, ref position) : 0;
+                    frequentSamplingEnabled = version == 2 ? selectiveSamplingIntervalMilliseconds != 0 : _frequentSamplingEnabled;
+                    codeDictionary.Clear();
 
                     // TODO Debug logs to measure overhead https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3205
                     /* if (IsLogLevelDebugEnabled)
@@ -72,7 +79,7 @@ internal sealed class SampleNativeFormatParser
 
                     var selectedForFrequentSampling = false;
 
-                    if (_frequentSamplingEnabled)
+                    if (frequentSamplingEnabled)
                     {
                         selectedForFrequentSampling = buffer[position++] == 1;
                     }
@@ -95,7 +102,8 @@ internal sealed class SampleNativeFormatParser
                         threadName,
                         "continuous-profiler",
                         threadIndex,
-                        selectedForFrequentSampling);
+                        selectedForFrequentSampling,
+                        selectiveSamplingIntervalMilliseconds);
 
                     ReadStackFrames(code, threadSample, codeDictionary, buffer, ref position);
 
@@ -221,6 +229,7 @@ internal sealed class SampleNativeFormatParser
     {
         var selectiveSamplerSamples = new List<ThreadSample>();
         var position = 0;
+        uint selectiveSamplingIntervalMilliseconds = 0;
 
         uint threadIndex = 0;
 
@@ -234,6 +243,14 @@ internal sealed class SampleNativeFormatParser
 
                 if (operationCode == OpCodes.SelectiveSampleBatchStart)
                 {
+                    var version = ReadInt(buffer, ref position);
+                    if (version != 2)
+                    {
+                        return [];
+                    }
+
+                    selectiveSamplingIntervalMilliseconds = (uint)ReadInt(buffer, ref position);
+
                     // each batch has independently coded strings
                     codeDictionary.Clear();
                 }
@@ -253,7 +270,8 @@ internal sealed class SampleNativeFormatParser
                         threadName,
                         "selective-sampler",
                         threadIndex++,
-                        true);
+                        true,
+                        selectiveSamplingIntervalMilliseconds);
 
                     var code = ReadShort(buffer, ref position);
 

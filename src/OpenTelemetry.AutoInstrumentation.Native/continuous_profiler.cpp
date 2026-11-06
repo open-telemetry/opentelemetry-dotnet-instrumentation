@@ -367,7 +367,11 @@ ContinuousProfiler::ContinuousProfiler(IAllocationSamplingSessionProvider& alloc
  * standard windows utf-16 strings
  *
  * I would write out the "spec" for this format here, but it essentially maps to the code
- * (e.g., 0x01 is StartBatch, which is followed by an int versionNumber and a long captureStartTimeInMillis)
+ * CPU batches start with 0x01, an int versionNumber, a long captureStartTimeInMillis and an int
+ * selectiveSamplingIntervalMilliseconds. Selective batches start with 0x0A, an int versionNumber and an int
+ * selectiveSamplingIntervalMilliseconds. The selective interval belongs to the configuration snapshot used to capture
+ * that batch; it also applies to samples marked for frequent sampling in CPU batches. Zero means selective sampling
+ * was disabled for that CPU batch, so its samples have no frequent-sampling flag.
  *
  * The bulk of the data is an (unknown length) array of frame strings, which are represented as coded strings in each
  * buffer.
@@ -392,7 +396,7 @@ constexpr auto kSelectedThreadSample      = 0x09;
 constexpr auto kSelectedThreadsStartBatch = 0x0A;
 constexpr auto kSelectedThreadsEndBatch   = 0x0B;
 
-constexpr auto kCurrentThreadSamplesBufferVersion = 1;
+constexpr auto kCurrentThreadSamplesBufferVersion = 2;
 
 constexpr FunctionIdentifier DefaultFunctionIdentifier = {0, 0, false};
 
@@ -410,18 +414,21 @@ ThreadSamplesBuffer::~ThreadSamplesBuffer()
         }                                                                                                              \
     }
 
-void ThreadSamplesBuffer::StartBatch() const
+void ThreadSamplesBuffer::StartBatch(const uint32_t selectiveSamplingIntervalMilliseconds) const
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteByte(kThreadSamplesStartBatch);
     WriteInt(kCurrentThreadSamplesBufferVersion);
     WriteCurrentTimeMillis();
+    WriteInt(static_cast<int32_t>(selectiveSamplingIntervalMilliseconds));
 }
 
-void ThreadSamplesBuffer::StartSelectedThreadsBatch() const
+void ThreadSamplesBuffer::StartSelectedThreadsBatch(const uint32_t selectiveSamplingIntervalMilliseconds) const
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteByte(kSelectedThreadsStartBatch);
+    WriteInt(kCurrentThreadSamplesBufferVersion);
+    WriteInt(static_cast<int32_t>(selectiveSamplingIntervalMilliseconds));
 }
 
 void ThreadSamplesBuffer::EndSelectedThreadsBatch() const
@@ -1211,11 +1218,11 @@ static thread_span_context GetContext(ThreadID threadId)
 static void ResolveSymbolsAndPublishBufferForAllThreads(
     ContinuousProfiler*                                                  prof,
     const std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacks,
-    const bool                                                           selectiveSamplingEnabled,
-    const uint32_t                                                       samplingInterval)
+    const uint32_t                                                       samplingInterval,
+    const uint32_t                                                       selectiveSamplingInterval)
 {
     prof->AllocateBuffer();
-    prof->cur_cpu_writer_->StartBatch();
+    prof->cur_cpu_writer_->StartBatch(selectiveSamplingInterval);
 
     for (const auto& [threadId, threadStack] : threadStacks)
     {
@@ -1229,7 +1236,7 @@ static void ResolveSymbolsAndPublishBufferForAllThreads(
 
         prof->cur_cpu_writer_->StartSample(threadState, spanContext);
 
-        if (selectiveSamplingEnabled)
+        if (selectiveSamplingInterval != 0)
         {
             const auto threadSelectedForFrequentSampling =
                 selective_sampling_trace_map.find(spanContext.trace_context_) != selective_sampling_trace_map.end();
@@ -1247,12 +1254,14 @@ static void ResolveSymbolsAndPublishBufferForAllThreads(
 }
 
 static void ResolveSymbolsAndPublishBufferForSelectedThreads(
-    ContinuousProfiler* prof, const std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacks)
+    ContinuousProfiler*                                                  prof,
+    const std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacks,
+    const uint32_t                                                       selectiveSamplingInterval)
 {
     std::vector<unsigned char> localBytes;
     ThreadSamplesBuffer        localBuf(&localBytes);
 
-    localBuf.StartSelectedThreadsBatch();
+    localBuf.StartSelectedThreadsBatch(selectiveSamplingInterval);
     for (const auto& [threadId, threadStack] : threadStacks)
     {
         if (threadStack.empty())
@@ -1350,12 +1359,11 @@ bool TryPrepareSelectedThreadSampling(ContinuousProfiler* prof, const std::chron
 
 // The implementation will suspend CLR for
 // .net and use thread suspension for netfx
-static void CaptureSamples(ContinuousProfiler* prof,
-                           ICorProfilerInfo7*  info7,
-                           const SamplingType  samplingType,
-                           ThreadStacksBuffer& threadStacksBuffer,
-                           const bool          selectiveSamplingEnabled,
-                           const uint32_t      cpuSamplingInterval)
+static void CaptureSamples(ContinuousProfiler*                prof,
+                           ICorProfilerInfo7*                 info7,
+                           const SamplingType                 samplingType,
+                           ThreadStacksBuffer&                threadStacksBuffer,
+                           const ThreadSamplingConfiguration& configuration)
 {
     if (samplingType == SamplingType::SelectedThreads &&
         !TryPrepareSelectedThreadSampling(prof, std::chrono::steady_clock::now()))
@@ -1474,11 +1482,13 @@ static void CaptureSamples(ContinuousProfiler* prof,
 
     if (samplingType == SamplingType::Continuous)
     {
-        ResolveSymbolsAndPublishBufferForAllThreads(prof, threadStacks, selectiveSamplingEnabled, cpuSamplingInterval);
+        ResolveSymbolsAndPublishBufferForAllThreads(prof, threadStacks, configuration.cpuSamplingIntervalMilliseconds,
+                                                    configuration.selectiveSamplingIntervalMilliseconds);
     }
     else if (samplingType == SamplingType::SelectedThreads)
     {
-        ResolveSymbolsAndPublishBufferForSelectedThreads(prof, threadStacks);
+        ResolveSymbolsAndPublishBufferForSelectedThreads(prof, threadStacks,
+                                                         configuration.selectiveSamplingIntervalMilliseconds);
     }
 }
 
@@ -1551,8 +1561,7 @@ static void SamplingThreadMainCore(ContinuousProfiler*    prof,
             iteration = 0;
         }
 
-        CaptureSamples(prof, info7, samplingType, threadStacksBuffer, configuration.SelectiveEnabled(),
-                       configuration.cpuSamplingIntervalMilliseconds);
+        CaptureSamples(prof, info7, samplingType, threadStacksBuffer, configuration);
 
         if (shutdownToken.IsCancellationRequested())
         {
