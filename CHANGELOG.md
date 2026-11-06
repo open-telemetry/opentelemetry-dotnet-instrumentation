@@ -11,6 +11,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- macOS libraries are now built and tested against
+  [macOS Sequoia 15 ARM64](https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md).
+
 #### Dependency updates
 
 ### Deprecated
@@ -22,6 +25,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Preserve the selective sampling interval from each capture cycle in native
   selective and CPU batch headers, including when the interval changes before
   export.
+- Fixed ADO.NET bytecode instrumentation clearing `Activity.Current` after an
+  async command created by a `DbDataSource`. Connection-based attributes are
+  skipped when unavailable. Provider command subclasses, including Npgsql
+  data-source commands, use their provider's instrumentation to avoid duplicate
+  database spans.
 - Limit string Kafka message keys recorded on spans to 256 characters to prevent
   oversized keys from being retained until export.
 
@@ -702,7 +710,7 @@ and runtime, then loads the correct version of dependency assemblies.
   and `OTEL_DOTNET_AUTO_ENTITYFRAMEWORKCORE_SET_DBSTATEMENT_FOR_TEXT`
   These features are always enabled. Statements are sanitized.
 - Support for macOS Ventura 13 x64.
-  macOS libraries are built and tested against [macOS Sonoma 14 arm64](https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md).
+  macOS libraries are built and tested against macOS Sonoma 14 arm64.
 
 ### Fixed
 

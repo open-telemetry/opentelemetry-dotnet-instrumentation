@@ -27,8 +27,8 @@ jobs:
             environment-type: host
             replace-artifacts: |
               bin-windows-2022!net
-          - artifact-name: macos-14
-            runner: macos-14
+          - artifact-name: macos-15
+            runner: macos-15
             environment-type: host
             replace-artifacts: |
               bin-windows-2022!net

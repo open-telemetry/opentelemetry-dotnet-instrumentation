@@ -26,6 +26,8 @@ internal sealed class StubDbConnection : DbConnection
 
     public override ConnectionState State => _state;
 
+    internal Task? ExecutionGate { get; set; }
+
     public override void ChangeDatabase(string databaseName)
     {
     }
@@ -34,7 +36,7 @@ internal sealed class StubDbConnection : DbConnection
 
     public override void Open() => _state = ConnectionState.Open;
 
-    protected override DbCommand CreateDbCommand() => new StubDbCommand { Connection = this };
+    protected override DbCommand CreateDbCommand() => new StubDbCommand { Connection = this, ExecutionGate = ExecutionGate };
 
     protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel) =>
         new StubDbTransaction(this, isolationLevel);

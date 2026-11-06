@@ -61,15 +61,16 @@ internal static class AdoNetInstrumentation
             tags.Add(DatabaseAttributes.Keys.DbQueryText, sqlStatementInfo.SanitizedSql);
         }
 
-        var databaseName = iDbCommand.Connection?.Database;
+        var connection = TryGetConnection(iDbCommand);
+        var databaseName = connection?.Database;
         if (!string.IsNullOrEmpty(databaseName))
         {
             tags.Add(DatabaseAttributes.Keys.DbNamespace, databaseName);
         }
 
-        if (iDbCommand is DbCommand dbCommand)
+        if (iDbCommand is DbCommand && connection is DbConnection dbConnection)
         {
-            var dataSource = dbCommand.Connection?.DataSource;
+            var dataSource = dbConnection.DataSource;
             if (!string.IsNullOrEmpty(dataSource))
             {
                 var connectionDetails = SqlConnectionDetails.ParseFromDataSource(dataSource!);
@@ -104,5 +105,20 @@ internal static class AdoNetInstrumentation
         }
 
         activity.Stop();
+    }
+
+    // Commands created by DbDataSource throw NotSupportedException on Connection.
+    // Skip the connection attributes instead of failing the call, so the activity still starts
+    // and Activity.Current is not lost (see CallTarget EndMethodHandler).
+    private static IDbConnection? TryGetConnection(IDbCommand command)
+    {
+        try
+        {
+            return command.Connection;
+        }
+        catch (NotSupportedException)
+        {
+            return null;
+        }
     }
 }

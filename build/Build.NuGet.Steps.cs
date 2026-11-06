@@ -56,7 +56,7 @@ partial class Build
                 "bin-alpine-arm64/linux-musl-arm64",
                 "bin-ubuntu-22.04/linux-x64",
                 "bin-ubuntu-22.04-arm/linux-arm64",
-                "bin-macos-14/osx-arm64",
+                "bin-macos-15/osx-arm64",
                 "bin-windows-2022/win-x64",
                 "bin-windows-2022/win-x86"
             };
