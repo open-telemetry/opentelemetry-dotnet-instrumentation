@@ -37,3 +37,13 @@ FROM integrated AS classic
 RUN Start-IISCommitDelay;`
     (Get-IISAppPool -Name DefaultAppPool).ManagedPipelineMode = 'Classic';`
     Stop-IISCommitDelay -Commit $True
+
+FROM integrated AS integrated-appdomains
+ARG configuration=Debug
+WORKDIR /inetpub/app-b
+COPY bin/${configuration}/app.publish .
+COPY app-b.yaml .
+WORKDIR /inetpub/wwwroot
+COPY app-a.yaml .
+COPY configure-appdomains.ps1 .
+RUN .\configure-appdomains.ps1

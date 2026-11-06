@@ -3,6 +3,7 @@
 
 using System.Globalization;
 #if NETFRAMEWORK
+using System.Collections.Specialized;
 using System.Net.Http;
 #endif
 using OpenTelemetry.AutoInstrumentation.Configurations;
@@ -20,6 +21,100 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 [Collection("Non-Parallel Collection")]
 public sealed class SettingsTests
 {
+#if NETFRAMEWORK
+    [Theory]
+    [InlineData(ConfigurationKeys.FileBasedConfiguration.Enabled)]
+    [InlineData(ConfigurationKeys.FileBasedConfiguration.FileName)]
+    internal void HostedYamlSelectionUsesEachAppsSettings(string key)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { key, "process" },
+        });
+
+        var firstApp = new NameValueCollection { { key, "first" } };
+        var secondApp = new NameValueCollection { { key, "second" } };
+
+        Assert.Equal("first", Settings.GetYamlConfigurationValue(key, firstApp, isHosted: true));
+        Assert.Equal("second", Settings.GetYamlConfigurationValue(key, secondApp, isHosted: true));
+
+        // the per-app values must not leak into process-level selection.
+        Assert.Equal("process", Settings.GetYamlConfigurationValue(key, [], isHosted: true));
+    }
+
+    [Theory]
+    [InlineData(ConfigurationKeys.FileBasedConfiguration.Enabled)]
+    [InlineData(ConfigurationKeys.FileBasedConfiguration.FileName)]
+    internal void HostedAppSettingsTakePrecedenceOverProcessYamlSelection(string key)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { key, "process" },
+        });
+
+        var appSettings = new NameValueCollection { { key, "app" } };
+
+        Assert.Equal("app", Settings.GetYamlConfigurationValue(key, appSettings, isHosted: true));
+        Assert.Equal("process", Settings.GetYamlConfigurationValue(key, appSettings, isHosted: false));
+        Assert.Equal("process", Settings.GetYamlConfigurationValue(key, [], isHosted: true));
+    }
+
+    [Fact]
+    internal void HostedRelativeYamlFileFromAppSettingsResolvesAgainstApplicationDirectory()
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { ConfigurationKeys.FileBasedConfiguration.FileName, null },
+        });
+
+        var appSettings = new NameValueCollection { { ConfigurationKeys.FileBasedConfiguration.FileName, "otel.yaml" } };
+
+        Assert.Equal(@"C:\app\otel.yaml", Settings.GetYamlConfigurationFilePath(appSettings, isHosted: true, @"C:\app"));
+    }
+
+    [Fact]
+    internal void HostedDefaultYamlFileResolvesAgainstApplicationDirectoryWhenEnabledInAppSettings()
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { ConfigurationKeys.FileBasedConfiguration.Enabled, null },
+            { ConfigurationKeys.FileBasedConfiguration.FileName, null },
+        });
+
+        var appSettings = new NameValueCollection { { ConfigurationKeys.FileBasedConfiguration.Enabled, "true" } };
+
+        Assert.Equal(@"C:\app\config.yaml", Settings.GetYamlConfigurationFilePath(appSettings, isHosted: true, @"C:\app"));
+    }
+
+    [Fact]
+    internal void HostedYamlFileFromProcessKeepsProcessRelativePath()
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { ConfigurationKeys.FileBasedConfiguration.Enabled, "true" },
+            { ConfigurationKeys.FileBasedConfiguration.FileName, null },
+        });
+
+        Assert.Equal("config.yaml", Settings.GetYamlConfigurationFilePath([], isHosted: true, @"C:\app"));
+
+        Environment.SetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName, "otel.yaml");
+        Assert.Equal("otel.yaml", Settings.GetYamlConfigurationFilePath([], isHosted: true, @"C:\app"));
+    }
+
+    [Fact]
+    internal void HostedRootedYamlFileFromAppSettingsIsUnchanged()
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { ConfigurationKeys.FileBasedConfiguration.FileName, null },
+        });
+
+        var appSettings = new NameValueCollection { { ConfigurationKeys.FileBasedConfiguration.FileName, @"D:\config\otel.yaml" } };
+
+        Assert.Equal(@"D:\config\otel.yaml", Settings.GetYamlConfigurationFilePath(appSettings, isHosted: true, @"C:\app"));
+    }
+#endif
+
     [Fact]
     internal void GeneralSettings_DefaultValues()
     {
