@@ -53,7 +53,7 @@ public class SqliteMicrosoftTests(ITestOutputHelper output) : TestHelper("Sqlite
             [
                 new() { Key = "db.system.name", Value = new AnyValue { StringValue = "sqlite" } },
                 new() { Key = "db.query.summary", Value = new AnyValue { StringValue = "SELECT MyTable" } },
-                new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT * FROM MyTable" } },
+                new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT *, ? AS ['Tis], ? AS OtherValue FROM MyTable" } },
                 new() { Key = "db.namespace", Value = new AnyValue { StringValue = "main" } }
             ]);
 
