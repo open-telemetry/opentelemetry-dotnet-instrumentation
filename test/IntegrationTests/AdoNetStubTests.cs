@@ -9,6 +9,56 @@ namespace IntegrationTests;
 
 public class AdoNetStubTests(ITestOutputHelper output) : TestHelper("AdoNetStub", output)
 {
+#if NET
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    [Trait("Category", "EndToEnd")]
+    public void DbDataSourceCommandsPreserveParentActivity(bool completeSynchronously)
+    {
+        EnableBytecodeInstrumentation();
+
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+
+        string[] operations = ["ExecuteScalarAsync", "ExecuteNonQueryAsync", "ExecuteReaderAsync"];
+        foreach (var operation in operations)
+        {
+            collector.Expect("TestApplication.AdoNetStub", span => span.Name == $"{operation}.parent");
+            collector.Expect("TestApplication.AdoNetStub", span => span.Name == $"{operation}.subsequent");
+            collector.ExpectAdoNet(
+                "SELECT FakeTable",
+                [
+                    new() { Key = "db.system.name", Value = new AnyValue { StringValue = "other_sql" } },
+                    new() { Key = "db.query.summary", Value = new AnyValue { StringValue = "SELECT FakeTable" } },
+                    new() { Key = "db.query.text", Value = new AnyValue { StringValue = "SELECT * FROM FakeTable" } }
+                ]);
+        }
+
+        collector.ExpectAllCollected(collected =>
+        {
+            Assert.Equal(9, collected.Count);
+            foreach (var operation in operations)
+            {
+                var parent = Assert.Single(collected, item => item.Span.Name == $"{operation}.parent").Span;
+                var subsequent = Assert.Single(collected, item => item.Span.Name == $"{operation}.subsequent").Span;
+                var database = Assert.Single(collected, item =>
+                    item.Scope.Name == "OpenTelemetry.AutoInstrumentation.AdoNet" && item.Span.ParentSpanId == parent.SpanId).Span;
+
+                Assert.Equal(parent.TraceId, database.TraceId);
+                Assert.Equal(parent.TraceId, subsequent.TraceId);
+                Assert.Equal(parent.SpanId, subsequent.ParentSpanId);
+            }
+
+            return true;
+        });
+
+        RunTestApplication(new() { Arguments = $"--db-data-source {completeSynchronously}" });
+
+        collector.AssertExpectations();
+    }
+#endif
+
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]

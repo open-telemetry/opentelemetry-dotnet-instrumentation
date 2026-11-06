@@ -22,6 +22,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fixed ADO.NET bytecode instrumentation clearing `Activity.Current` after an
+  async command created by a `DbDataSource`. Connection-based attributes are
+  skipped when unavailable. Provider command subclasses, including Npgsql
+  data-source commands, use their provider's instrumentation to avoid duplicate
+  database spans.
 - Limit string Kafka message keys recorded on spans to 256 characters to prevent
   oversized keys from being retained until export.
 

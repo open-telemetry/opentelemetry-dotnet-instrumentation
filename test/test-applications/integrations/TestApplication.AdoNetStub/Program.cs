@@ -6,6 +6,15 @@ using TestApplication.Shared;
 
 ConsoleHelper.WriteSplashScreen(args);
 
+#if NET
+if (ArgumentHelper.HasArgument(args, "--db-data-source"))
+{
+    var completeSynchronously = bool.Parse(ArgumentHelper.GetRequiredArgument(args, "--db-data-source"));
+    await DbDataSourceCommandScenario.RunAsync(completeSynchronously).ConfigureAwait(false);
+    return;
+}
+#endif
+
 using var connection = new StubDbConnection();
 await connection.OpenAsync().ConfigureAwait(false);
 
