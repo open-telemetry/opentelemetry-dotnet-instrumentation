@@ -25,7 +25,8 @@ internal static class AdoNetDbSystemMapper
             "Oracle.ManagedDataAccess.Client.OracleCommand" => (false, "oracle.db"),
             "System.Data.SqlClient.SqlCommand" => (false, "microsoft.sql_server"),
             "System.Data.SQLite.SQLiteCommand" => (false, "sqlite"),
-            _ => (true, "other_sql")
+            // Inherit provider handling for subclasses such as NpgsqlDataSourceCommand.
+            _ => t.BaseType is { } baseType ? GetInstrumentationDetails(baseType) : (true, "other_sql")
         });
     }
 
