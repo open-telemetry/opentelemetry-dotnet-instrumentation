@@ -95,7 +95,7 @@ $artifacts = @(
     "bin-alpine-arm64",
     "bin-ubuntu-22.04",
     "bin-ubuntu-22.04-arm",
-    "bin-macos-14",
+    "bin-macos-15",
     "bin-windows-2022"
 )
 $destFolder = "./bin/ci-artifacts/"
