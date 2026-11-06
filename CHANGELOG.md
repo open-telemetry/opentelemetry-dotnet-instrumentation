@@ -5,9 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.19.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.19.1..HEAD)
 
 ### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [v1.19.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.19.1)
 
 ### Changed
 
@@ -31,15 +43,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
     from `1.20.2` to `1.20.3`.
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 
-- Restore experimental SqlClient trace context propagation on .NET Framework
-  after the instrumentation package stopped leaving SQL spans in
-  `Activity.Current`.
 - Fixed ADO.NET bytecode instrumentation clearing `Activity.Current` after an
   async command created by a `DbDataSource`. Connection-based attributes are
   skipped when unavailable. Provider command subclasses, including Npgsql
