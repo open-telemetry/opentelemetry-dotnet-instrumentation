@@ -22,6 +22,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Preserve the selective sampling interval from each capture cycle in native
+  selective and CPU batch headers, including when the interval changes before
+  export.
 - Fixed ADO.NET bytecode instrumentation clearing `Activity.Current` after an
   async command created by a `DbDataSource`. Connection-based attributes are
   skipped when unavailable. Provider command subclasses, including Npgsql
