@@ -35,6 +35,8 @@ for further details.
 
 For ASP.NET application you can configure the most common `OTEL_` settings
 (like `OTEL_SERVICE_NAME`) via `appSettings` in `Web.config`.
+Each application reads its managed `appSettings` within its own AppDomain.
+Process environment variables take precedence over entries with the same key.
 
 If a service name is not explicitly configured, one will be generated for you.
 If the application is hosted on IIS in .NET Framework this will use
