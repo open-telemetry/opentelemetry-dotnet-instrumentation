@@ -368,7 +368,7 @@ void RejitHandler::EnqueueForRejit(std::vector<ModuleID>&              modulesVe
 
     Logger::Debug("RejitHandler::EnqueueForRejit");
 
-    std::function<void()> action = [=, modules = std::move(modulesVector), methods = std::move(modulesMethodDef),
+    std::function<void()> action = [this, modules = std::move(modulesVector), methods = std::move(modulesMethodDef),
                                     localPromise = promise, callRevertExplicitly = callRevertExplicitly]() mutable
     {
         // Request ReJIT

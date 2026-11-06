@@ -118,6 +118,33 @@ public class ContinuousProfilerTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
+    public void ExportThreadSamplesTruncatesDeepStacks()
+    {
+        EnableBytecodeInstrumentation();
+        using var collector = new MockProfilesCollector(Output);
+        SetExporter(collector);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.ContinuousProfiler.ThreadPlugin, TestApplication.ContinuousProfiler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
+        SetEnvironmentVariable("OTEL_TEST_DEEP_STACK", "true");
+
+        collector.ExpectCollected(ExpectCollected, "Expect Collected failed");
+        collector.Expect(
+            profileData => profileData.ResourceProfiles.Any(resourceProfiles =>
+                resourceProfiles.ScopeProfiles.Any(scopeProfile =>
+                    scopeProfile.Profiles.Any(profile => ContainsTruncatedDeepStack(profile, profileData.Dictionary)))),
+            "Expected an exported deep stack truncated to 512 frames");
+
+        var (_, _, processId) = RunTestApplication();
+
+        collector.ResourceExpector.ExpectStandardResources(processId, "TestApplication.ContinuousProfiler");
+
+        collector.AssertCollected();
+        collector.AssertExpectations();
+        collector.ResourceExpector.AssertExpectations();
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
     public async Task ExportThreadSamplesAcrossControlPlaneConfigurationChanges()
     {
         EnableBytecodeInstrumentation();
@@ -259,6 +286,27 @@ public class ContinuousProfilerTests : TestHelper
 #else
             if (stackTrace.Contains(expectedStackTrace))
 #endif
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool ContainsTruncatedDeepStack(Profile profile, ProfilesDictionary dictionary)
+    {
+        foreach (var sample in profile.Samples)
+        {
+            var stackIndex = sample.StackIndex;
+            if (stackIndex <= 0 || stackIndex >= dictionary.StackTable.Count)
+            {
+                continue;
+            }
+
+            var stack = dictionary.StackTable[stackIndex];
+            if (stack.LocationIndices.Count == 512 &&
+                GetFrameNames(stack, dictionary).Count(frame => frame.Contains("DeepStack.Capture", StringComparison.Ordinal)) > 1)
             {
                 return true;
             }

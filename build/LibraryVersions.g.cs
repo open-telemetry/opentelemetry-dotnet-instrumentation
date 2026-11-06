@@ -163,7 +163,7 @@ public static partial class LibraryVersion
                 new("3.6.0"),
                 new("3.22.9"),
                 new("4.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("4.7.0", supportedFrameworks: [ "net10.0" ]),
+                new("4.7.2", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -188,7 +188,7 @@ public static partial class LibraryVersion
             "TestApplication.StackExchangeRedis",
             [
                 new("2.6.122"),
-                new("2.12.14"),
+                new("2.13.23"),
                 new("3.0.25", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("3.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("3.3.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),

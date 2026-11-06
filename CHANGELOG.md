@@ -5,7 +5,28 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.18.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.19.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+- Fixed ADO.NET bytecode instrumentation clearing `Activity.Current` after an async
+  command created by a `DbDataSource` (for example `NpgsqlDataSource`). The command now
+  still starts its activity, without the connection-based attributes, so spans
+  started later stay in the same trace.
+- Limit string Kafka message keys recorded on spans to 256 characters to prevent
+  oversized keys from being retained until export.
+
+## [v1.19.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.19.0)
 
 ### Added
 
@@ -23,16 +44,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
     from `1.20.1` to `1.20.2`.
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 
-- Fixed ADO.NET bytecode instrumentation clearing `Activity.Current` after an async
-  command created by a `DbDataSource` (for example `NpgsqlDataSource`). The command now
-  still starts its activity, without the connection-based attributes, so spans
-  started later stay in the same trace.
 - Fix instrumentation errors and unfinished Kafka `ProduceAsync` spans when no
   delivery result is available.
 - Reject sequences and mappings supplied for scalar fields in file-based
@@ -43,7 +56,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   variables without a fallback with an empty value in file-based YAML configuration.
 - Prevent .NET Framework assembly redirection from hanging or reusing stale
   references when assembly-reference enumeration fails.
-
 - Improved OpAMP plugin-state report scheduling by coalescing server-requested
   full-state reports and ensuring at least five seconds between consecutive sends.
 
