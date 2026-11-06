@@ -16,9 +16,9 @@ to .NET applications without having to modify their source code.
 > [!WARNING]
 > The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([1.19.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+([1.19.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
 can be found in [opentelemetry.io](https://opentelemetry.io/docs/zero-code/dotnet/)
-or [versioned README](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.19.0/docs/README.md).
+or [versioned README](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.19.1/docs/README.md).
 
 ---
 
@@ -102,11 +102,11 @@ Supported processor architectures are:
 
 CI tests run against the following operating systems:
 
-- [Alpine x64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
-- [Alpine ARM64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
-- [Debian x64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/debian.dockerfile)
-- [Debian ARM64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/debian-arm64.dockerfile)
-- [CentOS Stream 9 x64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/centos-stream9.dockerfile)
+- [Alpine x64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.19.1/docker/alpine.dockerfile)
+- [Alpine ARM64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.19.1/docker/alpine.dockerfile)
+- [Debian x64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.19.1/docker/debian.dockerfile)
+- [Debian ARM64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.19.1/docker/debian-arm64.dockerfile)
+- [CentOS Stream 9 x64](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.19.1/docker/centos-stream9.dockerfile)
 - [macOS Sequoia 15 ARM64](https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md)
 - [Microsoft Windows Server 2022 x64](https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md)
 - [Microsoft Windows Server 2025 x64](https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-Readme.md)
@@ -198,7 +198,7 @@ Example usage:
 
 ```sh
 # Download the installer into a private directory
-version="v1.19.0"
+version="v1.19.1"
 repository="open-telemetry/opentelemetry-dotnet-instrumentation"
 release_workflow="$repository/.github/workflows/release.yml"
 download_dir="$(mktemp -d "${TMPDIR:-/tmp}/otel-dotnet-auto-installer.XXXXXX")"
@@ -254,7 +254,7 @@ uses environment variables as parameters:
 | `DOWNLOAD_DIR`              | Folder to download the archive to. Will use local archive if it already exists  | No       | *Calculated*                |
 | `LOCAL_PATH`                | Full path the archive to use for installation. (ideal for air-gapped scenarios) | No       | *Calculated*                |
 | `SKIP_RELEASE_VERIFICATION` | Set to `true` to skip GitHub release and artifact attestation verification      | No       | `false`                     |
-| `VERSION`                   | Version to download                                                             | No       | `v1.19.0`                   |
+| `VERSION`                   | Version to download                                                             | No       | `v1.19.1`                   |
 
 The installer copies the archive into a unique `otel-dotnet-auto.XXXXXX`
 directory under `${TMPDIR:-/tmp}` before verification and extraction. When
@@ -294,7 +294,7 @@ Example usage (run as administrator):
 # PowerShell 5.1 is required
 #Requires -PSEdition Desktop
 
-$version = "v1.19.0"
+$version = "v1.19.1"
 $repository = "open-telemetry/opentelemetry-dotnet-instrumentation"
 $release_workflow = "$repository/.github/workflows/release.yml"
 $skip_release_verification = $false
