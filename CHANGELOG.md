@@ -16,17 +16,38 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.Http` from `1.20.1` to `1.20.2`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.20.1` to `1.20.2`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.20.1-beta.1` to `1.20.1-beta.2`,
+  - `OpenTelemetry.OpAmp.Client` from `0.9.0-alpha.3` to `0.10.0-alpha.1`,
+  - `OpenTelemetry.Resources.Azure` from `1.20.1-beta.1` to `1.20.2-beta.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.20.1` to `1.20.2`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
+    from `1.20.1-beta.1` to `1.20.2-beta.1`.
+- .NET Framework only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.20.2` to `1.20.3`,
+  - `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
+    from `1.20.2` to `1.20.3`.
+
 ### Deprecated
 
 ### Removed
 
 ### Fixed
 
+- Restore experimental SqlClient trace context propagation on .NET Framework
+  after the instrumentation package stopped leaving SQL spans in
+  `Activity.Current`.
 - Fixed ADO.NET bytecode instrumentation clearing `Activity.Current` after an
   async command created by a `DbDataSource`. Connection-based attributes are
   skipped when unavailable. Provider command subclasses, including Npgsql
   data-source commands, use their provider's instrumentation to avoid duplicate
   database spans.
+- Fixed ADO.NET SQL sanitization for provider-specific quoting and literal
+  syntax, including SQLite identifiers containing apostrophes. Improved
+  redaction of account names and passwords in SQL statements.
 - Limit string Kafka message keys recorded on spans to 256 characters to prevent
   oversized keys from being retained until export.
 

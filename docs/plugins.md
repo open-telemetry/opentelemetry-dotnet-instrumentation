@@ -250,6 +250,19 @@ OpAMP requests do not produce application spans. Listener callbacks must return
 promptly. A blocking listener can delay other listeners and subsequent OpAMP
 message processing. Hand off lengthy work and return from the callback promptly.
 
+The default HTTP and WebSocket clients do not follow redirects. To enable them,
+set `settings.AllowRedirects = true` in `ConfigureOpAmpOptions`. This setting
+does not apply to clients returned by `HttpClientFactory` or
+`ClientWebSocketFactory`, which control their own redirect behavior. WebSocket
+redirects cannot be disabled on .NET Framework.
+
+Use `settings.MaxPendingMessageBytes` in `ConfigureOpAmpOptions` to limit the
+aggregate size of pending custom messages, including state reports queued with
+them. This replaces the upstream `MaxPendingCustomMessageBytes` property. The
+automatic instrumentation environment variable
+`OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGE_BYTES` and YAML field
+`max_pending_custom_message_bytes` retain their names and configure this limit.
+
 OpAMP plugin-state reports are scheduled asynchronously. Repeated server requests
 for full state are coalesced, ensuring at least five seconds between consecutive
 server-requested full-state sends. Plugin notifications are scheduled independently
@@ -415,15 +428,15 @@ sampling remains disabled until a runtime configuration enables that feature.
 | OpenTelemetry.Exporter.ConsoleExporterOptions                                             | OpenTelemetry.Exporter.Console                    | 1.20.1        |
 | OpenTelemetry.Exporter.ZipkinExporterOptions  **Deprecated**                              | OpenTelemetry.Exporter.Zipkin                     | 1.20.1        |
 | OpenTelemetry.Exporter.OtlpExporterOptions                                                | OpenTelemetry.Exporter.OpenTelemetryProtocol      | 1.20.1        |
-| OpenTelemetry.Instrumentation.AspNet.AspNetTraceInstrumentationOptions                    | OpenTelemetry.Instrumentation.AspNet              | 1.20.2        |
-| OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreTraceInstrumentationOptions            | OpenTelemetry.Instrumentation.AspNetCore          | 1.20.1        |
-| OpenTelemetry.Instrumentation.EntityFrameworkCore.EntityFrameworkInstrumentationOptions   | OpenTelemetry.Instrumentation.EntityFrameworkCore | 1.20.1-beta.1 |
+| OpenTelemetry.Instrumentation.AspNet.AspNetTraceInstrumentationOptions                    | OpenTelemetry.Instrumentation.AspNet              | 1.20.3        |
+| OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreTraceInstrumentationOptions            | OpenTelemetry.Instrumentation.AspNetCore          | 1.20.2        |
+| OpenTelemetry.Instrumentation.EntityFrameworkCore.EntityFrameworkInstrumentationOptions   | OpenTelemetry.Instrumentation.EntityFrameworkCore | 1.20.2-beta.1 |
 | OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientTraceInstrumentationOptions         | OpenTelemetry.Instrumentation.GrpcNetClient       | 1.20.1-beta.1 |
-| OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions                  | OpenTelemetry.Instrumentation.Http                | 1.20.1        |
+| OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions                  | OpenTelemetry.Instrumentation.Http                | 1.20.2        |
 | OpenTelemetry.Instrumentation.Quartz.QuartzInstrumentationOptions                         | OpenTelemetry.Instrumentation.Quartz              | 1.20.1-beta.1 |
-| OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions              | OpenTelemetry.Instrumentation.SqlClient           | 1.20.1        |
+| OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions              | OpenTelemetry.Instrumentation.SqlClient           | 1.20.2        |
 | OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions | OpenTelemetry.Instrumentation.StackExchangeRedis  | 1.20.1-beta.1 |
-| OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                               | OpenTelemetry.Instrumentation.Wcf                 | 1.20.1-beta.1 |
+| OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                               | OpenTelemetry.Instrumentation.Wcf                 | 1.20.1-beta.2 |
 
 ### Metrics
 
@@ -433,7 +446,7 @@ sampling remains disabled until a runtime configuration enables that feature.
 | OpenTelemetry.Exporter.ConsoleExporterOptions                            | OpenTelemetry.Exporter.Console                 | 1.20.1        |
 | OpenTelemetry.Exporter.PrometheusExporterOptions                         | OpenTelemetry.Exporter.Prometheus.HttpListener | 1.20.1-beta.1 |
 | OpenTelemetry.Exporter.OtlpExporterOptions                               | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.20.1        |
-| OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions | OpenTelemetry.Instrumentation.AspNet           | 1.20.2        |
+| OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions | OpenTelemetry.Instrumentation.AspNet           | 1.20.3        |
 
 ### Logs
 
@@ -445,9 +458,9 @@ sampling remains disabled until a runtime configuration enables that feature.
 
 ### OpAMP
 
-| Settings type                                           | NuGet package              | NuGet version |
-|---------------------------------------------------------|----------------------------|---------------|
-| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.9.0-alpha.3 |
+| Settings type                                           | NuGet package              | NuGet version  |
+|---------------------------------------------------------|----------------------------|----------------|
+| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.10.0-alpha.1 |
 
 ## Requirements
 

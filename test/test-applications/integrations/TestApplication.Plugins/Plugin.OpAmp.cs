@@ -25,7 +25,7 @@ public partial class Plugin : IPlugin, IProvideEffectiveConfig, IProvideRemoteCo
         ThrowIfMissing(settings);
         Console.WriteLine($"{nameof(Plugin)}.{nameof(ConfigureOpAmpOptions)}() invoked.");
         Console.WriteLine($"{nameof(settings.MaxPendingCustomMessages)}: {settings.MaxPendingCustomMessages}");
-        Console.WriteLine($"{nameof(settings.MaxPendingCustomMessageBytes)}: {settings.MaxPendingCustomMessageBytes}");
+        Console.WriteLine($"{nameof(settings.MaxPendingMessageBytes)}: {settings.MaxPendingMessageBytes}");
         settings.EffectiveConfigurationReporting.EnableReporting = true;
         settings.RemoteConfiguration.AcceptsRemoteConfig = true;
         settings.RemoteConfiguration.ReportsRemoteConfigStatus = true;
