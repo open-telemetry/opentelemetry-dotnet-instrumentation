@@ -37,6 +37,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Restore experimental SqlClient trace context propagation on .NET Framework
+  after the instrumentation package stopped leaving SQL spans in
+  `Activity.Current`.
 - Fixed ADO.NET bytecode instrumentation clearing `Activity.Current` after an
   async command created by a `DbDataSource`. Connection-based attributes are
   skipped when unavailable. Provider command subclasses, including Npgsql
