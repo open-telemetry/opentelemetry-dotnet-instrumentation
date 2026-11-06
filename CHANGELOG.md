@@ -19,10 +19,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
-- Fixed ADO.NET bytecode instrumentation clearing `Activity.Current` after an async
-  command created by a `DbDataSource` (for example `NpgsqlDataSource`). The command now
-  still starts its activity, without the connection-based attributes, so spans
-  started later stay in the same trace.
+- Fixed ADO.NET bytecode instrumentation clearing `Activity.Current` after an
+  async command created by a `DbDataSource` (for example `NpgsqlDataSource`).
+  The command now still starts its activity, without the connection-based
+  attributes, so spans started later stay in the same trace.
 - Limit string Kafka message keys recorded on spans to 256 characters to prevent
   oversized keys from being retained until export.
 
