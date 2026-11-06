@@ -49,14 +49,14 @@ internal sealed class SampleNativeFormatParser
                 if (operationCode == OpCodes.StartBatch)
                 {
                     var version = ReadInt(buffer, ref position);
-                    if (version != 1 && version != 2)
+                    if (version != 1)
                     {
                         return null; // not able to parse
                     }
 
                     sampleStartMillis = ReadInt64(buffer, ref position);
-                    selectiveSamplingIntervalMilliseconds = version == 2 ? (uint)ReadInt(buffer, ref position) : 0;
-                    frequentSamplingEnabled = version == 2 ? selectiveSamplingIntervalMilliseconds != 0 : _frequentSamplingEnabled;
+                    selectiveSamplingIntervalMilliseconds = (uint)ReadInt(buffer, ref position);
+                    frequentSamplingEnabled = selectiveSamplingIntervalMilliseconds != 0;
                     codeDictionary.Clear();
 
                     // TODO Debug logs to measure overhead https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/3205
@@ -244,7 +244,7 @@ internal sealed class SampleNativeFormatParser
                 if (operationCode == OpCodes.SelectiveSampleBatchStart)
                 {
                     var version = ReadInt(buffer, ref position);
-                    if (version != 2)
+                    if (version != 1)
                     {
                         return [];
                     }

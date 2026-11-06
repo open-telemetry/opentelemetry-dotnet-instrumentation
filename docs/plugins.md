@@ -358,9 +358,9 @@ public class MySelectiveSamplerPlugin : IPlugin, ISelectiveSamplerPlugin
 
 `Exporter` must implement `ISelectiveSamplerExporter`.
 
-Native selective batches use format version 2. Each batch starts with opcode
-`0x0A`, a 32-bit format version, and a 32-bit selective sampling interval in
-milliseconds, all integers in big-endian order. Sample records follow, ending
+Each native selective batch starts with opcode `0x0A`, a 32-bit format version
+(`1`), and a 32-bit selective sampling interval in milliseconds, all integers
+in big-endian order. Sample records follow, ending
 with opcode `0x0B`. A returned buffer can contain several batches with different
 intervals. Exporters must use each batch's interval for its snapshot samples.
 
@@ -408,15 +408,15 @@ the CPU sampling interval in milliseconds for each native batch. Use that
 interval to set the exported profile period. Existing exporters must update
 their `ExportThreadSamples` implementation to accept the interval.
 
-Native CPU batches use format version 2. After the start opcode `0x01`, the
-32-bit format version and 64-bit capture timestamp in milliseconds are followed
-by a 32-bit selective sampling interval in milliseconds, all in big-endian order.
+In native CPU batches, the start opcode `0x01`, 32-bit format version (`1`),
+and 64-bit capture timestamp in milliseconds are followed by a 32-bit selective
+sampling interval in milliseconds, all in big-endian order.
 This interval comes from the same configuration snapshot as the captured samples.
 Use it for snapshot copies of samples marked `SelectedForFrequentSampling`;
 the separate `samplingInterval` argument still describes the CPU profile period.
 A zero selective interval means selective sampling was disabled for that batch
 and sample records omit the frequent-sampling flag. Exporters must update their
-native format parsers to read the version 2 headers.
+native format parsers to read the selective interval from each batch header.
 
 An exporter and a nonzero CPU interval or allocation limit prepare the
 corresponding managed handler even when its `Enabled` setting is false. Native

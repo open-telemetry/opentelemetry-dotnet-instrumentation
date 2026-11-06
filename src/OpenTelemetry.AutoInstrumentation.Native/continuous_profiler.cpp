@@ -396,7 +396,7 @@ constexpr auto kSelectedThreadSample      = 0x09;
 constexpr auto kSelectedThreadsStartBatch = 0x0A;
 constexpr auto kSelectedThreadsEndBatch   = 0x0B;
 
-constexpr auto kCurrentThreadSamplesBufferVersion = 2;
+constexpr auto kCurrentThreadSamplesBufferVersion = 1;
 
 constexpr FunctionIdentifier DefaultFunctionIdentifier = {0, 0, false};
 

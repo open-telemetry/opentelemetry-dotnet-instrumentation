@@ -139,8 +139,8 @@ TEST_F(ContinuousProfilerBatchTest, SelectiveBatchesRetainTheirOwnIntervalsInACo
         SelectiveSamplingRecordProducedThreadSample(static_cast<int32_t>(bytes.size()), bytes.data());
     }
 
-    const std::vector<unsigned char> expected = {0x0A, 0, 0, 0, 2, 0, 0, 0, 40, 0x0B,
-                                                 0x0A, 0, 0, 0, 2, 0, 0, 0, 80, 0x0B};
+    const std::vector<unsigned char> expected = {0x0A, 0, 0, 0, 1, 0, 0, 0, 40, 0x0B,
+                                                 0x0A, 0, 0, 0, 1, 0, 0, 0, 80, 0x0B};
     std::vector<unsigned char>       output(expected.size());
     ASSERT_EQ(expected.size(), SelectiveSamplerReadThreadSamples(static_cast<int32_t>(output.size()), output.data()));
     EXPECT_EQ(expected, output);
@@ -165,7 +165,7 @@ TEST_F(ContinuousProfilerBatchTest, CpuBatchRetainsBothIntervalsFromItsConfigura
     ASSERT_EQ(output.size(),
               ContinuousProfilerReadThreadSamplesV2(static_cast<int32_t>(output.size()), output.data(), &cpuInterval));
     EXPECT_EQ(400u, cpuInterval);
-    EXPECT_EQ((std::vector<unsigned char>{0x01, 0, 0, 0, 2}),
+    EXPECT_EQ((std::vector<unsigned char>{0x01, 0, 0, 0, 1}),
               (std::vector<unsigned char>(output.begin(), output.begin() + 5)));
     // The 8-byte timestamp precedes the selective interval, independently of the platform's long width.
     EXPECT_EQ((std::vector<unsigned char>{0, 0, 0, 40, 0x06}),

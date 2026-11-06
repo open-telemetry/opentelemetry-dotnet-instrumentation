@@ -18,8 +18,8 @@ public class SampleNativeFormatParserTests
         byte[] intervals = cpu ? [40, 80, 0] : [40, 80];
         foreach (var interval in intervals)
         {
-            // Golden version 2 headers use big-endian integers and an 8-byte CPU timestamp.
-            buffer.AddRange(cpu ? [0x01, 0, 0, 0, 2] : [0x0A, 0, 0, 0, 2]);
+            // Batch headers use version 1, big-endian integers and an 8-byte CPU timestamp.
+            buffer.AddRange(cpu ? [0x01, 0, 0, 0, 1] : [0x0A, 0, 0, 0, 1]);
             if (cpu)
             {
                 buffer.AddRange(new byte[8]);
