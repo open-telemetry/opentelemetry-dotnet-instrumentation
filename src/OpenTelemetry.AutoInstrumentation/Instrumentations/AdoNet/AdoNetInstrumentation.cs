@@ -90,6 +90,22 @@ internal static class AdoNetInstrumentation
         return Source.StartActivity(activityName, ActivityKind.Client, default(ActivityContext), tags);
     }
 
+    public static void StopActivity(Activity? activity, Exception? exception)
+    {
+        if (activity is null)
+        {
+            return;
+        }
+
+        if (exception is not null)
+        {
+            activity.SetException(exception);
+            activity.SetTag(GenericAttributes.Keys.ErrorType, exception.GetType().FullName);
+        }
+
+        activity.Stop();
+    }
+
     // Commands created by DbDataSource throw NotSupportedException on Connection.
     // Skip the connection attributes instead of failing the call, so the activity still starts
     // and Activity.Current is not lost (see CallTarget EndMethodHandler).
@@ -115,21 +131,5 @@ internal static class AdoNetInstrumentation
         {
             return null;
         }
-    }
-
-    public static void StopActivity(Activity? activity, Exception? exception)
-    {
-        if (activity is null)
-        {
-            return;
-        }
-
-        if (exception is not null)
-        {
-            activity.SetException(exception);
-            activity.SetTag(GenericAttributes.Keys.ErrorType, exception.GetType().FullName);
-        }
-
-        activity.Stop();
     }
 }
