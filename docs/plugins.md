@@ -250,6 +250,19 @@ OpAMP requests do not produce application spans. Listener callbacks must return
 promptly. A blocking listener can delay other listeners and subsequent OpAMP
 message processing. Hand off lengthy work and return from the callback promptly.
 
+The default HTTP and WebSocket clients do not follow redirects. To enable them,
+set `settings.AllowRedirects = true` in `ConfigureOpAmpOptions`. This setting
+does not apply to clients returned by `HttpClientFactory` or
+`ClientWebSocketFactory`, which control their own redirect behavior. WebSocket
+redirects cannot be disabled on .NET Framework.
+
+Use `settings.MaxPendingMessageBytes` in `ConfigureOpAmpOptions` to limit the
+aggregate size of pending custom messages, including state reports queued with
+them. This replaces the upstream `MaxPendingCustomMessageBytes` property. The
+automatic instrumentation environment variable
+`OTEL_DOTNET_AUTO_OPAMP_MAX_PENDING_CUSTOM_MESSAGE_BYTES` and YAML field
+`max_pending_custom_message_bytes` retain their names and configure this limit.
+
 OpAMP plugin-state reports are scheduled asynchronously. Repeated server requests
 for full state are coalesced, ensuring at least five seconds between consecutive
 server-requested full-state sends. Plugin notifications are scheduled independently

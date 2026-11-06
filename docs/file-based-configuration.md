@@ -655,7 +655,8 @@ opamp/development:
   # Maximum number of custom messages that may wait to be sent.
   # If omitted, 2048 is used. The value must be positive.
   max_pending_custom_messages: 2048
-  # Maximum aggregate size, in bytes, of pending custom message payloads.
+  # Maximum aggregate size, in bytes, of pending custom messages,
+  # including state reports queued with them.
   # If omitted, 67108864 (64 MiB) is used. The value must be positive.
   max_pending_custom_message_bytes: 67108864
 ```

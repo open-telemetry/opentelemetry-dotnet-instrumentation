@@ -27,9 +27,10 @@ internal class OpAmpSettings : Settings
     public int? MaxPendingCustomMessages { get; private set; }
 
     /// <summary>
-    /// Gets the maximum aggregate size, in bytes, of pending custom message payloads.
+    /// Gets the maximum aggregate size, in bytes, of pending custom messages,
+    /// including any state reports queued with them.
     /// </summary>
-    public int? MaxPendingCustomMessageBytes { get; private set; }
+    public int? MaxPendingMessageBytes { get; private set; }
 
     protected override void OnLoadEnvVar(Configuration configuration)
     {
@@ -39,9 +40,9 @@ internal class OpAmpSettings : Settings
             configuration.GetInt32(ConfigurationKeys.OpAmpMaxPendingCustomMessages),
             ConfigurationKeys.OpAmpMaxPendingCustomMessages,
             configuration.FailFast);
-        MaxPendingCustomMessageBytes = GetPositiveInt(
-            configuration.GetInt32(ConfigurationKeys.OpAmpMaxPendingCustomMessageBytes),
-            ConfigurationKeys.OpAmpMaxPendingCustomMessageBytes,
+        MaxPendingMessageBytes = GetPositiveInt(
+            configuration.GetInt32(ConfigurationKeys.OpAmpMaxPendingMessageBytes),
+            ConfigurationKeys.OpAmpMaxPendingMessageBytes,
             configuration.FailFast);
     }
 
@@ -53,8 +54,8 @@ internal class OpAmpSettings : Settings
             configuration.OpAmp?.MaxPendingCustomMessages,
             "opamp/development.max_pending_custom_messages",
             configuration.FailFast);
-        MaxPendingCustomMessageBytes = GetPositiveInt(
-            configuration.OpAmp?.MaxPendingCustomMessageBytes,
+        MaxPendingMessageBytes = GetPositiveInt(
+            configuration.OpAmp?.MaxPendingMessageBytes,
             "opamp/development.max_pending_custom_message_bytes",
             configuration.FailFast);
     }
