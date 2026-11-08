@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Serilog" VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IncludeSerilogHosting)'=='true'">
