@@ -8,7 +8,7 @@ using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Logs;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.LogBridge;
 
 internal delegate void EmitLog(object loggerInstance, string? body, DateTime timestamp, string? severityText, int severityLevel, Exception? exception, IEnumerable<KeyValuePair<string, object?>>? properties, Activity? current, object?[]? args, string? renderedMessage);
 
@@ -264,7 +264,7 @@ internal static class OpenTelemetryLogHelpers
     private static EmitLog? BuildEmitLog(Type logRecordDataType, Type logRecordAttributesListType, Type loggerType)
     {
         // Creates expression:
-        // .Lambda #Lambda1<OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge.EmitLog>(
+        // .Lambda #Lambda1<OpenTelemetry.AutoInstrumentation.Instrumentations.LogBridge.EmitLog>(
         //     System.Object $instance,
         //     System.String $body,
         //     System.DateTime $timestamp,

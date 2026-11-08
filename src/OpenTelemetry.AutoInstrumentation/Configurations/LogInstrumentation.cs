@@ -22,4 +22,9 @@ internal enum LogInstrumentation
     /// NLog instrumentation.
     /// </summary>
     NLog = 2,
+
+    /// <summary>
+    /// Serilog instrumentation.
+    /// </summary>
+    Serilog = 3,
 }

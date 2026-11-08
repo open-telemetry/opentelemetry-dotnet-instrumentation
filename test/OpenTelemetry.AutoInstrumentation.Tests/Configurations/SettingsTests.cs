@@ -407,6 +407,7 @@ public sealed class SettingsTests
     [InlineData("ILOGGER", LogInstrumentation.ILogger)]
     [InlineData("LOG4NET", LogInstrumentation.Log4Net)]
     [InlineData("NLOG", LogInstrumentation.NLog)]
+    [InlineData("SERILOG", LogInstrumentation.Serilog)]
     internal void LogSettings_Instrumentations_SupportedValues(string logInstrumentation, LogInstrumentation expectedLogInstrumentation)
     {
         using var envScope = new EnvironmentScope(new Dictionary<string, string?>
@@ -433,6 +434,22 @@ public sealed class SettingsTests
         var settings = Settings.FromDefaultSources<LogSettings>(false);
 
         Assert.Equal(expectedValue, settings.IncludeFormattedMessage);
+    }
+
+    [Theory]
+    [InlineData("true", true)]
+    [InlineData("false", false)]
+    [InlineData(null, false)]
+    internal void EnableSerilogBridge_DependsOnCorrespondingEnvVariable(string? enableSerilogBridge, bool expectedValue)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { "OTEL_DOTNET_AUTO_LOGS_ENABLE_SERILOG_BRIDGE", enableSerilogBridge }
+        });
+
+        var settings = Settings.FromDefaultSources<LogSettings>(false);
+
+        Assert.Equal(expectedValue, settings.EnableSerilogBridge);
     }
 
     [Theory]

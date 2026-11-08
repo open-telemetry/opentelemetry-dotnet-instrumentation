@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IncludeSerilogHosting Condition="'$(LibraryVersion)'=='' or '$(SerilogExtensionsHosting)'!=''">true</IncludeSerilogHosting>
+    <IncludeSerilogSinksOpenTelemetry Condition="'$(LibraryVersion)'=='' or '$(SerilogSinksOpenTelemetry)'!=''">true</IncludeSerilogSinksOpenTelemetry>
+    <DefineConstants Condition="'$(IncludeSerilogHosting)'=='true'">$(DefineConstants);SERILOG_HOSTING</DefineConstants>
+    <DefineConstants Condition="'$(IncludeSerilogSinksOpenTelemetry)'=='true'">$(DefineConstants);SERILOG_SINKS_OPENTELEMETRY</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" VersionOverride="$(LibraryVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IncludeSerilogHosting)'=='true'">
+    <PackageReference Include="Serilog.Extensions.Hosting" VersionOverride="$(SerilogExtensionsHosting)" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IncludeSerilogSinksOpenTelemetry)'=='true'">
+    <PackageReference Include="Serilog.Sinks.OpenTelemetry" VersionOverride="$(SerilogSinksOpenTelemetry)" />
+  </ItemGroup>
+
+</Project>

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.TraceContextInjection;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.LogBridge;
 #if NET
 using OpenTelemetry.AutoInstrumentation.Logger;
 #endif

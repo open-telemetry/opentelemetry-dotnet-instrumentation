@@ -926,6 +926,17 @@ internal static partial class InstrumentationDefinitions
         }
         {
             uint categories = 0;
+            if (logSettings.LogsEnabled && logSettings.EnabledInstrumentations.Contains(LogInstrumentation.Serilog))
+            {
+                categories |= 4u;
+            }
+            if (categories != 0)
+            {
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Serilog"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Serilog.LoggerConfiguration"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("CreateLogger"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("Serilog.Core.Logger"), 1, 2, 0, 0, 4, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Serilog.Bridge.Integrations.LoggerConfigurationIntegration"), 0, categories));
+            }
+        }
+        {
+            uint categories = 0;
             if (tracerSettings.TracesEnabled && tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.SqlClient))
             {
                 categories |= 1u;

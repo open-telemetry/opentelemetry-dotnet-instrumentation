@@ -305,6 +305,12 @@ internal partial class ConfigurationKeys
         public const string EnableNLogBridge = "OTEL_DOTNET_AUTO_LOGS_ENABLE_NLOG_BRIDGE";
 
         /// <summary>
+        /// Configuration key for whether or not experimental Serilog bridge
+        /// should be enabled.
+        /// </summary>
+        public const string EnableSerilogBridge = "OTEL_DOTNET_AUTO_LOGS_ENABLE_SERILOG_BRIDGE";
+
+        /// <summary>
         /// Configuration key for disabling all log instrumentations.
         /// </summary>
         public const string LogsInstrumentationEnabled = "OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_ENABLED";

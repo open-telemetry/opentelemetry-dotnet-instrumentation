@@ -239,13 +239,14 @@ internal static class Instrumentation
         // ILogger bridge is initialized using ILogger-specific extension methods in LoggerInitializer class.
         // That extension methods sets up its own LogProvider.
 
-        Logger.Debug($"InitializeLoggerProvider called. LogsEnabled={LogSettings.Value.LogsEnabled}, EnableLog4NetBridge={LogSettings.Value.EnableLog4NetBridge}, EnableNLogBridge={LogSettings.Value.EnableNLogBridge}");
+        Logger.Debug($"InitializeLoggerProvider called. LogsEnabled={LogSettings.Value.LogsEnabled}, EnableLog4NetBridge={LogSettings.Value.EnableLog4NetBridge}, EnableNLogBridge={LogSettings.Value.EnableNLogBridge}, EnableSerilogBridge={LogSettings.Value.EnableSerilogBridge}");
         Logger.Debug($"EnabledInstrumentations: {string.Join(", ", LogSettings.Value.EnabledInstrumentations)}");
 
         // Initialize logger provider if any bridge is enabled
         var shouldInitialize = LogSettings.Value.LogsEnabled && (
             (LogSettings.Value.EnableLog4NetBridge && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Log4Net)) ||
-            (LogSettings.Value.EnableNLogBridge && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.NLog)));
+            (LogSettings.Value.EnableNLogBridge && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.NLog)) ||
+            (LogSettings.Value.EnableSerilogBridge && LogSettings.Value.EnabledInstrumentations.Contains(LogInstrumentation.Serilog)));
 
         Logger.Debug($"ShouldInitialize logger provider: {shouldInitialize}");
 

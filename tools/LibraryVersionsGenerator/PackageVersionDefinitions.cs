@@ -119,6 +119,22 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "Serilog",
+            NugetPackageName = "Serilog",
+            TestApplicationName = "TestApplication.SerilogBridge",
+            Versions =
+            [
+                // Serilog.Extensions.Hosting and Serilog.Sinks.OpenTelemetry require Serilog 2.10.0 or later
+                new SerilogVersion("2.0.0") { SerilogExtensionsHostingVersion = string.Empty, SerilogSinksOpenTelemetryVersion = string.Empty },
+                // 3.1.0 - LogEvent.TraceId and LogEvent.SpanId added; 3.1.1 is the lowest version accepted by Serilog.Sinks.OpenTelemetry 2.0.0
+                new SerilogVersion("3.1.1") { SerilogExtensionsHostingVersion = "8.0.0", SerilogSinksOpenTelemetryVersion = "2.0.0" },
+                // 4.0.0 - AssemblyVersion changes from 2.0.0.0 to 4.0.0.0
+                new SerilogVersion("4.0.0") { SerilogExtensionsHostingVersion = "8.0.0", SerilogSinksOpenTelemetryVersion = "3.0.0" },
+                new SerilogVersion("*") { SerilogExtensionsHostingVersion = "*", SerilogSinksOpenTelemetryVersion = "*" }
+            ]
+        },
+        new()
+        {
             IntegrationName = "MassTransit",
             NugetPackageName = "MassTransit",
             TestApplicationName = "TestApplication.MassTransit",
