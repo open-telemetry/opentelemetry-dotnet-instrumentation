@@ -37,7 +37,8 @@ using (var command = connection.CreateCommand())
 // Sync: ExecuteReader  →  instruments SqliteCommand.ExecuteReader(CommandBehavior)
 using (var command = connection.CreateCommand())
 {
-    command.CommandText = "SELECT * FROM MyTable";
+    // An apostrophe inside a SQLite identifier must not expose subsequent string literals.
+    command.CommandText = "SELECT *, 'value3' AS ['Tis], 'value4' AS OtherValue FROM MyTable";
     using var reader = command.ExecuteReader();
     Console.WriteLine($"ExecuteReader HasRows: {reader.HasRows}");
 }

@@ -28,9 +28,9 @@ internal static class OpAmpClientSettingsConfigurator
             settings.MaxPendingCustomMessages = opAmpSettings.MaxPendingCustomMessages.Value;
         }
 
-        if (opAmpSettings.MaxPendingCustomMessageBytes.HasValue)
+        if (opAmpSettings.MaxPendingMessageBytes.HasValue)
         {
-            settings.MaxPendingCustomMessageBytes = opAmpSettings.MaxPendingCustomMessageBytes.Value;
+            settings.MaxPendingMessageBytes = opAmpSettings.MaxPendingMessageBytes.Value;
         }
 
         foreach (var resourceAttribute in resources.Attributes)

@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using OpenTelemetry.AutoInstrumentation.Plugins;
+#if NETFRAMEWORK
+using OpenTelemetry.AutoInstrumentation.Instrumentations.SqlClient;
+#endif
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
@@ -38,6 +41,14 @@ internal sealed class SqlClientTracerInitializer : SqlClientInitializer
         if (tracingHandle != null)
         {
             lifespanManager.Track(tracingHandle);
+#if NETFRAMEWORK
+            if (SqlClientTraceContextPropagator.IsPropagationEnabled)
+            {
+#pragma warning disable CA2000 // The lifespan manager owns and disposes the listener.
+                lifespanManager.Track(SqlClientTraceContextPropagator.CreateActivityListener());
+#pragma warning restore CA2000
+            }
+#endif
         }
     }
 }

@@ -5,7 +5,7 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.19.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.19.1..HEAD)
 
 ### Added
 
@@ -23,6 +23,40 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+## [v1.19.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.19.1)
+
+### Changed
+
+- macOS libraries are now built and tested against
+  [macOS Sequoia 15 ARM64](https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md).
+
+#### Dependency updates
+
+- Following packages updated
+  - `OpenTelemetry.Instrumentation.Http` from `1.20.1` to `1.20.2`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.20.1` to `1.20.2`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.20.1-beta.1` to `1.20.1-beta.2`,
+  - `OpenTelemetry.OpAmp.Client` from `0.9.0-alpha.3` to `0.10.0-alpha.1`,
+  - `OpenTelemetry.Resources.Azure` from `1.20.1-beta.1` to `1.20.2-beta.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.20.1` to `1.20.2`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
+    from `1.20.1-beta.1` to `1.20.2-beta.1`.
+- .NET Framework only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.20.2` to `1.20.3`,
+  - `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
+    from `1.20.2` to `1.20.3`.
+
+### Fixed
+
+- Fixed ADO.NET bytecode instrumentation clearing `Activity.Current` after an
+  async command created by a `DbDataSource`. Connection-based attributes are
+  skipped when unavailable. Provider command subclasses, including Npgsql
+  data-source commands, use their provider's instrumentation to avoid duplicate
+  database spans.
+- Fixed ADO.NET SQL sanitization for provider-specific quoting and literal
+  syntax, including SQLite identifiers containing apostrophes. Improved
+  redaction of account names and passwords in SQL statements.
 - Limit string Kafka message keys recorded on spans to 256 characters to prevent
   oversized keys from being retained until export.
 
@@ -703,7 +737,7 @@ and runtime, then loads the correct version of dependency assemblies.
   and `OTEL_DOTNET_AUTO_ENTITYFRAMEWORKCORE_SET_DBSTATEMENT_FOR_TEXT`
   These features are always enabled. Statements are sanitized.
 - Support for macOS Ventura 13 x64.
-  macOS libraries are built and tested against [macOS Sonoma 14 arm64](https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md).
+  macOS libraries are built and tested against macOS Sonoma 14 arm64.
 
 ### Fixed
 

@@ -9,23 +9,23 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 public class OpAmpSettingsTests
 {
     [Fact]
-    public void LoadEnvVar_CustomMessageLimits()
+    public void LoadEnvVar_MessageLimits()
     {
         var configuration = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection
         {
             { ConfigurationKeys.OpAmpMaxPendingCustomMessages, "4096" },
-            { ConfigurationKeys.OpAmpMaxPendingCustomMessageBytes, "134217728" },
+            { ConfigurationKeys.OpAmpMaxPendingMessageBytes, "134217728" },
         }));
         var settings = new OpAmpSettings();
 
         settings.LoadEnvVar(configuration);
 
         Assert.Equal(4096, settings.MaxPendingCustomMessages);
-        Assert.Equal(134217728, settings.MaxPendingCustomMessageBytes);
+        Assert.Equal(134217728, settings.MaxPendingMessageBytes);
     }
 
     [Fact]
-    public void LoadEnvVar_CustomMessageLimitsAreUnsetByDefault()
+    public void LoadEnvVar_MessageLimitsAreUnsetByDefault()
     {
         var configuration = new Configuration(false, new NameValueConfigurationSource(false, []));
         var settings = new OpAmpSettings();
@@ -33,15 +33,15 @@ public class OpAmpSettingsTests
         settings.LoadEnvVar(configuration);
 
         Assert.Null(settings.MaxPendingCustomMessages);
-        Assert.Null(settings.MaxPendingCustomMessageBytes);
+        Assert.Null(settings.MaxPendingMessageBytes);
     }
 
     [Theory]
     [InlineData(ConfigurationKeys.OpAmpMaxPendingCustomMessages, "0")]
     [InlineData(ConfigurationKeys.OpAmpMaxPendingCustomMessages, "-1")]
-    [InlineData(ConfigurationKeys.OpAmpMaxPendingCustomMessageBytes, "0")]
-    [InlineData(ConfigurationKeys.OpAmpMaxPendingCustomMessageBytes, "-1")]
-    public void LoadEnvVar_NonPositiveCustomMessageLimitIsIgnored(string key, string invalidValue)
+    [InlineData(ConfigurationKeys.OpAmpMaxPendingMessageBytes, "0")]
+    [InlineData(ConfigurationKeys.OpAmpMaxPendingMessageBytes, "-1")]
+    public void LoadEnvVar_NonPositiveMessageLimitIsIgnored(string key, string invalidValue)
     {
         var configuration = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection
         {
@@ -52,15 +52,15 @@ public class OpAmpSettingsTests
         settings.LoadEnvVar(configuration);
 
         Assert.Null(settings.MaxPendingCustomMessages);
-        Assert.Null(settings.MaxPendingCustomMessageBytes);
+        Assert.Null(settings.MaxPendingMessageBytes);
     }
 
     [Theory]
     [InlineData(ConfigurationKeys.OpAmpMaxPendingCustomMessages, "0")]
     [InlineData(ConfigurationKeys.OpAmpMaxPendingCustomMessages, "-1")]
-    [InlineData(ConfigurationKeys.OpAmpMaxPendingCustomMessageBytes, "0")]
-    [InlineData(ConfigurationKeys.OpAmpMaxPendingCustomMessageBytes, "-1")]
-    public void LoadEnvVar_NonPositiveCustomMessageLimitFailsFast(string key, string invalidValue)
+    [InlineData(ConfigurationKeys.OpAmpMaxPendingMessageBytes, "0")]
+    [InlineData(ConfigurationKeys.OpAmpMaxPendingMessageBytes, "-1")]
+    public void LoadEnvVar_NonPositiveMessageLimitFailsFast(string key, string invalidValue)
     {
         var configuration = new Configuration(true, new NameValueConfigurationSource(true, new NameValueCollection
         {
