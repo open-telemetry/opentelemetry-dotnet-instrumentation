@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Added experimental process environment context propagation, with configurable
+  parent or link extraction and automatic context injection into child processes.
+
 ### Changed
 
 #### Dependency updates

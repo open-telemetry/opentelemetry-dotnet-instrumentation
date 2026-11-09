@@ -538,6 +538,7 @@ instrumentation/development:
       npgsql:              # Npgsql
       nservicebus:         # NServiceBus
       oraclemda:           # Oracle.ManagedDataAccess
+      process:             # Process environment context propagation
       rabbitmq:            # RabbitMQ.Client
       quartz:              # Quartz
       sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
@@ -563,10 +564,26 @@ instrumentation/development:
 
 ## Instrumentation options
 
+For `process`, omitting the entry disables the instrumentation. An empty
+`process:` enables context extraction in `parent` mode and context injection.
+Omitting or leaving either `context_extraction:` or `context_injection:` empty
+uses the same defaults. To disable injection explicitly, set
+`context_injection.enabled: false`; to disable extraction, set
+`context_extraction.mode: off`.
+See [process environment context propagation](config.md#process-environment-context-propagation)
+for supported runtimes and behavior.
+
 ``` yaml
 instrumentation/development:
   dotnet:
     traces:
+      process:
+        context_extraction:
+          # Supported values: parent, link, off. Default is parent.
+          mode: parent
+        context_injection:
+          # Omitted or empty context_injection also enables injection.
+          enabled: true
       graphql:
         # Whether the GraphQL instrumentation can pass raw queries through the graphql.document attribute. Queries might contain sensitive information.
         # Default is false

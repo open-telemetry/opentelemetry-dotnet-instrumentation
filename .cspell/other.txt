@@ -73,6 +73,7 @@ srcs
 STACKEXCHANGEREDIS
 TMPDIR
 traceparent
+tracestate
 tracesexporter
 unencrypted
 UNENCRYPTEDSUPPORT

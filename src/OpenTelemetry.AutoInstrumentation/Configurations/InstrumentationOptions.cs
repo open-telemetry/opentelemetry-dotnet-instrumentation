@@ -3,6 +3,7 @@
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.HeadersCapture;
+using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
@@ -11,8 +12,13 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 /// </summary>
 internal class InstrumentationOptions
 {
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+
     internal InstrumentationOptions(Configuration configuration)
     {
+        ProcessContextExtractionMode = ParseProcessContextExtractionMode(configuration.GetString(ConfigurationKeys.Traces.InstrumentationOptions.ProcessContextExtractionMode), configuration.FailFast);
+        ProcessContextInjectionEnabled = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.ProcessContextInjectionEnabled) ?? true;
+
 #if NETFRAMEWORK
         AspNetInstrumentationCaptureRequestHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureRequestHeaders, AdditionalTag.CreateHttpRequestCache);
         AspNetInstrumentationCaptureResponseHeaders = configuration.ParseHeaders(ConfigurationKeys.Traces.InstrumentationOptions.AspNetInstrumentationCaptureResponseHeaders, AdditionalTag.CreateHttpResponseCache);
@@ -38,6 +44,9 @@ internal class InstrumentationOptions
     {
         if (instrumentationConfiguration != null)
         {
+            ProcessContextExtractionMode = ParseProcessContextExtractionMode(instrumentationConfiguration.Process?.ContextExtraction?.Mode, failFast);
+            ProcessContextInjectionEnabled = instrumentationConfiguration.Process?.ContextInjection?.Enabled ?? true;
+
 #if NETFRAMEWORK
             if (instrumentationConfiguration.AspNet != null)
             {
@@ -88,6 +97,16 @@ internal class InstrumentationOptions
             }
         }
     }
+
+    /// <summary>
+    /// Gets how process environment context is extracted for root activities.
+    /// </summary>
+    public ProcessContextExtractionMode ProcessContextExtractionMode { get; } = ProcessContextExtractionMode.Parent;
+
+    /// <summary>
+    /// Gets a value indicating whether context is injected into child process environments.
+    /// </summary>
+    public bool ProcessContextInjectionEnabled { get; } = true;
 
 #if NETFRAMEWORK
     /// <summary>
@@ -164,6 +183,31 @@ internal class InstrumentationOptions
     /// Gets a value indicating whether text query in Oracle Client can be passed as a db.statement tag.
     /// </summary>
     public bool OracleMdaSetDbStatementForText { get; }
+
+    private static ProcessContextExtractionMode ParseProcessContextExtractionMode(string? value, bool failFast)
+    {
+        switch (value)
+        {
+            case null:
+            case "":
+            case "parent":
+                return ProcessContextExtractionMode.Parent;
+            case "link":
+                return ProcessContextExtractionMode.Link;
+            case "off":
+                return ProcessContextExtractionMode.Off;
+            default:
+                var message = $"Process context extraction mode '{value}' is not supported. Supported values are parent, link, and off.";
+                Logger.Error(message);
+
+                if (failFast)
+                {
+                    throw new NotSupportedException(message);
+                }
+
+                return ProcessContextExtractionMode.Parent;
+        }
+    }
 
 #if NETFRAMEWORK
     private static bool GetSqlClientNetFxExperimentalContextPropagation(Configuration configuration)

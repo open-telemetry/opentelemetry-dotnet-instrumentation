@@ -160,6 +160,7 @@ due to lack of stable semantic convention.
 | `NPGSQL` \[7\]              | [Npgsql](https://www.nuget.org/packages/Npgsql)                                                                                                                                                                            | ≥6.0.0                 | source & bytecode \[10\]  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `NSERVICEBUS`               | [NServiceBus](https://www.nuget.org/packages/NServiceBus)                                                                                                                                                                  | ≥8.0.0 & < 10.0.0      | source & bytecode         | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `ORACLEMDA`                 | [Oracle.ManagedDataAccess.Core](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core) and [Oracle.ManagedDataAccess](https://www.nuget.org/packages/Oracle.ManagedDataAccess) **Not supported on ARM64**           | ≥23.4.0                | source                    | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `PROCESS`                   | Process environment context propagation (native CLR Profiler required)                                                                                                                                                     | See below              | bytecode                  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `RABBITMQ`                  | [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)                                                                                                                                                         | ≥5.0.0                 | source or bytecode \[11\] | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `QUARTZ`                    | [Quartz](https://www.nuget.org/packages/Quartz) **Quartz 4.x is supported on .NET 10+ only; Quartz 3.x is not supported on .NET Framework 4.7.1 or earlier**                                                               | \[13\]                 | source                    | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `SQLCLIENT`                 | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient), [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) \[12\]  and `System.Data` (shipped with .NET Framework) | * \[14\]               | source & bytecode \[15\]  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
@@ -337,6 +338,50 @@ while Npgsql can write multiple logical commands to the same connector in one
 [multiplexing loop](https://github.com/npgsql/npgsql/blob/d3768398c17877b3a916c3c4d87e8e11698991fc/src/Npgsql/MultiplexingDataSource.cs#L176-L199).
 The instrumentation safely skips propagation and logs one warning when it
 detects a multiplexed connector.
+
+#### Process environment context propagation
+
+The experimental `PROCESS` trace instrumentation connects telemetry across
+process boundaries through the `TRACEPARENT`, `TRACESTATE`, and `BAGGAGE` environment
+variables. It requires the native CLR Profiler and supports .NET 8–10 and
+.NET Framework using the distributed `System.Diagnostics.DiagnosticSource` 10.x.
+It applies to activities created through `ActivitySource`; legacy activities
+created directly with `new Activity(...)` are not covered.
+Propagation uses the configured [propagators](#propagators), mapping their
+fields to environment variable names, for example `traceparent` to `TRACEPARENT`.
+
+| Environment variable | Description | Default value |
+| -------------------- | ----------- | ------------- |
+| `OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_ENABLED` | Enables context extraction and child process injection. Inherits the standard trace instrumentation enable flags. | `true` |
+| `OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_EXTRACTION_MODE` | Applies environment context to root activities: `parent` uses it as a remote parent; `link` adds a link; `off` disables extraction. | `parent` |
+| `OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_INJECTION_ENABLED` | Injects the current trace context and baggage into child process environments when `UseShellExecute` is `false`. | `true` |
+
+Extraction uses the process environment captured at startup. Existing activity
+parents take precedence over the environment context. Injection uses the current
+context at each process launch, without creating a process span. The options
+are independent: use `off` for injection only, or disable injection for
+extraction only. Disabling the `PROCESS` instrumentation disables both.
+
+In `parent` and `link` modes, extracted baggage initializes the agent's
+initialization execution context, with existing ambient values taking precedence.
+It then follows the SDK's normal execution-context inheritance and application
+updates; unrelated or flow-suppressed contexts have no initialization guarantee.
+The agent does not reset baggage for each root activity.
+
+Injection replaces the configured propagator's fields in a copy of the child
+environment, preserving the parent environment and the original `ProcessStartInfo`.
+Without an active span, `parent` mode forwards the valid startup trace context;
+other modes omit trace context. Injection always uses live ambient baggage.
+Shell-executed launches are skipped, including .NET Framework launches that use
+the default `UseShellExecute=true`. Startup-hook-only deployments leave this
+instrumentation inactive and log an explanatory message.
+
+Unsupported extraction modes are logged and use `parent`, or fail initialization
+when `OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED=true`. This experimental
+instrumentation implements
+[environment context propagation](https://github.com/open-telemetry/opentelemetry-specification/issues/5398).
+See [file-based configuration](file-based-configuration.md#instrumentation-options)
+for the corresponding YAML options.
 
 ## Propagators
 
