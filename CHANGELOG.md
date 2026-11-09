@@ -10,7 +10,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Added experimental process environment context propagation, with parent or link
-  extraction for configured command and job methods, startup baggage extraction,
+  extraction for root `ActivitySource` activities, startup baggage extraction,
   and automatic context injection into child processes.
 
 ### Changed

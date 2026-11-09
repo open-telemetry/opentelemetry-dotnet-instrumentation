@@ -160,7 +160,7 @@ due to lack of stable semantic convention.
 | `NPGSQL` \[7\]              | [Npgsql](https://www.nuget.org/packages/Npgsql)                                                                                                                                                                            | ≥6.0.0                 | source & bytecode \[10\]  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `NSERVICEBUS`               | [NServiceBus](https://www.nuget.org/packages/NServiceBus)                                                                                                                                                                  | ≥8.0.0 & < 10.0.0      | source & bytecode         | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `ORACLEMDA`                 | [Oracle.ManagedDataAccess.Core](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core) and [Oracle.ManagedDataAccess](https://www.nuget.org/packages/Oracle.ManagedDataAccess) **Not supported on ARM64**           | ≥23.4.0                | source                    | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `PROCESS`                   | Configured invocation methods and `System.Diagnostics.Process`                                                                                                                                                             | See below              | bytecode                  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `PROCESS`                   | `System.Diagnostics.ActivitySource` and `System.Diagnostics.Process`                                                                                                                                                       | See below              | bytecode                  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `RABBITMQ`                  | [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)                                                                                                                                                         | ≥5.0.0                 | source or bytecode \[11\] | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `QUARTZ`                    | [Quartz](https://www.nuget.org/packages/Quartz) **Quartz 4.x is supported on .NET 10+ only; Quartz 3.x is not supported on .NET Framework 4.7.1 or earlier**                                                               | \[13\]                 | source                    | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `SQLCLIENT`                 | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient), [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) \[12\]  and `System.Data` (shipped with .NET Framework) | * \[14\]               | source & bytecode \[15\]  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
@@ -349,14 +349,12 @@ environments. Extraction and injection can be configured independently.
 | Environment variable | Description | Default value |
 | -------------------- | ----------- | ------------- |
 | `OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_ENABLED` | Enables context extraction and child process injection. Inherits the standard trace instrumentation enable flags. | `true` |
-| `OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_EXTRACTION_MODE` | Applies environment context to selected invocation spans without an ambient parent: `parent` uses it as a remote parent; `link` adds a link; `off` disables extraction. | `parent` |
+| `OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_EXTRACTION_MODE` | Applies environment context to root `ActivitySource` activities without an ambient or supplied parent: `parent` uses it as a remote parent; `link` adds a link; `off` disables extraction. | `parent` |
 | `OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_INJECTION_ENABLED` | Injects the current trace context and baggage into child process environments when `UseShellExecute` is `false`. | `true` |
 
-To apply incoming trace context, select command or job methods through
-[YAML configuration](file-based-configuration.md#process-invocation-spans).
-Without a selected method, `PROCESS` can initialize baggage and inject child
-environments but creates no invocation spans. Child process injection requires
-`ProcessStartInfo.UseShellExecute` to be `false`.
+Incoming context applies to activities created through `ActivitySource.StartActivity`
+and `ActivitySource.CreateActivity`. No method targets are required. Child process
+injection requires `ProcessStartInfo.UseShellExecute` to be `false`.
 
 See [Process instrumentation](process-instrumentation.md) for supported .NET
 APIs, propagation behavior, and limitations, and

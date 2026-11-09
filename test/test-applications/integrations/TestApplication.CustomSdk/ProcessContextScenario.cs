@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
 
@@ -10,7 +9,8 @@ namespace TestApplication.CustomSdk;
 
 internal static class ProcessContextScenario
 {
-    private const string SourceName = "OpenTelemetry.AutoInstrumentation.NoCode";
+    private const string SourceName = "TestApplication.ProcessContextCustomSdk";
+    private static readonly ActivitySource Source = new(SourceName);
 
     internal static bool TryRun(string[] args)
     {
@@ -30,10 +30,9 @@ internal static class ProcessContextScenario
         return true;
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
     private static void Invoke(string name)
     {
-        var activity = Activity.Current ?? throw new InvalidOperationException("Configured invocation activity was not created.");
+        using var activity = Source.StartActivity(name) ?? throw new InvalidOperationException("Process invocation activity was not created.");
         var links = string.Join(",", activity.Links.Select(link => $"{link.Context.TraceId}:{link.Context.SpanId}"));
         Console.WriteLine($"PROCESS_CONTEXT_CUSTOM_SDK|{name}|{activity.TraceId}|{activity.SpanId}|{activity.ParentSpanId}|{(activity.HasRemoteParent ? "1" : "0")}|{(activity.Recorded ? "1" : "0")}|{activity.TraceStateString}|{Baggage.Current.GetBaggage("origin")}|{links}");
 

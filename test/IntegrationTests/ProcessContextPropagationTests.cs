@@ -20,6 +20,7 @@ public class ProcessContextPropagationTests : TestHelper
         : base("Smoke", output)
     {
         EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", SourceName);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_ENABLED", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED", "false");
@@ -37,23 +38,22 @@ public class ProcessContextPropagationTests : TestHelper
     [InlineData("link", true)]
     [InlineData("link", false)]
     [InlineData("off", true)]
-    public void AppliesContextToConfiguredInvocationsBeforeSampling(string? mode, bool sampled)
+    public void ExtractsContextBeforeSamplingAndPreservesExistingParents(string? mode, bool sampled)
     {
         using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_EXTRACTION_MODE", mode);
         SetEnvironmentVariable("TRACEPARENT", $"00-{TraceId}-{ParentSpanId}-{(sampled ? "01" : "00")}");
 
-        var output = RunWithConfiguration(collector, "process-context-roots", mode);
+        var (output, _, _) = RunTestApplication(new() { Arguments = "process-context-roots" });
         var activities = ReadRows(output, "PROCESS_CONTEXT|activity|").ToDictionary(row => row[0], StringComparer.Ordinal);
         var samples = ReadRows(output, "PROCESS_CONTEXT|sample|").ToDictionary(row => row[0], StringComparer.Ordinal);
         var parentMode = mode is null or "parent";
-        var invocationNames = new List<string> { "invocation", "repeated", "task", "task-result", "baggage-updated" };
-#if NET
-        invocationNames.Add("value-task");
-#endif
-        foreach (var name in invocationNames)
+
+        foreach (var name in new[] { "root", "repeated", "kind-first", "delayed", "task", "baggage-updated" })
         {
             var activity = activities[name];
-            Assert.Equal("OpenTelemetry.AutoInstrumentation.NoCode", activity[8]);
+            Assert.Equal(SourceName, activity[8]);
             Assert.Equal(mode == "link" ? $"{TraceId}:{ParentSpanId}" : string.Empty, samples[name][3]);
             if (parentMode)
             {
@@ -76,34 +76,25 @@ public class ProcessContextPropagationTests : TestHelper
             }
         }
 
-        var invocation = activities["invocation"];
+        var root = activities["root"];
         if (parentMode && !sampled)
         {
-            Assert.Contains(ReadRows(output, "PROCESS_CONTEXT|dropped|"), row => row[0] == "nested");
-            Assert.False(activities.ContainsKey("nested"));
+            Assert.Equal("child", Assert.Single(ReadRows(output, "PROCESS_CONTEXT|dropped|"))[0]);
+            Assert.False(activities.ContainsKey("child"));
         }
         else
         {
-            var nested = activities["nested"];
-            Assert.Equal(invocation[1], nested[1]);
-            Assert.Equal(invocation[2], nested[3]);
-            Assert.Equal(invocation[4], nested[4]);
-            Assert.Empty(nested[6]);
+            var child = activities["child"];
+            Assert.Equal(root[1], child[1]);
+            Assert.Equal(root[2], child[3]);
+            Assert.Equal(root[4], child[4]);
+            Assert.Empty(child[6]);
         }
 
-        Assert.NotEqual(invocation[2], activities["repeated"][2]);
+        Assert.NotEqual(root[2], activities["repeated"][2]);
         if (!parentMode)
         {
-            Assert.NotEqual(invocation[1], activities["repeated"][1]);
-        }
-
-        // Ordinary activities are unaffected, including activities created before
-        // an invocation and started after its scope has ended.
-        foreach (var name in new[] { "arbitrary", "delayed", "existing-links" })
-        {
-            Assert.NotEqual(TraceId, activities[name][1]);
-            Assert.Equal(ZeroSpanId, activities[name][3]);
-            Assert.Equal(ZeroSpanId, samples[name][2]);
+            Assert.NotEqual(root[1], activities["repeated"][1]);
         }
 
         foreach (var name in new[] { "explicit-context", "explicit-string" })
@@ -111,18 +102,73 @@ public class ProcessContextPropagationTests : TestHelper
             Assert.Equal(ExplicitTraceId, activities[name][1]);
             Assert.Equal(ExplicitSpanId, activities[name][3]);
             Assert.Empty(activities[name][6]);
+            Assert.Equal(ExplicitSpanId, samples[name][2]);
+            Assert.Empty(samples[name][3]);
         }
 
-        var ambient = activities["explicit-context"];
-        Assert.Equal(ambient[1], activities["ambient-invocation"][1]);
-        Assert.Equal(ambient[2], activities["ambient-invocation"][3]);
-        Assert.Empty(activities["ambient-invocation"][6]);
-        Assert.Equal($"{ExplicitTraceId}:{ExplicitSpanId}", activities["existing-links"][6]);
-        Assert.Equal($"{ExplicitTraceId}:{ExplicitSpanId}", samples["existing-links"][3]);
+        var ambient = activities["ambient"];
+        Assert.Equal(activities["explicit-context"][1], ambient[1]);
+        Assert.Equal(activities["explicit-context"][2], ambient[3]);
+        Assert.Empty(ambient[6]);
+        Assert.Equal(ambient[3], samples["ambient"][2]);
+        Assert.Empty(samples["ambient"][3]);
+
+        foreach (var name in new[] { "explicit-root", "explicit-root-context" })
+        {
+            Assert.NotEqual(TraceId, activities[name][1]);
+            Assert.Equal(ZeroSpanId, activities[name][3]);
+            Assert.Empty(activities[name][6]);
+            Assert.Equal(ZeroSpanId, samples[name][2]);
+            Assert.Empty(samples[name][3]);
+        }
+
+        Assert.Equal("cccccccccccccccccccccccccccccccc", activities["explicit-root-context"][1]);
+        Assert.Equal("cccccccccccccccccccccccccccccccc", samples["explicit-root-context"][1]);
+        var existingLinks = $"{ExplicitTraceId}:{ExplicitSpanId}" + (mode == "link" ? $",{TraceId}:{ParentSpanId}" : string.Empty);
+        Assert.Equal(existingLinks, samples["existing-links"][3]);
+        Assert.Equal($"{TraceId}:{ParentSpanId}", samples["already-linked"][3]);
+        if (!parentMode || sampled)
+        {
+            Assert.Equal(existingLinks, activities["existing-links"][6]);
+            Assert.Equal($"{TraceId}:{ParentSpanId}", activities["already-linked"][6]);
+        }
+
         var baggage = ReadRows(output, "PROCESS_CONTEXT|baggage|").ToDictionary(row => row[0], StringComparer.Ordinal);
         Assert.Equal(mode == "off" ? string.Empty : "environment", baggage["startup"][1]);
         Assert.Equal("updated", baggage["updated"][1]);
+        Assert.Contains("PROCESS_CONTEXT|unsubscribed|unchanged", output, StringComparison.Ordinal);
+        Assert.Contains("PROCESS_CONTEXT|dropping-listener|unchanged", output, StringComparison.Ordinal);
         Assert.Contains("PROCESS_CONTEXT|lifetime|restored", output, StringComparison.Ordinal);
+        ExpectExportedActivities(collector, activities.Values);
+        collector.AssertExpectations();
+    }
+
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [InlineData("parent", null)]
+    [InlineData("link", "invalid")]
+    public void MissingOrMalformedTraceContextLeavesOrdinaryRootsUnchanged(string mode, string? traceParent)
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_EXTRACTION_MODE", mode);
+        SetEnvironmentVariable("TRACEPARENT", traceParent);
+
+        var output = RunTestApplication(new() { Arguments = "process-context-roots" }).StandardOutput;
+        var activities = ReadRows(output, "PROCESS_CONTEXT|activity|").ToDictionary(row => row[0], StringComparer.Ordinal);
+        var samples = ReadRows(output, "PROCESS_CONTEXT|sample|").ToDictionary(row => row[0], StringComparer.Ordinal);
+        foreach (var name in new[] { "root", "repeated", "kind-first", "delayed", "task", "baggage-updated" })
+        {
+            Assert.NotEqual(TraceId, activities[name][1]);
+            Assert.NotEqual(ExplicitTraceId, activities[name][1]);
+            Assert.Equal(ZeroSpanId, activities[name][3]);
+            Assert.Empty(activities[name][6]);
+            Assert.Equal(ZeroSpanId, samples[name][2]);
+            Assert.Empty(samples[name][3]);
+        }
+
+        Assert.False(activities.ContainsKey("already-linked"));
+        Assert.Equal("environment", ReadRows(output, "PROCESS_CONTEXT|baggage|").Single(row => row[0] == "startup")[1]);
         ExpectExportedActivities(collector, activities.Values);
         collector.AssertExpectations();
     }
@@ -136,12 +182,14 @@ public class ProcessContextPropagationTests : TestHelper
     public void DisabledProcessInstrumentationLeavesIncomingContextUnused(bool groupEnabled, bool profilerEnabled)
     {
         using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_ENABLED", groupEnabled ? "true" : "false");
         SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", profilerEnabled ? "1" : "0");
         SetEnvironmentVariable("TRACEPARENT", $"00-{TraceId}-{ParentSpanId}-01");
 
-        var output = RunWithConfiguration(collector, "process-context-roots", groupEnabled: groupEnabled);
+        var (output, _, _) = RunTestApplication(new() { Arguments = "process-context-roots" });
         var activities = ReadRows(output, "PROCESS_CONTEXT|activity|");
-        foreach (var activity in activities.Where(activity => activity[0] is "invocation" or "repeated" or "arbitrary" or "delayed"))
+        foreach (var activity in activities.Where(activity => activity[0] is "root" or "repeated" or "kind-first" or "delayed"))
         {
             Assert.NotEqual(TraceId, activity[1]);
             Assert.Equal(ZeroSpanId, activity[3]);
@@ -163,7 +211,7 @@ public class ProcessContextPropagationTests : TestHelper
         using var collector = new MockSpansCollector(Output);
         SetEnvironmentVariable("TRACEPARENT", $"00-{TraceId}-{ParentSpanId}-01");
 
-        var output = RunWithConfiguration(collector, "process-context-launch", mode, injectionEnabled: injectionEnabled);
+        var output = RunWithConfiguration(collector, "process-context-launch", mode, injectionEnabled);
         var parents = ReadRows(output, "PROCESS_CONTEXT|activity|").ToDictionary(row => row[0], StringComparer.Ordinal);
         var exported = parents.Values.ToList();
 
@@ -217,7 +265,7 @@ public class ProcessContextPropagationTests : TestHelper
         var expected = activities.Where(activity => activity[4] == "1").ToArray();
         foreach (var activity in expected)
         {
-            collector.Expect(activity[8], span =>
+            collector.Expect(SourceName, span =>
                 span.Name == activity[0] && ToHex(span.TraceId) == activity[1] && ToHex(span.SpanId) == activity[2] &&
                 (span.ParentSpanId.IsEmpty ? ZeroSpanId : ToHex(span.ParentSpanId)) == activity[3] &&
                 string.Join(",", span.Links.Select(link => $"{ToHex(link.TraceId)}:{ToHex(link.SpanId)}")) == activity[6]);
@@ -231,39 +279,9 @@ public class ProcessContextPropagationTests : TestHelper
         return string.Concat(value.Select(item => item.ToString("x2", CultureInfo.InvariantCulture)));
     }
 
-    private string RunWithConfiguration(MockSpansCollector collector, string arguments, string? mode = null, bool groupEnabled = true, bool injectionEnabled = true)
+    private string RunWithConfiguration(MockSpansCollector collector, string arguments, string mode, bool injectionEnabled)
     {
         var path = Path.GetTempFileName();
-        var process = groupEnabled ? $$"""
-              process:
-                context_extraction:
-                  mode: {{mode ?? "parent"}}
-                context_injection:
-                  enabled: {{(injectionEnabled ? "true" : "false")}}
-        """ : string.Empty;
-        var targets = new List<(string Method, string ReturnType)>
-        {
-            ("Invoke", "System.Void"),
-            ("InvokeAsync", "System.Threading.Tasks.Task"),
-            ("InvokeTaskResultAsync", "System.Threading.Tasks.Task`1[System.Int32]")
-        };
-#if NET
-        targets.Add(("InvokeValueTaskAsync", "System.Threading.Tasks.ValueTask"));
-#endif
-        var noCodeTargets = string.Join(Environment.NewLine, targets.Select(target => $$"""
-                - target:
-                    assembly:
-                      name: TestApplication.Smoke
-                    type: TestApplication.Smoke.ProcessContextScenario
-                    method: {{target.Method}}
-                    signature:
-                      return_type: {{target.ReturnType}}
-                      parameter_types:
-                        - System.String
-                  span:
-                    name: invocation
-                    name_source: arguments[0]
-        """));
         var configuration = $$"""
         file_format: "1.0"
         tracer_provider:
@@ -281,10 +299,11 @@ public class ProcessContextPropagationTests : TestHelper
             traces:
               additional_sources:
                 - {{SourceName}}
-        {{process}}
-            no_code:
-              targets:
-        {{noCodeTargets}}
+              process:
+                context_extraction:
+                  mode: {{mode}}
+                context_injection:
+                  enabled: {{(injectionEnabled ? "true" : "false")}}
         """;
         File.WriteAllText(path, configuration);
         SetEnvironmentVariable("OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED", "true");

@@ -3,7 +3,9 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.Process.Integrations;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Context.Propagation;
 
@@ -34,15 +36,23 @@ internal static class ProcessInstrumentation
         }
     }
 
-    internal static void ApplyToInvocation(ref ActivityContext context, ref IEnumerable<ActivityLink>? links)
+    internal static bool IsDefinitionEnabled(NativeCallTargetDefinition2 definition)
+    {
+        // Do not rewrite activity creation across the application unless startup
+        // extraction produced a usable trace context. Baggage and injection are independent.
+        return _context?.HasIncomingTraceContext == true ||
+               Marshal.PtrToStringUni(definition.IntegrationType) != typeof(ActivitySourceCreateActivityIntegration).FullName;
+    }
+
+    internal static void ApplyToRoot(ref ActivityContext context, string? parentId, ref IEnumerable<ActivityLink>? links)
     {
         try
         {
-            _context?.ApplyToInvocation(ref context, ref links);
+            _context?.ApplyToRoot(ref context, parentId, ref links);
         }
         catch (Exception exception)
         {
-            Logger.Debug(exception, "Could not apply process environment context to the invocation.");
+            Logger.Debug(exception, "Could not apply process environment context to the root activity.");
         }
     }
 

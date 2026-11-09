@@ -452,7 +452,7 @@ See [nocode-instrumentation.md](nocode-instrumentation.md)
 ### Process instrumentation
 
 See [process-instrumentation.md](process-instrumentation.md) for context propagation
-between processes and configured command or job invocations.
+between processes, including incoming context for root `ActivitySource` activities.
 
 ## Log to trace correlation
 

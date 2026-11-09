@@ -10,7 +10,7 @@ namespace IntegrationTests;
 
 public class ProcessContextCustomSdkTests : TestHelper
 {
-    private const string SourceName = "OpenTelemetry.AutoInstrumentation.NoCode";
+    private const string SourceName = "TestApplication.ProcessContextCustomSdk";
     private const string TraceId = "11111111111111111111111111111111";
     private const string ParentSpanId = "2222222222222222";
 
@@ -34,7 +34,7 @@ public class ProcessContextCustomSdkTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [InlineData("parent")]
     [InlineData("link")]
-    public void UsesDefaultPropagatorsAndApplicationSamplerForConfiguredInvocations(string mode)
+    public void UsesDefaultPropagatorsAndApplicationSamplerForOrdinaryActivities(string mode)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -55,20 +55,6 @@ public class ProcessContextCustomSdkTests : TestHelper
               process:
                 context_extraction:
                   mode: {{mode}}
-            no_code:
-              targets:
-                - target:
-                    assembly:
-                      name: TestApplication.CustomSdk
-                    type: TestApplication.CustomSdk.ProcessContextScenario
-                    method: Invoke
-                    signature:
-                      return_type: System.Void
-                      parameter_types:
-                        - System.String
-                  span:
-                    name: invocation
-                    name_source: arguments[0]
         """;
         File.WriteAllText(path, configuration);
         SetEnvironmentVariable("OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED", "true");

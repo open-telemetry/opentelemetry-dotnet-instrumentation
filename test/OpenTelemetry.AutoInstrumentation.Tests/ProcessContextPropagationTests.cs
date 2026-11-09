@@ -43,14 +43,15 @@ public class ProcessContextPropagationTests
     }
 
     [Fact]
-    public void InvocationParentPreservesRemoteContextFlagsAndTraceState()
+    public void RootParentPreservesRemoteContextFlagsAndTraceState()
     {
         var propagation = CreatePropagation();
         ActivityContext context = default;
         IEnumerable<ActivityLink>? links = null;
 
-        propagation.ApplyToInvocation(ref context, ref links);
+        propagation.ApplyToRoot(ref context, null, ref links);
 
+        Assert.True(propagation.HasIncomingTraceContext);
         Assert.True(context.IsRemote);
         Assert.Equal(ActivityTraceFlags.Recorded, context.TraceFlags);
         Assert.Equal(TraceState, context.TraceState);
@@ -59,56 +60,39 @@ public class ProcessContextPropagationTests
         Assert.Null(links);
     }
 
+    [Fact]
+    public void RootContextUsesTheStartupSnapshot()
+    {
+        var environment = new Dictionary<string, string?> { ["TRACEPARENT"] = TraceParent, ["TRACESTATE"] = TraceState };
+        var propagation = new ProcessContextPropagation(ProcessContextExtractionMode.Parent, new TraceContextPropagator(), environment);
+        environment["TRACEPARENT"] = "00-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-bbbbbbbbbbbbbbbb-00";
+        environment["TRACESTATE"] = "changed=value";
+        ActivityContext context = default;
+        IEnumerable<ActivityLink>? links = null;
+
+        propagation.ApplyToRoot(ref context, null, ref links);
+
+        Assert.Equal("0123456789abcdef0123456789abcdef", context.TraceId.ToHexString());
+        Assert.Equal("0123456789abcdef", context.SpanId.ToHexString());
+        Assert.Equal(ActivityTraceFlags.Recorded, context.TraceFlags);
+        Assert.Equal(TraceState, context.TraceState);
+    }
+
     [Theory]
-    [InlineData((int)ProcessContextExtractionMode.Parent)]
-    [InlineData((int)ProcessContextExtractionMode.Link)]
-    [InlineData((int)ProcessContextExtractionMode.Off)]
-    public void PublicInvocationCreationSuppliesContextBeforeSampling(int mode)
+    [InlineData((int)ProcessContextExtractionMode.Parent, "")]
+    [InlineData((int)ProcessContextExtractionMode.Parent, "explicit-parent")]
+    [InlineData((int)ProcessContextExtractionMode.Link, "")]
+    [InlineData((int)ProcessContextExtractionMode.Link, "explicit-parent")]
+    public void PreservesEverySuppliedParentIdIncludingExplicitRoots(int mode, string parentId)
     {
         var propagation = CreatePropagation((ProcessContextExtractionMode)mode);
-        using var source = new ActivitySource(nameof(PublicInvocationCreationSuppliesContextBeforeSampling));
-        ActivityContext sampledParent = default;
-        ActivityLink[] sampledLinks = [];
-        using var listener = new ActivityListener
-        {
-            ShouldListenTo = candidate => ReferenceEquals(candidate, source),
-            Sample = (ref ActivityCreationOptions<ActivityContext> options) =>
-            {
-                sampledParent = options.Parent;
-                sampledLinks = options.Links?.ToArray() ?? [];
-                return ActivitySamplingResult.AllDataAndRecorded;
-            }
-        };
-        ActivitySource.AddActivityListener(listener);
-        ActivityContext parentContext = default;
+        ActivityContext context = default;
         IEnumerable<ActivityLink>? links = null;
-        propagation.ApplyToInvocation(ref parentContext, ref links);
 
-        using var invocation = source.StartActivity("invocation", ActivityKind.Internal, parentContext, links: links);
+        propagation.ApplyToRoot(ref context, parentId, ref links);
 
-        Assert.NotNull(invocation);
-        if (mode == (int)ProcessContextExtractionMode.Parent)
-        {
-            Assert.True(sampledParent.IsRemote);
-            Assert.Equal(TraceState, sampledParent.TraceState);
-            Assert.Equal("0123456789abcdef", invocation.ParentSpanId.ToHexString());
-            Assert.Equal(sampledParent.TraceId, invocation.TraceId);
-            Assert.Empty(sampledLinks);
-        }
-        else
-        {
-            Assert.Equal(default, sampledParent);
-            Assert.Equal(default, invocation.ParentSpanId);
-            if (mode == (int)ProcessContextExtractionMode.Link)
-            {
-                Assert.Equal("0123456789abcdef", Assert.Single(sampledLinks).Context.SpanId.ToHexString());
-                Assert.Equal(sampledLinks, invocation.Links);
-            }
-            else
-            {
-                Assert.Empty(sampledLinks);
-            }
-        }
+        Assert.Equal(default, context);
+        Assert.Null(links);
     }
 
     [Fact]
@@ -119,9 +103,10 @@ public class ProcessContextPropagationTests
         ActivityContext context = default;
         IEnumerable<ActivityLink>? links = [existing];
 
-        propagation.ApplyToInvocation(ref context, ref links);
-        propagation.ApplyToInvocation(ref context, ref links);
+        propagation.ApplyToRoot(ref context, null, ref links);
+        propagation.ApplyToRoot(ref context, null, ref links);
 
+        Assert.True(propagation.HasIncomingTraceContext);
         Assert.Equal(default, context);
         Assert.NotNull(links);
         Assert.Equal(2, links.Count());
@@ -129,34 +114,56 @@ public class ProcessContextPropagationTests
         Assert.Equal("0123456789abcdef", links.Last().Context.SpanId.ToHexString());
     }
 
-    [Fact]
-    public void PreservesExplicitAndAmbientParents()
+    [Theory]
+    [InlineData((int)ProcessContextExtractionMode.Parent)]
+    [InlineData((int)ProcessContextExtractionMode.Link)]
+    public void PreservesExplicitAndAmbientParents(int mode)
     {
-        var propagation = CreatePropagation();
+        var propagation = CreatePropagation((ProcessContextExtractionMode)mode);
         var explicitContext = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.None);
         var context = explicitContext;
         IEnumerable<ActivityLink>? links = null;
-        propagation.ApplyToInvocation(ref context, ref links);
+        propagation.ApplyToRoot(ref context, null, ref links);
         Assert.Equal(explicitContext, context);
+        Assert.Null(links);
+
+        // A non-default context with no parent span can deliberately select a new root.
+        var explicitRoot = new ActivityContext(ActivityTraceId.CreateRandom(), default, ActivityTraceFlags.None);
+        context = explicitRoot;
+        propagation.ApplyToRoot(ref context, null, ref links);
+        Assert.Equal(explicitRoot, context);
+        Assert.Null(links);
 
         using var ambient = new Activity("ambient");
         ambient.Start();
         context = default;
-        propagation.ApplyToInvocation(ref context, ref links);
+        propagation.ApplyToRoot(ref context, null, ref links);
         Assert.Equal(default, context);
+        Assert.Null(links);
     }
 
     [Theory]
-    [InlineData("invalid")]
-    [InlineData("00-00000000000000000000000000000000-0123456789abcdef-01")]
-    public void InvalidIncomingTraceContextDoesNotChangeInvocations(string traceParent)
+    [InlineData((int)ProcessContextExtractionMode.Parent, null)]
+    [InlineData((int)ProcessContextExtractionMode.Parent, "invalid")]
+    [InlineData((int)ProcessContextExtractionMode.Parent, "00-00000000000000000000000000000000-0123456789abcdef-01")]
+    [InlineData((int)ProcessContextExtractionMode.Link, null)]
+    [InlineData((int)ProcessContextExtractionMode.Link, "invalid")]
+    [InlineData((int)ProcessContextExtractionMode.Link, "00-00000000000000000000000000000000-0123456789abcdef-01")]
+    public void InvalidIncomingTraceContextDoesNotChangeRoots(int mode, string? traceParent)
     {
-        var propagation = new ProcessContextPropagation(ProcessContextExtractionMode.Parent, new TraceContextPropagator(), new Dictionary<string, string?> { ["TRACEPARENT"] = traceParent });
+        var environment = new Dictionary<string, string?>();
+        if (traceParent is not null)
+        {
+            environment["TRACEPARENT"] = traceParent;
+        }
+
+        var propagation = new ProcessContextPropagation((ProcessContextExtractionMode)mode, new TraceContextPropagator(), environment);
         ActivityContext context = default;
         IEnumerable<ActivityLink>? links = null;
 
-        propagation.ApplyToInvocation(ref context, ref links);
+        propagation.ApplyToRoot(ref context, null, ref links);
 
+        Assert.False(propagation.HasIncomingTraceContext);
         Assert.Equal(default, context);
         Assert.Null(links);
     }
@@ -172,8 +179,9 @@ public class ProcessContextPropagationTests
             propagation.InitializeBaggage();
             ActivityContext context = default;
             IEnumerable<ActivityLink>? links = null;
-            propagation.ApplyToInvocation(ref context, ref links);
+            propagation.ApplyToRoot(ref context, null, ref links);
 
+            Assert.False(propagation.HasIncomingTraceContext);
             Assert.Equal(default, context);
             Assert.Empty(Baggage.Current.GetBaggage());
         }
@@ -215,6 +223,7 @@ public class ProcessContextPropagationTests
             Baggage.Current = default;
             var propagation = new ProcessContextPropagation(ProcessContextExtractionMode.Link, new BaggagePropagator(), new Dictionary<string, string?> { ["BAGGAGE"] = "startup=value" });
             propagation.InitializeBaggage();
+            Assert.False(propagation.HasIncomingTraceContext);
             Assert.Equal("value", Baggage.Current.GetBaggage("startup"));
         }
         finally

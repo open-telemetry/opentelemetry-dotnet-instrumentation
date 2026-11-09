@@ -20,6 +20,8 @@ internal sealed class ProcessContextPropagation
         _incoming = mode == ProcessContextExtractionMode.Off ? default : propagator.Extract(default, environment, EnvironmentCarrier.Get);
     }
 
+    internal bool HasIncomingTraceContext => IsValid(_incoming.ActivityContext);
+
     internal void InitializeBaggage()
     {
         if (_incoming.Baggage.Count > 0)
@@ -35,10 +37,10 @@ internal sealed class ProcessContextPropagation
         }
     }
 
-    internal void ApplyToInvocation(ref ActivityContext context, ref IEnumerable<ActivityLink>? links)
+    internal void ApplyToRoot(ref ActivityContext context, string? parentId, ref IEnumerable<ActivityLink>? links)
     {
         if (_mode == ProcessContextExtractionMode.Off || !IsValid(_incoming.ActivityContext) ||
-            Activity.Current is not null || context != default)
+            context != default || parentId is not null || Activity.Current is not null)
         {
             return;
         }
@@ -49,13 +51,15 @@ internal sealed class ProcessContextPropagation
             return;
         }
 
-        var updatedLinks = links?.ToList() ?? [];
-        if (!updatedLinks.Any(link => link.Context.TraceId == _incoming.ActivityContext.TraceId && link.Context.SpanId == _incoming.ActivityContext.SpanId))
+        if (links is null)
         {
-            updatedLinks.Add(new ActivityLink(_incoming.ActivityContext));
+            links = [new ActivityLink(_incoming.ActivityContext)];
+            return;
         }
 
-        links = updatedLinks;
+        // Preserve deferred enumeration: a sampler can drop the activity without
+        // reading links, in which case the application iterator must not run.
+        links = AppendIncomingLink(links, _incoming.ActivityContext);
     }
 
     internal void InjectEnvironment(IDictionary<string, string?> environment)
@@ -77,6 +81,21 @@ internal sealed class ProcessContextPropagation
         }
 
         _propagator.Inject(new PropagationContext(context, Baggage.Current), environment, EnvironmentCarrier.Set);
+    }
+
+    private static IEnumerable<ActivityLink> AppendIncomingLink(IEnumerable<ActivityLink> links, ActivityContext incoming)
+    {
+        var alreadyLinked = false;
+        foreach (var link in links)
+        {
+            alreadyLinked |= link.Context.TraceId == incoming.TraceId && link.Context.SpanId == incoming.SpanId;
+            yield return link;
+        }
+
+        if (!alreadyLinked)
+        {
+            yield return new ActivityLink(incoming);
+        }
     }
 
     private static bool IsValid(ActivityContext context)

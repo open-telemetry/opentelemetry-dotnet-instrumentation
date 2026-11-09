@@ -3,7 +3,6 @@
 
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using OpenTelemetry;
 
 namespace TestApplication.Smoke;
@@ -30,7 +29,10 @@ internal static class ProcessContextScenario
                 return true;
             case "process-context-child":
                 WriteBaggage("startup");
-                Invoke("process-child");
+                using (var child = Source.StartActivity("process-child"))
+                {
+                    WriteActivity("process-child", child);
+                }
 
                 return true;
             default:
@@ -42,7 +44,7 @@ internal static class ProcessContextScenario
     {
         using var listener = new ActivityListener
         {
-            ShouldListenTo = static source => source.Name is "TestApplication.ProcessContext" or "OpenTelemetry.AutoInstrumentation.NoCode",
+            ShouldListenTo = static source => source.Name == "TestApplication.ProcessContext",
             Sample = static (ref ActivityCreationOptions<ActivityContext> options) =>
             {
                 var links = string.Join(",", (options.Links ?? []).Select(link => $"{link.Context.TraceId}:{link.Context.SpanId}"));
@@ -52,22 +54,41 @@ internal static class ProcessContextScenario
         };
         ActivitySource.AddActivityListener(listener);
         WriteBaggage("startup");
+        VerifySkippedActivity(registerDroppingListener: false);
+        VerifySkippedActivity(registerDroppingListener: true);
         using var delayed = Source.CreateActivity("delayed", ActivityKind.Internal);
 
-        Invoke("invocation");
-        Invoke("repeated");
-        InvokeAsync("task").GetAwaiter().GetResult();
-        if (InvokeTaskResultAsync("task-result").GetAwaiter().GetResult() != 42)
+        using (var root = Source.StartActivity("root"))
         {
-            throw new InvalidOperationException("The configured invocation changed the task result.");
+            WriteActivity("root", root);
+            using var child = Source.StartActivity("child");
+            if (child is null && root is { Recorded: false })
+            {
+                // The SDK may omit local children of an unsampled propagation-only activity.
+                Write("dropped", "child");
+            }
+            else
+            {
+                WriteActivity("child", child);
+            }
         }
 
-#if NET
-        InvokeValueTaskAsync("value-task").AsTask().GetAwaiter().GetResult();
-#endif
-        using (var arbitrary = Source.StartActivity("arbitrary"))
+        // Later environment changes must not replace the context cached at startup.
+        var startupTraceParent = Environment.GetEnvironmentVariable("TRACEPARENT");
+        try
         {
-            WriteActivity("arbitrary", arbitrary);
+            Environment.SetEnvironmentVariable("TRACEPARENT", ExplicitTraceParent);
+            using var repeated = Source.StartActivity("repeated");
+            WriteActivity("repeated", repeated);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("TRACEPARENT", startupTraceParent);
+        }
+
+        using (var kindFirst = Source.StartActivity(ActivityKind.Internal, name: "kind-first"))
+        {
+            WriteActivity("kind-first", kindFirst);
         }
 
         delayed?.Start();
@@ -82,7 +103,8 @@ internal static class ProcessContextScenario
         using (var explicitParent = Source.StartActivity("explicit-context", ActivityKind.Internal, explicitContext))
         {
             WriteActivity("explicit-context", explicitParent);
-            Invoke("ambient-invocation");
+            using var ambient = Source.StartActivity("ambient");
+            WriteActivity("ambient", ambient);
         }
 
         using (var explicitParent = Source.StartActivity("explicit-string", ActivityKind.Internal, ExplicitTraceParent))
@@ -90,65 +112,91 @@ internal static class ProcessContextScenario
             WriteActivity("explicit-string", explicitParent);
         }
 
+        // Empty string parent IDs also select a root. Force W3C format so the
+        // normal ActivityContext sampling callback handles this empty string.
+        var forceDefaultIdFormat = Activity.ForceDefaultIdFormat;
+        try
+        {
+            Activity.ForceDefaultIdFormat = true;
+            using var explicitRoot = Source.StartActivity("explicit-root", ActivityKind.Internal, parentId: string.Empty);
+            WriteActivity("explicit-root", explicitRoot);
+        }
+        finally
+        {
+            Activity.ForceDefaultIdFormat = forceDefaultIdFormat;
+        }
+
+        var rootContext = new ActivityContext(ActivityTraceId.CreateFromString("cccccccccccccccccccccccccccccccc".AsSpan()), default, ActivityTraceFlags.Recorded);
+        using (var explicitRoot = Source.StartActivity("explicit-root-context", ActivityKind.Internal, rootContext))
+        {
+            WriteActivity("explicit-root-context", explicitRoot);
+        }
+
         using (var linked = Source.StartActivity("existing-links", ActivityKind.Internal, default(ActivityContext), links: [new ActivityLink(explicitContext)]))
         {
             WriteActivity("existing-links", linked);
         }
 
+        if (ActivityContext.TryParse(startupTraceParent, Environment.GetEnvironmentVariable("TRACESTATE"), isRemote: true, out var incomingContext))
+        {
+            using var linked = Source.StartActivity("already-linked", ActivityKind.Internal, default(ActivityContext), links: [new ActivityLink(incomingContext)]);
+            WriteActivity("already-linked", linked);
+        }
+
+        EmitAsyncRoot().GetAwaiter().GetResult();
         Baggage.SetBaggage("origin", "updated");
-        Invoke("baggage-updated");
+        using (var updated = Source.StartActivity("baggage-updated"))
+        {
+            WriteActivity("baggage-updated", updated);
+        }
+
         WriteBaggage("updated");
         if (Activity.Current is not null)
         {
-            throw new InvalidOperationException("A configured invocation leaked its activity into the caller.");
+            throw new InvalidOperationException("Process context extraction leaked an activity into the caller.");
         }
 
         Write("lifetime", "restored");
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void Invoke(string label)
+    private static async Task EmitAsyncRoot()
     {
-        WriteInvocation(label);
-        if (label == "invocation")
+        await Task.Yield();
+        using var activity = Source.StartActivity("task");
+        WriteActivity("task", activity);
+    }
+
+    private static void VerifySkippedActivity(bool registerDroppingListener)
+    {
+        var previousActivity = Activity.Current;
+        var linksEnumerated = false;
+        var samplingAttempts = 0;
+        var label = registerDroppingListener ? "dropping-listener" : "unsubscribed";
+        using var source = new ActivitySource($"TestApplication.ProcessContext.{label}");
+        using var listener = new ActivityListener
         {
-            Invoke("nested");
+            ShouldListenTo = candidate => registerDroppingListener && ReferenceEquals(candidate, source),
+            Sample = (ref ActivityCreationOptions<ActivityContext> _) =>
+            {
+                samplingAttempts++;
+                return ActivitySamplingResult.None;
+            }
+        };
+        ActivitySource.AddActivityListener(listener);
+        using var activity = source.StartActivity(label, ActivityKind.Internal, default(ActivityContext), links: UnexpectedLinks());
+        if (activity is not null || linksEnumerated || !ReferenceEquals(previousActivity, Activity.Current) ||
+            samplingAttempts != (registerDroppingListener ? 1 : 0))
+        {
+            throw new InvalidOperationException("Skipping activity creation changed its context, enumerated links, or sampled an unexpected number of times.");
         }
-    }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static async Task InvokeAsync(string label)
-    {
-        await Task.Yield();
-        WriteInvocation(label);
-    }
+        Write(label, "unchanged");
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static async Task<int> InvokeTaskResultAsync(string label)
-    {
-        await Task.Yield();
-        WriteInvocation(label);
-        return 42;
-    }
-
-#if NET
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static async ValueTask InvokeValueTaskAsync(string label)
-    {
-        await Task.Yield();
-        WriteInvocation(label);
-    }
-#endif
-
-    private static void WriteInvocation(string label)
-    {
-        if (Activity.Current?.DisplayName == label)
+        IEnumerable<ActivityLink> UnexpectedLinks()
         {
-            WriteActivity(label, Activity.Current);
-        }
-        else
-        {
-            Write("dropped", label);
+            linksEnumerated = true;
+            yield return new ActivityLink(default);
+            throw new InvalidOperationException("Links for an activity that is not created must not be enumerated.");
         }
     }
 

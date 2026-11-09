@@ -1,6 +1,8 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using OpenTelemetry.AutoInstrumentation.Instrumentations.Process;
+
 namespace OpenTelemetry.AutoInstrumentation;
 
 internal static partial class InstrumentationDefinitions
@@ -13,7 +15,7 @@ internal static partial class InstrumentationDefinitions
         {
             // Fixed Id for definitions payload (to avoid loading the same integrations from multiple AppDomains).
             DefinitionsId = "57D20C392035423F9F58419EDE286903",
-            Definitions = GetSharedDefinitionsArray(),
+            Definitions = GetSharedDefinitionsArray().Where(ProcessInstrumentation.IsDefinitionEnabled).ToArray(),
         };
     }
 

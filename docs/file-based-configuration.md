@@ -575,32 +575,10 @@ for supported .NET APIs, runtimes, and behavior. Both directions use the
 propagators selected by the [`propagator` configuration](#propagator-configuration);
 their fields determine the environment variables used for propagation.
 
-### Process invocation spans
+### Process context propagation
 
-Select command or job methods using the existing `no_code.targets` configuration
-under `instrumentation/development.dotnet`, alongside `traces.process`. Choose a
-method whose execution covers one invocation. For asynchronous work, select a
-method returning `Task` or `Task<T>` that completes when that work finishes. The
-span ends when the method returns or the returned task completes; a method that
-only schedules background work does not cover that work's lifetime.
-
-When the selected method has no ambient `Activity.Current`, `parent` applies the
-incoming remote parent, `link` adds an incoming link, and `off` leaves the method
-span unchanged. Parent and link inputs are supplied before sampling and ID
-generation. Existing ambient parents take precedence, so nested selected methods
-and ordinary child activities inherit normally. The agent does not change the
-parents or links of other `ActivitySource` roots. No additional process-wide or
-`Main` span is created.
-
-The agent automatically registers the
-`OpenTelemetry.AutoInstrumentation.NoCode` source for these spans. Without a
-selected method target, `process` can initialize baggage and inject child
-environments but creates no invocation span. Targets currently require YAML;
-environment-only configuration cannot define them. Environment values can be
-referenced within YAML, as shown for the process options below.
-
-Enable [file-based configuration](#file-based-configuration), then replace the
-assembly, type, method, and signature with those of your command or job method:
+Enable process context propagation and register an application's `ActivitySource`
+with the tracer provider:
 
 ``` yaml
 file_format: "1.0"
@@ -623,24 +601,17 @@ instrumentation/development:
         context_injection:
           # Independent of extraction. Default is true.
           enabled: ${OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_INJECTION_ENABLED:-true}
-    no_code:
-      targets:
-        - target:
-            assembly:
-              name: MyCommand
-            type: MyCommand.CommandRunner
-            method: ExecuteAsync
-            signature:
-              return_type: System.Threading.Tasks.Task
-              parameter_types: []
-          span:
-            name: execute-command
-            kind: internal
+      additional_sources:
+        - MyCommand
 ```
 
-See [configuration based instrumentation](nocode-instrumentation.md) for method
-selection and span options. Process options do not replace the normal method
-span configuration or the tracer provider's sampler.
+With this configuration, `new ActivitySource("MyCommand").StartActivity("job")`
+receives the incoming process context when no ambient or supplied parent exists.
+No `no_code.targets` configuration is required. For applications that need spans
+created without code changes,
+[configuration based instrumentation](nocode-instrumentation.md) remains
+available independently. See [Process instrumentation](process-instrumentation.md)
+for parent precedence, sampling, supported APIs, and limitations.
 
 ### Other instrumentation options
 

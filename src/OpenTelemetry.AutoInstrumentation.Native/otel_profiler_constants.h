@@ -43,7 +43,8 @@ const WSTRING skip_assembly_prefixes[]{
 const WSTRING include_assemblies[]{
     WStr("Microsoft.Extensions.Logging"),
     WStr("Microsoft.Extensions.Logging.Abstractions"),
-    // Environment context propagation instruments Process.Start.
+    // Environment context propagation instruments ActivitySource and Process.Start.
+    WStr("System.Diagnostics.DiagnosticSource"),
     WStr("System.Diagnostics.Process"),
 };
 

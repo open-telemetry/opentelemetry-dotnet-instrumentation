@@ -14,7 +14,7 @@ for settings and defaults, or use the corresponding
 
 Extraction and injection are independent. Set the extraction mode to `off` for
 injection only, or disable injection for extraction only. Disabling `PROCESS`
-disables both directions while leaving ordinary configured method spans enabled.
+disables both directions. Existing Process metrics are configured independently.
 
 Unsupported extraction modes are logged and use `parent`, or fail initialization
 when fail-fast is enabled. Use `OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED=true` for
@@ -23,42 +23,71 @@ environment configuration, or `fail_fast: true` in YAML.
 Startup-hook-only deployments leave this instrumentation inactive and log an
 explanatory message.
 
-## Incoming context and invocation spans
+## Incoming context and activities
 
-Extraction uses the process environment captured at startup. Incoming trace
-context is applied to spans for command or job methods selected through
-[configuration based instrumentation](nocode-instrumentation.md). Choose a method
-whose execution covers one invocation.
+Extraction uses the process environment captured once at startup. Incoming trace
+context applies automatically to root activities created through
+`System.Diagnostics.ActivitySource.StartActivity(...)` or
+`ActivitySource.CreateActivity(...)`, including the simple overload:
 
-Method targets are configured in YAML under
-`instrumentation/development.dotnet.no_code.targets`; environment-only
-configuration cannot define targets. YAML can reference environment variables for
-the process options. See the
-[invocation configuration example](file-based-configuration.md#process-invocation-spans).
+``` csharp
+using System.Diagnostics;
 
-When the selected method starts without an ambient `Activity.Current`, its span
-receives the incoming context according to the extraction mode:
+using var source = new ActivitySource("MyCommand");
+using var job = source.StartActivity("job");
+// Run the job within this activity's scope.
+```
+
+Register your source with the tracer provider as usual. For the agent's provider,
+set `OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES=MyCommand`, or use YAML
+[`traces.additional_sources`](file-based-configuration.md#instrumentation-additional-sources).
+An application-owned provider can register it with `AddSource("MyCommand")`.
+Process instrumentation does not subscribe to additional sources or force
+activities to be created when there are no listeners.
+
+When there is no ambient `Activity.Current`, supplied parent context, or supplied
+parent ID, the activity receives the incoming trace context according to the
+extraction mode:
 
 | Mode | Behavior |
 | ---- | -------- |
-| `parent` | Uses the incoming trace context as a remote parent. |
-| `link` | Adds a link to the incoming trace context. |
-| `off` | Leaves the method span unchanged and disables incoming baggage initialization. |
+| `parent` | Uses the incoming trace context as a remote parent, including its trace flags and trace state. |
+| `link` | Adds a link to the incoming trace context, preserving existing links and avoiding a duplicate incoming link. |
+| `off` | Leaves activity creation unchanged and disables incoming baggage initialization. |
 
-Parent and link inputs are supplied through the public
-`ActivitySource.StartActivity(...)` API before sampling and ID generation.
-Existing ambient parents take precedence. Nested method spans and other
-activities created within the invocation inherit normally. The agent does not
-change the parents or links of other `ActivitySource` roots.
+Incoming parents and links are available to listeners and samplers before the
+activity is created. The configured sampler still determines whether the new
+activity is recorded and sampled. Ambient activities and supplied parents take
+precedence. A supplied parent ID, including an empty string used to request an
+independent root, is preserved. A default `ActivityContext` with no parent ID
+uses the incoming context when no activity is current.
 
-The invocation span lasts until the selected method returns, or until its
-returned `Task` or `Task<T>` completes. Choose a method that awaits the command
-or job's work, rather than one that only schedules background work. Spans use
-`OpenTelemetry.AutoInstrumentation.NoCode`, which the agent registers
-automatically. No additional process-wide or `Main` span is created.
+The startup context can apply to multiple root activities; it is not consumed by
+the first one. Nested activities inherit their active parent normally. With
+`CreateActivity(...)`, extraction is applied during creation and sampling, even
+if the application calls `Activity.Start()` later. Normal activity lifetimes
+remain under application control. No additional process-wide or `Main` span is
+created.
 
-Without a selected target, `PROCESS` can initialize baggage and inject child
-environments but creates no invocation spans.
+[Configuration based instrumentation](nocode-instrumentation.md) is an optional
+way to create method spans without changing application code. Its spans receive
+incoming context through the same activity factory hook; no method targets or
+YAML configuration are required for manually created activities.
+
+### Implementation and support boundaries
+
+The profiler intercepts DiagnosticSource 10.x's private nine-argument
+`ActivitySource.CreateActivity` method, the shared implementation used by the
+public `StartActivity` and `CreateActivity` overloads. The hook supplies parent
+and link arguments before sampling and ID generation, then lets the original
+method execute. It is registered only when extraction produces a valid incoming
+trace context. Baggage initialization and child-process injection remain
+available when no valid trace context was extracted.
+
+This hook is constrained to the supported assembly version and method signature.
+It does not cover legacy activities created with `new Activity(...).Start()`.
+Because context is applied to eligible roots throughout the process, use `off`
+when launch context must not parent or link unrelated later work.
 
 ## Child process propagation
 
