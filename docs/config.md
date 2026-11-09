@@ -160,7 +160,7 @@ due to lack of stable semantic convention.
 | `NPGSQL` \[7\]              | [Npgsql](https://www.nuget.org/packages/Npgsql)                                                                                                                                                                            | ≥6.0.0                 | source & bytecode \[10\]  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `NSERVICEBUS`               | [NServiceBus](https://www.nuget.org/packages/NServiceBus)                                                                                                                                                                  | ≥8.0.0 & < 10.0.0      | source & bytecode         | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `ORACLEMDA`                 | [Oracle.ManagedDataAccess.Core](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core) and [Oracle.ManagedDataAccess](https://www.nuget.org/packages/Oracle.ManagedDataAccess) **Not supported on ARM64**           | ≥23.4.0                | source                    | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `PROCESS`                   | Process environment context propagation (native CLR Profiler required)                                                                                                                                                     | See below              | bytecode                  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `PROCESS`                   | `System.Diagnostics.ActivitySource` and `System.Diagnostics.Process`                                                                                                                                                       | See below              | bytecode                  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `RABBITMQ`                  | [RabbitMQ.Client](https://www.nuget.org/packages/RabbitMQ.Client/)                                                                                                                                                         | ≥5.0.0                 | source or bytecode \[11\] | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `QUARTZ`                    | [Quartz](https://www.nuget.org/packages/Quartz) **Quartz 4.x is supported on .NET 10+ only; Quartz 3.x is not supported on .NET Framework 4.7.1 or earlier**                                                               | \[13\]                 | source                    | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `SQLCLIENT`                 | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient), [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) \[12\]  and `System.Data` (shipped with .NET Framework) | * \[14\]               | source & bytecode \[15\]  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
@@ -342,13 +342,42 @@ detects a multiplexed connector.
 #### Process environment context propagation
 
 The experimental `PROCESS` trace instrumentation connects telemetry across
-process boundaries through the `TRACEPARENT`, `TRACESTATE`, and `BAGGAGE` environment
-variables. It requires the native CLR Profiler and supports .NET 8–10 and
-.NET Framework using the distributed `System.Diagnostics.DiagnosticSource` 10.x.
-It applies to activities created through `ActivitySource`; legacy activities
-created directly with `new Activity(...)` are not covered.
-Propagation uses the configured [propagators](#propagators), mapping their
-fields to environment variable names, for example `traceparent` to `TRACEPARENT`.
+process boundaries using the configured [propagators](#propagators) to extract
+context from the process environment and inject context into child process
+environments. With the default `OTEL_PROPAGATORS=tracecontext,baggage`, the fields
+map to `TRACEPARENT`, `TRACESTATE`, and `BAGGAGE`. Selecting different propagators
+changes the fields extracted and injected; for example, `b3` uses `B3`. Optional
+fields, such as `TRACESTATE`, are written only when present in the context.
+File-based configuration selects propagators through its
+[`propagator` configuration](file-based-configuration.md#propagator-configuration).
+
+Propagator field names are mapped to environment variable names by converting
+ASCII letters to uppercase and replacing characters other than ASCII letters,
+digits, and underscores with underscores. A leading digit is prefixed with an
+underscore. For example, `traceparent` becomes `TRACEPARENT`, and `x-b3-sampled`
+becomes `X_B3_SAMPLED`. Lookup follows platform rules: names are case-sensitive
+on Unix and case-insensitive on Windows. On Unix, `traceparent` does not
+substitute for `TRACEPARENT`.
+
+The instrumentation supports .NET 8–10 and .NET Framework, using the distributed
+`System.Diagnostics.DiagnosticSource` 10.x. It covers these .NET APIs:
+
+- **Context extraction:** root activities created through
+  `System.Diagnostics.ActivitySource.StartActivity(...)` and
+  `ActivitySource.CreateActivity(...)`. The hook intercepts DiagnosticSource
+  10.x's private nine-argument `ActivitySource.CreateActivity` method before
+  sampling and ID generation. It also covers activities created first and started
+  later with `Activity.Start()`. Activities constructed directly with
+  `new Activity(...).Start()` are not covered.
+- **Context injection:** direct launches through
+  `System.Diagnostics.Process.Start(...)`, including static overloads and the
+  instance `Process.Start()` method using `Process.StartInfo`. The launch settings
+  come from `System.Diagnostics.ProcessStartInfo`, including its `Environment`
+  or .NET Framework `EnvironmentVariables` collection. The hooks intercept
+  `Process.StartCore(ProcessStartInfo)` on .NET and
+  `Process.StartWithCreateProcess(ProcessStartInfo)` on .NET Framework.
+  `ProcessStartInfo.UseShellExecute` must be `false`; shell-executed launches are
+  skipped, including .NET Framework launches that use the default value `true`.
 
 | Environment variable | Description | Default value |
 | -------------------- | ----------- | ------------- |
@@ -371,9 +400,8 @@ The agent does not reset baggage for each root activity.
 Injection replaces the configured propagator's fields in a copy of the child
 environment, preserving the parent environment and the original `ProcessStartInfo`.
 Without an active span, `parent` mode forwards the valid startup trace context;
-other modes omit trace context. Injection always uses live ambient baggage.
-Shell-executed launches are skipped, including .NET Framework launches that use
-the default `UseShellExecute=true`. Startup-hook-only deployments leave this
+other modes omit trace context. When the configured propagators support baggage,
+injection uses live ambient baggage. Startup-hook-only deployments leave this
 instrumentation inactive and log an explanatory message.
 
 Unsupported extraction modes are logged and use `parent`, or fail initialization
