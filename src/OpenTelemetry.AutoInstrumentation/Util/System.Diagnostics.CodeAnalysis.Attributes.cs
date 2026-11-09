@@ -9,7 +9,7 @@
 // used by the compiler for null-state static analysis.
 // This is a C# feature, but requires these attributes to be defined,
 // so we define them here for older .NET runtimes.
-// https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/nullable-analysis
+// https://docs.microsoft.com/dotnet/csharp/language-reference/attributes/nullable-analysis
 
 #pragma warning disable SA1649 // file name should match first type name
 #pragma warning disable SA1402 // file may only contain a single type

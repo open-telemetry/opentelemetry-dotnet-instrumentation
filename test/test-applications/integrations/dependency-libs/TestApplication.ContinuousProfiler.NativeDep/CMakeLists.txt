@@ -103,7 +103,7 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 # Sets compiler options
 add_compile_options(-std=c++20 -fPIC -fms-extensions)
 add_compile_options(-DPAL_STDCPP_COMPAT -DPLATFORM_UNIX -DUNICODE)
-add_compile_options(-Wno-invalid-noreturn -Wno-macro-redefined)
+add_compile_options(-Werror -Wno-invalid-noreturn -Wno-macro-redefined)
 if (ISMACOS)
     add_compile_options(-stdlib=libc++ -DMACOS -Wno-pragma-pack)
 elseif(ISLINUX)

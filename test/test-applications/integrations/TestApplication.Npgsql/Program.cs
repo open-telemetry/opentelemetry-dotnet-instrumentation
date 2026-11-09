@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using System.Reflection;
 using Npgsql;
 using TestApplication.Shared;
@@ -21,6 +22,12 @@ internal static class Program
         var postgresPort = ArgumentHelper.GetArgument(args, "--postgres", "5432");
 
         var connString = $"Server=127.0.0.1;Port={postgresPort};User ID=postgres";
+
+        if (ArgumentHelper.HasArgument(args, "--db-data-source-scenario"))
+        {
+            await RunDataSourceCommandScenarioAsync(connString).ConfigureAwait(false);
+            return;
+        }
 
         if (ArgumentHelper.HasArgument(args, "--stale-context-scenario"))
         {
@@ -74,6 +81,35 @@ internal static class Program
         while (await reader.ReadAsync().ConfigureAwait(false))
         {
             Console.WriteLine(reader.GetInt32(0));
+        }
+    }
+
+    private static async Task RunDataSourceCommandScenarioAsync(string connectionString)
+    {
+        using var source = new ActivitySource("TestApplication.Npgsql");
+        using var parent = source.StartActivity("DataSource.parent")
+                           ?? throw new InvalidOperationException("The parent activity was not created.");
+        using var dataSource = NpgsqlDataSource.Create(connectionString);
+        using var command = dataSource.CreateCommand("SELECT 123");
+
+        var task = command.ExecuteScalarAsync();
+        var activityAfterReturn = Activity.Current;
+        var result = await task.ConfigureAwait(false);
+        if (!Equals(result, 123))
+        {
+            throw new InvalidOperationException("The data-source command did not return the expected result.");
+        }
+
+        if (!ReferenceEquals(parent, activityAfterReturn) || !ReferenceEquals(parent, Activity.Current))
+        {
+            throw new InvalidOperationException("The data-source command changed Activity.Current.");
+        }
+
+        using var subsequent = source.StartActivity("DataSource.subsequent")
+                               ?? throw new InvalidOperationException("The subsequent activity was not created.");
+        if (subsequent.TraceId != parent.TraceId || subsequent.ParentSpanId != parent.SpanId)
+        {
+            throw new InvalidOperationException("The data-source command broke the subsequent activity's parent context.");
         }
     }
 

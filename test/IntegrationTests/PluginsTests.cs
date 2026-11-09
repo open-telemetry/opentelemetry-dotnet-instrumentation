@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Diagnostics;
 using IntegrationTests.Helpers;
 using OpAmp.Proto.V1;
 
@@ -183,6 +184,82 @@ public class PluginsTests : TestHelper
         Assert.Contains(ignoredPluginType, standardOutput, StringComparison.Ordinal);
     }
 
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void OpAmpRepeatedFullStateRequestsAreRateLimited()
+    {
+        var reportInterval = TimeSpan.FromSeconds(5);
+        var minimumObservedInterval = TimeSpan.FromSeconds(4);
+        var clock = Stopwatch.StartNew();
+        var observationLock = new object();
+        var samples = new List<string>();
+        using var firstFullStateReported = new ManualResetEventSlim();
+        using var completed = new ManualResetEventSlim();
+        TimeSpan? firstFullStateReportAt = null;
+        string? failure = null;
+
+        void ObserveFullState(AgentToServer frame, long requestNumber)
+        {
+            if (requestNumber == 1 || frame.AgentDisconnect != null || frame.AgentDescription == null)
+            {
+                return;
+            }
+
+            lock (observationLock)
+            {
+                var now = clock.Elapsed;
+                if (samples.Count < 16)
+                {
+                    samples.Add(FormattableString.Invariant($"{now.TotalSeconds:F3}s"));
+                }
+
+                if (!firstFullStateReportAt.HasValue)
+                {
+                    // The first full-state report is dispatched asynchronously without an initial cooldown.
+                    firstFullStateReportAt = now;
+                    firstFullStateReported.Set();
+                    return;
+                }
+
+                // Exact queue-time boundaries are covered with a fake clock in unit tests. Allow
+                // transport variance here while still proving that the immediate reply loop is gone.
+                if (now - firstFullStateReportAt.Value < minimumObservedInterval)
+                {
+                    failure ??= "A full-state report bypassed the cooldown.";
+                }
+
+                completed.Set();
+            }
+        }
+
+        using var server = new MockOpAmpServer(
+            Output,
+            responseFactory: (frame, requestNumber) =>
+            {
+                ObserveFullState(frame, requestNumber);
+                return new ServerToAgent
+                {
+                    InstanceUid = frame.InstanceUid,
+                    Capabilities = (ulong)ServerCapabilities.AcceptsStatus,
+                    Flags = (ulong)ServerToAgentFlags.ReportFullState
+                };
+            });
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_ENABLED", "true");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPAMP_SERVER_URL", server.Endpoint);
+        RunOpAmpTestApplication(() =>
+        {
+            var receivedFirst = firstFullStateReported.Wait(TimeSpan.FromSeconds(10));
+            var receivedNext = receivedFirst && completed.Wait(reportInterval + TimeSpan.FromSeconds(2));
+            lock (observationLock)
+            {
+                Assert.True(receivedFirst, "No initial full-state report arrived. Received: " + string.Join("; ", samples));
+                Assert.True(receivedNext, "No deferred full-state report arrived. Received: " + string.Join("; ", samples));
+                Assert.True(failure == null, failure + " Received: " + string.Join("; ", samples));
+            }
+        });
+    }
+
     private static bool HasEffectiveConfig(AgentToServer frame, string content)
     {
         return frame.EffectiveConfig?.ConfigMap?.ConfigMap.TryGetValue("config.yaml", out var file) == true &&
@@ -192,7 +269,7 @@ public class PluginsTests : TestHelper
     private void AssertOpAmpPluginConfigurationAndShutdown(Action configureOpAmp)
     {
         const int maxPendingCustomMessages = 123;
-        const int maxPendingCustomMessageBytes = 456;
+        const int maxPendingMessageBytes = 456;
         using var server = new MockOpAmpServer(
             Output,
             capabilities: ServerCapabilities.AcceptsStatus | ServerCapabilities.AcceptsEffectiveConfig);
@@ -219,7 +296,7 @@ public class PluginsTests : TestHelper
 
         Assert.Contains("Plugin.ConfigureOpAmpOptions() invoked.", standardOutput, StringComparison.Ordinal);
         Assert.Contains($"MaxPendingCustomMessages: {maxPendingCustomMessages}", standardOutput, StringComparison.Ordinal);
-        Assert.Contains($"MaxPendingCustomMessageBytes: {maxPendingCustomMessageBytes}", standardOutput, StringComparison.Ordinal);
+        Assert.Contains($"MaxPendingMessageBytes: {maxPendingMessageBytes}", standardOutput, StringComparison.Ordinal);
         Assert.Contains("Plugin.ConfigureOpAmpClient() invoked.", standardOutput, StringComparison.Ordinal);
         Assert.Contains("Plugin.BeforeOpAmpClientStopped() invoked.", standardOutput, StringComparison.Ordinal);
 
@@ -233,6 +310,11 @@ public class PluginsTests : TestHelper
 
     private string RunOpAmpTestApplication(MockOpAmpServer server)
     {
+        return RunOpAmpTestApplication(() => server.AssertExpectations(TimeSpan.FromSeconds(10)));
+    }
+
+    private string RunOpAmpTestApplication(Action assertReports)
+    {
         var timeout = TimeSpan.FromSeconds(10);
         using var process = StartTestApplication(new TestSettings { Arguments = "--wait-for-release", RedirectStandardInput = true });
         Assert.NotNull(process);
@@ -240,7 +322,7 @@ public class PluginsTests : TestHelper
 
         try
         {
-            server.AssertExpectations(timeout);
+            assertReports();
         }
         finally
         {

@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.319-bookworm-slim@sha256:2f5eb32870b4c0074a3d5b5191a03553bcab7b74463a76a7c0a5f3ef65c90fe5
+FROM mcr.microsoft.com/dotnet/sdk:9.0.320-bookworm-slim@sha256:07ed28d9e7279248fcea27334880f6c415b42c631c39b8bc5b3caf13ec6fdaa2
 # There is no official base image for .NET SDK 10+ on Debian, so install .NET10 via apt-get
 
 # renovate: datasource=deb depName=cmake

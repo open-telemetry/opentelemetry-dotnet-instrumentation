@@ -27,6 +27,8 @@ public interface IProvideRemoteConfigStatus : IOpAmpPlugin
     /// configuration updates. Publish status safely across threads and return a stable snapshot,
     /// including its hash buffer.
     /// Do not issue reporting notifications or synchronously wait for OpAMP callbacks from this getter.
+    /// If this callback throws, a later remote-status notification or server-requested full-state
+    /// report can retry the read.
     /// </remarks>
     RemoteConfigStatusReport? GetRemoteConfigStatus();
 }

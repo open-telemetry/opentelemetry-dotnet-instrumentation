@@ -96,21 +96,8 @@ internal static class SamplerFactory
 
     private static TraceIdRatioBasedSampler? CreateTraceIdRatioSampler(TraceIdRatioSamplerConfig config, bool failFast, string path)
     {
-        if (!config.Ratio.HasValue)
-        {
-            var message = $"Sampler configuration '{path}' must define the 'ratio' property.";
-            Logger.Error(message);
-
-            if (failFast)
-            {
-                throw new InvalidOperationException(message);
-            }
-
-            return null;
-        }
-
-        var ratio = config.Ratio.Value;
-        if (ratio is < 0 or > 1)
+        var ratio = config.Ratio ?? 1.0;
+        if (double.IsNaN(ratio) || ratio is < 0 or > 1)
         {
             var message = $"Sampler configuration '{path}' ratio must be between 0 and 1 inclusive.";
             Logger.Error(message);

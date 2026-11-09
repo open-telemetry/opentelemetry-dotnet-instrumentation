@@ -99,7 +99,7 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 # Sets compiler options
 add_compile_options(-std=c++20 -fPIC -fms-extensions -fvisibility=hidden)
 add_compile_options(-DPAL_STDCPP_COMPAT -DPLATFORM_UNIX -DUNICODE)
-add_compile_options(-Wno-invalid-noreturn -Wno-macro-redefined)
+add_compile_options(-Werror -Wno-invalid-noreturn -Wno-macro-redefined)
 
 # ******************************************************
 # Security hardening flags
@@ -223,6 +223,7 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         thread_utils.cpp
         runtime_sampler_configuration.cpp
         runtime_sampler_service.cpp
+        runtime_async.cpp
         environment_variables_util.cpp
         stack_capturer.cpp
         stub_generator.cpp
@@ -233,6 +234,10 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         tracer_method_rewriter.cpp
         tracer_rejit_preprocessor.cpp
         tracer_tokens.cpp
+        type_name_assembly_reference_parser.cpp
+        type_name_assembly_redirection_rewriter.cpp
+        unsafe_accessor_type_attribute_blob_rewriter.cpp
+        unsafe_accessor_type_attribute_updater.cpp
         lib/coreclr/src/pal/prebuilt/idl/corprof_i.cpp
 )
 

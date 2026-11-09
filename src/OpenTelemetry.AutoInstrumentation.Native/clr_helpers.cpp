@@ -136,6 +136,8 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
     std::vector<BYTE> final_signature_bytes;
     std::vector<BYTE> method_spec_signature;
 
+    DWORD method_impl_flags = 0;
+
     HRESULT    hr         = E_FAIL;
     const auto token_type = TypeFromToken(token);
     switch (token_type)
@@ -146,8 +148,8 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
             break;
         case mdtMethodDef:
             hr = metadata_import->GetMemberProps(token, &parent_token, function_name, kNameMaxSize, &function_name_len,
-                                                 nullptr, &raw_signature, &raw_signature_len, nullptr, nullptr, nullptr,
-                                                 nullptr, nullptr);
+                                                 nullptr, &raw_signature, &raw_signature_len, nullptr,
+                                                 &method_impl_flags, nullptr, nullptr, nullptr);
             break;
         case mdtMethodSpec:
         {
@@ -164,6 +166,7 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
             function_name_len = DWORD(generic_info.name.length() + 1);
             method_spec_token = token;
             method_def_token  = generic_info.id;
+            method_impl_flags = generic_info.method_impl_flags;
         }
         break;
         default:
@@ -187,13 +190,18 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
                 MethodSignature(final_signature_bytes),
                 MethodSignature(method_spec_signature),
                 method_def_token,
-                FunctionMethodSignature(raw_signature, raw_signature_len)};
+                FunctionMethodSignature(raw_signature, raw_signature_len),
+                method_impl_flags};
     }
 
     final_signature_bytes = GetSignatureByteRepresentation(raw_signature_len, raw_signature);
 
-    return {token, WSTRING(function_name), type_info, MethodSignature(final_signature_bytes),
-            FunctionMethodSignature(raw_signature, raw_signature_len)};
+    return {token,
+            WSTRING(function_name),
+            type_info,
+            MethodSignature(final_signature_bytes),
+            FunctionMethodSignature(raw_signature, raw_signature_len),
+            method_impl_flags};
 }
 
 ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id)
@@ -341,6 +349,112 @@ mdAssemblyRef FindAssemblyRef(const ComPtr<IMetaDataAssemblyImport>& assembly_im
         }
     }
     return mdAssemblyRefNil;
+}
+
+void RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImport>&                   assembly_import,
+                                const ComPtr<IMetaDataAssemblyEmit>&                     assembly_emit,
+                                std::unordered_map<WSTRING, AssemblyVersionRedirection>& redirects)
+{
+    // Inspect all assembly references and make any necessary redirects.
+    for (const auto assembly_ref : EnumAssemblyRefs(assembly_import))
+    {
+        const void*      public_key_or_token;
+        ULONG            public_key_or_token_sz;
+        WCHAR            name[kNameMaxSize];
+        ULONG            name_len = 0;
+        ASSEMBLYMETADATA assembly_metadata{};
+        const void*      hash_value;
+        ULONG            hash_value_sz;
+        DWORD            assembly_flags = 0;
+
+        auto hr = assembly_import->GetAssemblyRefProps(assembly_ref, &public_key_or_token, &public_key_or_token_sz,
+                                                       name, kNameMaxSize, &name_len, &assembly_metadata, &hash_value,
+                                                       &hash_value_sz, &assembly_flags);
+        if (FAILED(hr) || name_len == 0)
+        {
+            Logger::Warn("RedirectAssemblyReferences: GetAssemblyRefProps failed HRESULT=", HResultStr(hr));
+            continue;
+        }
+
+        const auto wsz_name = WSTRING(name);
+        if (Logger::IsDebugEnabled())
+        {
+            Logger::Debug("RedirectAssemblyReferences: AssemblyRef for [", wsz_name,
+                          "] version=", AssemblyVersionStr(assembly_metadata));
+        }
+
+        const auto found_redirect = redirects.find(wsz_name);
+        if (found_redirect == redirects.end())
+        {
+            // No redirection to be applied here.
+            continue;
+        }
+
+        AssemblyVersionRedirection& redirect           = found_redirect->second;
+        auto                        version_comparison = redirect.CompareToAssemblyVersion(assembly_metadata);
+        if (version_comparison > 0)
+        {
+            // Redirection was a higher version, let's proceed with the redirection
+            Logger::Info("RedirectAssemblyReferences: redirecting [", wsz_name,
+                         "] from_version=", AssemblyVersionStr(assembly_metadata),
+                         " to_version=", redirect.VersionStr(), " previous_redirects=", redirect.ulRedirectionCount);
+            assembly_metadata.usMajorVersion   = redirect.usMajorVersion;
+            assembly_metadata.usMinorVersion   = redirect.usMinorVersion;
+            assembly_metadata.usBuildNumber    = redirect.usBuildNumber;
+            assembly_metadata.usRevisionNumber = redirect.usRevisionNumber;
+            hr = assembly_emit.Get()->SetAssemblyRefProps(assembly_ref, public_key_or_token, public_key_or_token_sz,
+                                                          name, &assembly_metadata, hash_value, hash_value_sz,
+                                                          assembly_flags);
+            if (hr != S_OK)
+            {
+                Logger::Warn("RedirectAssemblyReferences: redirection error: SetAssemblyRefProps HRESULT=",
+                             HResultStr(hr));
+            }
+            else
+            {
+                redirect.ulRedirectionCount++;
+            }
+        }
+        else if (version_comparison == 0)
+        {
+            // No need to redirect since it is the same assembly version on the ref and on the map
+            if (Logger::IsDebugEnabled())
+            {
+                Logger::Debug("RedirectAssemblyReferences: same version for [", wsz_name,
+                              "] version=", redirect.VersionStr(), " previous_redirects=", redirect.ulRedirectionCount);
+            }
+        }
+        else
+        {
+            // Redirection points to a lower version. If no redirection was done yet modify the map to
+            // point to the higher version. If redirection was already applied do not redirect and let
+            // the runtime handle it.
+            if (redirect.ulRedirectionCount == 0)
+            {
+                // Redirection was not applied yet use the higher version. Also increment the redirection
+                // count to indicate that this version was already used.
+                Logger::Info("RedirectAssemblyReferences: redirection update for [", wsz_name,
+                             "] to_version=", AssemblyVersionStr(assembly_metadata),
+                             " previous_version_redirection=", redirect.VersionStr());
+                redirect.usMajorVersion   = assembly_metadata.usMajorVersion;
+                redirect.usMinorVersion   = assembly_metadata.usMinorVersion;
+                redirect.usBuildNumber    = assembly_metadata.usBuildNumber;
+                redirect.usRevisionNumber = assembly_metadata.usRevisionNumber;
+                redirect.ulRedirectionCount++;
+            }
+            else
+            {
+                // This is risky: we aren't sure if the reference will be actually be used during the runtime.
+                // So it is possible that nothing will happen but we can't be sure. Using higher versions on
+                // the OpenTelemetry.AutoInstrumentation dependencies minimizes the chances of hitting this code
+                // path.
+                Logger::Error("RedirectAssemblyReferences: AssemblyRef [", wsz_name,
+                              "] version=", AssemblyVersionStr(assembly_metadata),
+                              " has a higher version than an earlier applied redirection to version=",
+                              redirect.VersionStr());
+            }
+        }
+    }
 }
 
 HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit,

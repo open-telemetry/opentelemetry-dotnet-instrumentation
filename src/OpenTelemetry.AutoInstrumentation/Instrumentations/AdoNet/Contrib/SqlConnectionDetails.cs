@@ -10,12 +10,26 @@ namespace OpenTelemetry.Instrumentation;
 internal sealed partial class SqlConnectionDetails
 {
     /// <summary>
+    /// The maximum number of data sources to cache the details of, so that an application which
+    /// uses many distinct data sources (for example a SQLite database file per tenant) cannot
+    /// cause the cache to grow without bound. Beyond this, data sources are parsed every time.
+    /// </summary>
+    internal const int CacheCapacity = 1_000;
+
+    /// <summary>
     /// Timeout in milliseconds for regex operations to mitigate potential ReDoS
     /// attacks when the data source string contains unexpected input.
     /// </summary>
     private const int RegexTimeoutMs = 1_000;
 
     private static readonly ConcurrentDictionary<string, SqlConnectionDetails> ConnectionDetailCache = new(StringComparer.OrdinalIgnoreCase);
+
+    // The number of entries in the cache, plus any being added, to avoid ConcurrentDictionary.Count
+    // on the hot path. A slot is reserved before an entry is added and released if it is not, so
+    // that concurrent callers cannot grow the cache beyond its capacity.
+    private static int reservedCacheSlots;
+
+    private DbNamespaceEntry? dbNamespace;
 
     private SqlConnectionDetails()
     {
@@ -27,7 +41,14 @@ internal sealed partial class SqlConnectionDetails
 
     public string? InstanceName { get; private set; }
 
-    public int? Port { get; private set; }
+    public object? BoxedPort { get; private set; }
+
+    public string? ServerAddressAndPort { get; private set; }
+
+    /// <summary>
+    /// Gets the number of data sources whose details are cached.
+    /// </summary>
+    internal static int CacheCount => ConnectionDetailCache.Count;
 
     public static SqlConnectionDetails ParseFromDataSource(string dataSource)
     {
@@ -94,12 +115,17 @@ internal sealed partial class SqlConnectionDetails
                 }
             }
 
+            var serverAddress = serverHostName ?? serverIpAddress;
+
             connectionDetails = new SqlConnectionDetails
             {
+                BoxedPort = port,
+                InstanceName = instanceName,
                 ServerHostName = serverHostName,
                 ServerIpAddress = serverIpAddress,
-                InstanceName = instanceName,
-                Port = port,
+                ServerAddressAndPort = string.IsNullOrEmpty(serverAddress)
+                    ? null
+                    : port is { } portNumber ? $"{serverAddress}:{portNumber}" : serverAddress,
             };
         }
         catch (RegexMatchTimeoutException)
@@ -107,8 +133,60 @@ internal sealed partial class SqlConnectionDetails
             connectionDetails = new SqlConnectionDetails();
         }
 
-        ConnectionDetailCache.TryAdd(dataSource, connectionDetails);
-        return connectionDetails;
+        // Fast-path capacity check using our own count to avoid ConcurrentDictionary.Count cost.
+        if (Volatile.Read(ref reservedCacheSlots) >= CacheCapacity)
+        {
+            return connectionDetails;
+        }
+
+        // Reserve a slot before adding, so that concurrent callers cannot add more entries than the capacity.
+        if (Interlocked.Increment(ref reservedCacheSlots) > CacheCapacity)
+        {
+            Interlocked.Decrement(ref reservedCacheSlots);
+            return connectionDetails;
+        }
+
+        if (ConnectionDetailCache.TryAdd(dataSource, connectionDetails))
+        {
+            return connectionDetails;
+        }
+
+        // Another thread added the data source meanwhile, so release the slot and return the cached value.
+        Interlocked.Decrement(ref reservedCacheSlots);
+        return ConnectionDetailCache.TryGetValue(dataSource, out var existing) ? existing : connectionDetails;
+    }
+
+    /// <summary>
+    /// Gets the <c>db.namespace</c> for a database reached through this data source.
+    /// </summary>
+    /// <param name="databaseName">The database name.</param>
+    /// <returns>
+    /// <paramref name="databaseName"/> qualified by the instance name, if there is one.
+    /// </returns>
+    /// <remarks>
+    /// Qualifying allocates, so the last result is kept. A data source is almost always used with
+    /// a single database, and holding one entry keeps what a data source can retain bounded.
+    /// </remarks>
+    public string GetDbNamespace(string databaseName)
+    {
+        if (string.IsNullOrEmpty(this.InstanceName))
+        {
+            return databaseName;
+        }
+
+        var lastDbNamespace = Volatile.Read(ref this.dbNamespace);
+
+        if (lastDbNamespace is not null &&
+            string.Equals(lastDbNamespace.DatabaseName, databaseName, StringComparison.Ordinal))
+        {
+            return lastDbNamespace.DbNamespace;
+        }
+
+        var value = $"{this.InstanceName}.{databaseName}";
+
+        Volatile.Write(ref this.dbNamespace, new DbNamespaceEntry(databaseName, value));
+
+        return value;
     }
 
 #if NET
@@ -158,4 +236,11 @@ internal sealed partial class SqlConnectionDetails
 
     private static Regex NamedPipeRegex() => NamedPipeRegexField;
 #endif
+
+    private sealed class DbNamespaceEntry(string databaseName, string dbNamespace)
+    {
+        public string DatabaseName { get; } = databaseName;
+
+        public string DbNamespace { get; } = dbNamespace;
+    }
 }

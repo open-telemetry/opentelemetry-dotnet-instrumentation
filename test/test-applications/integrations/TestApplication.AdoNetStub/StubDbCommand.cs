@@ -24,6 +24,8 @@ internal sealed class StubDbCommand : DbCommand
 
     public override UpdateRowSource UpdatedRowSource { get; set; }
 
+    internal Task? ExecutionGate { get; set; }
+
     protected override DbConnection? DbConnection { get; set; }
 
     protected override DbTransaction? DbTransaction { get; set; }
@@ -41,7 +43,7 @@ internal sealed class StubDbCommand : DbCommand
 
     public override Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
     {
-        return Task.FromResult(0);
+        return CompleteAsync(0);
     }
 
     public override object? ExecuteScalar()
@@ -51,7 +53,7 @@ internal sealed class StubDbCommand : DbCommand
 
     public override Task<object?> ExecuteScalarAsync(CancellationToken cancellationToken)
     {
-        return Task.FromResult<object?>(null);
+        return CompleteAsync<object?>(null);
     }
 
     public override void Prepare()
@@ -67,6 +69,16 @@ internal sealed class StubDbCommand : DbCommand
 
     protected override Task<DbDataReader> ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
     {
-        return Task.FromResult<DbDataReader>(new StubDbDataReader());
+        return CompleteAsync<DbDataReader>(new StubDbDataReader());
+    }
+
+    private async Task<T> CompleteAsync<T>(T result)
+    {
+        if (ExecutionGate is not null)
+        {
+            await ExecutionGate.ConfigureAwait(false);
+        }
+
+        return result;
     }
 }

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using IntegrationTests.Helpers;
+using OpenTelemetry.Proto.Trace.V1;
 
 namespace IntegrationTests;
 
@@ -51,6 +52,45 @@ public class NpqsqlTests : TestHelper
         RunTestApplication(new()
         {
             Arguments = $"--postgres {_postgres.Port}",
+            PackageVersion = packageVersion
+        });
+
+        collector.AssertExpectations();
+    }
+
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Linux")]
+    [MemberData(nameof(LibraryVersion.Npgsql), MemberType = typeof(LibraryVersion))]
+    public void DataSourceCommandEmitsSingleProviderSpan(string packageVersion)
+    {
+        EnableBytecodeInstrumentation();
+
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+        // Npgsql 10 also emits a physical-connection span; count query spans separately.
+        Func<Span, bool> isCommandSpan = span => span.Attributes.Any(attribute =>
+            (attribute.Key is "db.statement" or "db.query.text") && attribute.Value.StringValue == "SELECT 123");
+        collector.Expect("TestApplication.Npgsql", span => span.Name == "DataSource.parent");
+        collector.Expect("Npgsql", isCommandSpan);
+        collector.Expect("TestApplication.Npgsql", span => span.Name == "DataSource.subsequent");
+        collector.ExpectAllCollected(collected =>
+        {
+            Assert.DoesNotContain(collected, item => item.Scope.Name == "OpenTelemetry.AutoInstrumentation.AdoNet");
+            var parent = Assert.Single(collected, item => item.Span.Name == "DataSource.parent").Span;
+            var provider = Assert.Single(collected, item => item.Scope.Name == "Npgsql" && isCommandSpan(item.Span)).Span;
+            var subsequent = Assert.Single(collected, item => item.Span.Name == "DataSource.subsequent").Span;
+
+            Assert.Equal(parent.TraceId, provider.TraceId);
+            Assert.Equal(parent.SpanId, provider.ParentSpanId);
+            Assert.Equal(parent.TraceId, subsequent.TraceId);
+            Assert.Equal(parent.SpanId, subsequent.ParentSpanId);
+            return true;
+        });
+
+        RunTestApplication(new()
+        {
+            Arguments = $"--postgres {_postgres.Port} --db-data-source-scenario",
             PackageVersion = packageVersion
         });
 

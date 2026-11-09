@@ -189,15 +189,6 @@ internal sealed class ContinuousProfilerManager : IDisposable
             selectiveSamplingConfig);
     }
 
-#if NETFRAMEWORK
-    private static string CreateReaderMutexName()
-    {
-        using var process = System.Diagnostics.Process.GetCurrentProcess();
-        return @"Local\OpenTelemetry.AutoInstrumentation.ContinuousProfiler.Reader." +
-               process.Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
-    }
-#endif
-
     private static void AddSelectiveHandler(SampleExporterBuilder builder, SamplingStartupPlan plan)
     {
         builder.SetExportTimeout(plan.SelectiveExportTimeout);
@@ -253,7 +244,7 @@ internal sealed class ContinuousProfilerManager : IDisposable
             candidateExporter.Start(
                 EnsureNetFrameworkCanaryThread,
                 CanaryStatePollingInterval,
-                CreateReaderMutexName(),
+                NativeMethods.CreateContinuousProfilerReaderMutex,
                 () => CanReadCurrentConfiguration(plan));
 #else
             candidateExporter.Start();

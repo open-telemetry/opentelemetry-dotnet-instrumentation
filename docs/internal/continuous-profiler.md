@@ -16,6 +16,16 @@ events:
 
 You can export stack traces to any observability back end that supports profiling.
 
+Stack capture retains at most 512 frames per thread, including managed and native
+frames. CPU and selective sampling share a capture storage budget of 32,768 frame
+slots, including reusable vector capacity, and at most 1,024 cached thread entries.
+Allocation snapshots use the same per-stack depth limit. Excess frames are omitted
+while the captured prefix remains usable. Buffers are reused between captures
+within the storage budget. Before capture, buffers for threads outside the current
+cohort are removed, and cached capacity is reclaimed when needed to admit more
+threads. Initial reservations adapt to the cohort size to avoid exhausting the
+budget on many shallow stacks. These limits are internal and cannot be configured.
+
 ## Native runtime configuration lifecycle
 
 The native sampler is process-wide. Startup configuration is a **Seed**: the
@@ -38,7 +48,9 @@ Managed startup translates the plugin configuration into a complete Seed and
 sets up the configured exporter. Each CPU batch carries the sampling interval
 used to produce it. The managed reader passes that interval to the exporter.
 On .NET Framework, each AppDomain tracks its Activity context. Prepared readers
-share a process-wide mutex, so one AppDomain consumes native buffers at a time.
+share an unnamed, process-private mutex created by the native profiler, so one
+AppDomain consumes native buffers at a time. Each reader owns a non-inheritable
+duplicate handle; no session-visible mutex name is exposed.
 Readers take and retain the mutex only while they have exporters for every
 currently enabled native sampler. A reader releases it when a runtime update
 makes its exporters incompatible, allowing a compatible AppDomain to take over.
@@ -46,7 +58,8 @@ Takeover after AppDomain unload also requires a compatible exporter. A canary
 thread supports periodic stack capture in the active reader's AppDomain.
 
 The managed reader requires the native runtime sampler configuration and V2
-thread-sample exports. An older native profiler cannot report the committed
+thread-sample exports. On .NET Framework, it also requires the native reader
+mutex export. An older native profiler cannot report the committed
 configuration or the sampling interval of each batch, so managed profiling
 initialization fails instead of publishing an unverified period.
 
@@ -148,7 +161,7 @@ can parse dense thread sampling data and export it.
 ### How does the thread sampler work?
 
 The profiler uses the
-[.NET profiler](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
+[.NET profiler](https://docs.microsoft.com/dotnet/framework/unmanaged-api/profiling/)
 to perform periodic call stack sampling. For every sampling period, the runtime
 suspends execution and the samples for all managed threads are saved in the buffer,
 then the runtime resumes.
@@ -306,7 +319,7 @@ in an observability back end that supports profiling.
 
 ### How does the memory profiler work?
 
-The profiler leverages [.NET profiling](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
+The profiler leverages [.NET profiling](https://docs.microsoft.com/dotnet/framework/unmanaged-api/profiling/)
 to perform allocation sampling.
 For every sampled allocation, allocation amount together with stack trace of
 the thread that triggered the allocation, and associated span context, are saved

@@ -55,13 +55,13 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "6.0.36",
-                "8.0.23",
-                "9.0.12",
+                "8.0.33",
+                "9.0.22",
 #if NET10_0
                 "10.0.0",
 #endif
 #if NET10_0
-                "10.0.13",
+                "10.0.14",
 #endif
 #endif
             ];
@@ -113,7 +113,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "2.52.0",
-                "2.84.0",
+                "2.85.0",
 #endif
             ];
             return theoryData;
@@ -163,7 +163,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "8.3.0",
-                "8.5.11",
+                "8.5.12",
 #endif
             ];
             return theoryData;
@@ -227,7 +227,7 @@ public static partial class LibraryVersion
                 "3.7.0",
 #endif
 #if NET10_0 || NET9_0 || NET8_0 || NET462
-                "3.12.0",
+                "3.13.0",
 #endif
 #endif
             ];
@@ -243,7 +243,7 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "2.0.0",
+                "2.6.1",
                 "2.6.2",
 #endif
             ];
@@ -260,7 +260,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "9.0.0",
-                "26.7.0",
+                "26.10.0",
 #endif
             ];
             return theoryData;
@@ -324,7 +324,7 @@ public static partial class LibraryVersion
                 "23.5.1",
 #endif
 #if NET462
-                "23.26.301",
+                "23.26.400",
 #endif
 #endif
             ];
@@ -341,7 +341,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "23.5.1",
-                "23.26.301",
+                "23.26.400",
 #endif
             ];
             return theoryData;
@@ -357,12 +357,12 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "3.6.0",
-                "3.22.7",
+                "3.22.9",
 #if NET10_0
                 "4.0.0",
 #endif
 #if NET10_0
-                "4.6.0",
+                "4.7.2",
 #endif
 #endif
             ];
@@ -399,7 +399,7 @@ public static partial class LibraryVersion
                 "8.0.0",
                 "9.0.0",
                 "10.0.0",
-                "10.0.13",
+                "10.0.14",
 #endif
             ];
             return theoryData;
@@ -415,7 +415,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "2.6.122",
-                "2.12.14",
+                "2.13.23",
 #if NET10_0 || NET9_0 || NET8_0
                 "3.0.25",
 #endif
@@ -426,7 +426,7 @@ public static partial class LibraryVersion
                 "3.3.0",
 #endif
 #if NET10_0 || NET9_0 || NET8_0
-                "3.4.0",
+                "3.4.31",
 #endif
 #endif
             ];
@@ -446,7 +446,7 @@ public static partial class LibraryVersion
                 "6.2.0",
                 "8.1.2",
 #if NET10_0
-                "10.0.652802",
+                "10.1.0",
 #endif
 #endif
             ];
@@ -492,7 +492,36 @@ public static partial class LibraryVersion
                 "10.0.0",
 #endif
 #if NET462 || NET10_0
-                "10.0.13",
+                "10.0.14",
+#endif
+#endif
+            ];
+            return theoryData;
+        }
+    }
+    public static TheoryData<string> UnsafeAccessorTypeRedirection
+    {
+        get
+        {
+            TheoryData<string> theoryData =
+            [
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+                string.Empty,
+#else
+#if NET10_0
+                "null",
+#endif
+#if NET10_0
+                "9.0.0.0",
+#endif
+#if NET10_0
+                "10.0.0.0",
+#endif
+#if NET10_0
+                "11.0.0.0",
+#endif
+#if NET10_0
+                "1.0.0.0-incomplete",
 #endif
 #endif
             ];
@@ -546,6 +575,7 @@ public static partial class LibraryVersion
        { "WCFCoreClient", WCFCoreClient },
        { "Kafka", Kafka },
        { "AssemblyRedirection", AssemblyRedirection },
+       { "UnsafeAccessorTypeRedirection", UnsafeAccessorTypeRedirection },
        { "WCFCoreServer", WCFCoreServer },
     };
 }

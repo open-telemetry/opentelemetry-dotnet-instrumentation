@@ -50,6 +50,7 @@ private:
     bool startup_fix_required = false;
 
     bool corlib_module_loaded = false;
+    bool unsafe_accessor_type_redirection_enabled_ = false;
     AppDomainID corlib_app_domain_id = 0;
     bool managed_profiler_loaded_domain_neutral = false;
     std::unordered_set<AppDomainID> managed_profiler_loaded_app_domains;
@@ -73,6 +74,7 @@ private:
     std::unique_ptr<TracerRejitPreprocessor> tracer_integration_preprocessor = nullptr;
     bool call_target_bubble_up_exception_available = false;
     bool call_target_bubble_up_exception_function_available = false;
+    bool call_target_runtime_async_methods_available = false;
 
     // Cor assembly properties
     AssemblyProperty corAssemblyProperty{};
@@ -135,6 +137,7 @@ private:
     bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);
     static bool EnsureCallTargetBubbleUpExceptionTypeAvailable(const ModuleMetadata& module_metadata, mdTypeDef* typeDef);
     static bool EnsureIsCallTargetBubbleUpExceptionFunctionAvailable(const ModuleMetadata& module_metadata, mdTypeDef typeDef);
+    static bool EnsureCallTargetRuntimeAsyncMethodsAvailable(const ModuleMetadata& module_metadata);
 
     //
     // Initialization methods

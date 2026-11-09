@@ -35,15 +35,15 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     // Case 2: Equal version, should NOT be redirected with/without native profiler
     // TODO currently different test jobs use different versions of .net runtime:
     //   - test-build-container (ubuntu-22.04, alpine, alpine-x64, linux-musl): DS file version 10.0.426.12010
-    //   - test-build-managed (net10.0, windows-2022): DS file version 10.0.1326.50504
-    [InlineData("10.0.13", AssemblyName, "10.0.0.0", "10.0.1326.50504", true)]
-    [InlineData("10.0.13", AssemblyName, "10.0.0.0", "10.0.1326.50504", false)]
+    //   - test-build-managed (net10.0, windows-2022): DS file version 10.0.1426.52326
+    [InlineData("10.0.14", AssemblyName, "10.0.0.0", "10.0.1426.52326", true)]
+    [InlineData("10.0.14", AssemblyName, "10.0.0.0", "10.0.1426.52326", false)]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
 #elif NETFRAMEWORK
     // Case 1: Lower version should be redirected (native profiler mandatory)
-    [InlineData("6.0.0", AssemblyName, "10.0.0.13", "10.0.1326.50504")]
+    [InlineData("6.0.0", AssemblyName, "10.0.0.14", "10.0.1426.52326")]
     // Case 2: Equal version, should NOT be redirected (native profiler mandatory)
-    [InlineData("10.0.13", AssemblyName, "10.0.0.13", "10.0.1326.50504")]
+    [InlineData("10.0.14", AssemblyName, "10.0.0.14", "10.0.1426.52326")]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
 #endif
     public void DefaultRedirection(
@@ -93,7 +93,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
 #elif NET9_0
     [InlineData("9.0.0", "10.0.0.0", "10.0.25.52411")]
 #elif NET10_0
-    [InlineData("10.0.13", "10.0.0.0", "10.0.1326.50504")]
+    [InlineData("10.0.14", "10.0.0.0", "10.0.1426.52326")]
 #endif
     public void AdditionalDepsFallback(
         string libraryVersion,

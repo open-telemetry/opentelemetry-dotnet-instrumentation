@@ -40,7 +40,7 @@ internal sealed class OpAmpManager : IDisposable
         var effectiveConfigProvider = settings.EffectiveConfigurationReporting.EnableReporting ? plugin as IProvideEffectiveConfig : null;
         var remoteConfigStatusProvider = settings.RemoteConfiguration.ReportsRemoteConfigStatus ? plugin as IProvideRemoteConfigStatus : null;
         _reporter = new OpAmpReporter(effectiveConfigProvider, remoteConfigStatusProvider, clientProxy);
-        if (_reporter.EffectiveConfigReportingEnabled || _reporter.RemoteConfigStatusReportingEnabled)
+        if (_reporter.EffectiveConfigReportingEnabled)
         {
             clientProxy.Subscribe<ServerCapabilitiesMessage>(_reporter);
         }
@@ -84,7 +84,7 @@ internal sealed class OpAmpManager : IDisposable
             return;
         }
 
-        _reporter.Stop();
+        _reporter.Dispose();
         CancelStartup();
 
         try

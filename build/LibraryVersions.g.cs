@@ -33,10 +33,10 @@ public static partial class LibraryVersion
             "TestApplication.EntityFrameworkCore",
             [
                 new("6.0.36"),
-                new("8.0.23"),
-                new("9.0.12"),
+                new("8.0.33"),
+                new("9.0.22"),
                 new("10.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("10.0.13", supportedFrameworks: [ "net10.0" ]),
+                new("10.0.14", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -60,7 +60,7 @@ public static partial class LibraryVersion
             "TestApplication.GrpcNetClient",
             [
                 new("2.52.0"),
-                new("2.84.0"),
+                new("2.85.0"),
             ]
         },
         {
@@ -83,7 +83,7 @@ public static partial class LibraryVersion
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),
-                new("8.5.11"),
+                new("8.5.12"),
             ]
         },
         {
@@ -109,13 +109,13 @@ public static partial class LibraryVersion
                 new("3.0.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
                 new("3.5.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
                 new("3.7.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
-                new("3.12.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
+                new("3.13.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0", "net472" ]),
             ]
         },
         {
             "TestApplication.MySqlConnector",
             [
-                new("2.0.0"),
+                new("2.6.1"),
                 new("2.6.2"),
             ]
         },
@@ -123,7 +123,7 @@ public static partial class LibraryVersion
             "TestApplication.MySqlData",
             [
                 new("9.0.0"),
-                new("26.7.0"),
+                new("26.10.0"),
             ]
         },
         {
@@ -147,23 +147,23 @@ public static partial class LibraryVersion
             "TestApplication.OracleMda.NetFramework",
             [
                 new("23.5.1", supportedFrameworks: [ "net472" ]),
-                new("23.26.301", supportedFrameworks: [ "net472" ]),
+                new("23.26.400", supportedFrameworks: [ "net472" ]),
             ]
         },
         {
             "TestApplication.OracleMda.Core",
             [
                 new("23.5.1"),
-                new("23.26.301"),
+                new("23.26.400"),
             ]
         },
         {
             "TestApplication.Quartz",
             [
                 new("3.6.0"),
-                new("3.22.7"),
+                new("3.22.9"),
                 new("4.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("4.6.0", supportedFrameworks: [ "net10.0" ]),
+                new("4.7.2", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -181,18 +181,18 @@ public static partial class LibraryVersion
                 new("8.0.0"),
                 new("9.0.0"),
                 new("10.0.0"),
-                new("10.0.13"),
+                new("10.0.14"),
             ]
         },
         {
             "TestApplication.StackExchangeRedis",
             [
                 new("2.6.122"),
-                new("2.12.14"),
+                new("2.13.23"),
                 new("3.0.25", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("3.1.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
                 new("3.3.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
-                new("3.4.0", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
+                new("3.4.31", supportedFrameworks: [ "net10.0", "net9.0", "net8.0" ]),
             ]
         },
         {
@@ -201,7 +201,7 @@ public static partial class LibraryVersion
                 new("4.10.2"),
                 new("6.2.0"),
                 new("8.1.2"),
-                new("10.0.652802", supportedFrameworks: [ "net10.0" ]),
+                new("10.1.0", supportedFrameworks: [ "net10.0" ]),
             ]
         },
         {
@@ -219,7 +219,17 @@ public static partial class LibraryVersion
                 new("9.0.0", supportedFrameworks: [ "net9.0" ]),
                 new("6.0.0", supportedFrameworks: [ "net462" ]),
                 new("10.0.0", supportedFrameworks: [ "net8.0", "net9.0" ]),
-                new("10.0.13", supportedFrameworks: [ "net462", "net10.0" ]),
+                new("10.0.14", supportedFrameworks: [ "net462", "net10.0" ]),
+            ]
+        },
+        {
+            "TestApplication.UnsafeAccessorTypeRedirection",
+            [
+                new("null", supportedFrameworks: [ "net10.0" ], additionalMetaData: new() { { "UnsafeAccessorAssemblyName", "Microsoft.Extensions.DependencyInjection.Abstractions" }, { "UnsafeAccessorPackageVersion", "10.0.0" }, { "UnsafeAccessorComplete", "true" } }),
+                new("9.0.0.0", supportedFrameworks: [ "net10.0" ], additionalMetaData: new() { { "UnsafeAccessorAssemblyName", "Microsoft.Extensions.DependencyInjection.Abstractions" }, { "UnsafeAccessorAssemblyVersion", "9.0.0.0" }, { "UnsafeAccessorPackageVersion", "9.0.0" }, { "UnsafeAccessorComplete", "true" } }),
+                new("10.0.0.0", supportedFrameworks: [ "net10.0" ], additionalMetaData: new() { { "UnsafeAccessorAssemblyName", "Microsoft.Extensions.DependencyInjection.Abstractions" }, { "UnsafeAccessorAssemblyVersion", "10.0.0.0" }, { "UnsafeAccessorPackageVersion", "10.0.0" }, { "UnsafeAccessorComplete", "true" } }),
+                new("11.0.0.0", supportedFrameworks: [ "net10.0" ], additionalMetaData: new() { { "UnsafeAccessorAssemblyName", "Microsoft.Extensions.DependencyInjection.Abstractions" }, { "UnsafeAccessorAssemblyVersion", "11.0.0.0" }, { "UnsafeAccessorPackageVersion", "11.0.0-rc.1.26425.128" }, { "UnsafeAccessorComplete", "true" } }),
+                new("1.0.0.0-incomplete", supportedFrameworks: [ "net10.0" ], additionalMetaData: new() { { "UnsafeAccessorAssemblyName", "Microsoft.Extensions.DependencyInjection.Abstractions" }, { "UnsafeAccessorAssemblyVersion", "1.0.0.0" }, { "UnsafeAccessorPackageVersion", "10.0.0" }, { "UnsafeAccessorComplete", "false" } }),
             ]
         },
         {

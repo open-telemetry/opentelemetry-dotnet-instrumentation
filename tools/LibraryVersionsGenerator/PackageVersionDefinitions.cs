@@ -47,8 +47,8 @@ internal static class PackageVersionDefinitions
             [
                 new("6.0.36"),
                 // new("7.0.20"), all versions contains references to vulnerable packages https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
-                new("8.0.23"),
-                new("9.0.12"),
+                new("8.0.33"),
+                new("9.0.22"),
                 new("10.0.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]),
                 new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
             ]
@@ -180,7 +180,8 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MySqlConnector",
             Versions =
             [
-                new("2.0.0"),
+                // new("2.0.0"), - moderate vulnerability https://github.com/advisories/GHSA-473q-m89c-ghf8, < 2.6.1
+                new("2.6.1"),
                 new("*")
             ]
         },
@@ -260,7 +261,7 @@ internal static class PackageVersionDefinitions
             [
                 // new("3.4.0"), - transitive vulnerability https://github.com/advisories/GHSA-rxg9-xrhp-64gj, <= 3.5.0
                 new("3.6.0"),
-                new("3.22.7"),
+                new("3.22.9"),
                 new("4.0.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]),
                 new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
             ]
@@ -299,7 +300,7 @@ internal static class PackageVersionDefinitions
             Versions =
             [
                 new("2.6.122"),
-                new("2.12.14"),
+                new("2.13.23"),
                 new("3.0.25", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]),
                 new("3.1.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]), // first version with the new internal ConnectImplAsync signature
                 new("3.3.0", supportedTargetFrameworks: ["net10.0", "net9.0", "net8.0"], supportedExecutionFrameworks: ["net10.0", "net9.0", "net8.0"]), // first version with the new internal ConnectImplAsync signature
@@ -351,10 +352,73 @@ internal static class PackageVersionDefinitions
                 // Use case 2: Equal to instrumentation tool version
                 // net8.0: 10.0.0 (equal to instrumentation 10.0.0)
                 // net9.0: 10.0.0 (equal to instrumentation 10.0.0)
-                // net462: 10.0.13 (equal to instrumentation 10.0.13
-                // net10.0: 10.0.13 (framework override to 10.0.0, validates build parameter was respected)
+                // net462: 10.0.14 (equal to instrumentation 10.0.14
+                // net10.0: 10.0.14 (framework override to 10.0.0, validates build parameter was respected)
                 new("10.0.0", supportedTargetFrameworks: ["net8.0", "net9.0"], supportedExecutionFrameworks: ["net8.0", "net9.0"]),
-                new("10.0.13", supportedTargetFrameworks: ["net462", "net10.0"], supportedExecutionFrameworks: ["net462", "net10.0"]),
+                new("10.0.14", supportedTargetFrameworks: ["net462", "net10.0"], supportedExecutionFrameworks: ["net462", "net10.0"]),
+            ]
+        },
+        new()
+        {
+            IntegrationName = "UnsafeAccessorTypeRedirection",
+            NugetPackageName = "Microsoft.Extensions.DependencyInjection.Abstractions",
+            TestApplicationName = "TestApplication.UnsafeAccessorTypeRedirection",
+            Versions =
+            [
+                new(
+                    "null",
+                    supportedTargetFrameworks: ["net10.0"],
+                    supportedExecutionFrameworks: ["net10.0"],
+                    buildProperties: new Dictionary<string, string>
+                    {
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorPackageVersion"] = "10.0.0",
+                        ["UnsafeAccessorComplete"] = "true"
+                    }),
+                new(
+                    "9.0.0.0",
+                    supportedTargetFrameworks: ["net10.0"],
+                    supportedExecutionFrameworks: ["net10.0"],
+                    buildProperties: new Dictionary<string, string>
+                    {
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorAssemblyVersion"] = "9.0.0.0",
+                        ["UnsafeAccessorPackageVersion"] = "9.0.0",
+                        ["UnsafeAccessorComplete"] = "true"
+                    }),
+                new(
+                    "10.0.0.0",
+                    supportedTargetFrameworks: ["net10.0"],
+                    supportedExecutionFrameworks: ["net10.0"],
+                    buildProperties: new Dictionary<string, string>
+                    {
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorAssemblyVersion"] = "10.0.0.0",
+                        ["UnsafeAccessorPackageVersion"] = "10.0.0",
+                        ["UnsafeAccessorComplete"] = "true"
+                    }),
+                new(
+                    "11.0.0.0",
+                    supportedTargetFrameworks: ["net10.0"],
+                    supportedExecutionFrameworks: ["net10.0"],
+                    buildProperties: new Dictionary<string, string>
+                    {
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorAssemblyVersion"] = "11.0.0.0",
+                        ["UnsafeAccessorPackageVersion"] = "11.0.0-rc.1.26425.128",
+                        ["UnsafeAccessorComplete"] = "true"
+                    }),
+                new(
+                    "1.0.0.0-incomplete",
+                    supportedTargetFrameworks: ["net10.0"],
+                    supportedExecutionFrameworks: ["net10.0"],
+                    buildProperties: new Dictionary<string, string>
+                    {
+                        ["UnsafeAccessorAssemblyName"] = "Microsoft.Extensions.DependencyInjection.Abstractions",
+                        ["UnsafeAccessorAssemblyVersion"] = "1.0.0.0",
+                        ["UnsafeAccessorPackageVersion"] = "10.0.0",
+                        ["UnsafeAccessorComplete"] = "false"
+                    })
             ]
         },
         new()

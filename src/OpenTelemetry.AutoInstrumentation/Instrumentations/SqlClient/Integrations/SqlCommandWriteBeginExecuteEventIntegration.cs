@@ -41,11 +41,22 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.SqlClient.Integrati
     type: InstrumentationType.Trace)]
 public static class SqlCommandWriteBeginExecuteEventIntegration
 {
+    internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
+    {
+        return SqlClientTraceContextPropagator.IsPropagationEnabled
+            ? new CallTargetState(null, SqlClientTraceContextPropagator.BeginCapture())
+            : CallTargetState.GetDefault();
+    }
+
     internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception? exception, in CallTargetState state)
     {
-        if (exception is null)
+        if (state.State is SqlClientTraceContextPropagator.ActivityCapture capture)
         {
-            SqlClientTraceContextPropagator.Propagate(instance);
+            SqlClientTraceContextPropagator.EndCapture(capture);
+            if (exception is null)
+            {
+                SqlClientTraceContextPropagator.Propagate(instance, capture.Context);
+            }
         }
 
         return CallTargetReturn.GetDefault();

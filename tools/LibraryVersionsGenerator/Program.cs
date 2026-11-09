@@ -43,6 +43,7 @@ internal static class Program
             foreach (var version in packageVersionDefinition.Versions)
             {
                 var calculatedVersion = EvaluateVersion(packageVersionDefinition.NugetPackageName, version.Version);
+                var buildProperties = GetDependencies(version).Concat(version.BuildProperties).ToDictionary();
 
                 if (uniqueVersions.Add(calculatedVersion))
                 {
@@ -65,7 +66,7 @@ internal static class Program
                         }
                     }
 
-                    if (version.GetType() == typeof(PackageVersion))
+                    if (buildProperties.Count == 0)
                     {
                         // Filter platform specific version
                         if (!isPlatformSpecific)
@@ -80,10 +81,10 @@ internal static class Program
                         // Filter platform specific version
                         if (!isPlatformSpecific)
                         {
-                            xUnitFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version), version.SupportedExecutionFrameworks, version.SupportedPlatforms);
+                            xUnitFileStringBuilder.AddVersionWithMetadata(calculatedVersion, buildProperties, version.SupportedExecutionFrameworks, version.SupportedPlatforms);
                         }
 
-                        buildFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version), version.SupportedTargetFrameworks, version.SupportedPlatforms);
+                        buildFileStringBuilder.AddVersionWithMetadata(calculatedVersion, buildProperties, version.SupportedTargetFrameworks, version.SupportedPlatforms);
                     }
                 }
             }

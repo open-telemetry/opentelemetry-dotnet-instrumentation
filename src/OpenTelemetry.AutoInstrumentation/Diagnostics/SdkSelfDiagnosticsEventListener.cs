@@ -16,6 +16,7 @@ namespace OpenTelemetry.AutoInstrumentation.Diagnostics;
 internal class SdkSelfDiagnosticsEventListener : EventListener
 {
     private const string EventSourceNamePrefix = "OpenTelemetry-";
+    private const string AutoInstrumentationEventSourceNamePrefix = "OpenTelemetry-AutoInstrumentation";
 
     private readonly object lockObj = new();
     private readonly EventLevel logLevel;
@@ -45,7 +46,10 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
 
     protected override void OnEventSourceCreated(EventSource eventSource)
     {
-        if (eventSource.Name.StartsWith(EventSourceNamePrefix, StringComparison.Ordinal))
+        // InternalLogger already writes each message to its sink before mirroring it to the
+        // auto-instrumentation event sources, so enabling them here would log every message twice.
+        if (eventSource.Name.StartsWith(EventSourceNamePrefix, StringComparison.Ordinal) &&
+            !eventSource.Name.StartsWith(AutoInstrumentationEventSourceNamePrefix, StringComparison.Ordinal))
         {
             // If there are EventSource classes already initialized as of now, this method would be called from
             // the base class constructor before the first line of code in SelfDiagnosticsEventListener constructor.
