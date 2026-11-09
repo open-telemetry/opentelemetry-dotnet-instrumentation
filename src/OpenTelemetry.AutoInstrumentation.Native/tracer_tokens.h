@@ -8,7 +8,7 @@
 
 #include "calltarget_tokens.h"
 
-#define FASTPATH_COUNT 10
+#define FASTPATH_COUNT 9
 
 namespace trace
 {

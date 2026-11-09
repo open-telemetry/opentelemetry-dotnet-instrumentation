@@ -35,10 +35,10 @@ internal sealed class ProcessContextPropagation
         }
     }
 
-    internal void ApplyToRoot(ref ActivityContext context, string? parentId, ref IEnumerable<ActivityLink>? links)
+    internal void ApplyToInvocation(ref ActivityContext context, ref IEnumerable<ActivityLink>? links)
     {
         if (_mode == ProcessContextExtractionMode.Off || !IsValid(_incoming.ActivityContext) ||
-            Activity.Current is not null || context != default || parentId is not null)
+            Activity.Current is not null || context != default)
         {
             return;
         }

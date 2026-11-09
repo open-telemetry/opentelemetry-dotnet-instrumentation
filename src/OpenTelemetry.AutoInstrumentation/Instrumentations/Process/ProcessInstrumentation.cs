@@ -34,15 +34,15 @@ internal static class ProcessInstrumentation
         }
     }
 
-    internal static void ApplyToRoot(ref ActivityContext context, string? parentId, ref IEnumerable<ActivityLink>? links)
+    internal static void ApplyToInvocation(ref ActivityContext context, ref IEnumerable<ActivityLink>? links)
     {
         try
         {
-            _context?.ApplyToRoot(ref context, parentId, ref links);
+            _context?.ApplyToInvocation(ref context, ref links);
         }
         catch (Exception exception)
         {
-            Logger.Debug(exception, "Process environment context extraction failed.");
+            Logger.Debug(exception, "Could not apply process environment context to the invocation.");
         }
     }
 

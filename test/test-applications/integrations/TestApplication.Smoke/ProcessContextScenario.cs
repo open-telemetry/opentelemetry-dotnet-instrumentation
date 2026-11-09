@@ -3,6 +3,7 @@
 
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using OpenTelemetry;
 
 namespace TestApplication.Smoke;
@@ -29,10 +30,7 @@ internal static class ProcessContextScenario
                 return true;
             case "process-context-child":
                 WriteBaggage("startup");
-                using (var child = Source.StartActivity("process-child"))
-                {
-                    WriteActivity("process-child", child);
-                }
+                Invoke("process-child");
 
                 return true;
             default:
@@ -44,11 +42,11 @@ internal static class ProcessContextScenario
     {
         using var listener = new ActivityListener
         {
-            ShouldListenTo = static source => source.Name == "TestApplication.ProcessContext",
+            ShouldListenTo = static source => source.Name is "TestApplication.ProcessContext" or "OpenTelemetry.AutoInstrumentation.NoCode",
             Sample = static (ref ActivityCreationOptions<ActivityContext> options) =>
             {
                 var links = string.Join(",", (options.Links ?? []).Select(link => $"{link.Context.TraceId}:{link.Context.SpanId}"));
-                Write("sample", options.Name, options.Parent.TraceId.ToString(), options.Parent.SpanId.ToString(), links);
+                Write("sample", options.Name, options.Parent.TraceId.ToString(), options.Parent.SpanId.ToString(), links, options.Parent.IsRemote ? "1" : "0");
                 return ActivitySamplingResult.None;
             }
         };
@@ -56,24 +54,20 @@ internal static class ProcessContextScenario
         WriteBaggage("startup");
         using var delayed = Source.CreateActivity("delayed", ActivityKind.Internal);
 
-        using (var root = Source.StartActivity("root"))
+        Invoke("invocation");
+        Invoke("repeated");
+        InvokeAsync("task").GetAwaiter().GetResult();
+        if (InvokeTaskResultAsync("task-result").GetAwaiter().GetResult() != 42)
         {
-            WriteActivity("root", root);
-            using var child = Source.StartActivity("child");
-            if (child is null && root is { Recorded: false })
-            {
-                // The SDK may omit local children of an unsampled propagation-only activity.
-                Write("dropped", "child");
-            }
-            else
-            {
-                WriteActivity("child", child);
-            }
+            throw new InvalidOperationException("The configured invocation changed the task result.");
         }
 
-        using (var repeated = Source.StartActivity("repeated"))
+#if NET
+        InvokeValueTaskAsync("value-task").AsTask().GetAwaiter().GetResult();
+#endif
+        using (var arbitrary = Source.StartActivity("arbitrary"))
         {
-            WriteActivity("repeated", repeated);
+            WriteActivity("arbitrary", arbitrary);
         }
 
         delayed?.Start();
@@ -88,6 +82,7 @@ internal static class ProcessContextScenario
         using (var explicitParent = Source.StartActivity("explicit-context", ActivityKind.Internal, explicitContext))
         {
             WriteActivity("explicit-context", explicitParent);
+            Invoke("ambient-invocation");
         }
 
         using (var explicitParent = Source.StartActivity("explicit-string", ActivityKind.Internal, ExplicitTraceParent))
@@ -98,6 +93,62 @@ internal static class ProcessContextScenario
         using (var linked = Source.StartActivity("existing-links", ActivityKind.Internal, default(ActivityContext), links: [new ActivityLink(explicitContext)]))
         {
             WriteActivity("existing-links", linked);
+        }
+
+        Baggage.SetBaggage("origin", "updated");
+        Invoke("baggage-updated");
+        WriteBaggage("updated");
+        if (Activity.Current is not null)
+        {
+            throw new InvalidOperationException("A configured invocation leaked its activity into the caller.");
+        }
+
+        Write("lifetime", "restored");
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void Invoke(string label)
+    {
+        WriteInvocation(label);
+        if (label == "invocation")
+        {
+            Invoke("nested");
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static async Task InvokeAsync(string label)
+    {
+        await Task.Yield();
+        WriteInvocation(label);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static async Task<int> InvokeTaskResultAsync(string label)
+    {
+        await Task.Yield();
+        WriteInvocation(label);
+        return 42;
+    }
+
+#if NET
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static async ValueTask InvokeValueTaskAsync(string label)
+    {
+        await Task.Yield();
+        WriteInvocation(label);
+    }
+#endif
+
+    private static void WriteInvocation(string label)
+    {
+        if (Activity.Current?.DisplayName == label)
+        {
+            WriteActivity(label, Activity.Current);
+        }
+        else
+        {
+            Write("dropped", label);
         }
     }
 
@@ -249,7 +300,7 @@ internal static class ProcessContextScenario
         }
 
         var links = string.Join(",", activity.Links.Select(link => $"{link.Context.TraceId}:{link.Context.SpanId}"));
-        Write("activity", label, activity.TraceId.ToString(), activity.SpanId.ToString(), activity.ParentSpanId.ToString(), activity.Recorded ? "1" : "0", activity.TraceStateString ?? string.Empty, links, activity.HasRemoteParent ? "1" : "0");
+        Write("activity", label, activity.TraceId.ToString(), activity.SpanId.ToString(), activity.ParentSpanId.ToString(), activity.Recorded ? "1" : "0", activity.TraceStateString ?? string.Empty, links, activity.HasRemoteParent ? "1" : "0", activity.Source.Name);
     }
 
     private static void Write(params string[] values)

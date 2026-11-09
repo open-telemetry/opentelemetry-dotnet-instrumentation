@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.Process;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Util;
 
@@ -90,7 +91,12 @@ internal static class NoCodeIntegrationHelper
             }
         }
 
-        var activity = Source.StartActivity(name: spanName, kind: noCodeEntry.ActivityKind, tags: tags);
+        // Configured method spans define invocation boundaries. Supply launch context
+        // through the public API so listeners see the parent or links during sampling.
+        ActivityContext parentContext = default;
+        IEnumerable<ActivityLink>? links = null;
+        ProcessInstrumentation.ApplyToInvocation(ref parentContext, ref links);
+        var activity = Source.StartActivity(spanName, noCodeEntry.ActivityKind, parentContext, tags, links);
 
         // Store state for OnMethodEnd (needed for status rules evaluation)
         var noCodeState = new NoCodeCallTargetState(noCodeEntry, instance, arguments, noCodeEntry.TargetMethod, noCodeEntry.TargetType);

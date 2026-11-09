@@ -811,17 +811,6 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Diagnostics.DiagnosticSource"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Diagnostics.ActivitySource"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("CreateActivity"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray(new[] { "System.Diagnostics.Activity", "System.String", "System.Diagnostics.ActivityKind", "System.Diagnostics.ActivityContext", "System.String", "System.Collections.Generic.IEnumerable`1[System.Collections.Generic.KeyValuePair`2[System.String,System.Object]]", "System.Collections.Generic.IEnumerable`1[System.Diagnostics.ActivityLink]", "System.DateTimeOffset", "System.Boolean", "System.Diagnostics.ActivityIdFormat" }), 10, 10, 0, 0, 10, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Process.Integrations.ActivitySourceCreateActivityIntegration"), 0, categories));
-            }
-        }
-        {
-            uint categories = 0;
-            if (tracerSettings.TracesEnabled && tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.Process))
-            {
-                categories |= 1u;
-            }
-            if (categories != 0)
-            {
                 nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Diagnostics.Process"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("System.Diagnostics.Process"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("StartCore"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Boolean", "System.Diagnostics.ProcessStartInfo"), 2, 8, 0, 0, 10, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Process.Integrations.ProcessStartIntegration"), 0, categories));
             }
         }

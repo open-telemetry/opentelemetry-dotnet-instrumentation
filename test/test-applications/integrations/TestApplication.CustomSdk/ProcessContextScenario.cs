@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
 
@@ -9,7 +10,7 @@ namespace TestApplication.CustomSdk;
 
 internal static class ProcessContextScenario
 {
-    private const string SourceName = "TestApplication.CustomSdk.ProcessContext";
+    private const string SourceName = "OpenTelemetry.AutoInstrumentation.NoCode";
 
     internal static bool TryRun(string[] args)
     {
@@ -22,20 +23,25 @@ internal static class ProcessContextScenario
         // application's SDK here must not be required for its default propagators.
         using var provider = Sdk.CreateTracerProviderBuilder()
             .AddSource(SourceName)
+            .SetSampler(new InvocationSampler())
             .AddOtlpExporter()
             .Build();
-        using var source = new ActivitySource(SourceName);
-        var name = args[0] == "--process-context-child" ? "child" : "root";
-        using var activity = source.StartActivity(name) ?? throw new InvalidOperationException("Activity was not created.");
-        Console.WriteLine($"PROCESS_CONTEXT_CUSTOM_SDK|{name}|{activity.TraceId}|{activity.SpanId}|{activity.ParentSpanId}|{(activity.HasRemoteParent ? "1" : "0")}|{(activity.Recorded ? "1" : "0")}|{activity.TraceStateString}|{Baggage.Current.GetBaggage("origin")}");
+        Invoke(args[0] == "--process-context-child" ? "child" : "root");
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void Invoke(string name)
+    {
+        var activity = Activity.Current ?? throw new InvalidOperationException("Configured invocation activity was not created.");
+        var links = string.Join(",", activity.Links.Select(link => $"{link.Context.TraceId}:{link.Context.SpanId}"));
+        Console.WriteLine($"PROCESS_CONTEXT_CUSTOM_SDK|{name}|{activity.TraceId}|{activity.SpanId}|{activity.ParentSpanId}|{(activity.HasRemoteParent ? "1" : "0")}|{(activity.Recorded ? "1" : "0")}|{activity.TraceStateString}|{Baggage.Current.GetBaggage("origin")}|{links}");
 
         if (name == "root")
         {
             Baggage.SetBaggage("origin", "updated");
             RunChild();
         }
-
-        return true;
     }
 
     private static void RunChild()
@@ -64,5 +70,24 @@ internal static class ProcessContextScenario
         }
 
         Console.Write(output.Result);
+    }
+
+    private sealed class InvocationSampler : Sampler
+    {
+        private readonly ParentBasedSampler _parentBased = new(new AlwaysOnSampler());
+
+        public override SamplingResult ShouldSample(in SamplingParameters samplingParameters)
+        {
+            var links = string.Join(",", (samplingParameters.Links ?? []).Select(link => $"{link.Context.TraceId}:{link.Context.SpanId}"));
+            Console.WriteLine($"PROCESS_CONTEXT_CUSTOM_SDK_SAMPLE|{samplingParameters.Name}|{samplingParameters.ParentContext.TraceId}|{samplingParameters.ParentContext.SpanId}|{links}");
+            if (samplingParameters.ParentContext != default)
+            {
+                return _parentBased.ShouldSample(in samplingParameters);
+            }
+
+            // A link must already be available during SDK sampling. Without it,
+            // the root is deliberately excluded from recording and export.
+            return new SamplingResult(samplingParameters.Links?.Any() == true ? SamplingDecision.RecordAndSample : SamplingDecision.Drop);
+        }
     }
 }

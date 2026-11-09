@@ -565,27 +565,89 @@ instrumentation/development:
 ## Instrumentation options
 
 For `process`, omitting the entry disables the instrumentation. An empty
-`process:` enables context extraction in `parent` mode and context injection.
-Omitting or leaving either `context_extraction:` or `context_injection:` empty
-uses the same defaults. To disable injection explicitly, set
-`context_injection.enabled: false`; to disable extraction, set
+`process:` enables startup context extraction in `parent` mode and child
+environment injection. Omitting or leaving either `context_extraction:` or
+`context_injection:` empty uses the same defaults. To disable injection
+explicitly, set `context_injection.enabled: false`; to disable extraction, set
 `context_extraction.mode: off`.
 See [process environment context propagation](config.md#process-environment-context-propagation)
 for supported .NET APIs, runtimes, and behavior. Both directions use the
 propagators selected by the [`propagator` configuration](#propagator-configuration);
 their fields determine the environment variables used for propagation.
 
+### Process invocation spans
+
+Select command or job methods using the existing `no_code.targets` configuration
+under `instrumentation/development.dotnet`, alongside `traces.process`. Choose a
+method whose execution covers one invocation. For asynchronous work, select a
+method returning `Task` or `Task<T>` that completes when that work finishes. The
+span ends when the method returns or the returned task completes; a method that
+only schedules background work does not cover that work's lifetime.
+
+When the selected method has no ambient `Activity.Current`, `parent` applies the
+incoming remote parent, `link` adds an incoming link, and `off` leaves the method
+span unchanged. Parent and link inputs are supplied before sampling and ID
+generation. Existing ambient parents take precedence, so nested selected methods
+and ordinary child activities inherit normally. The agent does not change the
+parents or links of other `ActivitySource` roots. No additional process-wide or
+`Main` span is created.
+
+The agent automatically registers the
+`OpenTelemetry.AutoInstrumentation.NoCode` source for these spans. Without a
+selected method target, `process` can initialize baggage and inject child
+environments but creates no invocation span. Targets currently require YAML;
+environment-only configuration cannot define them. Environment values can be
+referenced within YAML, as shown for the process options below.
+
+Enable [file-based configuration](#file-based-configuration), then replace the
+assembly, type, method, and signature with those of your command or job method:
+
 ``` yaml
+file_format: "1.0"
+tracer_provider:
+  processors:
+    - simple:
+        exporter:
+          console:
+propagator:
+  composite:
+    tracecontext:
+    baggage:
 instrumentation/development:
   dotnet:
     traces:
       process:
         context_extraction:
           # Supported values: parent, link, off. Default is parent.
-          mode: parent
+          mode: ${OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_EXTRACTION_MODE:-parent}
         context_injection:
-          # Omitted or empty context_injection also enables injection.
-          enabled: true
+          # Independent of extraction. Default is true.
+          enabled: ${OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_INJECTION_ENABLED:-true}
+    no_code:
+      targets:
+        - target:
+            assembly:
+              name: MyCommand
+            type: MyCommand.CommandRunner
+            method: ExecuteAsync
+            signature:
+              return_type: System.Threading.Tasks.Task
+              parameter_types: []
+          span:
+            name: execute-command
+            kind: internal
+```
+
+See [configuration based instrumentation](nocode-instrumentation.md) for method
+selection and span options. Process options do not replace the normal method
+span configuration or the tracer provider's sampler.
+
+### Other instrumentation options
+
+``` yaml
+instrumentation/development:
+  dotnet:
+    traces:
       graphql:
         # Whether the GraphQL instrumentation can pass raw queries through the graphql.document attribute. Queries might contain sensitive information.
         # Default is false
