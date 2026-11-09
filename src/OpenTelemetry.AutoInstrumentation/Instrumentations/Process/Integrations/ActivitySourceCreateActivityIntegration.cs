@@ -33,12 +33,7 @@ public static class ActivitySourceCreateActivityIntegration
         bool startIt,
         ActivityIdFormat idFormat)
     {
-        // Match the factory's no-listener fast path before preparing any links.
-        if (instance is ActivitySource source && source.HasListeners())
-        {
-            ProcessInstrumentation.ApplyToRoot(ref context, parentId, ref links);
-        }
-
+        ProcessInstrumentation.ApplyToRoot(ref context, parentId, ref links);
         return CallTargetState.GetDefault();
     }
 }

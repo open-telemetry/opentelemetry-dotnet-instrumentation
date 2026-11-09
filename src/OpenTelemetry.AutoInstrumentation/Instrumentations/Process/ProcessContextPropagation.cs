@@ -12,12 +12,17 @@ internal sealed class ProcessContextPropagation
     private readonly ProcessContextExtractionMode _mode;
     private readonly TextMapPropagator _propagator;
     private readonly PropagationContext _incoming;
+    private readonly IEnumerable<ActivityLink>? _incomingLinks;
 
     internal ProcessContextPropagation(ProcessContextExtractionMode mode, TextMapPropagator propagator, IDictionary<string, string?> environment)
     {
         _mode = mode;
         _propagator = propagator;
         _incoming = mode == ProcessContextExtractionMode.Off ? default : propagator.Extract(default, environment, EnvironmentCarrier.Get);
+        if (mode == ProcessContextExtractionMode.Link && HasIncomingTraceContext)
+        {
+            _incomingLinks = Array.AsReadOnly<ActivityLink>([new(_incoming.ActivityContext)]);
+        }
     }
 
     internal bool HasIncomingTraceContext => IsValid(_incoming.ActivityContext);
@@ -53,7 +58,7 @@ internal sealed class ProcessContextPropagation
 
         if (links is null)
         {
-            links = [new ActivityLink(_incoming.ActivityContext)];
+            links = _incomingLinks;
             return;
         }
 

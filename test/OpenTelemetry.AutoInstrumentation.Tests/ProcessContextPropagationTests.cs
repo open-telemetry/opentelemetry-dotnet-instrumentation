@@ -114,6 +114,23 @@ public class ProcessContextPropagationTests
         Assert.Equal("0123456789abcdef", links.Last().Context.SpanId.ToHexString());
     }
 
+    [Fact]
+    public void AListenerCannotChangeIncomingLinksForLaterRoots()
+    {
+        var propagation = CreatePropagation(ProcessContextExtractionMode.Link);
+        ActivityContext context = default;
+        IEnumerable<ActivityLink>? links = null;
+        propagation.ApplyToRoot(ref context, null, ref links);
+        var incoming = Assert.Single(links!).Context;
+
+        var collection = Assert.IsAssignableFrom<IList<ActivityLink>>(links);
+        Assert.Throws<NotSupportedException>(() => collection[0] = default);
+
+        links = null;
+        propagation.ApplyToRoot(ref context, null, ref links);
+        Assert.Equal(incoming, Assert.Single(links!).Context);
+    }
+
     [Theory]
     [InlineData((int)ProcessContextExtractionMode.Parent)]
     [InlineData((int)ProcessContextExtractionMode.Link)]

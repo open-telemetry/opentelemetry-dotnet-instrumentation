@@ -81,8 +81,9 @@ The profiler intercepts DiagnosticSource 10.x's private nine-argument
 public `StartActivity` and `CreateActivity` overloads. The hook supplies parent
 and link arguments before sampling and ID generation, then lets the original
 method execute. It is registered only when extraction produces a valid incoming
-trace context. Baggage initialization and child-process injection remain
-available when no valid trace context was extracted.
+trace context. Incoming links are cached as read-only data; application-supplied
+links retain deferred enumeration. Baggage initialization and child-process
+injection remain available when no valid trace context was extracted.
 
 This hook is constrained to the supported assembly version and method signature.
 It does not cover legacy activities created with `new Activity(...).Start()`.
