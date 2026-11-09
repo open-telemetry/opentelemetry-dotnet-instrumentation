@@ -570,7 +570,7 @@ environment injection. Omitting or leaving either `context_extraction:` or
 `context_injection:` empty uses the same defaults. To disable injection
 explicitly, set `context_injection.enabled: false`; to disable extraction, set
 `context_extraction.mode: off`.
-See [process environment context propagation](config.md#process-environment-context-propagation)
+See [Process instrumentation](process-instrumentation.md)
 for supported .NET APIs, runtimes, and behavior. Both directions use the
 propagators selected by the [`propagator` configuration](#propagator-configuration);
 their fields determine the environment variables used for propagation.
