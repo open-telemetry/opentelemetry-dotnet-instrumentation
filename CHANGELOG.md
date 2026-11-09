@@ -19,6 +19,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- On .NET Framework, managed `OTEL_*` settings from `App.config`/`Web.config`
+  are read within each AppDomain instead of being promoted to process
+  environment variables. Environment variables take precedence over local
+  settings, including resource attributes.
+
 ## [v1.19.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.19.1)
 
 ### Changed
@@ -62,8 +67,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Added bytecode instrumentation support for methods compiled with the experimental
   .NET runtime-async feature.
-
-### Changed
 
 #### Dependency updates
 
@@ -368,10 +371,6 @@ release.
 
 ### Fixed
 
-- On .NET Framework, managed `OTEL_*` settings from `App.config`/`Web.config`
-  are read within each AppDomain instead of being promoted to process
-  environment variables. Environment variables take precedence over local
-  settings, including resource attributes.
 - Suppress instrumentation while starting the OpAMP client to prevent internal
   OpAMP transport calls from being collected as traces.
 
