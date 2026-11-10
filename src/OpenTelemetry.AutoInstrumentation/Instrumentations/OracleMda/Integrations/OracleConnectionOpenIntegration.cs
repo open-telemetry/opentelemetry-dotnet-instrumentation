@@ -18,29 +18,9 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrati
     maximumVersion: OracleMdaConstants.MaxVersion,
     integrationName: OracleMdaConstants.IntegrationName,
     type: InstrumentationType.Trace)]
-[InstrumentMethod(
-    assemblyName: OracleMdaConstants.OracleMdaAssemblyName,
-    typeName: OracleMdaConstants.OracleConnectionTypeName,
-    methodName: "OpenAsync",
-    returnTypeName: ClrNames.Task,
-    parameterTypeNames: [ClrNames.CancellationToken],
-    minimumVersion: OracleMdaConstants.MinVersion,
-    maximumVersion: OracleMdaConstants.MaxVersion,
-    integrationName: OracleMdaConstants.IntegrationName,
-    type: InstrumentationType.Trace)]
 public static class OracleConnectionOpenIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
-    {
-        if (instance is not null)
-        {
-            OracleConnectionIntegrationHelper.SetDatabaseOpenTelemetryTracing(instance);
-        }
-
-        return CallTargetState.GetDefault();
-    }
-
-    internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance, CancellationToken cancellationToken)
     {
         if (instance is not null)
         {
