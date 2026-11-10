@@ -1,9 +1,9 @@
 # Process instrumentation
 
-The experimental `PROCESS` trace instrumentation connects telemetry across
+The `PROCESS` trace instrumentation connects telemetry across
 process boundaries. It extracts incoming context from the process environment
 and injects outgoing context into child process environments using the configured
-propagators. It supports .NET 8–10 and .NET Framework and implements
+propagators. It implements
 [environment context propagation](https://github.com/open-telemetry/opentelemetry-specification/issues/5398).
 
 ## Configuration

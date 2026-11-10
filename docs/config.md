@@ -341,7 +341,7 @@ detects a multiplexed connector.
 
 #### Process environment context propagation
 
-The experimental `PROCESS` trace instrumentation connects telemetry across
+The `PROCESS` trace instrumentation connects telemetry across
 process boundaries using the configured [propagators](#propagators) to extract
 context from the process environment and inject context into child process
 environments. Extraction and injection can be configured independently.
