@@ -349,7 +349,7 @@ environments. Extraction and injection can be configured independently.
 | Environment variable | Description | Default value |
 | -------------------- | ----------- | ------------- |
 | `OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_ENABLED` | Enables context extraction and child process injection. Inherits the standard trace instrumentation enable flags. | `true` |
-| `OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_EXTRACTION_MODE` | Applies environment context to root `ActivitySource` activities without an ambient or supplied parent: `parent` uses it as a remote parent; `link` adds a link; `off` disables extraction. | `parent` |
+| `OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_EXTRACTION_MODE` | Applies environment context to root `ActivitySource` activities without an ambient or supplied parent: `parent` uses it as a remote parent; `link` adds a link; `none` disables extraction. | `parent` |
 | `OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_INJECTION_ENABLED` | Injects the current trace context and baggage into child process environments when `UseShellExecute` is `false`. | `true` |
 
 Incoming context applies to activities created through `ActivitySource.StartActivity`

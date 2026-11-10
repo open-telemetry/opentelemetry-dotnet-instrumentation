@@ -21,5 +21,5 @@ internal enum ProcessContextExtractionMode
     /// <summary>
     /// Do not extract context from the process environment.
     /// </summary>
-    Off
+    None
 }

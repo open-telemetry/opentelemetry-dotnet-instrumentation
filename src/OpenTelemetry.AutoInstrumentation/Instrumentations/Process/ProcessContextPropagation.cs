@@ -18,7 +18,7 @@ internal sealed class ProcessContextPropagation
     {
         _mode = mode;
         _propagator = propagator;
-        _incoming = mode == ProcessContextExtractionMode.Off ? default : propagator.Extract(default, environment, EnvironmentCarrier.Get);
+        _incoming = mode == ProcessContextExtractionMode.None ? default : propagator.Extract(default, environment, EnvironmentCarrier.Get);
         if (mode == ProcessContextExtractionMode.Link && HasIncomingTraceContext)
         {
             _incomingLinks = Array.AsReadOnly<ActivityLink>([new(_incoming.ActivityContext)]);
@@ -44,7 +44,7 @@ internal sealed class ProcessContextPropagation
 
     internal void ApplyToRoot(ref ActivityContext context, string? parentId, ref IEnumerable<ActivityLink>? links)
     {
-        if (_mode == ProcessContextExtractionMode.Off || !IsValid(_incoming.ActivityContext) ||
+        if (_mode == ProcessContextExtractionMode.None || !IsValid(_incoming.ActivityContext) ||
             context != default || parentId is not null || Activity.Current is not null)
         {
             return;

@@ -12,7 +12,7 @@ See the [environment variable reference](config.md#process-environment-context-p
 for settings and defaults, or use the corresponding
 [YAML options](file-based-configuration.md#instrumentation-options).
 
-Extraction and injection are independent. Set the extraction mode to `off` for
+Extraction and injection are independent. Set the extraction mode to `none` for
 injection only, or disable injection for extraction only. Disabling `PROCESS`
 disables both directions. Existing Process metrics are configured independently.
 
@@ -53,7 +53,7 @@ extraction mode:
 | ---- | -------- |
 | `parent` | Uses the incoming trace context as a remote parent, including its trace flags and trace state. |
 | `link` | Adds a link to the incoming trace context, preserving existing links and avoiding a duplicate incoming link. |
-| `off` | Leaves activity creation unchanged and disables incoming baggage initialization. |
+| `none` | Leaves activity creation unchanged and disables incoming baggage initialization. |
 
 Incoming parents and links are available to listeners and samplers before the
 activity is created. The configured sampler still determines whether the new
@@ -87,7 +87,7 @@ injection remain available when no valid trace context was extracted.
 
 This hook is constrained to the supported assembly version and method signature.
 It does not cover legacy activities created with `new Activity(...).Start()`.
-Because context is applied to eligible roots throughout the process, use `off`
+Because context is applied to eligible roots throughout the process, use `none`
 when launch context must not parent or link unrelated later work.
 
 ## Child process propagation

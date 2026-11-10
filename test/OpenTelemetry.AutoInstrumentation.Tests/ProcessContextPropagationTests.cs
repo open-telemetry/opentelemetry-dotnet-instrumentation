@@ -186,13 +186,13 @@ public class ProcessContextPropagationTests
     }
 
     [Fact]
-    public void OffModeDoesNotExtractTraceContextOrBaggage()
+    public void NoneModeDoesNotExtractTraceContextOrBaggage()
     {
         var previousBaggage = Baggage.Current;
         try
         {
             Baggage.Current = default;
-            var propagation = CreatePropagation(ProcessContextExtractionMode.Off, "startup=value");
+            var propagation = CreatePropagation(ProcessContextExtractionMode.None, "startup=value");
             propagation.InitializeBaggage();
             ActivityContext context = default;
             IEnumerable<ActivityLink>? links = null;
@@ -277,7 +277,7 @@ public class ProcessContextPropagationTests
     [Theory]
     [InlineData((int)ProcessContextExtractionMode.Parent, true)]
     [InlineData((int)ProcessContextExtractionMode.Link, false)]
-    [InlineData((int)ProcessContextExtractionMode.Off, false)]
+    [InlineData((int)ProcessContextExtractionMode.None, false)]
     public void InjectionWithoutAnActivityForwardsIncomingContextOnlyInParentMode(int mode, bool forwards)
     {
         var propagation = CreatePropagation((ProcessContextExtractionMode)mode);

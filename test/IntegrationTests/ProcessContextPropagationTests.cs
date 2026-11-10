@@ -37,7 +37,7 @@ public class ProcessContextPropagationTests : TestHelper
     [InlineData("parent", false)]
     [InlineData("link", true)]
     [InlineData("link", false)]
-    [InlineData("off", true)]
+    [InlineData("none", true)]
     public void ExtractsContextBeforeSamplingAndPreservesExistingParents(string? mode, bool sampled)
     {
         using var collector = new MockSpansCollector(Output);
@@ -134,7 +134,7 @@ public class ProcessContextPropagationTests : TestHelper
         }
 
         var baggage = ReadRows(output, "PROCESS_CONTEXT|baggage|").ToDictionary(row => row[0], StringComparer.Ordinal);
-        Assert.Equal(mode == "off" ? string.Empty : "environment", baggage["startup"][1]);
+        Assert.Equal(mode == "none" ? string.Empty : "environment", baggage["startup"][1]);
         Assert.Equal("updated", baggage["updated"][1]);
         Assert.Contains("PROCESS_CONTEXT|unsubscribed|unchanged", output, StringComparison.Ordinal);
         Assert.Contains("PROCESS_CONTEXT|dropping-listener|unchanged", output, StringComparison.Ordinal);

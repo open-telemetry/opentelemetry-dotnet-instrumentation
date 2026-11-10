@@ -17,7 +17,7 @@ public class ProcessConfigurationTests
     [InlineData("", (int)ProcessContextExtractionMode.Parent)]
     [InlineData("parent", (int)ProcessContextExtractionMode.Parent)]
     [InlineData("link", (int)ProcessContextExtractionMode.Link)]
-    [InlineData("off", (int)ProcessContextExtractionMode.Off)]
+    [InlineData("none", (int)ProcessContextExtractionMode.None)]
     public void LoadEnvVar_ExtractionMode(string? value, int expected)
     {
         var settings = LoadEnvironmentSettings(new NameValueCollection
@@ -33,6 +33,7 @@ public class ProcessConfigurationTests
     [Theory]
     [InlineData("unsupported")]
     [InlineData("1")]
+    [InlineData("off")]
     public void LoadEnvVar_InvalidExtractionModeUsesParent(string value)
     {
         var settings = LoadEnvironmentSettings(new NameValueCollection
@@ -46,6 +47,7 @@ public class ProcessConfigurationTests
     [Theory]
     [InlineData("unsupported")]
     [InlineData("1")]
+    [InlineData("off")]
     public void LoadEnvVar_InvalidExtractionModeFailsFast(string value)
     {
         var values = new NameValueCollection
@@ -133,7 +135,7 @@ public class ProcessConfigurationTests
     [Theory]
     [InlineData("parent", true, (int)ProcessContextExtractionMode.Parent)]
     [InlineData("link", true, (int)ProcessContextExtractionMode.Link)]
-    [InlineData("off", true, (int)ProcessContextExtractionMode.Off)]
+    [InlineData("none", true, (int)ProcessContextExtractionMode.None)]
     [InlineData("parent", false, (int)ProcessContextExtractionMode.Parent)]
     public void LoadFile_DirectionOptions(string mode, bool injectionEnabled, int expected)
     {
@@ -148,6 +150,7 @@ public class ProcessConfigurationTests
     [Theory]
     [InlineData("unsupported")]
     [InlineData("1")]
+    [InlineData("off")]
     public void LoadFile_InvalidExtractionModeUsesParent(string mode)
     {
         var settings = LoadYamlSettings($"process: {{context_extraction: {{mode: {mode}}}}}");
@@ -155,10 +158,12 @@ public class ProcessConfigurationTests
         Assert.Equal(ProcessContextExtractionMode.Parent, settings.InstrumentationOptions.ProcessContextExtractionMode);
     }
 
-    [Fact]
-    public void LoadFile_InvalidExtractionModeFailsFast()
+    [Theory]
+    [InlineData("unsupported")]
+    [InlineData("off")]
+    public void LoadFile_InvalidExtractionModeFailsFast(string mode)
     {
-        Assert.Throws<NotSupportedException>(() => LoadYamlSettings("process: {context_extraction: {mode: unsupported}}", failFast: true));
+        Assert.Throws<NotSupportedException>(() => LoadYamlSettings($"process: {{context_extraction: {{mode: {mode}}}}}", failFast: true));
     }
 
     [Fact]

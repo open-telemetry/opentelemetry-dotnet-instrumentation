@@ -194,10 +194,10 @@ internal class InstrumentationOptions
                 return ProcessContextExtractionMode.Parent;
             case "link":
                 return ProcessContextExtractionMode.Link;
-            case "off":
-                return ProcessContextExtractionMode.Off;
+            case "none":
+                return ProcessContextExtractionMode.None;
             default:
-                var message = $"Process context extraction mode '{value}' is not supported. Supported values are parent, link, and off.";
+                var message = $"Process context extraction mode '{value}' is not supported. Supported values are parent, link, and none.";
                 Logger.Error(message);
 
                 if (failFast)
