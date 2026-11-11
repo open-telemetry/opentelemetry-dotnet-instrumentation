@@ -79,6 +79,46 @@ public class LogTests : TestHelper
         collector.AssertExpectations();
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    [Trait("Category", "EndToEnd")]
+    public void SdkDiagnosticsAreEnabledWithOnlyTheILoggerBridge(bool enableClrProfiler)
+    {
+        var logsDirectory = DirectoryHelpers.CreateTempDirectory();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED", "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED", "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLED", "true");
+        SetEnvironmentVariable("OTEL_LOGS_EXPORTER", "none");
+        SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "file");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", logsDirectory.FullName);
+        SetEnvironmentVariable("OTEL_DOTNET_SELF_DIAGNOSTICS_SINKS", null);
+        SetEnvironmentVariable("OTEL_DOTNET_SELF_DIAGNOSTICS_LOG_DIRECTORY", null);
+        SetEnvironmentVariable("OTEL_SDK_DISABLED", null);
+
+        if (enableClrProfiler)
+        {
+            EnableBytecodeInstrumentation();
+        }
+        else
+        {
+            SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
+        }
+
+        try
+        {
+            var (_, _, processId) = RunTestApplication();
+            var sdkLog = Assert.Single(logsDirectory.GetFiles($"otel-dotnet-{processId}-*.log"));
+
+            Assert.Contains("LoggerProviderSdk built successfully.", File.ReadAllText(sdkLog.FullName), StringComparison.Ordinal);
+        }
+        finally
+        {
+            logsDirectory.Delete(true);
+        }
+    }
+
     [Fact]
     public async Task EnableLogsWithCLRAndHostingStartup()
     {

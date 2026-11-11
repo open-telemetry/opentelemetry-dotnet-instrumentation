@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
+using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Logs;
 
@@ -57,7 +58,7 @@ internal static class LoggerInitializer
             var settings = Instrumentation.LogSettings.Value;
             var pluginManager = Instrumentation.PluginManager;
 
-            builder.AddOpenTelemetry(loggerBuilder =>
+            builder.ConfigureSelfDiagnostics(pluginManager).AddOpenTelemetry(loggerBuilder =>
             {
                 loggerBuilder.SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(Instrumentation.ResourceSettings.Value));
 

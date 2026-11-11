@@ -507,10 +507,8 @@ public class SmokeTests : TestHelper
     [InlineData("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,TestApplication.Smoke,TestApplication.Smoke.exe")]
     public void ApplicationFailFastEnabled(string additionalVariableKey, string additionalVariableValue)
     {
-#if NETFRAMEWORK
         var logsDirectory = DirectoryHelpers.CreateTempDirectory();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", logsDirectory.FullName);
-#endif
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true");
         SetEnvironmentVariable(additionalVariableKey, additionalVariableValue);
 
@@ -534,6 +532,39 @@ public class SmokeTests : TestHelper
             Assert.Contains("An error occurred in the managed loader:", File.ReadAllText(nativeLog.FullName), StringComparison.Ordinal);
         }
 #endif
+        if (additionalVariableKey == "OTEL_TRACES_EXPORTER")
+        {
+            // No SDK provider was built, so the managed lines buffered during start-up fall back to the
+            // automatic instrumentation's own file, and no SDK self-diagnostics file exists.
+            var managedLog = logsDirectory.GetFiles("otel-dotnet-auto-*-Managed-*.log").Single();
+
+            Assert.Contains("OpenTelemetry SDK load exception.", File.ReadAllText(managedLog.FullName), StringComparison.Ordinal);
+            Assert.DoesNotContain(logsDirectory.GetFiles("otel-dotnet-*.log"), f => !f.Name.StartsWith("otel-dotnet-auto-", StringComparison.Ordinal));
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void ManagedLogsAreWrittenBySdkSelfDiagnostics()
+    {
+        var logsDirectory = DirectoryHelpers.CreateTempDirectory();
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", logsDirectory.FullName);
+        SetEnvironmentVariable("OTEL_LOG_LEVEL", null);
+        SetEnvironmentVariable("OTEL_DOTNET_SELF_DIAGNOSTICS_SINKS", null);
+        SetEnvironmentVariable("OTEL_DOTNET_SELF_DIAGNOSTICS_LOG_DIRECTORY", null);
+        SetEnvironmentVariable("OTEL_SDK_DISABLED", null);
+
+        var (_, _, processId) = RunTestApplication();
+
+        var sdkLog = logsDirectory.GetFiles($"otel-dotnet-{processId}-*.log").Single();
+        var content = File.ReadAllText(sdkLog.FullName);
+        Assert.Contains("OpenTelemetry-AutoInstrumentation: OpenTelemetry tracer initialized.", content, StringComparison.Ordinal);
+
+        // The exit line is deliberately not asserted. It is logged from the ProcessExit handler, and the runtime
+        // disposes every EventSource before it runs ProcessExit handlers, so lines logged during process exit do
+        // not reach the SDK's self-diagnostics.
+        Assert.Empty(logsDirectory.GetFiles("otel-dotnet-auto-*-Managed-*.log"));
     }
 
     [Fact]

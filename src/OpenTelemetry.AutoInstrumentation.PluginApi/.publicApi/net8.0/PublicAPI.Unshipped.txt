@@ -1,0 +1,2 @@
+OpenTelemetry.AutoInstrumentation.PluginApi.Telemetry.IConfigureSelfDiagnosticsOptions
+OpenTelemetry.AutoInstrumentation.PluginApi.Telemetry.IConfigureSelfDiagnosticsOptions.ConfigureSelfDiagnosticsOptions(OpenTelemetry.SelfDiagnostics.SelfDiagnosticsOptions! options) -> void

@@ -622,12 +622,29 @@ If the default log directories can't be created,
 the instrumentation uses the path of the current user's [temporary folder](https://docs.microsoft.com/dotnet/api/System.IO.Path.GetTempPath?view=net-6.0)
 instead.
 
-| Environment variable             | Description                                                                           | Default value                            | Status                                                                                                                            |
-|----------------------------------|---------------------------------------------------------------------------------------|------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `OTEL_DOTNET_AUTO_LOG_DIRECTORY` | Directory of the .NET Tracer logs.                                                    | *See the previous note on default paths* | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `OTEL_LOG_LEVEL`                 | SDK log level. (supported values: `none`,`error`,`warn`,`info`,`debug`)               | `info`                                   | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md)       |
-| `OTEL_DOTNET_AUTO_LOGGER`        | AutoInstrumentation diagnostic logs sink. (supported values: `none`,`file`,`console`) | `file`                                   | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
-| `OTEL_DOTNET_AUTO_LOG_FILE_SIZE` | Maximum size (in bytes) of a single log file created by the Auto Instrumentation      | 10 485 760 (10 MB)                       | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+Managed instrumentation uses SDK self-diagnostics for internal logs.
+Use `OTEL_DOTNET_SELF_DIAGNOSTICS_SINKS` to select the log output and
+`OTEL_DOTNET_SELF_DIAGNOSTICS_LOG_DIRECTORY` to set the log directory.
+See the [SDK troubleshooting guide](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#troubleshooting)
+for details.
+
+Managed instrumentation and SDK logs share an
+`otel-dotnet-{pid}-{processName}-{startTime}-{index}.log` file.
+Startup and native profiler logs use separate files.
+See [Troubleshooting](troubleshooting.md) for help with log files.
+
+For managed logs, `OTEL_LOG_LEVEL` also accepts `trace`, `warning`, and
+`information`. Shutdown errors go to standard error unless logging is disabled.
+
+The existing settings below remain supported for compatibility.
+They map to SDK self-diagnostics options. Explicit SDK settings take precedence.
+
+| Environment variable             | Description                                             | Default value                 | Status                                                                                                                            |
+| -------------------------------- | ------------------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `OTEL_DOTNET_AUTO_LOG_DIRECTORY` | Log directory.                                          | *See the default paths above* | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OTEL_LOG_LEVEL`                 | Log level: `none`, `error`, `warn`, `info`, or `debug`. | `info`                        | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md)       |
+| `OTEL_DOTNET_AUTO_LOGGER`        | Log output: `none`, `file`, or `console`.               | `file`                        | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OTEL_DOTNET_AUTO_LOG_FILE_SIZE` | Maximum size of each log file, in bytes.                | 10 485 760 (10 MB)            | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 
 ## OpAMP Client
 

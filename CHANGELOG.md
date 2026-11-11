@@ -14,6 +14,21 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Managed diagnostic logs (the `OpenTelemetry.AutoInstrumentation` assembly,
+  including OpAMP) are now written by the OpenTelemetry SDK's self-diagnostics
+  instead of the automatic instrumentation's own file. The file is
+  `otel-dotnet-{pid}-{processName}-{startTime}-{index}.log` in the same
+  directory as before, with the SDK's line format and preamble.
+  `OTEL_LOG_LEVEL`, `OTEL_DOTNET_AUTO_LOGGER`, `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
+  and `OTEL_DOTNET_AUTO_LOG_FILE_SIZE` keep working; the SDK's
+  `OTEL_DOTNET_SELF_DIAGNOSTICS_*` variables take precedence when set.
+  Lines logged before the SDK starts are buffered and replayed; when the SDK
+  is unavailable, they use the previous `otel-dotnet-auto-*-Managed-*.log`
+  file unless the resolved self-diagnostics options disable logging.
+  Shutdown errors are written to standard error unless logging is disabled.
+  Plugins can adjust self-diagnostics options by implementing
+  `IConfigureSelfDiagnosticsOptions`.
+
 #### Dependency updates
 
 - Following packages updated

@@ -31,7 +31,6 @@ internal static class Instrumentation
 
     private static int _initialized;
     private static int _isExiting;
-    private static SdkSelfDiagnosticsEventListener? _sdkEventListener;
 
     private static TracerProvider? _tracerProvider;
     private static MeterProvider? _meterProvider;
@@ -90,6 +89,7 @@ internal static class Instrumentation
         }
         catch (Exception ex)
         {
+            OtelLogging.UseFallbackIfStillBuffering();
             Logger.Error(ex, "Failed to initialize from AppSettings.");
             throw;
         }
@@ -97,9 +97,6 @@ internal static class Instrumentation
 
         try
         {
-            // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
-            _sdkEventListener = new(Logger);
-
             _pluginManager = new PluginManager(PluginsSettings.Value);
             _pluginManager.Initializing();
 
@@ -128,6 +125,10 @@ internal static class Instrumentation
                 EnvironmentConfigurationSdkHelper.UseEnvironmentVariables(SdkSettings.Value);
             }
 
+            // On all paths, ConfigureSelfDiagnostics is registered before the plugin hooks so a plugin
+            // that calls ConfigureServices with its own Configure<SelfDiagnosticsOptions> runs after this
+            // mapping and wins. The supported hook is IConfigureSelfDiagnosticsOptions.
+
             if (TracerSettings.Value.TracesEnabled)
             {
 #if NETFRAMEWORK
@@ -140,12 +141,16 @@ internal static class Instrumentation
                 {
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
+                        .ConfigureSelfDiagnostics(_pluginManager)
                         .InvokePluginsBefore(_pluginManager)
                         .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings.Value, _pluginManager)
                         .InvokePluginsAfter(_pluginManager);
 
                     _tracerProvider = builder.Build();
+
+                    OtelLogging.NotifySdkAvailable();
+
                     _tracerProvider.TryCallInitialized(_pluginManager);
                     Logger.Information("OpenTelemetry tracer initialized.");
                 }
@@ -162,12 +167,16 @@ internal static class Instrumentation
                 {
                     var builder = Sdk
                         .CreateMeterProviderBuilder()
+                        .ConfigureSelfDiagnostics(_pluginManager)
                         .InvokePluginsBefore(_pluginManager)
                         .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings.Value, _pluginManager)
                         .InvokePluginsAfter(_pluginManager);
 
                     _meterProvider = builder.Build();
+
+                    OtelLogging.NotifySdkAvailable();
+
                     _meterProvider.TryCallInitialized(_pluginManager);
                     Logger.Information("OpenTelemetry meter initialized.");
                 }
@@ -178,9 +187,17 @@ internal static class Instrumentation
                     Logger.Information("Initialized lazily-loaded metric instrumentations without initializing sdk.");
                 }
             }
+
+            // Initialization can finish without enabling an SDK self-diagnostics listener, even if a provider
+            // was built. Route any still-buffered managed logs to our own sink; existing SDK self-diagnostics
+            // routing is unaffected.
+            OtelLogging.UseFallbackIfStillBuffering();
         }
         catch (Exception ex)
         {
+            // If logs are still buffering, flush them to our own sink so the error below reaches it too.
+            // Logs already routed to SDK self-diagnostics keep using that route.
+            OtelLogging.UseFallbackIfStillBuffering();
             Logger.Error(ex, "OpenTelemetry SDK load exception.");
             throw;
         }
@@ -258,9 +275,13 @@ internal static class Instrumentation
 
             // TODO: plugins support
             var loggerProvider = loggerProviderBuilder!
+                .ConfigureSelfDiagnostics(_pluginManager)
                 .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
                 .UseEnvironmentVariables(LazyInstrumentationLoader, LogSettings.Value, _pluginManager!)
                 .Build();
+
+            OtelLogging.NotifySdkAvailable();
+
             Logger.Information("OpenTelemetry logger provider initialized.");
             return loggerProvider;
         }
@@ -460,6 +481,11 @@ internal static class Instrumentation
             LazyInstrumentationLoader?.Dispose();
             ContinuousProfiler.Dispose();
 
+            // Log before provider disposal removes the SDK self-diagnostics sinks.
+            // At process exit, EventSources are already disposed; this message only reaches
+            // the fallback file if the SDK never started.
+            Logger.Information("OpenTelemetry Automatic Instrumentation exit.");
+
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();
             if (LoggerProviderFactory.IsValueCreated)
@@ -467,17 +493,14 @@ internal static class Instrumentation
                 LoggerProvider?.Dispose();
             }
 
-            _sdkEventListener?.Dispose();
-
             NativeCallTargetUnmanagedMemoryHelper.Free();
-
-            Logger.Information("OpenTelemetry Automatic Instrumentation exit.");
         }
         catch (Exception ex)
         {
             try
             {
-                Logger.Error(ex, "An error occurred while attempting to exit.");
+                // SDK logging may already be unavailable during shutdown.
+                OtelLogging.WriteShutdownError(ex);
             }
             catch (Exception)
             {

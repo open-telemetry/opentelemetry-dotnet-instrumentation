@@ -8,6 +8,7 @@ using OpenTelemetry.AutoInstrumentation.PluginApi;
 using OpenTelemetry.AutoInstrumentation.PluginApi.Telemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
+using OpenTelemetry.SelfDiagnostics;
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Plugins;
@@ -195,6 +196,17 @@ internal partial class PluginManager
             if (plugin.Instance is IConfigureLogsOptions<T> configurator)
             {
                 configurator.ConfigureLogsOptions(options);
+            }
+        }
+    }
+
+    public void ConfigureSelfDiagnosticsOptions(SelfDiagnosticsOptions options)
+    {
+        foreach (var plugin in _plugins)
+        {
+            if (plugin.Instance is IConfigureSelfDiagnosticsOptions configurator)
+            {
+                configurator.ConfigureSelfDiagnosticsOptions(options);
             }
         }
     }

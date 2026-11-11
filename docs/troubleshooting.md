@@ -18,6 +18,17 @@ By default, the library writes the log files under predefined [locations](./conf
 If needed, change the default location by updating the `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
 environment variable.
 
+Collect the following files from that directory:
+
+- `otel-dotnet-{pid}-{processName}-{startTime}-{index}.log`: SDK self-diagnostics,
+  including managed instrumentation logs,
+- `otel-dotnet-auto-*-Native.log`: the native profiler logs,
+- `otel-dotnet-auto-*-Loader-*.log` and `otel-dotnet-auto-*-StartupHook-*.log`:
+  the start-up logs.
+
+If SDK self-diagnostics did not start, managed logs use
+`otel-dotnet-auto-*-Managed-*.log` instead. Check this file for startup errors.
+
 After obtaining the logs, remove the `OTEL_LOG_LEVEL`
 environment variable, or set it to less verbose level
 to avoid unnecessary overhead.

@@ -12,6 +12,11 @@ public sealed class OtelLoggingTests
     [Fact]
     public void WhenNoFileSizeIsConfigured_Then_DefaultIsUsed()
     {
+        using var scope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { "OTEL_DOTNET_AUTO_LOG_FILE_SIZE", null },
+        });
+
         var defaultSize = OtelLogging.GetConfiguredFileSizeLimitBytes();
         Assert.Equal(10 * 1024 * 1024, defaultSize);
     }
@@ -297,6 +302,132 @@ public sealed class OtelLoggingTests
         finally
         {
             Console.SetOut(currentWriter);
+        }
+    }
+
+    [Fact]
+    public void WhenManagedLoggerIsRequested_Then_ItIsRoutedThroughSdkSelfDiagnostics()
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_LOG_LEVEL", null },
+        });
+
+        OtelLogging.Reset();
+
+        Assert.IsType<SelfDiagnosticsLogger>(OtelLogging.GetLogger());
+    }
+
+    [Fact]
+    public void WhenSuffixIsNeitherManagedNorOpAmp_Then_GetLoggerReturnsInternalLogger()
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "OTEL_LOG_LEVEL", null },
+            { "OTEL_DOTNET_AUTO_LOGGER", "none" },
+        });
+
+        OtelLogging.Reset();
+
+        var logger = OtelLogging.GetLogger("FileUnitTests");
+
+        Assert.IsType<InternalLogger>(logger);
+        Assert.IsNotType<SelfDiagnosticsLogger>(logger);
+    }
+
+    [Fact]
+    public void WhenRoutingDecisionWasMade_Then_LoggersCreatedLaterInheritIt()
+    {
+        using var scope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { "OTEL_LOG_LEVEL", null },
+            { "OTEL_DOTNET_AUTO_LOGGER", "none" },
+        });
+
+        OtelLogging.Reset();
+        try
+        {
+            var early = Assert.IsType<SelfDiagnosticsLogger>(OtelLogging.GetLogger());
+            Assert.Equal(SelfDiagnosticsLogger.RoutingMode.Buffering, early.CurrentRoutingMode);
+
+            OtelLogging.UseFallbackIfStillBuffering();
+
+            var late = Assert.IsType<SelfDiagnosticsLogger>(OtelLogging.GetLogger("OpAmp"));
+            Assert.Equal(SelfDiagnosticsLogger.RoutingMode.Fallback, early.CurrentRoutingMode);
+            Assert.Equal(SelfDiagnosticsLogger.RoutingMode.Fallback, late.CurrentRoutingMode);
+        }
+        finally
+        {
+            OtelLogging.Reset();
+        }
+    }
+
+    [Theory]
+    [InlineData("trace", (int)LogLevel.Debug)]
+    [InlineData("DEBUG", (int)LogLevel.Debug)]
+    [InlineData(" debug ", (int)LogLevel.Debug)]
+    [InlineData("warning", (int)LogLevel.Warning)]
+    [InlineData("information", (int)LogLevel.Information)]
+    [InlineData("invalid", (int)LogLevel.Warning)]
+    [InlineData(" NONE ", null)]
+    public void WhenManagedLoggerIsCreated_Then_BufferFilteringMatchesSdkLevelParsing(string value, int? expectedLevel)
+    {
+        using var scope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { "OTEL_LOG_LEVEL", value },
+            { "OTEL_DOTNET_AUTO_LOGGER", "none" },
+        });
+
+        OtelLogging.Reset();
+        try
+        {
+            var logger = OtelLogging.GetLogger();
+            if (expectedLevel.HasValue)
+            {
+                var level = (LogLevel)expectedLevel.Value;
+                Assert.Equal(level, logger.Level);
+                Assert.Equal(level == LogLevel.Debug, logger.IsEnabled(LogLevel.Debug));
+            }
+            else
+            {
+                Assert.False(logger.IsEnabled(LogLevel.Error), "Expected logger to be disabled for Error level when OTEL_LOG_LEVEL is none.");
+            }
+        }
+        finally
+        {
+            OtelLogging.Reset();
+        }
+    }
+
+    [Fact]
+    public void WhenManagedLoggingIsDisabled_Then_FallbackDoesNotCreateFiles()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        using var scope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { "OTEL_LOG_LEVEL", "none" },
+            { "OTEL_DOTNET_AUTO_LOGGER", "file" },
+            { "OTEL_DOTNET_AUTO_LOG_DIRECTORY", directory },
+        });
+
+        OtelLogging.Reset();
+        try
+        {
+            var logger = OtelLogging.GetLogger();
+            logger.Error("before fallback", true);
+            OtelLogging.UseFallbackIfStillBuffering();
+            logger.Error("after fallback", true);
+            OtelLogging.GetLogger("OpAmp").Error("late logger", true);
+
+            Assert.False(Directory.Exists(directory));
+        }
+        finally
+        {
+            OtelLogging.Reset();
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory, true);
+            }
         }
     }
 
