@@ -22,6 +22,7 @@ public class AdoNetSqlDialectTests
     [InlineData("Oracle.ManagedDataAccess.Client.OracleCommand", false, "oracle.db", (int)SqlProcessor.SqlDialect.Oracle)]
     [InlineData("System.Data.SqlClient.SqlCommand", false, "microsoft.sql_server", (int)SqlProcessor.SqlDialect.SqlServer)]
     [InlineData("System.Data.SQLite.SQLiteCommand", false, "sqlite", (int)SqlProcessor.SqlDialect.Sqlite)]
+    [InlineData("System.Data.Entity.Internal.InterceptableDbCommand", false, "other_sql", (int)SqlProcessor.SqlDialect.Default)]
     [InlineData("Unknown.Provider.Command", true, "other_sql", (int)SqlProcessor.SqlDialect.Default)]
     public void SelectsInstrumentationDetails(string commandTypeName, bool enabled, string systemName, int expectedDialect)
     {
