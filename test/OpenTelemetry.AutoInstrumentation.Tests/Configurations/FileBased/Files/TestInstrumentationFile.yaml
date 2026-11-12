@@ -27,6 +27,7 @@ instrumentation/development:
       npgsql:
       nservicebus:
       oraclemda:
+      process:
       rabbitmq:
       quartz:
       sqlclient:
@@ -50,4 +51,3 @@ instrumentation/development:
     logs:
       ilogger:
       log4net:
-

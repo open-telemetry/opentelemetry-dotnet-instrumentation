@@ -29,6 +29,11 @@ internal static class Program
 
     public static async Task Main(string[] args)
     {
+        if (ProcessContextScenario.TryRun(args))
+        {
+            return;
+        }
+
         ConsoleHelper.WriteSplashScreen(args);
 
         // When export of NServiceBus metrics is tested, which are updated on receive side,

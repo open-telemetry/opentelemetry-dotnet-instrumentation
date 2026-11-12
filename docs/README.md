@@ -449,6 +449,11 @@ See [manual-instrumentation.md](manual-instrumentation.md).
 
 See [nocode-instrumentation.md](nocode-instrumentation.md)
 
+### Process instrumentation
+
+See [process-instrumentation.md](process-instrumentation.md) for context propagation
+between processes, including incoming context for root `ActivitySource` activities.
+
 ## Log to trace correlation
 
 See [log-trace-correlation.md](log-trace-correlation.md).

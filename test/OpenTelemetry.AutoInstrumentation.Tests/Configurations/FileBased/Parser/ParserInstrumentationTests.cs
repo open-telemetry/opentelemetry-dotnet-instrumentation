@@ -48,6 +48,7 @@ public class ParserInstrumentationTests
             "npgsql",
             "nservicebus",
             "oraclemda",
+            "process",
             "rabbitmq",
             "quartz",
             "sqlclient",
@@ -142,6 +143,7 @@ public class ParserInstrumentationTests
             "httpclient",
             "npgsql",
             "oraclemda",
+            "process",
             "sqlclient",
         ];
 
@@ -159,6 +161,8 @@ public class ParserInstrumentationTests
 
         Assert.True(traces.Npgsql!.ContextPropagation);
         Assert.True(traces.OracleMda!.SetDbStatementForText);
+        Assert.Equal("link", traces.Process!.ContextExtraction!.Mode);
+        Assert.False(traces.Process.ContextInjection!.Enabled);
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.HttpClient!.CaptureRequestHeaders);
         Assert.Equal("X-Key,X-Custom-Header,X-Header-Example", traces.HttpClient!.CaptureResponseHeaders);
 
