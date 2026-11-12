@@ -63,7 +63,7 @@ internal sealed class MockCorrelationCollector : IDisposable
 
         Assert.Equal(expectedSpan.Span.SpanId, expectedLogRecord.SpanId);
         Assert.Equal(expectedSpan.Span.TraceId, expectedLogRecord.TraceId);
-        Assert.Equal((uint)(ActivityTraceFlags.Recorded|ActivityTraceFlags.RandomTraceId), expectedLogRecord.Flags);
+        Assert.Equal((uint)(ActivityTraceFlags.Recorded | ActivityTraceFlags.RandomTraceId), expectedLogRecord.Flags);
     }
 
     private async Task HandleLogHttpRequests(HttpContext ctx)
