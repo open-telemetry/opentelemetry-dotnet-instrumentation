@@ -72,6 +72,36 @@ public class SqlClientSystemTests : TestHelper
         collector.AssertExpectations();
     }
 
+    [SkippableTheory]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Linux")]
+    [MemberData(nameof(LibraryVersion.SqlClientSystem), MemberType = typeof(LibraryVersion))]
+    public void EntityFramework6CommandsAreNotTracedByAdoNetInstrumentation(string packageVersion)
+    {
+        // Skip the test if fixture does not support current platform
+        _sqlServerFixture.SkipIfUnsupportedPlatform();
+
+        // ADO.NET instrumentation is bytecode-based; without the profiler the test would pass trivially.
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("TEST_DATABASE_PASSWORD", _sqlServerFixture.Password);
+
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+
+        // EF6 wraps the SqlCommand in InterceptableDbCommand; only the inner SqlCommand should be traced.
+        collector.Expect("OpenTelemetry.Instrumentation.SqlClient");
+        collector.ExpectAllCollected(collected =>
+            !collected.Any(item => item.Scope.Name == "OpenTelemetry.AutoInstrumentation.AdoNet"));
+
+        RunTestApplication(new()
+        {
+            Arguments = $"--port {_sqlServerFixture.Port} --entity-framework-6",
+            PackageVersion = packageVersion
+        });
+
+        collector.AssertExpectations();
+    }
+
 #if NETFRAMEWORK
     [SkippableTheory]
     [Trait("Category", "EndToEnd")]

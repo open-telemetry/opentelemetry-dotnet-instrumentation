@@ -25,6 +25,12 @@ internal static class Program
         var (databasePassword, databasePort) = GetDatabaseConfiguration(args);
         var connectionString = GetConnectionString(databasePassword, databasePort);
 
+        if (ArgumentHelper.HasArgument(args, EntityFramework6Scenario.Argument))
+        {
+            EntityFramework6Scenario.Run(connectionString);
+            return;
+        }
+
         using (var scalarCommandConnection = new SqlConnection(connectionString))
         {
             if (SqlServerScalarCommandExecutor.TryExecute(scalarCommandConnection, args))
