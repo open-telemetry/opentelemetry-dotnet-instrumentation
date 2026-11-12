@@ -6,7 +6,7 @@
     <PackageVersion Include="NuGet.ProjectModel" Version="8.0.0" />
     <PackageVersion Include="System.IO.Abstractions" Version="23.0.0" />
     <!-- Override the vulnerable System.Security.Cryptography.Pkcs dependency from NuGet.ProjectModel.
-         The advisory was fixed in 11.0.0-rc.2; use the stable .NET 11 version targeted by the tools.
+         The advisory was fixed in 10.0.13; use the current .NET servicing version.
          https://github.com/advisories/GHSA-846f-f764-76mx -->
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="11.0.0" />
     <PackageVersion Include="Valleysoft.DockerfileModel" Version="4.0.0" />
