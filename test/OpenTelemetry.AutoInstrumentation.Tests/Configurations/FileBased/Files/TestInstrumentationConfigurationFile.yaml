@@ -26,4 +26,6 @@ instrumentation/development:
     logs:
       log4net:
         bridge_enabled: true
+      serilog:
+        bridge_enabled: true
 

@@ -80,6 +80,15 @@ public static partial class LibraryVersion
             ]
         },
         {
+            "TestApplication.SerilogBridge",
+            [
+                new("2.0.0", additionalMetaData: new() { { "SerilogExtensionsHosting", "" }, { "SerilogSinksOpenTelemetry", "" } }),
+                new("3.1.1", additionalMetaData: new() { { "SerilogExtensionsHosting", "8.0.0" }, { "SerilogSinksOpenTelemetry", "2.0.0" } }),
+                new("4.0.0", additionalMetaData: new() { { "SerilogExtensionsHosting", "8.0.0" }, { "SerilogSinksOpenTelemetry", "3.0.0" } }),
+                new("4.4.0", additionalMetaData: new() { { "SerilogExtensionsHosting", "10.0.0" }, { "SerilogSinksOpenTelemetry", "4.2.0" } }),
+            ]
+        },
+        {
             "TestApplication.MassTransit",
             [
                 new("8.3.0"),

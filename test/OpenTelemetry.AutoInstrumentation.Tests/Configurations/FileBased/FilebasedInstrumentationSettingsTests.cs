@@ -160,6 +160,38 @@ public class FilebasedInstrumentationSettingsTests
         Assert.True(settings.EnableNLogBridge);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void LoadFile_SetsSerilogInstrumentationAndBridge_IfPresent(bool bridgeEnabled)
+    {
+        var instrumentation = new DotNetInstrumentation
+        {
+            Logs = new DotNetLogs
+            {
+                Serilog = new()
+                {
+                    BridgeEnabled = bridgeEnabled
+                }
+            }
+        };
+
+        var conf = new YamlConfiguration
+        {
+            InstrumentationDevelopment = new InstrumentationDevelopment
+            {
+                DotNet = instrumentation
+            }
+        };
+
+        var settings = new LogSettings();
+
+        settings.LoadFile(conf);
+
+        Assert.Equal([LogInstrumentation.Serilog], settings.EnabledInstrumentations);
+        Assert.Equal(bridgeEnabled, settings.EnableSerilogBridge);
+    }
+
     [Fact]
     public void LoadFile_AddTracesAdditionalSources_List()
     {

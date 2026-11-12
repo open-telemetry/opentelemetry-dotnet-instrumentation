@@ -178,6 +178,8 @@ public class ParserInstrumentationTests
 #endif
 
         Assert.True(logs.Log4Net.BridgeEnabled);
+        Assert.NotNull(logs.Serilog);
+        Assert.True(logs.Serilog.BridgeEnabled);
     }
 
     [Fact]

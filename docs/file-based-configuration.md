@@ -559,6 +559,7 @@ instrumentation/development:
       ilogger:             # Microsoft.Extensions.Logging
       log4net:             # Log4Net
       nlog:                # NLog
+      serilog:             # Serilog
 ```
 
 ## Instrumentation options
@@ -615,6 +616,10 @@ instrumentation/development:
       nlog:
         # Logs bridge is disabled by default
         # More info about NLog bridge can be found at https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/nlog-bridge.md
+        bridge_enabled: true
+      serilog:
+        # Logs bridge is disabled by default
+        # More info about Serilog bridge can be found at https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/serilog-bridge.md
         bridge_enabled: true
 ```
 

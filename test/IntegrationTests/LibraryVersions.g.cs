@@ -153,6 +153,24 @@ public static partial class LibraryVersion
             return theoryData;
         }
     }
+    public static TheoryData<string> Serilog
+    {
+        get
+        {
+            TheoryData<string> theoryData =
+            [
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+                string.Empty,
+#else
+                "2.0.0",
+                "3.1.1",
+                "4.0.0",
+                "4.4.0",
+#endif
+            ];
+            return theoryData;
+        }
+    }
     public static TheoryData<string> MassTransit
     {
         get
@@ -558,6 +576,7 @@ public static partial class LibraryVersion
        { "GrpcNetClient", GrpcNetClient },
        { "log4net", log4net },
        { "NLog", NLog },
+       { "Serilog", Serilog },
        { "MassTransit", MassTransit },
        { "SqlClientMicrosoft", SqlClientMicrosoft },
        { "SqlClientSystem", SqlClientSystem },

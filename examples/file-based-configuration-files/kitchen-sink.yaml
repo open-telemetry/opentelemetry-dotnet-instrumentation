@@ -637,3 +637,4 @@ instrumentation/development:
       ilogger:             # Microsoft.Extensions.Logging
       log4net:             # Log4Net
       nlog:                # NLog
+      serilog:             # Serilog

@@ -26,6 +26,12 @@ internal class DotNetLogs
     public LogBridgeEnabled? NLog { get; set; }
 
     /// <summary>
+    /// Gets or sets the Serilog logs instrumentation configuration.
+    /// </summary>
+    [YamlMember(Alias = "serilog")]
+    public LogBridgeEnabled? Serilog { get; set; }
+
+    /// <summary>
     /// Returns the list of enabled log instrumentations.
     /// </summary>
     public IReadOnlyList<LogInstrumentation> GetEnabledInstrumentations()
@@ -45,6 +51,11 @@ internal class DotNetLogs
         if (NLog != null)
         {
             result.Add(LogInstrumentation.NLog);
+        }
+
+        if (Serilog != null)
+        {
+            result.Add(LogInstrumentation.Serilog);
         }
 
         return result;

@@ -17,7 +17,7 @@ internal static partial class InstrumentationDefinitions
 {
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(68);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(69);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
@@ -157,6 +157,12 @@ internal static partial class InstrumentationDefinitions
                 nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog.Logger"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("WriteToTargets"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.Type", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"), 4, 5, 0, 0, 5, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsWithWrapperTypeIntegration")));
                 nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog.Logger"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("WriteToTargets"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.Type", "NLog.LogEventInfo", "NLog.Internal.TargetWithFilterChain"), 4, 5, 0, 0, 5, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsWithWrapperTypeIntegration")));
                 nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("NLog.Logger"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("WriteLogEventToTargets"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "System.Type", "NLog.LogEventInfo", "NLog.Internal.ITargetWithFilterChain"), 4, 6, 0, 0, 6, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.TraceContextInjection.Integrations.NLogWriteToTargetsWithWrapperTypeIntegration")));
+            }
+
+            // Serilog
+            if (logSettings.EnabledInstrumentations.Contains(LogInstrumentation.Serilog))
+            {
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Serilog"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Serilog.LoggerConfiguration"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("CreateLogger"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("Serilog.Core.Logger"), 1, 2, 0, 0, 4, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Serilog.Bridge.Integrations.LoggerConfigurationIntegration")));
             }
         }
 
