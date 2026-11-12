@@ -86,7 +86,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Removed
 
-- Support for .NET 8 and .NET 9. Both framework reached end of support.
+- Support for .NET 8 and .NET 9. Both frameworks reached end of support.
 
 ### Fixed
 
