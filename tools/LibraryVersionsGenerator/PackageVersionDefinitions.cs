@@ -47,10 +47,11 @@ internal static class PackageVersionDefinitions
             [
                 new("6.0.36"),
                 // new("7.0.20"), all versions contains references to vulnerable packages https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
-                new("8.0.33"),
-                new("9.0.22"),
-                new("10.0.0", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"]),
-                new("*", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"])
+                new("8.0.34"),
+                new("9.0.23"),
+                new("10.0.15", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"]),
+                new("11.0.0", supportedTargetFrameworks: ["net11.0"], supportedExecutionFrameworks: ["net11.0"]),
+                new("*", supportedTargetFrameworks: ["net11.0"], supportedExecutionFrameworks: ["net11.0"])
             ]
         },
         new()
@@ -262,8 +263,8 @@ internal static class PackageVersionDefinitions
                 // new("3.4.0"), - transitive vulnerability https://github.com/advisories/GHSA-rxg9-xrhp-64gj, <= 3.5.0
                 new("3.6.0"),
                 new("3.22.10"),
-                new("4.0.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]),
-                new("*", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"])
+                new("4.0.0", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"]),
+                new("*", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"])
             ]
         },
         new()
@@ -286,10 +287,11 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.Sqlite.Microsoft",
             Versions =
             [
-                new("8.0.0"),
-                new("9.0.0"),
-                new("10.0.0"),
-                new("*")
+                new("8.0.34"),
+                new("9.0.23"),
+                new("10.0.15"),
+                new("11.0.0", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"]),
+                new("*", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"])
             ]
         },
         new()

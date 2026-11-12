@@ -33,10 +33,10 @@ public static partial class LibraryVersion
             "TestApplication.EntityFrameworkCore",
             [
                 new("6.0.36"),
-                new("8.0.33"),
-                new("9.0.22"),
-                new("10.0.0", supportedFrameworks: [ "net11.0", "net10.0" ]),
+                new("8.0.34"),
+                new("9.0.23"),
                 new("10.0.15", supportedFrameworks: [ "net11.0", "net10.0" ]),
+                new("11.0.0", supportedFrameworks: [ "net11.0" ]),
             ]
         },
         {
@@ -162,8 +162,8 @@ public static partial class LibraryVersion
             [
                 new("3.6.0"),
                 new("3.22.10"),
-                new("4.0.0", supportedFrameworks: [ "net10.0" ]),
-                new("4.7.3", supportedFrameworks: [ "net10.0" ]),
+                new("4.0.0", supportedFrameworks: [ "net11.0", "net10.0" ]),
+                new("4.7.3", supportedFrameworks: [ "net11.0", "net10.0" ]),
             ]
         },
         {
@@ -178,10 +178,10 @@ public static partial class LibraryVersion
         {
             "TestApplication.Sqlite.Microsoft",
             [
-                new("8.0.0"),
-                new("9.0.0"),
-                new("10.0.0"),
+                new("8.0.34"),
+                new("9.0.23"),
                 new("10.0.15"),
+                new("11.0.0", supportedFrameworks: [ "net11.0", "net10.0" ]),
             ]
         },
         {

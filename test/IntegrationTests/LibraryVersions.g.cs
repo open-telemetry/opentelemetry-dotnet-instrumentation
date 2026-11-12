@@ -55,13 +55,13 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "6.0.36",
-                "8.0.33",
-                "9.0.22",
-#if NET11_0 || NET10_0
-                "10.0.0",
-#endif
+                "8.0.34",
+                "9.0.23",
 #if NET11_0 || NET10_0
                 "10.0.15",
+#endif
+#if NET11_0
+                "11.0.0",
 #endif
 #endif
             ];
@@ -358,10 +358,10 @@ public static partial class LibraryVersion
 #else
                 "3.6.0",
                 "3.22.10",
-#if NET10_0
+#if NET11_0 || NET10_0
                 "4.0.0",
 #endif
-#if NET10_0
+#if NET11_0 || NET10_0
                 "4.7.3",
 #endif
 #endif
@@ -396,10 +396,12 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "8.0.0",
-                "9.0.0",
-                "10.0.0",
+                "8.0.34",
+                "9.0.23",
                 "10.0.15",
+#if NET11_0 || NET10_0
+                "11.0.0",
+#endif
 #endif
             ];
             return theoryData;

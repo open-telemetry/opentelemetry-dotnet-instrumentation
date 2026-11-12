@@ -16,9 +16,9 @@
     <PackageReference Include="Quartz.Extensions.Hosting" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
   <ItemGroup Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net472' ">
-    <PackageReference Update="Quartz" VersionOverride="3.22.18" />
-    <PackageReference Update="Quartz.Extensions.DependencyInjection" VersionOverride="3.22.18" />
-    <PackageReference Update="Quartz.Extensions.Hosting" VersionOverride="3.22.18" />
+    <PackageReference Update="Quartz" VersionOverride="3.22.10" />
+    <PackageReference Update="Quartz.Extensions.DependencyInjection" VersionOverride="3.22.10" />
+    <PackageReference Update="Quartz.Extensions.Hosting" VersionOverride="3.22.10" />
   </ItemGroup>
 
 </Project>

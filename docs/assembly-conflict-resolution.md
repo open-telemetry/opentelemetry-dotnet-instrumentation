@@ -96,8 +96,8 @@ can supply the assembly.
 The instrumentation may depend on a **higher version** of a shared library
 than the version the application was built against. For example:
 
-- The application references `System.Diagnostics.DiagnosticSource` 8.0.0
-- The instrumentation requires `System.Diagnostics.DiagnosticSource` 10.0.0
+- The application references `System.Diagnostics.DiagnosticSource` 10.0.0
+- The instrumentation requires `System.Diagnostics.DiagnosticSource` 11.0.0
 
 If the lower version loads first, the instrumentation may not work
 correctly because it relies on APIs that only exist in the higher
