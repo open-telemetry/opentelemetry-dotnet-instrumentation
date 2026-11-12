@@ -20,8 +20,8 @@ RUN apt-get update && \
 COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 11.0.100-rc.3.26522.148 --install-dir /usr/share/dotnet --no-path \
-    && ./dotnet-install.sh -v 10.0.403 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 11.0.100 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 10.0.404 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 ENV PATH="$PATH:/usr/share/dotnet"

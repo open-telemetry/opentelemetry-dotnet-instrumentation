@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:11.0.100-rc.3-alpine3.24@sha256:f2542b156e7c9eda7783e4a5745efa6c133a162a1940fd4175849aa80fccfd23
+FROM mcr.microsoft.com/dotnet/sdk:11.0.100-alpine3.24@sha256:52556c0fb9d0f609ae9aeab9efeeba96f4acc2f7038f7696f2235ccbdbb8e290
 
 # renovate: datasource=repology depName=clang22
 ARG CLANG22_VERSION=22.1.3-r2
@@ -42,7 +42,7 @@ COPY ./scripts/dotnet-install.sh ./dotnet-install.sh
 
 # Install older SDKs using the install script
 RUN chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 10.0.403 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 10.0.404 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project

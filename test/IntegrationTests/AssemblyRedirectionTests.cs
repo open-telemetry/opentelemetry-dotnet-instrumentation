@@ -17,25 +17,24 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     // Case 2: Equal version, should NOT be redirected with/without native profiler
     // TODO currently different test jobs use different versions of .net runtime:
     //   - test-build-container (ubuntu-22.04, alpine, alpine-x64, linux-musl): DS file version 10.0.426.12010
-    //   - test-build-managed (net10.0, windows-2025): DS file version 10.0.1426.52326
-    [InlineData("10.0.14", AssemblyName, "10.0.0.0", "10.0.1426.52326", true)]
-    [InlineData("10.0.14", AssemblyName, "10.0.0.0", "10.0.1426.52326", false)]
+    //   - test-build-managed (net10.0, windows-2025): DS file version 10.0.1526.53008.
+    [InlineData("10.0.15", AssemblyName, "10.0.0.0", "10.0.1526.53008", true)]
+    [InlineData("10.0.15", AssemblyName, "10.0.0.0", "10.0.1526.53008", false)]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
     // TODO NET11TODO put here a test w S.D.DS 11.*
 #elif NET11_0
     // Case 1: Lower version is not possible for DiagnosticSource on .NET 11,
     //         msbuild will ignore a lower version of this package since it's part of .NET 11 SDK
     // Case 2: Equal version, should NOT be redirected with/without native profiler
-    // RC3 ships DiagnosticSource with file version 11.0.26.52348.
-    [InlineData("11.0.0-rc.3.26522.148", AssemblyName, "11.0.0.0", "11.0.26.52348", true)]
-    [InlineData("11.0.0-rc.3.26522.148", AssemblyName, "11.0.0.0", "11.0.26.52348", false)]
-    // TODO NET11TODO adjust expectedAssemblyFileVersion to the final .NET 11 release version
+    // .NET 11.0.0 ships DiagnosticSource with file version 11.0.26.53018.
+    [InlineData("11.0.0", AssemblyName, "11.0.0.0", "11.0.26.53018", true)]
+    [InlineData("11.0.0", AssemblyName, "11.0.0.0", "11.0.26.53018", false)]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 11, the instrumentation tool is already using the highest possible version
 #elif NETFRAMEWORK
     // Case 1: Lower version should be redirected (native profiler mandatory)
-    [InlineData("6.0.0", AssemblyName, "10.0.0.14", "10.0.1426.52326")]
+    [InlineData("6.0.0", AssemblyName, "10.0.0.15", "10.0.1526.53008")]
     // Case 2: Equal version, should NOT be redirected (native profiler mandatory)
-    [InlineData("10.0.14", AssemblyName, "10.0.0.14", "10.0.1426.52326")]
+    [InlineData("10.0.15", AssemblyName, "10.0.0.15", "10.0.1526.53008")]
     // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
 #endif
     public void DefaultRedirection(
@@ -81,10 +80,10 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
     [Theory]
     [Trait("Category", "EndToEnd")]
 #if NET10_0
-    [InlineData("10.0.14", "10.0.0.0", "10.0.1426.52326")]
+    [InlineData("10.0.15", "10.0.0.0", "10.0.1526.53008")]
 #elif NET11_0
     // The .NET 11 shared framework supplies DiagnosticSource even when the application references an older package.
-    [InlineData("10.0.14", "11.0.0.0", "11.0.26.52348")]
+    [InlineData("10.0.15", "11.0.0.0", "11.0.26.53018")]
 #endif
     public void AdditionalDepsFallback(
         string libraryVersion,
