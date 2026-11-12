@@ -19,6 +19,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fixed `ORACLEMDA` bytecode instrumentation logging an
+  `AmbiguousMatchException` on every `OracleConnection.Open` and
+  `OracleConnection.OpenAsync` call, which prevented the integration from
+  enabling Database OpenTelemetry Tracing on connection open.
+
 ## [v1.19.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.19.1)
 
 ### Changed
