@@ -13,7 +13,9 @@ with environment variables taking precedence over `App.config` or `Web.config` f
 
     For an application running on .NET Framework, you can use a web configuration
     file  (`web.config`) or an application configuration file (`app.config`) to
-    configure the `OTEL_*` settings.
+    configure managed `OTEL_*` settings. Each AppDomain reads its own `appSettings`;
+    a process environment variable takes precedence when the same key is present
+    in both places.
 
     ⚠️ Only settings starting with `OTEL_` can be set using `App.config` or `Web.config`.
     However, the following settings are not supported:
@@ -22,8 +24,6 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     - `OTEL_DOTNET_AUTO_HOME`
     - `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`
     - `OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED`
-    - `OTEL_DOTNET_AUTO_[TRACES|METRICS|LOGS]_INSTRUMENTATION_ENABLED`
-    - `OTEL_DOTNET_AUTO_[TRACES|METRICS|LOGS]_{INSTRUMENTATION_ID}_INSTRUMENTATION_ENABLED`
     - `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
     - `OTEL_LOG_LEVEL`
     - `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED` (Deprecated)
@@ -41,12 +41,14 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     ```
 
     > [!NOTE]
-    > On .NET Framework, `OTEL_*` values from `Web.config` or `App.config` are
-    > promoted to process-level environment variables at startup, and the OTel
-    > SDK is initialized only once per process. In IIS, where multiple
-    > applications can share a single worker process (Application Pool), this
-    > means the first application to start determines the configuration for all
-    > applications in that pool.
+    > Managed settings from `Web.config` or `App.config` apply only to their
+    > AppDomain. YAML selection (`OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED`
+    > and `OTEL_CONFIG_FILE`) remains process-level; YAML environment substitution
+    > reads process environment variables. Native profiler, AppDomain loading,
+    > and internal logging settings also require process environment variables.
+    > Applications sharing one process may still share native profiler and
+    > continuous profiling behavior. Use a separate process for each logical
+    > application when possible.
     > See [IIS instrumentation](iis-instrumentation.md) for details.
 
 3. Service name automatic detection
@@ -85,10 +87,21 @@ for more details.
 
 ### Resource attributes
 
+On .NET Framework, `OTEL_RESOURCE_ATTRIBUTES` and `OTEL_SERVICE_NAME` may also
+be supplied through `App.config`/`Web.config` `appSettings`. The environment
+variable wins when the same key appears in both places. The complete
+`OTEL_RESOURCE_ATTRIBUTES` value is selected from one source; the two lists are
+not merged. `OTEL_SERVICE_NAME` takes precedence over `service.name` within the
+selected attributes.
+
 | Environment variable       | Description                                                                                                                                                                                                                                                                  | Default value                                                                                                                                                                                  | Status                                                                                                                      |
 |----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
 | `OTEL_RESOURCE_ATTRIBUTES` | Key-value pairs to be used as resource attributes. See [Resource SDK](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/sdk.md#specifying-resource-information-via-an-environment-variable) for more details.                   | See [Resource semantic conventions](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/resource/README.md#semantic-attributes-with-sdk-provided-default-value) for details. | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_SERVICE_NAME`        | Sets the value of the [`service.name`](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/resource/README.md#service) resource attribute. If `service.name` is provided in `OTEL_RESOURCE_ATTRIBUTES`, the value of `OTEL_SERVICE_NAME` takes precedence. | See [Service name automatic detection](#configuration-methods) under Configuration method section.                                                                                             | [Stable](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+
+If no explicit `service.name` is provided, automatic fallback naming still applies.
+If no explicit `service.instance.id` is provided, the instrumentation generates
+one automatically when building the resource.
 
 ### Resource detectors
 

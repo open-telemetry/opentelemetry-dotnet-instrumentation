@@ -277,7 +277,7 @@ internal sealed class MockSpansCollector : IDisposable
             {
                 foreach (var span in scopeSpans.Spans ?? Enumerable.Empty<Span>())
                 {
-                    _spans.Add(new Collected(scopeSpans.Scope ?? new InstrumentationScope(), span, scopeSpans.SchemaUrl));
+                    _spans.Add(new Collected(scopeSpans.Scope ?? new InstrumentationScope(), span, scopeSpans.SchemaUrl, resourceSpan.Resource));
                 }
             }
         }
@@ -294,16 +294,19 @@ internal sealed class MockSpansCollector : IDisposable
     internal sealed class Collected
 #pragma warning restore CA1812 // Mark members as static. There is some issue in dotnet format.
     {
-        public Collected(InstrumentationScope scope, Span span, string schemaUrl)
+        public Collected(InstrumentationScope scope, Span span, string schemaUrl, OpenTelemetry.Proto.Resource.V1.Resource resource)
         {
             Scope = scope;
             Span = span;
             SchemaUrl = schemaUrl;
+            Resource = resource;
         }
 
         public InstrumentationScope Scope { get; }
 
         public Span Span { get; } // protobuf type
+
+        public OpenTelemetry.Proto.Resource.V1.Resource Resource { get; }
 
         public string SchemaUrl { get; }
 

@@ -22,13 +22,30 @@ internal class OtlpSettings
         Protocol = GetExporterOtlpProtocol(signalType, configuration);
 
         var priorityVar = OtlpSpecConfigDefinitions.GetHeadersEnvVar(signalType);
-        Headers = configuration.GetString(priorityVar);
+        Headers = configuration.GetString(priorityVar) ?? configuration.GetString(OtlpSpecConfigDefinitions.DefaultHeadersEnvVarName);
 
         priorityVar = OtlpSpecConfigDefinitions.GetTimeoutEnvVar(signalType);
-        TimeoutMilliseconds = configuration.GetInt32(priorityVar);
+        TimeoutMilliseconds = configuration.GetInt32(priorityVar) ?? configuration.GetInt32(OtlpSpecConfigDefinitions.DefaultTimeoutEnvVarName);
 
         priorityVar = OtlpSpecConfigDefinitions.GetEndpointEnvVar(signalType);
         Endpoint = configuration.GetUri(priorityVar);
+        if (Endpoint is null)
+        {
+            var defaultEndpoint = configuration.GetUri(OtlpSpecConfigDefinitions.DefaultEndpointEnvVarName);
+            if (defaultEndpoint is not null)
+            {
+                var signalPath = signalType switch
+                {
+                    OtlpSignalType.Traces => "traces",
+                    OtlpSignalType.Metrics => "metrics",
+                    OtlpSignalType.Logs => "logs",
+                    _ => throw new ArgumentOutOfRangeException(nameof(signalType))
+                };
+                Endpoint = Protocol == OtlpExportProtocol.HttpProtobuf
+                    ? new Uri($"{defaultEndpoint.AbsoluteUri.TrimEnd('/')}/v1/{signalPath}")
+                    : defaultEndpoint;
+            }
+        }
     }
 
     public OtlpSettings(OtlpSignalType signalType, OtlpHttpExporterConfig configuration)

@@ -10,12 +10,13 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 [Collection("Non-Parallel Collection")]
 public class EnvironmentInitializerTests
 {
-    private const string OtelVariableName = "OTEL_SETTING";
+    private const string OtelVariableName = ConfigurationKeys.FileBasedConfiguration.FileName;
+    private const string ManagedVariableName = "OTEL_TRACES_EXPORTER";
     private const string NonOtelVariableName = "OTHER_SETTING";
     private const string SomeValue = "val";
 
     [Fact]
-    public void SetsOTelEnvironmentVariable_WhenItWasEmpty()
+    public void SetsYamlSelectionEnvironmentVariable_WhenItWasEmpty()
     {
         using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
@@ -32,7 +33,7 @@ public class EnvironmentInitializerTests
     }
 
     [Fact]
-    public void Noop_WhenEnvironmentVariableWasAlreadySet()
+    public void Noop_WhenYamlSelectionEnvironmentVariableWasAlreadySet()
     {
         using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
         {
@@ -63,5 +64,24 @@ public class EnvironmentInitializerTests
 
         var actual = Environment.GetEnvironmentVariable(NonOtelVariableName);
         Assert.True(string.IsNullOrEmpty(actual), "initializer should ignore variables non starting from OTEL_");
+    }
+
+    [Theory]
+    [InlineData("OTEL_SERVICE_NAME")]
+    [InlineData("OTEL_RESOURCE_ATTRIBUTES")]
+    [InlineData(ManagedVariableName)]
+    public void Noop_WhenSettingIsManaged(string variableName)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { variableName, null }
+        });
+
+        EnvironmentInitializer.Initialize(new NameValueCollection
+        {
+            { variableName, SomeValue }
+        });
+
+        Assert.Null(Environment.GetEnvironmentVariable(variableName));
     }
 }
