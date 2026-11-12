@@ -18,6 +18,23 @@ internal static class AdditionalDepsHelper
             Guid.NewGuid().ToString("N"));
 
         Generate(outputDirectory);
+
+        // SDK commands can spawn tools whose target framework and runtime differ, such as Roslyn.
+        // A newer runtime's context would make those tools probe the wrong shared-store TFM.
+        // Keep the automatic fallback scoped to the test runtime; explicit generation stays complete.
+        var frameworkDirectory = Path.Combine(outputDirectory, "AdditionalDeps", "shared", "Microsoft.NETCore.App");
+        var versionPrefix = $"{Environment.Version.Major}.{Environment.Version.Minor}.";
+        foreach (var versionDirectory in Directory.EnumerateDirectories(frameworkDirectory))
+        {
+            if (!Path.GetFileName(versionDirectory).StartsWith(versionPrefix, StringComparison.Ordinal))
+            {
+                foreach (var contextFile in Directory.EnumerateFiles(versionDirectory, "*.deps.json"))
+                {
+                    File.Delete(contextFile);
+                }
+            }
+        }
+
         return outputDirectory;
     });
 
