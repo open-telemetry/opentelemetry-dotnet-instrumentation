@@ -12,7 +12,7 @@
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" />
     <PackageReference Include="NuGet.ProjectModel" />
     <PackageReference Include="System.IO.Abstractions" />
-    <!-- System.Security.Cryptography.Pkcs is a transitive package from NuGet.ProjectModel. Needs update to fix https://github.com/advisories/GHSA-846f-f764-76mx -->
+    <!-- Override the vulnerable NuGet.ProjectModel transitive dependency; see tools/Directory.Packages.props. -->
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
   </ItemGroup>
 
