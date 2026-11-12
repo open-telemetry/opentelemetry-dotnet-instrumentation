@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eux
 
-DOTNET=${DOTNET:-10.0}
+DOTNET=${DOTNET:-net10.0}
 CONFIGURATION=${CONFIGURATION:-Debug}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
