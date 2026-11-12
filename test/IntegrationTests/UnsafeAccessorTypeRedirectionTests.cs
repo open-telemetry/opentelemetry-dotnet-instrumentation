@@ -16,6 +16,12 @@ namespace IntegrationTests;
 public class UnsafeAccessorTypeRedirectionTests(ITestOutputHelper output)
     : TestHelper("UnsafeAccessorTypeRedirection", output)
 {
+#if NET11_0
+    private const string DependencyInjectionVersion = "11.0.0.0";
+#else
+    private const string DependencyInjectionVersion = "10.0.0.0";
+#endif
+
     /// <summary>
     /// Verifies that the native profiler adds a missing version, rewrites a lower version, and preserves equal or
     /// higher versions in complete unsafe-accessor declarations.
@@ -25,9 +31,9 @@ public class UnsafeAccessorTypeRedirectionTests(ITestOutputHelper output)
     /// <param name="expectedVersion">The assembly version expected after the profiler processes the module.</param>
     [Theory]
     [Trait("Category", "EndToEnd")]
-    [InlineData("Microsoft.Extensions.DependencyInjection", null, "10.0.0.0")]
-    [InlineData("Microsoft.Extensions.DependencyInjection", "9.0.0.0", "10.0.0.0")]
-    [InlineData("Microsoft.Extensions.DependencyInjection", "10.0.0.0", "10.0.0.0")]
+    [InlineData("Microsoft.Extensions.DependencyInjection", null, DependencyInjectionVersion)]
+    [InlineData("Microsoft.Extensions.DependencyInjection", "9.0.0.0", DependencyInjectionVersion)]
+    [InlineData("Microsoft.Extensions.DependencyInjection", "10.0.0.0", DependencyInjectionVersion)]
     [InlineData("Microsoft.Extensions.DependencyInjection", "11.0.0.0", "11.0.0.0")]
     public void NativeRewriteAttributeMetadata(string assemblyName, string? compiledVersion, string expectedVersion)
     {
