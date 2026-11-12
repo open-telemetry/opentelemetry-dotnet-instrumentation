@@ -39,6 +39,11 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
         string expectedAssemblyFileVersion,
         bool enableNativeProfiler = true)
     {
+#if NET10_0
+        // Validate the application's dependencies and native redirection without the shared fallback.
+        SetEnvironmentVariable("DOTNET_ADDITIONAL_DEPS", null);
+        SetEnvironmentVariable("DOTNET_SHARED_STORE", null);
+#endif
 #if NETFRAMEWORK
         Assert.True(enableNativeProfiler, "Native profiler is required for assembly redirection on .NET Framework");
         var excludedNames = string.Empty;
@@ -89,7 +94,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
 
         try
         {
-            GenerateAdditionalDeps(generatedDirectory);
+            AdditionalDepsHelper.Generate(generatedDirectory, Output);
 
             using var collector = new MockSpansCollector(Output);
             SetExporter(collector);
@@ -116,55 +121,25 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
         }
     }
 
-    private void GenerateAdditionalDeps(string outputDirectory)
+#endif
+
+#if NET10_0
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void StartupHookOnlyFailsWithoutCompatibleDiagnosticSource()
     {
-        var tracerHome = EnvironmentHelper.GetNukeBuildOutput();
-        var startInfo = new System.Diagnostics.ProcessStartInfo
-        {
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
+        // DiagnosticSource must stay in the Default ALC on .NET 10. Without a compatible
+        // application dependency or the host-level fallback, initialization is expected to fail.
+        SetEnvironmentVariable("DOTNET_ADDITIONAL_DEPS", null);
+        SetEnvironmentVariable("DOTNET_SHARED_STORE", null);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true");
 
-        // The same target-framework test assembly runs on Windows and Unix, so host selection must be
-        // made at runtime rather than with target-framework compilation symbols.
-        if (EnvironmentTools.IsWindows())
-        {
-            startInfo.FileName = "powershell.exe";
-            startInfo.ArgumentList.Add("-NoProfile");
-            startInfo.ArgumentList.Add("-NonInteractive");
-            startInfo.ArgumentList.Add("-ExecutionPolicy");
-            startInfo.ArgumentList.Add("Bypass");
-            startInfo.ArgumentList.Add("-File");
-            startInfo.ArgumentList.Add(Path.Combine(tracerHome, "generate-additional-deps.ps1"));
-            startInfo.ArgumentList.Add("-OutputPath");
-            startInfo.ArgumentList.Add(outputDirectory);
-        }
-        else
-        {
-            startInfo.FileName = "/bin/sh";
-            startInfo.ArgumentList.Add(Path.Combine(tracerHome, "generate-additional-deps.sh"));
-            startInfo.ArgumentList.Add("--output");
-            startInfo.ArgumentList.Add(outputDirectory);
-        }
+        var (_, errorOutput, _) = RunTestApplication(
+            new TestSettings { PackageVersion = "10.0.15" },
+            expectedExitCode: 0,
+            assertExitCode: Assert.NotEqual);
 
-        using var process = System.Diagnostics.Process.Start(startInfo);
-        Assert.NotNull(process);
-        using var helper = new ProcessHelper(process);
-
-        var exitedInTime = process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
-        if (!exitedInTime)
-        {
-            process.Kill();
-            process.WaitForExit();
-        }
-
-        Output.WriteLine($"AdditionalDeps generator exit code: {process.ExitCode}");
-        Output.WriteResult(helper);
-
-        Assert.True(exitedInTime, "AdditionalDeps generator timed out");
-        Assert.Equal(0, process.ExitCode);
+        Assert.Contains("System.Diagnostics.DiagnosticSource, Version=11.0.0.0", errorOutput, StringComparison.Ordinal);
     }
 #endif
 }
