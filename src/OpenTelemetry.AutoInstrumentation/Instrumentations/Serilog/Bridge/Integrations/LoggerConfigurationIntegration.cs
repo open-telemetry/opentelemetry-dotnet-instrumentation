@@ -35,8 +35,8 @@ public static class LoggerConfigurationIntegration
 
         try
         {
-            ILoggerProviderCollection? loggerProviders = null;
-            if (ExportsToOpenTelemetry(instance, depth: 0, ref loggerProviders))
+            var loggerProviders = new List<ILoggerProviderCollection>();
+            if (ExportsToOpenTelemetry(instance, depth: 0, loggerProviders))
             {
                 Logger.Debug("Serilog bridge not added: the logger already writes to Serilog.Sinks.OpenTelemetry.");
                 return CallTargetState.GetDefault();
@@ -56,7 +56,7 @@ public static class LoggerConfigurationIntegration
 
     // Walks every field that holds a sink, so wrapper field names that differ per Serilog version do not matter.
     // A bridge sink found here was added by a sub-logger's CreateLogger call, which runs first, so it is disabled.
-    private static bool ExportsToOpenTelemetry(object node, int depth, ref ILoggerProviderCollection? loggerProviders)
+    private static bool ExportsToOpenTelemetry(object node, int depth, List<ILoggerProviderCollection> loggerProviders)
     {
         if (node is IDuckType { Instance: OpenTelemetrySerilogSink bridgeSink })
         {
@@ -72,7 +72,7 @@ public static class LoggerConfigurationIntegration
 
         if (type.FullName is "Serilog.Extensions.Logging.LoggerProviderCollectionSink")
         {
-            loggerProviders = node.DuckCast<ILoggerProviderCollectionSink>().Providers;
+            loggerProviders.Add(node.DuckCast<ILoggerProviderCollectionSink>().Providers);
             return false;
         }
 
@@ -90,13 +90,13 @@ public static class LoggerConfigurationIntegration
                 var value = field.GetValue(node);
                 if (value is not null && IsSink(value.GetType()))
                 {
-                    found |= ExportsToOpenTelemetry(value, depth + 1, ref loggerProviders);
+                    found |= ExportsToOpenTelemetry(value, depth + 1, loggerProviders);
                 }
                 else if (value is IEnumerable items && IsSink(GetElementType(field.FieldType)))
                 {
                     foreach (var item in items)
                     {
-                        found |= item is not null && ExportsToOpenTelemetry(item, depth + 1, ref loggerProviders);
+                        found |= item is not null && ExportsToOpenTelemetry(item, depth + 1, loggerProviders);
                     }
                 }
             }

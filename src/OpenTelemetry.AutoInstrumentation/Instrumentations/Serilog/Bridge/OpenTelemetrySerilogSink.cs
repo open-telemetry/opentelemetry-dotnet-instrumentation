@@ -24,7 +24,7 @@ internal class OpenTelemetrySerilogSink
 
     public bool Disabled { get; set; }
 
-    public ILoggerProviderCollection? LoggerProviders { get; set; }
+    public List<ILoggerProviderCollection> LoggerProviders { get; set; } = [];
 
     [DuckReverseMethod(ParameterTypeNames = ["Serilog.Events.LogEvent, Serilog"])]
     public void Emit(ILogEvent logEvent)
@@ -35,9 +35,9 @@ internal class OpenTelemetrySerilogSink
             return;
         }
 
-        if (LoggerProviders is not null)
+        foreach (var loggerProviders in LoggerProviders)
         {
-            foreach (var provider in LoggerProviders.Providers)
+            foreach (var provider in loggerProviders.Providers)
             {
                 if (provider is OpenTelemetryLoggerProvider)
                 {
@@ -130,8 +130,12 @@ internal class OpenTelemetrySerilogSink
                 foreach (var item in value.DuckCast<IElementsValue>().Elements)
                 {
                     var element = item.DuckCast<DictionaryElement>();
-                    var key = element.Key.DuckCast<IScalarValue>().Value?.ToString() ?? "null";
-                    entries.Add(new KeyValuePair<string, object?>(key, ConvertValue(element.Value)));
+                    var keyValue = element.Key.DuckCast<IScalarValue>().Value;
+                    var key = (keyValue is IFormattable formattableKey ? formattableKey.ToString(null, CultureInfo.InvariantCulture) : keyValue?.ToString()) ?? "null";
+                    if (!entries.Exists(entry => entry.Key == key))
+                    {
+                        entries.Add(new KeyValuePair<string, object?>(key, ConvertValue(element.Value)));
+                    }
                 }
 
                 return new SerilogKeyValueList(entries, (IFormattable)value);

@@ -190,8 +190,9 @@ public class SerilogBridgeTests : TestHelper
                 records.Count(logRecord => VerifyBody(logRecord, "Logged through ILogger {Source}")) == 1 &&
                 records.Count(logRecord => VerifyBody(logRecord, "Logged through Serilog {Source}")) == 1 &&
                 records.Count(logRecord => VerifyBody(logRecord, "Logged through Serilog before the host is built")) == 1 &&
-                records.Count(logRecord => VerifyBody(logRecord, "Logged through Serilog to providers that the host does not use")) == 1,
-            "Expected each record exported once, also before the host is built and for providers that the host does not use.");
+                records.Count(logRecord => VerifyBody(logRecord, "Logged through Serilog to providers that the host does not use")) == 1 &&
+                records.Count(logRecord => VerifyBody(logRecord, "Logged through Serilog to three provider collections")) == 1,
+            "Expected each record exported once, also before the host is built, for providers that the host does not use and for three provider collections.");
 
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLE_SERILOG_BRIDGE", "true");

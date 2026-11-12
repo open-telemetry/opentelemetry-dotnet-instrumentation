@@ -128,6 +128,12 @@ internal static class Program
             using var otherLogger = new LoggerConfiguration().WriteTo.Providers(otherProviders).CreateLogger();
             otherLogger.Information("Logged through Serilog to providers that the host does not use");
 
+            // With the ILogger bridge on, only the middle collection holds the OpenTelemetry provider, so a check of the first or the last one misses it.
+            using var lastProviders = new LoggerProviderCollection();
+            lastProviders.AddProvider(NullLoggerProvider.Instance);
+            using var threeProvidersLogger = new LoggerConfiguration().WriteTo.Providers(otherProviders).WriteTo.Providers(providers).WriteTo.Providers(lastProviders).CreateLogger();
+            threeProvidersLogger.Information("Logged through Serilog to three provider collections");
+
             // The application adds its own OpenTelemetry provider.
             using var applicationServices = new ServiceCollection().AddLogging(logging => logging.AddOpenTelemetry()).BuildServiceProvider();
             using var applicationProviders = new LoggerProviderCollection();

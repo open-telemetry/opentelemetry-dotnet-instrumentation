@@ -76,6 +76,64 @@ public class SerilogTests
     }
 
     [Fact]
+    public void DictionaryValue_KeyIsConvertedWithInvariantCulture()
+    {
+        var originalCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+            var value = new DictionaryValue([new KeyValuePair<ScalarValue, LogEventPropertyValue>(new ScalarValue(1.5), new ScalarValue("one"))]);
+
+            var converted = Assert.IsAssignableFrom<IEnumerable<KeyValuePair<string, object?>>>(OpenTelemetrySerilogSink.ConvertValue(value));
+
+            Assert.Equal([new KeyValuePair<string, object?>("1.5", "one")], converted);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+        }
+    }
+
+    [Fact]
+    public void DictionaryValue_WithKeysThatCollideAfterConversion_KeepsFirstEntry()
+    {
+        var value = new DictionaryValue(
+        [
+            new KeyValuePair<ScalarValue, LogEventPropertyValue>(new ScalarValue(1), new ScalarValue(1)),
+            new KeyValuePair<ScalarValue, LogEventPropertyValue>(new ScalarValue("1"), new ScalarValue(2)),
+            new KeyValuePair<ScalarValue, LogEventPropertyValue>(new ScalarValue(null), new ScalarValue(3)),
+            new KeyValuePair<ScalarValue, LogEventPropertyValue>(new ScalarValue("null"), new ScalarValue(4))
+        ]);
+
+        var converted = Assert.IsAssignableFrom<IEnumerable<KeyValuePair<string, object?>>>(OpenTelemetrySerilogSink.ConvertValue(value));
+
+        Assert.Equal([new KeyValuePair<string, object?>("1", 1), new KeyValuePair<string, object?>("null", 3)], converted);
+    }
+
+    [Fact]
+    public void DictionaryValue_WithKeysThatCollideUnderInvariantCulture_KeepsFirstEntry()
+    {
+        var originalCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+            var value = new DictionaryValue(
+            [
+                new KeyValuePair<ScalarValue, LogEventPropertyValue>(new ScalarValue(1.5), new ScalarValue(1)),
+                new KeyValuePair<ScalarValue, LogEventPropertyValue>(new ScalarValue("1.5"), new ScalarValue(2))
+            ]);
+
+            var converted = Assert.IsAssignableFrom<IEnumerable<KeyValuePair<string, object?>>>(OpenTelemetrySerilogSink.ConvertValue(value));
+
+            Assert.Equal([new KeyValuePair<string, object?>("1.5", 1)], converted);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+        }
+    }
+
+    [Fact]
     public void SequenceValue_IsConvertedToArray()
     {
         var value = new SequenceValue([new ScalarValue(1), new ScalarValue("two"), new ScalarValue(true)]);
