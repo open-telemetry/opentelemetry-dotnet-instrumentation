@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="EntityFramework" />
     <PackageReference Include="System.Data.SqlClient" />
     <PackageReference Include="System.ValueTuple" Condition="'$(TargetFramework)' == 'net462'" />
   </ItemGroup>

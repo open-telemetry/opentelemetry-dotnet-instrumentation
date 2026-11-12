@@ -4,20 +4,25 @@
 using System.Data.Entity;
 using System.Data.Entity.SqlServer;
 using System.Data.SqlClient;
+using TestApplication.Shared;
 
-namespace TestApplication.SqlClient.System;
+namespace TestApplication.AdoNetEntityFramework6;
 #pragma warning disable CS0618 // Type or member is obsolete, System.Data.SqlClient classes are deprecated in 4.9.0+
 
 /// <summary>
 /// Runs a query through Entity Framework 6, which wraps every provider command
 /// in its internal InterceptableDbCommand before executing it.
 /// </summary>
-internal static class EntityFramework6Scenario
+internal static class Program
 {
-    public const string Argument = "--entity-framework-6";
-
-    public static void Run(string connectionString)
+    public static void Main(string[] args)
     {
+        ConsoleHelper.WriteSplashScreen(args);
+
+        var databasePassword = EnvironmentHelper.GetRequiredEnvironmentVariable("TEST_DATABASE_PASSWORD");
+        var databasePort = ArgumentHelper.GetRequiredArgument(args, "--port");
+        var connectionString = $"Server=127.0.0.1,{databasePort};User=sa;Password={databasePassword};TrustServerCertificate=True;";
+
         DbConfiguration.SetConfiguration(new SqlClientConfiguration());
         Database.SetInitializer<DbContext>(null);
 
