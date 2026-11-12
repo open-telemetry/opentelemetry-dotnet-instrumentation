@@ -19,7 +19,7 @@ internal class InternalLogger : IOtelLogger
 
     public LogLevel Level { get; }
 
-    public bool IsEnabled(LogLevel level)
+    public virtual bool IsEnabled(LogLevel level)
     {
         return level <= Level;
     }
@@ -144,7 +144,7 @@ internal class InternalLogger : IOtelLogger
     public void Error(Exception exception, string messageTemplate, object[] args, bool writeToEventLog)
         => Write(LogLevel.Error, exception, messageTemplate, args, writeToEventLog);
 
-    public void Close()
+    public virtual void Close()
     {
         // Replace with Noop sink, so that attempts to write after logger is closed
         // don't try to write to disposed sink.
@@ -156,7 +156,7 @@ internal class InternalLogger : IOtelLogger
         }
     }
 
-    private static void WriteEventSourceLog(LogLevel level, string message)
+    protected static void WriteEventSourceLog(LogLevel level, string message)
     {
         switch (level)
         {
@@ -172,6 +172,26 @@ internal class InternalLogger : IOtelLogger
             case LogLevel.Error:
                 AutoInstrumentationEventSource.Log.Error(message);
                 break;
+        }
+    }
+
+    protected static string FormatLine(LogLevel level, string rawMessage, DateTime timestampUtc) =>
+        $"[{timestampUtc:O}] [{level}] {rawMessage} {Environment.NewLine}";
+
+    /// <summary>
+    /// Writes an enabled log entry to the sink and optionally to <see cref="AutoInstrumentationEventSource"/>.
+    /// </summary>
+    /// <param name="level">The log level.</param>
+    /// <param name="rawMessage">The message, including any exception text.</param>
+    /// <param name="timestampUtc">The entry's UTC timestamp.</param>
+    /// <param name="writeToEventLog">Whether to also write to the event source.</param>
+    protected virtual void Emit(LogLevel level, string rawMessage, DateTime timestampUtc, bool writeToEventLog)
+    {
+        _sink.Write(FormatLine(level, rawMessage, timestampUtc));
+
+        if (writeToEventLog)
+        {
+            WriteEventSourceLog(level, rawMessage);
         }
     }
 
@@ -222,11 +242,7 @@ internal class InternalLogger : IOtelLogger
                 rawMessage += $"{Environment.NewLine}Exception: {exception.Message}{Environment.NewLine}{exception}";
             }
 
-            _sink.Write($"[{DateTime.UtcNow:O}] [{level}] {rawMessage} {Environment.NewLine}");
-            if (writeToEventLog)
-            {
-                WriteEventSourceLog(level, rawMessage);
-            }
+            Emit(level, rawMessage, DateTime.UtcNow, writeToEventLog);
         }
 #pragma warning disable CA1031 // Do not catch general exception
         catch (Exception)

@@ -450,11 +450,20 @@ sampling remains disabled until a runtime configuration enables that feature.
 
 ### Logs
 
-| Options type                                  | NuGet package                                | NuGet version |
-|-----------------------------------------------|----------------------------------------------|---------------|
-| OpenTelemetry.Logs.OpenTelemetryLoggerOptions | OpenTelemetry                                | 1.20.1        |
-| OpenTelemetry.Exporter.ConsoleExporterOptions | OpenTelemetry.Exporter.Console               | 1.20.1        |
-| OpenTelemetry.Exporter.OtlpExporterOptions    | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.20.1        |
+| Options type                                         | NuGet package                                | NuGet version |
+|------------------------------------------------------|----------------------------------------------|---------------|
+| OpenTelemetry.Logs.OpenTelemetryLoggerOptions        | OpenTelemetry                                | 1.20.1        |
+| OpenTelemetry.Exporter.ConsoleExporterOptions        | OpenTelemetry.Exporter.Console               | 1.20.1        |
+| OpenTelemetry.Exporter.OtlpExporterOptions           | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.20.1        |
+
+### Self-diagnostics options
+
+Implement `IConfigureSelfDiagnosticsOptions` to adjust the SDK's
+`OpenTelemetry.SelfDiagnostics.SelfDiagnosticsOptions`. The hook runs once for
+each provider automatic instrumentation builds (tracer, meter, etc.), after
+automatic instrumentation has applied its logging settings and the SDK applies
+its `OTEL_DOTNET_SELF_DIAGNOSTICS_*` variables, so implementations must be
+idempotent.
 
 ### OpAMP
 

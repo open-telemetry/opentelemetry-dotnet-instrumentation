@@ -9,7 +9,7 @@ namespace OpenTelemetry.AutoInstrumentation.Logging;
 /// <summary>
 /// Configures shared logger used by instrumentations.
 /// </summary>
-internal static class OtelLogging
+internal static partial class OtelLogging
 {
     private const string OtelDotnetAutoLogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
     private const string OtelLogLevel = "OTEL_LOG_LEVEL";
@@ -40,7 +40,9 @@ internal static class OtelLogging
     /// <returns>Logger</returns>
     public static IOtelLogger GetLogger(string suffix)
     {
-        return OtelLoggers.GetOrAdd(suffix, CreateLogger);
+        IOtelLogger? selfDiagnosticsLogger = null;
+        TryGetSelfDiagnosticsLogger(suffix, ref selfDiagnosticsLogger);
+        return selfDiagnosticsLogger ?? OtelLoggers.GetOrAdd(suffix, CreateLogger);
     }
 
     public static void CloseLogger(string suffix, IOtelLogger otelLogger)
@@ -67,6 +69,7 @@ internal static class OtelLogging
     {
         _configuredLogLevel = GetConfiguredLogLevel();
         _configuredLogSink = GetConfiguredLogSink();
+        ResetSelfDiagnostics();
         OtelLoggers.Clear();
     }
 
@@ -154,6 +157,38 @@ internal static class OtelLogging
             : NixDefaultDirectory;
     }
 
+    internal static string? GetLogDirectory()
+    {
+        string? logDirectory;
+
+        try
+        {
+            logDirectory = Environment.GetEnvironmentVariable(OtelDotnetAutoLogDirectory);
+
+            if (logDirectory == null)
+            {
+                logDirectory = GetDefaultLogDirectory(Environment.OSVersion.Platform == PlatformID.Win32NT);
+            }
+
+            logDirectory = CreateDirectoryIfMissing(logDirectory) ?? Path.GetTempPath();
+        }
+#pragma warning disable CA1031 // Do not catch general exception
+        catch (Exception)
+#pragma warning restore CA1031 // Do not catch general exception
+        {
+            // The try block may throw a SecurityException if not granted the System.Security.Permissions.FileIOPermission
+            // because of the following API calls
+            //   - Directory.Exists
+            //   - Environment.GetFolderPath
+            //   - Path.GetTempPath
+
+            // Unsafe to log
+            logDirectory = null;
+        }
+
+        return logDirectory;
+    }
+
     private static IOtelLogger CreateLogger(string suffix)
     {
         if (!_configuredLogLevel.HasValue)
@@ -165,6 +200,11 @@ internal static class OtelLogging
 
         return new InternalLogger(sink, _configuredLogLevel.Value);
     }
+
+    // Optional hook keeps SDK dependencies out of Loader and StartupHook.
+    static partial void TryGetSelfDiagnosticsLogger(string suffix, ref IOtelLogger? logger);
+
+    static partial void ResetSelfDiagnostics();
 
     private static ISink CreateSink(string suffix)
     {
@@ -243,38 +283,6 @@ internal static class OtelLogging
             .Replace(Path.DirectorySeparatorChar, '-')
             .Replace(Path.AltDirectorySeparatorChar, '-')
             .Trim('-');
-    }
-
-    private static string? GetLogDirectory()
-    {
-        string? logDirectory;
-
-        try
-        {
-            logDirectory = Environment.GetEnvironmentVariable(OtelDotnetAutoLogDirectory);
-
-            if (logDirectory == null)
-            {
-                logDirectory = GetDefaultLogDirectory(Environment.OSVersion.Platform == PlatformID.Win32NT);
-            }
-
-            logDirectory = CreateDirectoryIfMissing(logDirectory) ?? Path.GetTempPath();
-        }
-#pragma warning disable CA1031 // Do not catch general exception
-        catch (Exception)
-#pragma warning restore CA1031 // Do not catch general exception
-        {
-            // The try block may throw a SecurityException if not granted the System.Security.Permissions.FileIOPermission
-            // because of the following API calls
-            //   - Directory.Exists
-            //   - Environment.GetFolderPath
-            //   - Path.GetTempPath
-
-            // Unsafe to log
-            logDirectory = null;
-        }
-
-        return logDirectory;
     }
 
     private static string? CreateDirectoryIfMissing(string pathToCreate)

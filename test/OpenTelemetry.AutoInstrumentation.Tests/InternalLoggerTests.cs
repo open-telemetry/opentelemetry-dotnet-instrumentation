@@ -21,4 +21,29 @@ public class InternalLoggerTests
         var messages = Assert.Single(sink.Messages);
         Assert.Contains("[Information] info message", messages, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void WhenEntryPassesLevelCheck_Then_EmitReceivesLevelRawMessageTimestampAndFlag()
+    {
+        var logger = new EmitRecordingLogger(LogLevel.Information);
+
+        logger.Warning("w", true);
+
+        var (level, rawMessage, timestampUtc, writeToEventLog) = Assert.Single(logger.Emitted);
+
+        Assert.Equal(LogLevel.Warning, level);
+        Assert.Equal("w", rawMessage);
+        Assert.Equal(DateTimeKind.Utc, timestampUtc.Kind);
+        Assert.True(writeToEventLog);
+    }
+
+    private sealed class EmitRecordingLogger(LogLevel level) : InternalLogger(NoopSink.Instance, level)
+    {
+        public List<(LogLevel Level, string RawMessage, DateTime TimestampUtc, bool WriteToEventLog)> Emitted { get; } = [];
+
+        protected override void Emit(LogLevel level, string rawMessage, DateTime timestampUtc, bool writeToEventLog)
+        {
+            Emitted.Add((level, rawMessage, timestampUtc, writeToEventLog));
+        }
+    }
 }
