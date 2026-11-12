@@ -26,7 +26,7 @@ public class SerilogBridgeTests : TestHelper
 
         collector.ExpectCollected(
             records =>
-                records.Count == 5 &&
+                records.Count == 11 &&
                 records.Count(logRecord =>
                     VerifyBody(logRecord, "Hello {Name}, count {Count}, flag {Flag}, ratio {Ratio}, at {When}") &&
                     logRecord is { SeverityText: "Information", SeverityNumber: SeverityNumber.Info } &&
@@ -48,8 +48,9 @@ public class SerilogBridgeTests : TestHelper
                     VerifyBody(logRecord, "Exception occurred") &&
                     logRecord is { SeverityText: "Error", SeverityNumber: SeverityNumber.Error } &&
                     VerifyExceptionAttributes(logRecord) &&
-                    logRecord.Attributes.Count == 3) == 1,
-            "Expected the three Information records, the Warning record and the Error record, each exported once.");
+                    logRecord.Attributes.Count == 3) == 1 &&
+                VerifyReplayedTraceContext(records, packageVersion),
+            "Expected the three Information records, the Warning record and the Error record, each exported once, and the trace context of each replayed event.");
 
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLE_SERILOG_BRIDGE", "true");
@@ -323,6 +324,38 @@ public class SerilogBridgeTests : TestHelper
         return logRecord.TraceId != ByteString.Empty &&
                logRecord.SpanId != ByteString.Empty &&
                logRecord.Flags != 0;
+    }
+
+    private static bool VerifyReplayedTraceContext(ICollection<LogRecord> records, string packageVersion)
+    {
+        var capturedInActivity = records.Where(logRecord => VerifyBody(logRecord, "Replayed {Id}") && VerifyIdAttribute(logRecord, 1)).ToList();
+        var capturedOutsideActivity = records.Where(logRecord => VerifyBody(logRecord, "Replayed {Id}") && VerifyIdAttribute(logRecord, 2)).ToList();
+        if (capturedInActivity.Count != 3 || capturedOutsideActivity.Count != 3)
+        {
+            return false;
+        }
+
+        // Before Serilog 3.1, the bridge takes the trace context of the activity that is current at each write.
+        if (!string.IsNullOrEmpty(packageVersion) && Version.Parse(packageVersion) < new Version(3, 1))
+        {
+            var withTraceContext = capturedInActivity.Where(logRecord => logRecord.TraceId != ByteString.Empty).ToList();
+            return withTraceContext.Count == 2 &&
+                   withTraceContext[0].TraceId != withTraceContext[1].TraceId &&
+                   capturedOutsideActivity.Count(logRecord => logRecord.TraceId == ByteString.Empty) == 2;
+        }
+
+        // Serilog stores no trace flags, so only the record of the first write keeps them.
+        return capturedInActivity.All(logRecord => logRecord.TraceId != ByteString.Empty && logRecord.SpanId != ByteString.Empty) &&
+               capturedInActivity.Select(logRecord => logRecord.TraceId).Distinct().Count() == 1 &&
+               capturedInActivity.Select(logRecord => logRecord.SpanId).Distinct().Count() == 1 &&
+               capturedInActivity.Count(logRecord => logRecord.Flags != 0) == 1 &&
+               capturedOutsideActivity.All(logRecord => logRecord.TraceId == ByteString.Empty && logRecord.SpanId == ByteString.Empty);
+    }
+
+    private static bool VerifyIdAttribute(LogRecord logRecord, long expectedId)
+    {
+        return logRecord.Attributes.SingleOrDefault(value => value.Key == "Id")?.Value is { ValueCase: AnyValue.ValueOneofCase.IntValue } value &&
+               value.IntValue == expectedId;
     }
 
     private static bool VerifyBody(LogRecord logRecord, string expectedBody)

@@ -45,7 +45,10 @@ the following way:
   the rendered message is added as the `serilog.rendered_message` attribute
 - `Exception` is used to populate the following properties: `exception.type`,
   `exception.message`, `exception.stacktrace`
-- The trace context comes from `Activity.Current`
+- The trace context comes from the `TraceId` and `SpanId` that the event
+  stores (Serilog 3.1 and later), or from `Activity.Current` (earlier
+  versions). Serilog stores no trace flags. The bridge uses the flags of
+  `Activity.Current` only when its IDs are the same as the stored IDs.
 
 ### `Serilog` level severity mapping
 

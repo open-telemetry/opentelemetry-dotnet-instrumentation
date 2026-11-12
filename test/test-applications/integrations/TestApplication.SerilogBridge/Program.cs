@@ -80,6 +80,31 @@ internal static class Program
         logger.Information("Nested {@Points} and {@Levels}", Points, new { L2 = new { L3 = new { L4 = new { X = 1 } } } });
         logger.Warning("Logged outside of an activity");
         logger.Error(GetException(), "Exception occurred");
+
+        // Serilog 3.1+ stores the trace context in the event, so a replayed event keeps the context of its first write.
+        var capturingSink = new CapturingSink();
+        using (var capturingLogger = new LoggerConfiguration().WriteTo.Sink(capturingSink).CreateLogger())
+        {
+            using (Source.StartActivity("Captured"))
+            {
+                capturingLogger.Information("Replayed {Id}", 1);
+            }
+
+            capturingLogger.Information("Replayed {Id}", 2);
+        }
+
+        using (Source.StartActivity("Replaying"))
+        {
+            foreach (var logEvent in capturingSink.Events)
+            {
+                rootLogger.Write(logEvent);
+            }
+        }
+
+        foreach (var logEvent in capturingSink.Events)
+        {
+            rootLogger.Write(logEvent);
+        }
     }
 
     private static void LogThroughSubLogger()

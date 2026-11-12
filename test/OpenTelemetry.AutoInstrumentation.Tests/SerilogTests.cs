@@ -102,12 +102,16 @@ public class SerilogTests
             new KeyValuePair<ScalarValue, LogEventPropertyValue>(new ScalarValue(1), new ScalarValue(1)),
             new KeyValuePair<ScalarValue, LogEventPropertyValue>(new ScalarValue("1"), new ScalarValue(2)),
             new KeyValuePair<ScalarValue, LogEventPropertyValue>(new ScalarValue(null), new ScalarValue(3)),
-            new KeyValuePair<ScalarValue, LogEventPropertyValue>(new ScalarValue("null"), new ScalarValue(4))
+            new KeyValuePair<ScalarValue, LogEventPropertyValue>(new ScalarValue("null"), new ScalarValue(4)),
+            new KeyValuePair<ScalarValue, LogEventPropertyValue>(new ScalarValue("a"), new ScalarValue(5)),
+            new KeyValuePair<ScalarValue, LogEventPropertyValue>(new ScalarValue("A"), new ScalarValue(6))
         ]);
 
         var converted = Assert.IsAssignableFrom<IEnumerable<KeyValuePair<string, object?>>>(OpenTelemetrySerilogSink.ConvertValue(value));
 
-        Assert.Equal([new KeyValuePair<string, object?>("1", 1), new KeyValuePair<string, object?>("null", 3)], converted);
+        Assert.Equal(
+            [new KeyValuePair<string, object?>("1", 1), new KeyValuePair<string, object?>("null", 3), new KeyValuePair<string, object?>("a", 5), new KeyValuePair<string, object?>("A", 6)],
+            converted);
     }
 
     [Fact]

@@ -29,7 +29,7 @@ internal class OpenTelemetrySerilogSink
     [DuckReverseMethod(ParameterTypeNames = ["Serilog.Events.LogEvent, Serilog"])]
     public void Emit(ILogEvent logEvent)
     {
-        var logEmitter = OpenTelemetryLogHelpers.LogEmitter;
+        var logEmitter = OpenTelemetryLogHelpers.LogEmitterWithContext;
         if (Disabled || Sdk.SuppressInstrumentation || logEmitter is null)
         {
             return;
@@ -72,6 +72,16 @@ internal class OpenTelemetrySerilogSink
             return;
         }
 
+        var activity = Activity.Current;
+        var context = activity?.Context ?? default;
+
+        // Serilog stores no trace flags, so the flags of Activity.Current are kept only when the stored IDs match it.
+        if (((IDuckType)logEvent).Instance.TryDuckCast<LogEventTraceContext>(out var stored) &&
+            (stored.TraceId != activity?.TraceId || stored.SpanId != activity?.SpanId))
+        {
+            context = stored is { TraceId: { } traceId, SpanId: { } spanId } ? new ActivityContext(traceId, spanId, ActivityTraceFlags.None) : default;
+        }
+
         var level = logEvent.Level;
         logEmitter(
             logger,
@@ -81,7 +91,7 @@ internal class OpenTelemetrySerilogSink
             MapLogLevel(level),
             logEvent.Exception,
             properties,
-            Activity.Current,
+            context,
             null,
             null);
     }
@@ -114,11 +124,12 @@ internal class OpenTelemetrySerilogSink
                 break;
             case "Serilog.Events.StructureValue":
                 var members = new List<KeyValuePair<string, object?>>();
+                var names = new HashSet<string>(StringComparer.Ordinal);
                 foreach (var item in value.DuckCast<IStructureValue>().Properties)
                 {
                     var member = item.DuckCast<IStructureProperty>();
                     var name = member.Name;
-                    if (!members.Exists(entry => entry.Key == name))
+                    if (names.Add(name))
                     {
                         members.Add(new KeyValuePair<string, object?>(name, ConvertValue(member.Value)));
                     }
@@ -127,12 +138,13 @@ internal class OpenTelemetrySerilogSink
                 return new SerilogKeyValueList(members, (IFormattable)value);
             case "Serilog.Events.DictionaryValue":
                 var entries = new List<KeyValuePair<string, object?>>();
+                var keys = new HashSet<string>(StringComparer.Ordinal);
                 foreach (var item in value.DuckCast<IElementsValue>().Elements)
                 {
                     var element = item.DuckCast<DictionaryElement>();
                     var keyValue = element.Key.DuckCast<IScalarValue>().Value;
                     var key = (keyValue is IFormattable formattableKey ? formattableKey.ToString(null, CultureInfo.InvariantCulture) : keyValue?.ToString()) ?? "null";
-                    if (!entries.Exists(entry => entry.Key == key))
+                    if (keys.Add(key))
                     {
                         entries.Add(new KeyValuePair<string, object?>(key, ConvertValue(element.Value)));
                     }

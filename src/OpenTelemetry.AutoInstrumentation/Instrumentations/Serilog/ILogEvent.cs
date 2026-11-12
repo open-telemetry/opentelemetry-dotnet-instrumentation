@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections;
+using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
 
@@ -85,4 +86,13 @@ internal struct DictionaryElement
     public object Key;
 
     public object? Value;
+}
+
+// Wraps LogEvent.TraceId and LogEvent.SpanId, added in Serilog 3.1
+[DuckCopy]
+internal struct LogEventTraceContext
+{
+    public ActivityTraceId? TraceId;
+
+    public ActivitySpanId? SpanId;
 }
