@@ -118,7 +118,6 @@ internal static class TransientDependenciesGenerator
 
     public static void Run(Project targetProject)
     {
-        // TODO NET11TODO revert this temporary workaround when NuGet packages compatible with the .NET 11 SDK are available.
         var deps = Generator.EnumerateDependencies(targetProject.Path);
         var packages = targetProject.Solution.Directory / "src" / Projects.AutoInstrumentationAssemblies /
                        "Directory.Packages.props";
@@ -137,17 +136,7 @@ internal static class TransientDependenciesGenerator
         foreach (var framework in projectFrameworks)
         {
             var label = GetLabel(framework);
-            var targetFrameworkIdentifier = TargetFramework.NetFramework.Any(it => it == framework)
-                ? ".NETFramework"
-                : ".NETCoreApp";
-            var projectForTfm = new Microsoft.Build.Evaluation.Project(
-                packages,
-                new Dictionary<string, string>
-                {
-                    ["TargetFramework"] = framework,
-                    ["TargetFrameworkIdentifier"] = targetFrameworkIdentifier
-                },
-                toolsVersion: null);
+            var projectForTfm = targetProject.GetMSBuildProject(targetFramework: framework);
             var definedVersions = projectForTfm
                 .Items.Where(it => it.ItemType == "PackageVersion")
                 .ToDictionary(item => item.EvaluatedInclude, item => item.GetMetadata("Version"));

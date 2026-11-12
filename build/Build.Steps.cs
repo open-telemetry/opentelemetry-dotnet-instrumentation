@@ -176,18 +176,7 @@ partial class Build
                 }
             }
 
-            var testApplications = testApps.ToArray();
-            var testProjects = Solution.GetManagedTestProjects().ToArray();
-
-            if (TestTargetFramework != TargetFramework.NOT_SPECIFIED)
-            {
-                ResolveProjectTargetFrameworks(
-                    testApplications
-                        .Where(app => !app.Directory.ContainsFile("packages.config"))
-                        .Concat(testProjects));
-            }
-
-            foreach (var app in testApplications)
+            foreach (var app in testApps)
             {
 
                 // Special case: a test application using old packages.config needs special treatment.
@@ -208,24 +197,21 @@ partial class Build
                 }
 
                 string actualTestTfm = TestTargetFramework;
-                if (TestTargetFramework != TargetFramework.NOT_SPECIFIED)
+                if (TestTargetFramework != TargetFramework.NOT_SPECIFIED &&
+                    !app.GetTargetFrameworks().Contains(actualTestTfm))
                 {
-                    var appTargetFrameworks = GetProjectTargetFrameworks(app);
-                    if (!appTargetFrameworks.Contains(actualTestTfm))
+                    // Before skipping this app check if not a special case for .NET Framework
+                    actualTestTfm = null;
+                    if (TestTargetFramework == TargetFramework.NET462)
                     {
-                        // Before skipping this app check if not a special case for .NET Framework
-                        actualTestTfm = null;
-                        if (TestTargetFramework == TargetFramework.NET462)
-                        {
-                            actualTestTfm = appTargetFrameworks.FirstOrDefault(tfm => tfm.StartsWith("net4"));
-                        }
+                        actualTestTfm = app.GetTargetFrameworks().FirstOrDefault(tfm => tfm.StartsWith("net4"));
+                    }
 
-                        if (actualTestTfm is null)
-                        {
-                            // App doesn't support the select TFM, skip it.
-                            Log.Information("Skipping {0}: no suitable TFM for {1}", app.Name, TestTargetFramework);
-                            continue;
-                        }
+                    if (actualTestTfm is null)
+                    {
+                        // App doesn't support the select TFM, skip it.
+                        Log.Information("Skipping {0}: no suitable TFM for {1}", app.Name, TestTargetFramework);
+                        continue;
                     }
                 }
 
@@ -253,10 +239,10 @@ partial class Build
                 }
             }
 
-            foreach (var project in testProjects)
+            foreach (var project in Solution.GetManagedTestProjects())
             {
                 if (TestTargetFramework != TargetFramework.NOT_SPECIFIED &&
-                    !GetProjectTargetFrameworks(project).Contains(TestTargetFramework))
+                    !project.GetTargetFrameworks().Contains(TestTargetFramework))
                 {
                     // Skip this test project if it doesn't support the selected test TFM.
                     continue;
@@ -608,16 +594,11 @@ partial class Build
                 }
             }
 
-            if (TestTargetFramework != TargetFramework.NOT_SPECIFIED || ShouldRunTargetFrameworksSeparately())
-            {
-                ResolveProjectTargetFrameworks(unitTestProjects);
-            }
-
             if (TestTargetFramework != TargetFramework.NOT_SPECIFIED)
             {
                 unitTestProjects = unitTestProjects
                     .Where(p =>
-                        GetProjectTargetFrameworks(p).Contains(TestTargetFramework) &&
+                        p.GetTargetFrameworks().Contains(TestTargetFramework) &&
                         (p.Name != Projects.Tests.AutoInstrumentationLoaderTests || TargetFrameworks.Contains(TestTargetFramework)))
                     .ToArray();
             }
@@ -637,7 +618,7 @@ partial class Build
                 {
                     foreach (var project in unitTestProjects)
                     {
-                        foreach (var targetFramework in GetProjectTargetFrameworks(project))
+                        foreach (var targetFramework in project.GetTargetFrameworks())
                         {
                             DotNetTest(config => ConfigureUnitTest(config)
                                 .SetFramework(targetFramework)
@@ -682,7 +663,7 @@ partial class Build
 
                 if (ShouldRunTargetFrameworksSeparately())
                 {
-                    foreach (var targetFramework in GetProjectTargetFrameworks(project))
+                    foreach (var targetFramework in project.GetTargetFrameworks())
                     {
                         DotNetTest(config => ConfigureIntegrationTest(config)
                             .SetFramework(targetFramework));
