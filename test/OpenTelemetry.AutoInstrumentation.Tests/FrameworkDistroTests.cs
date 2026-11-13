@@ -1,7 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-// This test is setup to run on .NET because the 'DependencyListGenerator' tool is written in .NET
+// This test is set up to run on .NET because the 'DependencyListGenerator' tool is written in .NET
 // The actual test is testing both .NET and .NET Framework context.
 #if NET11_0
 

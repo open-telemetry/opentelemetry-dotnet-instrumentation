@@ -288,7 +288,6 @@ internal static class EnvironmentConfigurationTracerHelper
             DelayedInitialization.Traces.AddAspNetCore(lazyInstrumentationLoader, pluginManager, tracerSettings);
             return builder.AddSource(
                 "Microsoft.AspNetCore",
-                // Blazor activities first added in .NET 10.0
                 "Microsoft.AspNetCore.Components",
                 "Microsoft.AspNetCore.Components.Server.Circuits");
         }
