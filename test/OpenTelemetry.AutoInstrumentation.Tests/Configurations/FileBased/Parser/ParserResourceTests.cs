@@ -65,20 +65,22 @@ public class ParserResourceTests
         Assert.NotNull(config.Resource.DetectionDevelopment);
 
 #if NET
-        string[] expectedDetecors = [
+        string[] expectedDetectors =
+        [
             "azureappservice", "azurecontainerapps", "container", "host", "operatingsystem", "process", "processruntime"
-                ];
+        ];
 #endif
 #if NETFRAMEWORK
-        string[] expectedDetecors = [
+        string[] expectedDetectors =
+        [
             "azureappservice", "host", "operatingsystem", "process", "processruntime"
-                ];
+        ];
 #endif
 
         var detectors = config.Resource.DetectionDevelopment.Detectors;
         Assert.NotNull(detectors);
 
-        foreach (var alias in expectedDetecors)
+        foreach (var alias in expectedDetectors)
         {
             FileBasedTestHelper.AssertAliasPropertyExists(detectors, alias);
         }

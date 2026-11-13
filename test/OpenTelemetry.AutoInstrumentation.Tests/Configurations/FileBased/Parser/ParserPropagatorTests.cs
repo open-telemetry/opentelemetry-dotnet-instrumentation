@@ -21,9 +21,10 @@ public class ParserPropagatorTests
         var composite = config.Propagator.Composite;
         Assert.Null(config.Propagator.CompositeList);
 
-        string[] expectedPropagators = [
+        string[] expectedPropagators =
+        [
             "tracecontext", "baggage", "b3", "b3multi",
-                ];
+        ];
 
         foreach (var expected in expectedPropagators)
         {

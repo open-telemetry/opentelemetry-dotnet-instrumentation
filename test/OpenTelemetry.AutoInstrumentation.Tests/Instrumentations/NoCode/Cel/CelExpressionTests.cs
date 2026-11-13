@@ -1173,7 +1173,11 @@ public class CelExpressionTests
 
         public override string FullName
         {
-            get => $"{FirstName} {LastName}";
+            get
+            {
+                return $"{FirstName} {LastName}";
+            }
+
             set
             {
                 var parts = value?.Split(' ');

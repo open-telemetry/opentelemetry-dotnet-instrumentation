@@ -13,16 +13,16 @@ public class RuntimeSamplerConfigurationTests
     {
         Assert.Equal(16, Marshal.SizeOf<RuntimeSamplerConfiguration>());
         Assert.Equal(RuntimeSamplerConfiguration.Size, (uint)Marshal.SizeOf<RuntimeSamplerConfiguration>());
-        Assert.Equal(IntPtr.Zero, Marshal.OffsetOf<RuntimeSamplerConfiguration>(nameof(RuntimeSamplerConfiguration.StructureSize)));
-        Assert.Equal(new IntPtr(4), Marshal.OffsetOf<RuntimeSamplerConfiguration>(nameof(RuntimeSamplerConfiguration.CpuSamplingIntervalMilliseconds)));
-        Assert.Equal(new IntPtr(8), Marshal.OffsetOf<RuntimeSamplerConfiguration>(nameof(RuntimeSamplerConfiguration.SelectiveThreadSamplingIntervalMilliseconds)));
-        Assert.Equal(new IntPtr(12), Marshal.OffsetOf<RuntimeSamplerConfiguration>(nameof(RuntimeSamplerConfiguration.MaxAllocationSamplesPerMinute)));
+        Assert.Equal(0, Marshal.OffsetOf<RuntimeSamplerConfiguration>(nameof(RuntimeSamplerConfiguration.StructureSize)).ToInt32());
+        Assert.Equal(4, Marshal.OffsetOf<RuntimeSamplerConfiguration>(nameof(RuntimeSamplerConfiguration.CpuSamplingIntervalMilliseconds)).ToInt32());
+        Assert.Equal(8, Marshal.OffsetOf<RuntimeSamplerConfiguration>(nameof(RuntimeSamplerConfiguration.SelectiveThreadSamplingIntervalMilliseconds)).ToInt32());
+        Assert.Equal(12, Marshal.OffsetOf<RuntimeSamplerConfiguration>(nameof(RuntimeSamplerConfiguration.MaxAllocationSamplesPerMinute)).ToInt32());
 
         Assert.Equal(24, Marshal.SizeOf<RuntimeSamplerState>());
         Assert.Equal(RuntimeSamplerState.Size, (uint)Marshal.SizeOf<RuntimeSamplerState>());
-        Assert.Equal(IntPtr.Zero, Marshal.OffsetOf<RuntimeSamplerState>(nameof(RuntimeSamplerState.StructureSize)));
-        Assert.Equal(new IntPtr(4), Marshal.OffsetOf<RuntimeSamplerState>(nameof(RuntimeSamplerState.Authority)));
-        Assert.Equal(new IntPtr(8), Marshal.OffsetOf<RuntimeSamplerState>(nameof(RuntimeSamplerState.CommittedConfiguration)));
+        Assert.Equal(0, Marshal.OffsetOf<RuntimeSamplerState>(nameof(RuntimeSamplerState.StructureSize)).ToInt32());
+        Assert.Equal(4, Marshal.OffsetOf<RuntimeSamplerState>(nameof(RuntimeSamplerState.Authority)).ToInt32());
+        Assert.Equal(8, Marshal.OffsetOf<RuntimeSamplerState>(nameof(RuntimeSamplerState.CommittedConfiguration)).ToInt32());
     }
 
     [Theory]

@@ -91,7 +91,7 @@ finally
 
   <!-- StyleCop -->
   <ItemGroup>
-    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="all" />
+    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.3.180" PrivateAssets="all" />
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" />
     <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" Link="GlobalSuppressions.solution.cs" />
   </ItemGroup>

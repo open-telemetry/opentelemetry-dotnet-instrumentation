@@ -10,15 +10,16 @@ namespace OpenTelemetry.AutoInstrumentation;
 internal static class NativeCallTargetUnmanagedMemoryHelper
 {
     private const int SizeOfMemorySegment = 750 * 1024;
-    private static readonly int SizeOfPointer = Marshal.SizeOf<IntPtr>();
-    private static readonly List<IntPtr> Segments = new(5);
-    private static IntPtr _currentSegment;
+
+    private static readonly int SizeOfPointer = Marshal.SizeOf<nint>();
+    private static readonly List<nint> Segments = new(5);
+    private static nint _currentSegment;
     private static int _segmentOffset;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IntPtr Allocate(int bytesCount)
+    public static nint Allocate(int bytesCount)
     {
-        if (_currentSegment == IntPtr.Zero)
+        if (_currentSegment == 0)
         {
             CreateSegment();
         }
@@ -47,17 +48,17 @@ internal static class NativeCallTargetUnmanagedMemoryHelper
             Marshal.FreeCoTaskMem(Segments[i]);
         }
 
-        _currentSegment = IntPtr.Zero;
+        _currentSegment = 0;
         _segmentOffset = 0;
         Segments.Clear();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static unsafe IntPtr AllocateAndWriteUtf16String(string? value)
+    public static unsafe nint AllocateAndWriteUtf16String(string? value)
     {
         if (value is null)
         {
-            return IntPtr.Zero;
+            return 0;
         }
 
         var stringPtrSize = value.Length * sizeof(char);
@@ -72,11 +73,11 @@ internal static class NativeCallTargetUnmanagedMemoryHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IntPtr AllocateAndWriteUtf16StringArray(string[]? array)
+    public static nint AllocateAndWriteUtf16StringArray(string[]? array)
     {
         if (array is null || array.Length == 0)
         {
-            return IntPtr.Zero;
+            return 0;
         }
 
         var unmanagedArray = Allocate(array.Length * SizeOfPointer);
@@ -89,7 +90,7 @@ internal static class NativeCallTargetUnmanagedMemoryHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IntPtr AllocateAndWriteUtf16StringArray(string arrayItem1)
+    public static nint AllocateAndWriteUtf16StringArray(string arrayItem1)
     {
         var unmanagedArray = Allocate(SizeOfPointer);
         Marshal.WriteIntPtr(unmanagedArray, 0, AllocateAndWriteUtf16String(arrayItem1));
@@ -97,7 +98,7 @@ internal static class NativeCallTargetUnmanagedMemoryHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IntPtr AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2)
+    public static nint AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2)
     {
         var unmanagedArray = Allocate(2 * SizeOfPointer);
         Marshal.WriteIntPtr(unmanagedArray, 0, AllocateAndWriteUtf16String(arrayItem1));
@@ -106,7 +107,7 @@ internal static class NativeCallTargetUnmanagedMemoryHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IntPtr AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2, string arrayItem3)
+    public static nint AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2, string arrayItem3)
     {
         var unmanagedArray = Allocate(3 * SizeOfPointer);
         Marshal.WriteIntPtr(unmanagedArray, 0, AllocateAndWriteUtf16String(arrayItem1));
@@ -116,7 +117,7 @@ internal static class NativeCallTargetUnmanagedMemoryHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IntPtr AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2, string arrayItem3, string arrayItem4)
+    public static nint AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2, string arrayItem3, string arrayItem4)
     {
         var unmanagedArray = Allocate(4 * SizeOfPointer);
         Marshal.WriteIntPtr(unmanagedArray, 0, AllocateAndWriteUtf16String(arrayItem1));
@@ -127,7 +128,7 @@ internal static class NativeCallTargetUnmanagedMemoryHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IntPtr AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2, string arrayItem3, string arrayItem4, string arrayItem5)
+    public static nint AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2, string arrayItem3, string arrayItem4, string arrayItem5)
     {
         var unmanagedArray = Allocate(5 * SizeOfPointer);
         Marshal.WriteIntPtr(unmanagedArray, 0, AllocateAndWriteUtf16String(arrayItem1));
@@ -139,7 +140,7 @@ internal static class NativeCallTargetUnmanagedMemoryHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IntPtr AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2, string arrayItem3, string arrayItem4, string arrayItem5, string arrayItem6)
+    public static nint AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2, string arrayItem3, string arrayItem4, string arrayItem5, string arrayItem6)
     {
         var unmanagedArray = Allocate(6 * SizeOfPointer);
         Marshal.WriteIntPtr(unmanagedArray, 0, AllocateAndWriteUtf16String(arrayItem1));
@@ -152,7 +153,7 @@ internal static class NativeCallTargetUnmanagedMemoryHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IntPtr AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2, string arrayItem3, string arrayItem4, string arrayItem5, string arrayItem6, string arrayItem7)
+    public static nint AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2, string arrayItem3, string arrayItem4, string arrayItem5, string arrayItem6, string arrayItem7)
     {
         var unmanagedArray = Allocate(7 * SizeOfPointer);
         Marshal.WriteIntPtr(unmanagedArray, 0, AllocateAndWriteUtf16String(arrayItem1));
@@ -166,7 +167,7 @@ internal static class NativeCallTargetUnmanagedMemoryHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IntPtr AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2, string arrayItem3, string arrayItem4, string arrayItem5, string arrayItem6, string arrayItem7, string arrayItem8)
+    public static nint AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2, string arrayItem3, string arrayItem4, string arrayItem5, string arrayItem6, string arrayItem7, string arrayItem8)
     {
         var unmanagedArray = Allocate(8 * SizeOfPointer);
         Marshal.WriteIntPtr(unmanagedArray, 0, AllocateAndWriteUtf16String(arrayItem1));
@@ -181,7 +182,7 @@ internal static class NativeCallTargetUnmanagedMemoryHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IntPtr AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2, string arrayItem3, string arrayItem4, string arrayItem5, string arrayItem6, string arrayItem7, string arrayItem8, string arrayItem9)
+    public static nint AllocateAndWriteUtf16StringArray(string arrayItem1, string arrayItem2, string arrayItem3, string arrayItem4, string arrayItem5, string arrayItem6, string arrayItem7, string arrayItem8, string arrayItem9)
     {
         var unmanagedArray = Allocate(9 * SizeOfPointer);
         Marshal.WriteIntPtr(unmanagedArray, 0, AllocateAndWriteUtf16String(arrayItem1));

@@ -18,9 +18,9 @@ internal readonly record struct EquatableArray<T>
 
     public int Count => _array.Length;
 
-    public bool Equals(EquatableArray<T> array)
+    public bool Equals(EquatableArray<T> other)
     {
-        return _array.AsSpan().SequenceEqual(array.AsSpan());
+        return _array.AsSpan().SequenceEqual(other.AsSpan());
     }
 
     public override int GetHashCode()
