@@ -213,7 +213,11 @@ internal static class EnvironmentConfigurationMetricHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddRuntimeInstrumentation(MeterProviderBuilder builder)
         {
+#if NET
+            return builder.AddMeter("System.Runtime");
+#else
             return builder.AddRuntimeInstrumentation();
+#endif
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
