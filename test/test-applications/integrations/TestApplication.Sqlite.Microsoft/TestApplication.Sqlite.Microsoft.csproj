@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' != 'net462' " />
-    <PackageReference Include="Microsoft.Data.Sqlite" VersionOverride="10.0.15" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net462' " />
+    <PackageReference Include="Microsoft.Data.Sqlite" VersionOverride="11.0.0" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net462' " />
 
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Condition=" '$(LibraryVersion)' != '' and $([MSBuild]::VersionLessThan('$(LibraryVersion)', '10.0.11')) " />
   </ItemGroup>
