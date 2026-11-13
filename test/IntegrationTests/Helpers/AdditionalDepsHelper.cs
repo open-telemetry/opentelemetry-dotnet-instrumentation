@@ -17,6 +17,8 @@ internal static class AdditionalDepsHelper
             "additional-deps",
             Guid.NewGuid().ToString("N"));
 
+        _generatedDirectoryPath = outputDirectory;
+
         Generate(outputDirectory);
 
         // SDK commands can spawn tools whose target framework and runtime differ, such as Roslyn.
@@ -37,6 +39,8 @@ internal static class AdditionalDepsHelper
 
         return outputDirectory;
     });
+
+    private static string? _generatedDirectoryPath;
 
     public static string OutputDirectory => GeneratedDirectory.Value;
 
@@ -92,6 +96,28 @@ internal static class AdditionalDepsHelper
 
         Assert.True(exitedInTime, "AdditionalDeps generator timed out");
         Assert.True(process.ExitCode == 0, $"AdditionalDeps generator exited with code {process.ExitCode}.{Environment.NewLine}{helper.StandardOutput}{helper.ErrorOutput}");
+    }
+
+    public static void Cleanup()
+    {
+        var outputDirectory = _generatedDirectoryPath;
+        if (outputDirectory is null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (Directory.Exists(outputDirectory))
+            {
+                Directory.Delete(outputDirectory, recursive: true);
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Background SDK processes may still hold store files open on Windows.
+            Console.Error.WriteLine($"Could not remove AdditionalDeps test directory '{outputDirectory}': {ex.Message}");
+        }
     }
 }
 #endif
