@@ -31,9 +31,12 @@ internal class ResourceConfiguration
 
         if (Attributes != null)
         {
-            resourceAttributesWithPriority = [.. YamlAttribute.ParseAttributes(Attributes)
-                .Where(kv => kv.Value != null)
-                .Select(kv => new KeyValuePair<string, object>(kv.Key, kv.Value!))];
+            resourceAttributesWithPriority =
+            [
+                .. YamlAttribute.ParseAttributes(Attributes)
+                    .Where(kv => kv.Value != null)
+                    .Select(kv => new KeyValuePair<string, object>(kv.Key, kv.Value!))
+            ];
         }
 
         if (!string.IsNullOrEmpty(AttributesList))

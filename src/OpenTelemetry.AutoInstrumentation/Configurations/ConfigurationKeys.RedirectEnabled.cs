@@ -3,9 +3,6 @@
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
-/// <summary>
-/// Configuration keys
-/// </summary>
 internal partial class ConfigurationKeys
 {
     /// <summary>

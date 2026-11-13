@@ -89,7 +89,7 @@ public class AdoNetStubTests(ITestOutputHelper output) : TestHelper("AdoNetStub"
                 new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "server.address", Value = new AnyValue { StringValue = "FakeServer" } },
                 new() { Key = "server.port", Value = new AnyValue { IntValue = 5433 } }
-                ]);
+            ]);
         collector.ExpectAdoNet(
             "SELECT FakeTable",
             [
@@ -99,7 +99,7 @@ public class AdoNetStubTests(ITestOutputHelper output) : TestHelper("AdoNetStub"
                 new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "server.address", Value = new AnyValue { StringValue = "FakeServer" } },
                 new() { Key = "server.port", Value = new AnyValue { IntValue = 5433 } }
-                ]);
+            ]);
         collector.ExpectAdoNet(
             "INSERT FakeTable",
             [
@@ -109,7 +109,7 @@ public class AdoNetStubTests(ITestOutputHelper output) : TestHelper("AdoNetStub"
                 new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "server.address", Value = new AnyValue { StringValue = "FakeServer" } },
                 new() { Key = "server.port", Value = new AnyValue { IntValue = 5433 } }
-                ]);
+            ]);
         collector.ExpectAdoNet(
             "SELECT FakeTable",
             [
@@ -119,7 +119,7 @@ public class AdoNetStubTests(ITestOutputHelper output) : TestHelper("AdoNetStub"
                 new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "server.address", Value = new AnyValue { StringValue = "FakeServer" } },
                 new() { Key = "server.port", Value = new AnyValue { IntValue = 5433 } }
-                ]);
+            ]);
         collector.ExpectAdoNet(
             "SELECT FakeTable",
             [
@@ -129,7 +129,7 @@ public class AdoNetStubTests(ITestOutputHelper output) : TestHelper("AdoNetStub"
                 new() { Key = "db.namespace", Value = new AnyValue { StringValue = "FakeDatabase" } },
                 new() { Key = "server.address", Value = new AnyValue { StringValue = "FakeServer" } },
                 new() { Key = "server.port", Value = new AnyValue { IntValue = 5433 } }
-                ]);
+            ]);
 
         RunTestApplication(new() { });
 

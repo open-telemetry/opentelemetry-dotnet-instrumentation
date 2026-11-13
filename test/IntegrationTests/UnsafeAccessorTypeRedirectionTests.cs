@@ -13,6 +13,7 @@ namespace IntegrationTests;
 /// resolving or loading the assembly named by the attribute. It also verifies that incomplete unsafe-accessor
 /// declarations are ignored.
 /// </summary>
+/// <param name="output">The test output helper.</param>
 public class UnsafeAccessorTypeRedirectionTests(ITestOutputHelper output)
     : TestHelper("UnsafeAccessorTypeRedirection", output)
 {

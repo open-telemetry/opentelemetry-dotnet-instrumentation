@@ -175,11 +175,12 @@ internal sealed class EnvironmentHelper
         {
             TestAppStartupMode.Auto => IsCoreClr() ||
 #if NET
-            _testApplicationDirectory.Contains("aspnet", StringComparison.Ordinal)
+                _testApplicationDirectory.Contains("aspnet", StringComparison.Ordinal)
 #else
-            _testApplicationDirectory.Contains("aspnet")
+                _testApplicationDirectory.Contains("aspnet")
 #endif
-            ? ".dll" : GetExecutableExtension(),
+                    ? ".dll"
+                    : GetExecutableExtension(),
             TestAppStartupMode.DotnetCLI => ".dll",
             TestAppStartupMode.Exe => GetExecutableExtension(),
             _ => throw new InvalidOperationException($"Unknown startup mode '{startupMode}'")

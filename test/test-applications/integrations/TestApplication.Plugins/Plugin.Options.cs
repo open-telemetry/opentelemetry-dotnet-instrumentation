@@ -9,9 +9,9 @@ using OpenTelemetry.Instrumentation.Http;
 namespace TestApplication.Plugins;
 
 #pragma warning disable CA1515 // Consider making public types internal. Needed for AutoInstrumentation plugin loading.
-/// <summary>
+/// <content>
 /// Options extensions of the plugin.
-/// </summary>
+/// </content>
 public partial class Plugin : IPlugin,
     IConfigureTracesOptions<HttpClientTraceInstrumentationOptions>,
     IConfigureTracesOptions<OtlpExporterOptions>,
