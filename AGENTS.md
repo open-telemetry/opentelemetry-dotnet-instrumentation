@@ -30,7 +30,7 @@ Useful parameters (apply to the test targets):
 
 - `--test-project <substring>` - select test projects by name substring.
 - `--test-name <substring>` - becomes an xunit `FullyQualifiedName~` filter.
-- `--test-target-framework net8.0|net9.0|net10.0|net462|net472|...` - otherwise
+- `--test-target-framework net10.0|net11.0|net462|net472|...` - otherwise
   every TFM the project supports is run.
 - `--containers linux|windows|windows-only|none` - integration tests are
   tagged `[Trait("Containers", "Linux"|"Windows|Any")]`; use `none` to skip every
@@ -42,7 +42,7 @@ Running one integration test:
 
 ```cmd
 ./build.cmd BuildTracer
-./build.cmd --target ManagedTests --test-project IntegrationTests --test-name MongoDBTests --test-target-framework net8.0
+./build.cmd --target ManagedTests --test-project IntegrationTests --test-name MongoDBTests --test-target-framework net10.0
 ```
 
 Integration tests can also be run straight from an IDE / `dotnet test` once
