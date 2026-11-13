@@ -4201,7 +4201,7 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
         int majorVersion = runtime_information_.major_version;
         int minorVersion = runtime_information_.minor_version;
 
-        if (majorVersion >= 6)
+        if (majorVersion >= 10)
         {
             // Calculate key the same way as AssemblyRedirectionSourceGenerator:
             frameworkVersion = (majorVersion * 10 + minorVersion);
@@ -4211,10 +4211,10 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
         }
         else
         {
-            // Default to .NET 8.0 if version detection fails or unsupported version
-            frameworkVersion = 80;
+            // Default to .NET 10.0 if version detection fails or unsupported version
+            frameworkVersion = 100;
             Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Unsupported or undetected .NET (Core) version ",
-                         majorVersion, ".", minorVersion, ", using default version 80");
+                         majorVersion, ".", minorVersion, ", using default version 100");
         }
     }
 
