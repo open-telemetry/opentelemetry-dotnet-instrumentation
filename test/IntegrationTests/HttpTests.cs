@@ -44,7 +44,7 @@ public class HttpTests : TestHelper
             return true;
         });
 
-#if NET10_0_OR_GREATER
+#if NET
         collector.Expect("Microsoft.AspNetCore.Components");
         // Note: Microsoft.AspNetCore.Components.Server.Circuits metrics require the blazor.server.js
         // JavaScript client to establish a proper Blazor Server circuit with component rendering.
@@ -148,7 +148,7 @@ public class HttpTests : TestHelper
         collector.Expect("Microsoft.AspNetCore.Diagnostics");
         collector.Expect("Microsoft.AspNetCore.RateLimiting");
 
-#if NET10_0_OR_GREATER
+#if NET
         collector.Expect("Microsoft.AspNetCore.Components");
         // Note: Microsoft.AspNetCore.Components.Server.Circuits metrics require the blazor.server.js
         // JavaScript client to establish a proper Blazor Server circuit with component rendering.
