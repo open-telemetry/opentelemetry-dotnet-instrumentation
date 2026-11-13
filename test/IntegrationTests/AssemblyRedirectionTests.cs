@@ -11,40 +11,26 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
 
     [Theory]
     [Trait("Category", "EndToEnd")]
-#if NET8_0
-    // Case 1: Lower version should be redirected with/without native profiler
-    [InlineData("8.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", true)]
-    [InlineData("8.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", false)]
+#if NET10_0
+    // Case 1: Redirect the lower framework version to the distribution's DiagnosticSource 11 with the native profiler.
+    // StartupHook-only keeps DiagnosticSource in the Default ALC; AdditionalDepsFallback covers upgrading that copy.
+    [InlineData("10.0.15", AssemblyName, "11.0.0.0", "11.0.26.53018", true)]
     // Case 2: Equal version, should NOT be redirected with/without native profiler
-    [InlineData("10.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", true)]
-    [InlineData("10.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", false)]
-    // Case 3: Higher version should NOT be redirected with/without native profiler
-    // TODO even LibraryVersion=10.0.2 loads assembly 10.0.0.0, making it identical to case 2 from the loaded assembly perspective
-#elif NET9_0
-    // Case 1: Lower version should be redirected with/without native profiler
-    [InlineData("9.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", true)]
-    [InlineData("9.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", false)]
+    [InlineData("11.0.0", AssemblyName, "11.0.0.0", "11.0.26.53018", true)]
+    [InlineData("11.0.0", AssemblyName, "11.0.0.0", "11.0.26.53018", false)]
+#elif NET11_0
+    // Case 1: Lower version is not possible for DiagnosticSource on .NET 11,
+    //         msbuild will ignore a lower version of this package since it's part of .NET 11 SDK
     // Case 2: Equal version, should NOT be redirected with/without native profiler
-    [InlineData("10.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", true)]
-    [InlineData("10.0.0", AssemblyName, "10.0.0.0", "10.0.25.52411", false)]
-    // Case 3: Higher version should NOT be redirected with/without native profiler
-    // TODO even LibraryVersion=10.0.2 loads assembly 10.0.0.0, making it identical to case 2 from the loaded assembly perspectives
-#elif NET10_0
-    // Case 1: Lower version is not possible for DiagnosticSource on .NET 10,
-    //         msbuild will ignore a lower version of this package since it's part of .NET 10 SDK
-    // Case 2: Equal version, should NOT be redirected with/without native profiler
-    // TODO currently different test jobs use different versions of .net runtime:
-    //   - test-build-container (ubuntu-22.04, alpine, alpine-x64, linux-musl): DS file version 10.0.426.12010
-    //   - test-build-managed (net10.0, windows-2022): DS file version 10.0.1426.52326
-    [InlineData("10.0.14", AssemblyName, "10.0.0.0", "10.0.1426.52326", true)]
-    [InlineData("10.0.14", AssemblyName, "10.0.0.0", "10.0.1426.52326", false)]
-    // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
+    // .NET 11.0.0 ships DiagnosticSource with file version 11.0.26.53018.
+    [InlineData("11.0.0", AssemblyName, "11.0.0.0", "11.0.26.53018", true)]
+    [InlineData("11.0.0", AssemblyName, "11.0.0.0", "11.0.26.53018", false)]
 #elif NETFRAMEWORK
     // Case 1: Lower version should be redirected (native profiler mandatory)
-    [InlineData("6.0.0", AssemblyName, "10.0.0.14", "10.0.1426.52326")]
+    [InlineData("6.0.0", AssemblyName, "11.0.0.0", "11.0.26.53018")]
+    [InlineData("10.0.15", AssemblyName, "11.0.0.0", "11.0.26.53018")]
     // Case 2: Equal version, should NOT be redirected (native profiler mandatory)
-    [InlineData("10.0.14", AssemblyName, "10.0.0.14", "10.0.1426.52326")]
-    // Case 3: Higher version is not possible for DiagnosticSource on .NET 10, the instrumentation tool is already using the highest possible version
+    [InlineData("11.0.0", AssemblyName, "11.0.0.0", "11.0.26.53018")]
 #endif
     public void DefaultRedirection(
         string libraryVersion,
@@ -53,6 +39,11 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
         string expectedAssemblyFileVersion,
         bool enableNativeProfiler = true)
     {
+#if NET10_0
+        // Validate the application's dependencies and native redirection without the shared fallback.
+        SetEnvironmentVariable("DOTNET_ADDITIONAL_DEPS", null);
+        SetEnvironmentVariable("DOTNET_SHARED_STORE", null);
+#endif
 #if NETFRAMEWORK
         Assert.True(enableNativeProfiler, "Native profiler is required for assembly redirection on .NET Framework");
         var excludedNames = string.Empty;
@@ -88,13 +79,8 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
 #if NET
     [Theory]
     [Trait("Category", "EndToEnd")]
-#if NET8_0
-    [InlineData("8.0.0", "10.0.0.0", "10.0.25.52411")]
-#elif NET9_0
-    [InlineData("9.0.0", "10.0.0.0", "10.0.25.52411")]
-#elif NET10_0
-    [InlineData("10.0.14", "10.0.0.0", "10.0.1426.52326")]
-#endif
+    // AdditionalDeps supplies DiagnosticSource 11 on .NET 10; .NET 11 uses its shared framework copy.
+    [InlineData("10.0.15", "11.0.0.0", "11.0.26.53018")]
     public void AdditionalDepsFallback(
         string libraryVersion,
         string expectedAssemblyVersion,
@@ -108,7 +94,7 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
 
         try
         {
-            GenerateAdditionalDeps(generatedDirectory);
+            AdditionalDepsHelper.Generate(generatedDirectory, Output);
 
             using var collector = new MockSpansCollector(Output);
             SetExporter(collector);
@@ -135,55 +121,25 @@ public class AssemblyRedirectionTests(ITestOutputHelper output) : TestHelper("As
         }
     }
 
-    private void GenerateAdditionalDeps(string outputDirectory)
+#endif
+
+#if NET10_0
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void StartupHookOnlyFailsWithoutCompatibleDiagnosticSource()
     {
-        var tracerHome = EnvironmentHelper.GetNukeBuildOutput();
-        var startInfo = new System.Diagnostics.ProcessStartInfo
-        {
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
+        // DiagnosticSource must stay in the Default ALC on .NET 10. Without a compatible
+        // application dependency or the host-level fallback, initialization is expected to fail.
+        SetEnvironmentVariable("DOTNET_ADDITIONAL_DEPS", null);
+        SetEnvironmentVariable("DOTNET_SHARED_STORE", null);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true");
 
-        // The same target-framework test assembly runs on Windows and Unix, so host selection must be
-        // made at runtime rather than with target-framework compilation symbols.
-        if (EnvironmentTools.IsWindows())
-        {
-            startInfo.FileName = "powershell.exe";
-            startInfo.ArgumentList.Add("-NoProfile");
-            startInfo.ArgumentList.Add("-NonInteractive");
-            startInfo.ArgumentList.Add("-ExecutionPolicy");
-            startInfo.ArgumentList.Add("Bypass");
-            startInfo.ArgumentList.Add("-File");
-            startInfo.ArgumentList.Add(Path.Combine(tracerHome, "generate-additional-deps.ps1"));
-            startInfo.ArgumentList.Add("-OutputPath");
-            startInfo.ArgumentList.Add(outputDirectory);
-        }
-        else
-        {
-            startInfo.FileName = "/bin/sh";
-            startInfo.ArgumentList.Add(Path.Combine(tracerHome, "generate-additional-deps.sh"));
-            startInfo.ArgumentList.Add("--output");
-            startInfo.ArgumentList.Add(outputDirectory);
-        }
+        var (_, errorOutput, _) = RunTestApplication(
+            new TestSettings { PackageVersion = "10.0.15" },
+            expectedExitCode: 0,
+            assertExitCode: Assert.NotEqual);
 
-        using var process = System.Diagnostics.Process.Start(startInfo);
-        Assert.NotNull(process);
-        using var helper = new ProcessHelper(process);
-
-        var exitedInTime = process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
-        if (!exitedInTime)
-        {
-            process.Kill();
-            process.WaitForExit();
-        }
-
-        Output.WriteLine($"AdditionalDeps generator exit code: {process.ExitCode}");
-        Output.WriteResult(helper);
-
-        Assert.True(exitedInTime, "AdditionalDeps generator timed out");
-        Assert.Equal(0, process.ExitCode);
+        Assert.Contains("System.Diagnostics.DiagnosticSource, Version=11.0.0.0", errorOutput, StringComparison.Ordinal);
     }
 #endif
 }

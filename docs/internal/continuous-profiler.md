@@ -172,7 +172,7 @@ sampler uses two independent buffers to store samples alternately.
 
 ### Requirements
 
-* .NET 8.0 or higher, OR
+* .NET 10.0 or higher, OR
 * .NET Framework 4.6.2 or higher
 
 ### .NET Framework support
@@ -330,7 +330,7 @@ and exports in the way defined by the plugin.
 
 ### Requirements
 
-* .NET 8.0 or higher
+* .NET 10.0 or higher
 
 > [!NOTE]
 > Allocation sampling is not supported on .NET Framework. The runtime does not
@@ -401,10 +401,10 @@ between your process and the Collector.
 
 ## Feature support matrix
 
-| Feature             | .NET 8.0+ | .NET Framework 4.6.2+ |
-|---------------------|-----------|-----------------------|
-| Thread sampling     | Supported | Supported             |
-| Allocation sampling | Supported | Not supported         |
+| Feature             | .NET 10.0+ | .NET Framework 4.6.2+ |
+|---------------------|------------|-----------------------|
+| Thread sampling     | Supported  | Supported             |
+| Allocation sampling | Supported  | Not supported         |
 
 ## Plugin
 

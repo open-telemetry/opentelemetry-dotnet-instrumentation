@@ -753,7 +753,7 @@ instrumentation/development:
             kind: server
 ```
 
-### ValueTask Support (.NET 8+ only)
+### ValueTask Support (.NET 10+ only)
 
 Instrument methods returning `ValueTask` or `ValueTask<T>`:
 

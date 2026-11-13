@@ -96,8 +96,8 @@ can supply the assembly.
 The instrumentation may depend on a **higher version** of a shared library
 than the version the application was built against. For example:
 
-- The application references `System.Diagnostics.DiagnosticSource` 8.0.0
-- The instrumentation requires `System.Diagnostics.DiagnosticSource` 10.0.0
+- The application references `System.Diagnostics.DiagnosticSource` 10.0.0
+- The instrumentation requires `System.Diagnostics.DiagnosticSource` 11.0.0
 
 If the lower version loads first, the instrumentation may not work
 correctly because it relies on APIs that only exist in the higher
@@ -169,8 +169,8 @@ missing or lower `Version` is raised to the mapped version; an equal or higher
 version is preserved.
 
 > **NOTE**: On .NET, the instrumentation ships the baseline versions of its
-> dependencies for each target framework (for example, for `net8.0` the
-> 8.0.0 versions, for `net9.0` - 9.0.0, etc.) unless known issues
+> dependencies for each target framework (for example, for `net10.0` the
+> 10.0.0 versions, for `net11.0` - 11.0.0, etc.) unless known issues
 > (such as vulnerabilities) exist.
 
 After rewriting, the runtime proceeds to resolve the rewritten

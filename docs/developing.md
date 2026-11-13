@@ -5,20 +5,19 @@
 On all platforms, the minimum requirements are:
 
 - [Docker](https://www.docker.com/products/docker-desktop)
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- [.NET 11.0 SDK](https://dotnet.microsoft.com/download/dotnet/11.0)
 
 ### Windows
 
-- [Visual Studio 2022 (17.4)](https://visualstudio.microsoft.com/downloads/)
+- [Visual Studio 2026 (18.12)](https://visualstudio.microsoft.com/downloads/)
   or higher
   - Workloads with the following components:
     - ASP.NET and web development
     - .NET desktop development
     - Desktop development with C++
   - Individual components:
-    - MSVC v142 - Visual Studio 2019 C++ x64/x86 build tools (version 14.29)
+    - MSVC v145 - Visual Studio 2026 C++ x64/x86 build tools
 
 Microsoft provides
 [evaluation developer VMs](https://developer.microsoft.com/en-us/windows/downloads/virtual-machines)
@@ -96,7 +95,7 @@ $artifacts = @(
     "bin-ubuntu-22.04",
     "bin-ubuntu-22.04-arm",
     "bin-macos-15",
-    "bin-windows-2022"
+    "bin-windows-2025"
 )
 $destFolder = "./bin/ci-artifacts/"
 $zipFilesFolder = "~/Downloads/"

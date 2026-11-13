@@ -21,7 +21,7 @@ If applicable, add screenshots to help explain your problem.
 
 - OpenTelemetry Automatic Instrumentation version: [e.g. 1.0.0]
 - OS: [e.g. Windows Server 2012 R2 ]
-- .NET version: [e.g. .NET Framework 4.6.2, .NET Core 2.1]
+- .NET version: [e.g. .NET Framework 4.6.2, .NET 11.0]
 - Deployment mechanism, one of the following:
   - [ ] [OpenTelemetry.AutoInstrumentation NuGet package](../../docs/README.md#install-using-nuget-packages)
   - [ ] [Shell scripts](../../docs/README.md#shell-scripts)

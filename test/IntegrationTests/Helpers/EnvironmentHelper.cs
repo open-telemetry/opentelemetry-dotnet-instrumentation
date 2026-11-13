@@ -122,6 +122,22 @@ internal sealed class EnvironmentHelper
         {
             environmentVariables[key] = CustomEnvironmentVariables[key];
         }
+
+#if NET10_0 && !NUGET_PACKAGE_TESTS
+        // .NET 10 keeps DiagnosticSource in the Default ALC, so StartupHook-only tests need
+        // the host to select the distribution's version before initialization (see issue #4924).
+        // Explicit settings, including null, let assembly-redirection tests control this setup.
+        if (!CustomEnvironmentVariables.ContainsKey("DOTNET_ADDITIONAL_DEPS") &&
+            !CustomEnvironmentVariables.ContainsKey("DOTNET_SHARED_STORE") &&
+            environmentVariables.ContainsKey("DOTNET_STARTUP_HOOKS") &&
+            !string.IsNullOrEmpty(environmentVariables["DOTNET_STARTUP_HOOKS"]) &&
+            (!environmentVariables.ContainsKey("CORECLR_ENABLE_PROFILING") || environmentVariables["CORECLR_ENABLE_PROFILING"] != "1"))
+        {
+            var generatedDirectory = AdditionalDepsHelper.OutputDirectory;
+            environmentVariables["DOTNET_ADDITIONAL_DEPS"] = Path.Combine(generatedDirectory, "AdditionalDeps");
+            environmentVariables["DOTNET_SHARED_STORE"] = Path.Combine(generatedDirectory, "store");
+        }
+#endif
     }
 
     public string GetProfilerPath()

@@ -3,7 +3,7 @@
   <Import Project="..\CommonExcludedAssets.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <Description>ASP.NET Core Bootstrapper used by the OpenTelemetry.AutoInstrumentation project.</Description>
   </PropertyGroup>
   

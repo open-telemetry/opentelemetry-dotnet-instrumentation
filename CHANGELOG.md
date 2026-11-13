@@ -9,13 +9,84 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support for .NET 11.
+
 ### Changed
 
 #### Dependency updates
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/core-1.21.0/VERSIONING.md#core-components):
+  [`1.21.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.21.0).
+- Following packages updated
+  - `OpenTelemetry.Exporter.Prometheus.HttpListener`
+    from `1.20.1-beta.1` to `1.21.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.GrpcNetClient`
+    from `1.20.1-beta.1` to `1.21.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Http` from `1.20.2` to `1.21.0`,
+  - `OpenTelemetry.Instrumentation.Process` from `1.20.1-rc.1` to `1.21.0-rc.1`,
+  - `OpenTelemetry.Instrumentation.Quartz` from `1.20.1-beta.1` to `1.21.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.20.1` to `1.21.0`,
+  - `OpenTelemetry.Instrumentation.SqlClient` from `1.20.2` to `1.21.0`,
+  - `OpenTelemetry.Instrumentation.StackExchangeRedis`
+    from `1.20.1-beta.1` to `1.21.0-beta.1`,
+  - `OpenTelemetry.Instrumentation.Wcf` from `1.20.1-beta.2` to `1.21.0-beta.1`,
+  - `OpenTelemetry.OpAmp.Client` from `0.10.0-alpha.1` to `0.11.0-alpha.1`,
+  - `OpenTelemetry.Shims.OpenTracing` from `1.20.1-beta.1` to `1.21.0-beta.1`,
+  - `OpenTelemetry.Resources.Azure` from `1.20.2-beta.1` to `1.21.0-beta.1`,
+  - `OpenTelemetry.Resources.Host` from `1.20.1-beta.1` to `1.21.0-beta.1`,
+  - `OpenTelemetry.Resources.OperatingSystem`
+    from `1.20.1-beta.1` to `1.21.0-beta.1`,
+  - `OpenTelemetry.Resources.Process` from `1.20.1-rc.1` to `1.21.0-rc.1`,
+  - `OpenTelemetry.Resources.ProcessRuntime`
+    from `1.20.1-beta.1` to `1.21.0-beta.1`.
+- .NET only, following packages updated
+  - `OpenTelemetry.Instrumentation.AspNetCore` from `1.20.2` to `1.21.0`,
+  - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
+    from `1.20.2-beta.1` to `1.21.0-beta.1`,
+  - `OpenTelemetry.Resources.Container` from `1.20.1-beta.1` to `1.21.0-beta.1`.
+- .NET 10 only, added `System.Diagnostics.DiagnosticSource` version `11.0.0`.
+- .NET 11 only, following packages updated
+  - `Microsoft.Extensions.Configuration` from `10.0.0` to `11.0.0`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.0` to `11.0.0`,
+  - `Microsoft.Extensions.Configuration.EnvironmentVariables`
+    from `10.0.0` to `11.0.0`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.0` to `11.0.0`,
+  - `Microsoft.Extensions.Logging` from `10.0.0` to `11.0.0`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.0` to `11.0.0`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions`
+    from `10.0.0` to `11.0.0`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` from `10.0.14` to `11.0.0`,
+  - `Microsoft.Extensions.Configuration` from `10.0.14` to `11.0.0`,
+  - `Microsoft.Extensions.Configuration.Abstractions`
+    from `10.0.14` to `11.0.0`,
+  - `Microsoft.Extensions.Configuration.Binder` from `10.0.14` to `11.0.0`,
+  - `Microsoft.Extensions.Configuration.EnvironmentVariables`
+    from `10.0.14` to `11.0.0`,
+  - `Microsoft.Extensions.DependencyInjection` from `10.0.14` to `11.0.0`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions`
+    from `10.0.14` to `11.0.0`,
+  - `Microsoft.Extensions.Diagnostics.Abstractions` from `10.0.14` to `11.0.0`,
+  - `Microsoft.Extensions.Logging` from `10.0.14` to `11.0.0`,
+  - `Microsoft.Extensions.Logging.Abstractions` from `10.0.14` to `11.0.0`,
+  - `Microsoft.Extensions.Logging.Configuration` from `10.0.14` to `11.0.0`,
+  - `Microsoft.Extensions.Options` from `10.0.14` to `11.0.0`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions`
+    from `10.0.14` to `11.0.0`,
+  - `Microsoft.Extensions.Primitives` from `10.0.14` to `11.0.0`,
+  - `OpenTelemetry.Instrumentation.AspNet` from `1.20.3` to `1.21.0`,
+  - `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
+    from `1.20.3` to `1.21.0`,
+  - `System.Diagnostics.DiagnosticSource` from `10.0.14` to `11.0.0`,
+  - `System.IO.Pipelines` from `10.0.14` to `11.0.0`,
+  - `System.Text.Encodings.Web` from `10.0.14` to `11.0.0`,
+  - `System.Text.Json` from `10.0.14` to `11.0.0`.
+
 ### Deprecated
 
 ### Removed
+
+- Support for .NET 8 and .NET 9. Both frameworks reached end of support.
 
 ### Fixed
 
