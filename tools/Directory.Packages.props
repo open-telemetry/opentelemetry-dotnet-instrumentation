@@ -2,7 +2,7 @@
   <Import Project="..\Directory.Packages.props" />
   <ItemGroup>
     <PackageVersion Include="McMaster.Extensions.CommandLineUtils" Version="4.1.1" />
-    <PackageVersion Include="Microsoft.Build" Version="17.14.28" />
+    <PackageVersion Include="Microsoft.Build" Version="18.12.2" />
     <PackageVersion Include="NuGet.ProjectModel" Version="8.0.0" />
     <PackageVersion Include="System.IO.Abstractions" Version="23.0.0" />
     <!-- Override the vulnerable System.Security.Cryptography.Pkcs dependency from NuGet.ProjectModel.
