@@ -36,7 +36,13 @@ RUN apt-get update && \
     software-properties-common="${SOFTWARE_PROPERTIES_COMMON_VERSION}"
 
 # Install Clang 12 for C++20 support while retaining GCC 9/libstdc++ 9 compatibility.
-RUN curl -fsSL -o /tmp/llvm-snapshot.gpg.key https://apt.llvm.org/llvm-snapshot.gpg.key && \
+# Use a shell loop because curl 7.58 cannot retry all connection errors.
+RUN for attempt in 1 2 3 4 5; do \
+        curl -fsSL --connect-timeout 15 --max-time 120 -o /tmp/llvm-snapshot.gpg.key https://apt.llvm.org/llvm-snapshot.gpg.key && break; \
+        download_exit_code=$?; \
+        if [ "$attempt" -eq 5 ]; then exit "$download_exit_code"; fi; \
+        sleep "$((attempt * 2))"; \
+    done && \
     echo "8b2a587ffd672c4687e7581dad4b2f6c1bb2ad6b480cd9771ba2ff48e0b8c75d  /tmp/llvm-snapshot.gpg.key" | sha256sum -c - && \
     gpg --dearmor -o /usr/share/keyrings/llvm-archive-keyring.gpg /tmp/llvm-snapshot.gpg.key && \
     rm /tmp/llvm-snapshot.gpg.key && \
@@ -52,7 +58,12 @@ RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 
 # Install newer CMake. Ubuntu 18.04 provides CMake 3.10, but the native build uses newer commands.
-RUN curl -fsSL -o cmake.sh "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.sh" && \
+RUN for attempt in 1 2 3 4 5; do \
+        curl -fsSL --connect-timeout 15 --max-time 120 -o cmake.sh "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.sh" && break; \
+        download_exit_code=$?; \
+        if [ "$attempt" -eq 5 ]; then exit "$download_exit_code"; fi; \
+        sleep "$((attempt * 2))"; \
+    done && \
     echo "f582e02696ceee81818dc3378531804b2213ed41c2a8bc566253d16d894cefab  cmake.sh" | sha256sum -c - && \
     sh cmake.sh --skip-license --prefix=/usr/local && \
     rm cmake.sh
