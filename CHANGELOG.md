@@ -25,7 +25,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.Http` from `1.20.2` to `1.21.0`,
   - `OpenTelemetry.Instrumentation.Process` from `1.20.1-rc.1` to `1.21.0-rc.1`,
   - `OpenTelemetry.Instrumentation.Quartz` from `1.20.1-beta.1` to `1.21.0-beta.1`,
-  - `OpenTelemetry.Instrumentation.Runtime` from `1.20.1` to `1.21.0`,
   - `OpenTelemetry.Instrumentation.SqlClient` from `1.20.2` to `1.21.0`,
   - `OpenTelemetry.Instrumentation.StackExchangeRedis`
     from `1.20.1-beta.1` to `1.21.0-beta.1`,
@@ -77,6 +76,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OpenTelemetry.Instrumentation.AspNet` from `1.20.3` to `1.21.0`,
   - `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
     from `1.20.3` to `1.21.0`,
+  - `OpenTelemetry.Instrumentation.Runtime` from `1.20.1` to `1.21.0`,
   - `System.Diagnostics.DiagnosticSource` from `10.0.14` to `11.0.0`,
   - `System.IO.Pipelines` from `10.0.14` to `11.0.0`,
   - `System.Text.Encodings.Web` from `10.0.14` to `11.0.0`,
@@ -87,6 +87,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Removed
 
 - Support for .NET 8 and .NET 9. Both frameworks reached end of support.
+- Dependency on `OpenTelemetry.Instrumentation.Runtime` for .NET.
 
 ### Fixed
 

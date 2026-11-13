@@ -40,7 +40,6 @@
         { _W("OpenTelemetry.Instrumentation.Http"), {1, 21, 0, 1601} }, \
         { _W("OpenTelemetry.Instrumentation.Process"), {1, 21, 0, 1603} }, \
         { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 21, 0, 1602} }, \
-        { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 21, 0, 1607} }, \
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 21, 0, 1610} }, \
         { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 21, 0, 1609} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 21, 0, 1611} }, \
@@ -87,7 +86,6 @@
         { _W("OpenTelemetry.Instrumentation.Http"), {1, 21, 0, 1601} }, \
         { _W("OpenTelemetry.Instrumentation.Process"), {1, 21, 0, 1603} }, \
         { _W("OpenTelemetry.Instrumentation.Quartz"), {1, 21, 0, 1602} }, \
-        { _W("OpenTelemetry.Instrumentation.Runtime"), {1, 21, 0, 1607} }, \
         { _W("OpenTelemetry.Instrumentation.SqlClient"), {1, 21, 0, 1610} }, \
         { _W("OpenTelemetry.Instrumentation.StackExchangeRedis"), {1, 21, 0, 1609} }, \
         { _W("OpenTelemetry.Instrumentation.Wcf"), {1, 21, 0, 1611} }, \
