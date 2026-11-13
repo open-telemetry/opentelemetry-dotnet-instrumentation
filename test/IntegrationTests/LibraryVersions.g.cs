@@ -244,7 +244,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "2.6.1",
-                "2.6.2",
+                "3.0.0",
 #endif
             ];
             return theoryData;
