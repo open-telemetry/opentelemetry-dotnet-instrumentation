@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim@sha256:0104b334637a5f19aa9c983a91b54c89887c0984081f2068983107a6f6c21eeb
+FROM debian:bookworm-slim@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc
 
 # renovate: datasource=deb depName=bash
 ARG BASH_VERSION=5.2.15-2+b13

@@ -129,7 +129,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "3.3.0",
-                "3.5.0",
+                "3.6.0",
 #endif
             ];
             return theoryData;
@@ -180,7 +180,7 @@ public static partial class LibraryVersion
 #else
                 "5.2.3",
                 "6.1.5",
-                "7.1.1",
+                "7.1.2",
 #endif
             ];
             return theoryData;
@@ -227,7 +227,7 @@ public static partial class LibraryVersion
                 "3.7.0",
 #endif
 #if NET11_0 || NET10_0 || NET462
-                "3.13.0",
+                "3.14.0",
 #endif
 #endif
             ];
@@ -244,7 +244,7 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "2.6.1",
-                "2.6.2",
+                "3.0.0",
 #endif
             ];
             return theoryData;
@@ -428,7 +428,7 @@ public static partial class LibraryVersion
                 "3.3.0",
 #endif
 #if NET11_0 || NET10_0
-                "3.4.31",
+                "3.4.35",
 #endif
 #endif
             ];

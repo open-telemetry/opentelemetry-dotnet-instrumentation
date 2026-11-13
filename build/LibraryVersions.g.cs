@@ -67,7 +67,7 @@ public static partial class LibraryVersion
             "TestApplication.Log4NetBridge",
             [
                 new("3.3.0"),
-                new("3.5.0"),
+                new("3.6.0"),
             ]
         },
         {
@@ -76,7 +76,7 @@ public static partial class LibraryVersion
                 new("5.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "5.0.0" } }),
                 new("5.3.4", additionalMetaData: new() { { "NLogExtensionsLogging", "5.3.15" } }),
                 new("6.0.0", additionalMetaData: new() { { "NLogExtensionsLogging", "6.0.0" } }),
-                new("6.2.2", additionalMetaData: new() { { "NLogExtensionsLogging", "6.2.2" } }),
+                new("6.2.2", additionalMetaData: new() { { "NLogExtensionsLogging", "6.3.0" } }),
             ]
         },
         {
@@ -91,7 +91,7 @@ public static partial class LibraryVersion
             [
                 new("5.2.3"),
                 new("6.1.5"),
-                new("7.1.1"),
+                new("7.1.2"),
             ]
         },
         {
@@ -109,14 +109,14 @@ public static partial class LibraryVersion
                 new("3.0.0", supportedFrameworks: [ "net11.0", "net10.0", "net472" ]),
                 new("3.5.0", supportedFrameworks: [ "net11.0", "net10.0", "net472" ]),
                 new("3.7.0", supportedFrameworks: [ "net11.0", "net10.0", "net472" ]),
-                new("3.13.0", supportedFrameworks: [ "net11.0", "net10.0", "net472" ]),
+                new("3.14.0", supportedFrameworks: [ "net11.0", "net10.0", "net472" ]),
             ]
         },
         {
             "TestApplication.MySqlConnector",
             [
                 new("2.6.1"),
-                new("2.6.2"),
+                new("3.0.0"),
             ]
         },
         {
@@ -192,7 +192,7 @@ public static partial class LibraryVersion
                 new("3.0.25", supportedFrameworks: [ "net11.0", "net10.0" ]),
                 new("3.1.0", supportedFrameworks: [ "net11.0", "net10.0" ]),
                 new("3.3.0", supportedFrameworks: [ "net11.0", "net10.0" ]),
-                new("3.4.31", supportedFrameworks: [ "net11.0", "net10.0" ]),
+                new("3.4.35", supportedFrameworks: [ "net11.0", "net10.0" ]),
             ]
         },
         {
