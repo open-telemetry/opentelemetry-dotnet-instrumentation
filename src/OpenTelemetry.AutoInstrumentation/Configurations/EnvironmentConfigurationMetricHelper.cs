@@ -49,7 +49,6 @@ internal static class EnvironmentConfigurationMetricHelper
                         "Microsoft.AspNetCore.Routing",
                         "Microsoft.AspNetCore.Diagnostics",
                         "Microsoft.AspNetCore.RateLimiting",
-                        // Following metrics added in .NET 10
                         "Microsoft.AspNetCore.Components",
                         "Microsoft.AspNetCore.Components.Server.Circuits",
                         "Microsoft.AspNetCore.Components.Lifecycle",
@@ -200,7 +199,7 @@ internal static class EnvironmentConfigurationMetricHelper
         public static MeterProviderBuilder AddHttpClientInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
 #if NET
-            // HTTP has build in support for metrics in .NET8+. Executing OpenTelemetry.Instrumentation.Http in this case leads to duplicated metrics.
+            // HTTP has built in support for metrics in .NET8+. Executing OpenTelemetry.Instrumentation.Http in this case leads to duplicated metrics.
             return builder
                 .AddMeter("System.Net.Http")
                 .AddMeter("System.Net.NameResolution");

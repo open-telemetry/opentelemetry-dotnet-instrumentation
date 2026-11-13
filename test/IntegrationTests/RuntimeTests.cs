@@ -20,7 +20,7 @@ public class RuntimeTests : TestHelper
     {
         using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
-#if NET9_0_OR_GREATER
+#if NET
         collector.Expect("System.Runtime");
 #else
         collector.Expect("OpenTelemetry.Instrumentation.Runtime");
@@ -44,7 +44,7 @@ public class RuntimeTests : TestHelper
         using var collector = new MockMetricsCollector(Output);
         SetFileBasedExporter(collector);
         EnableFileBasedConfig();
-#if NET9_0_OR_GREATER
+#if NET
         collector.Expect("System.Runtime");
 #else
         collector.Expect("OpenTelemetry.Instrumentation.Runtime");

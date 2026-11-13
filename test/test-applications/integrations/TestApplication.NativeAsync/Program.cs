@@ -17,28 +17,17 @@ internal static class Program
         VerifyCompilationModes();
 
         EnsureEqual(42, await new RuntimeAsyncStructTarget(41).TaskOfTAsync().ConfigureAwait(false));
-#if NET10_0_OR_GREATER
         EnsureEqual(false, RuntimeAsyncStructTarget.WasInstrumented);
-#else
-        EnsureEqual(true, RuntimeAsyncStructTarget.WasInstrumented);
-#endif
 
         var runtimeTarget = new RuntimeAsyncTarget();
         await RuntimeAsyncTarget.TaskAsync().ConfigureAwait(false);
         EnsureEqual(42, await runtimeTarget.TaskOfTAsync().ConfigureAwait(false));
         EnsureEqual(91, await runtimeTarget.TaskOfTWithTaskReturningCallbackAsync().ConfigureAwait(false));
         await runtimeTarget.TaskWithTaskReturningCallbackAsync().ConfigureAwait(false);
-#if NET10_0_OR_GREATER
         EnsureEqual(0, TaskReturningAsyncCallbackIntegration.BeginCalls);
         EnsureEqual(0, TaskReturningAsyncCallbackIntegration.AsyncCalls);
         EnsureEqual(0, TaskReturningNonGenericAsyncCallbackIntegration.BeginCalls);
         EnsureEqual(0, TaskReturningNonGenericAsyncCallbackIntegration.AsyncCalls);
-#else
-        EnsureEqual(1, TaskReturningAsyncCallbackIntegration.BeginCalls);
-        EnsureEqual(1, TaskReturningAsyncCallbackIntegration.AsyncCalls);
-        EnsureEqual(1, TaskReturningNonGenericAsyncCallbackIntegration.BeginCalls);
-        EnsureEqual(1, TaskReturningNonGenericAsyncCallbackIntegration.AsyncCalls);
-#endif
         await ExpectFailureAsync(() => runtimeTarget.FaultedTaskOfTWithOnMethodEndAsync()).ConfigureAwait(false);
         EnsureEqual(1, FaultedTaskOfTOnMethodEndIntegration.Calls);
         EnsureEqual(true, FaultedTaskOfTOnMethodEndIntegration.ExceptionWasNull);
@@ -63,11 +52,7 @@ internal static class Program
 
     private static void VerifyCompilationModes()
     {
-#if NET10_0_OR_GREATER
         const bool runtimeAsyncExpected = true;
-#else
-        const bool runtimeAsyncExpected = false;
-#endif
         VerifyCompilationMode(typeof(RuntimeAsyncTarget), runtimeAsyncExpected);
         VerifyCompilationMode(typeof(RuntimeAsyncStructTarget), runtimeAsyncExpected);
         VerifyCompilationMode(typeof(ConventionalAsyncTarget), runtimeAsyncExpected: false);

@@ -934,7 +934,7 @@ internal sealed class OracleDatabaseOpenTelemetryCertificate : IDisposable
         {
             // Schannel cannot use the ephemeral key returned by CopyWithPrivateKey for TLS.
             var certificateBytes = certificate.Export(X509ContentType.Pkcs12);
-#if NET9_0_OR_GREATER
+#if NET
             return X509CertificateLoader.LoadPkcs12(
                 certificateBytes,
                 password: null,

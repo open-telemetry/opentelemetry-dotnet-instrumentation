@@ -5,7 +5,7 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Util;
 
 internal sealed class EnvironmentScope : IDisposable
 {
-#if NET9_0_OR_GREATER
+#if NET
     private static readonly Lock GlobalLock = new();
 #else
     private static readonly object GlobalLock = new();

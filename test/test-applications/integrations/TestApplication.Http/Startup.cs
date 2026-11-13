@@ -6,9 +6,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-#if NET10_0_OR_GREATER
 using Microsoft.AspNetCore.Identity;
-#endif
 
 namespace TestApplication.Http;
 
@@ -43,7 +41,6 @@ internal sealed class Startup
             });
         });
 
-#if NET10_0_OR_GREATER
         // Add Blazor Server to enable Components metrics
         services.AddRazorPages();
         services.AddServerSideBlazor();
@@ -54,7 +51,6 @@ internal sealed class Startup
 
         // Add in-memory user store for testing
         services.AddSingleton<IUserStore<TestUser>, InMemoryUserStore>();
-#endif
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -69,10 +65,8 @@ internal sealed class Startup
             .UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<TestHub>("/signalr"); // together with connection to SignalR Hub enables metrics for Microsoft.AspNetCore.Http.Connections for .NET8
-#if NET10_0_OR_GREATER
                 endpoints.MapBlazorHub(); // enables metrics for Microsoft.AspNetCore.Components.Server.Circuits in .NET10+
                 endpoints.MapFallbackToPage("/_Host"); // enables metrics for Microsoft.AspNetCore.Components in .NET10+
-#endif
 
                 endpoints.Map(
                     "/test",
@@ -127,7 +121,6 @@ internal sealed class Startup
                     await context.Response.WriteAsync("Logged out").ConfigureAwait(false);
                 });
 
-#if NET10_0_OR_GREATER
                 // Endpoints to trigger Identity metrics
                 endpoints.Map("/identity/create-user", async context =>
                 {
@@ -148,7 +141,6 @@ internal sealed class Startup
                     var user = await userManager.FindByNameAsync("testuser").ConfigureAwait(false);
                     await context.Response.WriteAsync(user != null ? "User found" : "User not found").ConfigureAwait(false);
                 });
-#endif
 
                 endpoints.Map(
                     "/exception",

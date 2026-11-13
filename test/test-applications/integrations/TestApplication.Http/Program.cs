@@ -43,7 +43,6 @@ internal static class Program
         // Trigger authorization metrics for .NET 10+
         httpClient.GetAsync(new Uri($"{dnsAddress}/protected")).Wait();
 
-#if NET10_0_OR_GREATER
         // Trigger Blazor Components metrics for .NET 10+
         // This will trigger Microsoft.AspNetCore.Components and Microsoft.AspNetCore.Components.Server.Circuits metrics
         httpClient.GetAsync(new Uri($"{dnsAddress}/blazor")).Wait();
@@ -52,7 +51,6 @@ internal static class Program
         // This will trigger Microsoft.AspNetCore.Identity metrics
         httpClient.GetAsync(new Uri($"{dnsAddress}/identity/create-user")).Wait();
         httpClient.GetAsync(new Uri($"{dnsAddress}/identity/find-user")).Wait();
-#endif
 
         var hubConnection = new HubConnectionBuilder().WithUrl($"{dnsAddress}/signalr").Build();
         hubConnection.StartAsync().Wait();
