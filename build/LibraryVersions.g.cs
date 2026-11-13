@@ -192,7 +192,7 @@ public static partial class LibraryVersion
                 new("3.0.25", supportedFrameworks: [ "net11.0", "net10.0" ]),
                 new("3.1.0", supportedFrameworks: [ "net11.0", "net10.0" ]),
                 new("3.3.0", supportedFrameworks: [ "net11.0", "net10.0" ]),
-                new("3.4.31", supportedFrameworks: [ "net11.0", "net10.0" ]),
+                new("3.4.35", supportedFrameworks: [ "net11.0", "net10.0" ]),
             ]
         },
         {

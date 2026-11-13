@@ -428,7 +428,7 @@ public static partial class LibraryVersion
                 "3.3.0",
 #endif
 #if NET11_0 || NET10_0
-                "3.4.31",
+                "3.4.35",
 #endif
 #endif
             ];
