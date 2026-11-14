@@ -20,6 +20,41 @@ You can also specify the configuration file path (default: `config.yaml`):
 OTEL_CONFIG_FILE=/path/to/config.yaml
 ```
 
+For ASP.NET applications on .NET Framework hosted by IIS, you can set both
+values in each application's `Web.config` instead:
+
+```xml
+<appSettings>
+  <add key="OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED" value="true" />
+  <add key="OTEL_CONFIG_FILE" value="C:\path\to\app\config.yaml" />
+</appSettings>
+```
+
+Each application reads its own YAML file, even when applications share an IIS
+application pool. The `Web.config` value for either setting takes precedence
+over the corresponding process environment variable, which acts as the default
+for applications that don't set it. A relative `OTEL_CONFIG_FILE` from
+`Web.config`, or the default `config.yaml` when YAML is enabled in
+`Web.config`, is resolved against the application's root directory. A relative
+path from an environment variable is resolved against the worker process
+directory, `%windir%\System32\inetsrv`, which is the same for every
+application.
+
+Only applications that use YAML configuration are isolated from each other.
+Other `OTEL_*` values in `Web.config` retain their existing behavior and are
+promoted to process environment variables, so they can still affect other
+applications in the pool that use environment variable configuration. The
+following remain process-wide even with a separate YAML file per application:
+
+- environment variable references inside YAML, which read from the process
+  environment,
+- the [settings that YAML does not support](#not-supported-configurations),
+  including CLR profiler settings,
+- the set of bytecode instrumentations, which the CLR profiler accepts only
+  from the first application to initialize. Enabling or disabling a bytecode
+  instrumentation in another application's YAML file does not change which
+  methods are instrumented.
+
 In your config file you can use environment variables in the format `${ENVIRONMENT_VARIABLE}`
 instead of a fixed value.
 

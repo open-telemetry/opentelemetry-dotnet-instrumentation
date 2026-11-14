@@ -14,6 +14,49 @@ public class EnvironmentInitializerTests
     private const string NonOtelVariableName = "OTHER_SETTING";
     private const string SomeValue = "val";
 
+    [Theory]
+    [InlineData(ConfigurationKeys.FileBasedConfiguration.Enabled)]
+    [InlineData(ConfigurationKeys.FileBasedConfiguration.FileName)]
+    [InlineData("OTEL_experimental_file_based_configuration_enabled")]
+    [InlineData("OTEL_config_file")]
+    public void DoesNotPromoteYamlSelectionFromHostedAppSettings(string setting)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { setting, null },
+            { OtelVariableName, null },
+        });
+
+        var appSettings = new NameValueCollection
+        {
+            { setting, SomeValue },
+            { OtelVariableName, SomeValue },
+        };
+        EnvironmentInitializer.Initialize(appSettings, isHosted: true);
+
+        Assert.Null(Environment.GetEnvironmentVariable(setting));
+        Assert.Equal(SomeValue, Environment.GetEnvironmentVariable(OtelVariableName));
+    }
+
+    [Theory]
+    [InlineData(ConfigurationKeys.FileBasedConfiguration.Enabled)]
+    [InlineData(ConfigurationKeys.FileBasedConfiguration.FileName)]
+    public void PromotesYamlSelectionFromNonHostedAppSettings(string setting)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { setting, null },
+        });
+
+        var appSettings = new NameValueCollection
+        {
+            { setting, SomeValue },
+        };
+        EnvironmentInitializer.Initialize(appSettings, isHosted: false);
+
+        Assert.Equal(SomeValue, Environment.GetEnvironmentVariable(setting));
+    }
+
     [Fact]
     public void SetsOTelEnvironmentVariable_WhenItWasEmpty()
     {
