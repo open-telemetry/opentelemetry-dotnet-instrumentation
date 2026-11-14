@@ -20,4 +20,6 @@ internal sealed class ConsoleThreadSample
     public string Source { get; set; } = string.Empty;
 
     public bool SelectedForFrequentSampling { get; set; }
+
+    public uint SelectiveSamplingIntervalMilliseconds { get; set; }
 }

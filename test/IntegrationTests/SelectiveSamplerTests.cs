@@ -39,6 +39,7 @@ public class SelectiveSamplerTests : TestHelper
         // Test app sleeps for 0.5s, sampling interval set to 0.05s
         Output.WriteLine($"Count: {threadSamples.Count}");
         Assert.InRange(threadSamples.Count, 7, 14);
+        Assert.All(threadSamples, sample => Assert.Equal(50u, sample.SelectiveSamplingIntervalMilliseconds));
 
         var threadNames = threadSamples.Select(sample => sample.ThreadName).Distinct(StringComparer.InvariantCultureIgnoreCase);
 
@@ -66,6 +67,8 @@ public class SelectiveSamplerTests : TestHelper
         var (output, _, processId) = RunTestApplication();
 
         var threadSamples = ConsoleProfileExporterHelpers.ExtractSamples(output);
+
+        Assert.All(threadSamples, sample => Assert.Equal(50u, sample.SelectiveSamplingIntervalMilliseconds));
 
         var groupedByTimestampAscending = threadSamples.GroupBy(sample => sample.TimestampNanoseconds).OrderBy(samples => samples.Key).ToList();
 
