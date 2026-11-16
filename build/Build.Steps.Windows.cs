@@ -16,7 +16,6 @@ partial class Build
 {
     Target CompileNativeSrcWindows => _ => _
         .Unlisted()
-        .After(SupportVs2026IfAvailable)
         .After(CompileManagedSrc)
         .After(GenerateAssemblyRedirectionSource)
         .OnlyWhenStatic(() => IsWin)
@@ -50,32 +49,8 @@ partial class Build
             }
         });
 
-    Target SupportVs2026IfAvailable => _ => _
-        .Unlisted()
-        .OnlyWhenStatic(() => IsWin)
-        .Executes(() =>
-        {
-            // Typical installation folder: C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\amd64
-            // Waiting for official support in Nuke package https://github.com/nuke-build/nuke/pull/1583
-
-            string[] editions = ["Enterprise", "Professional", "Community", "Preview"];
-
-            foreach (var edition in editions)
-            {
-                var msBuildPath = Path.Combine(SpecialFolder(SpecialFolders.ProgramFiles).NotNull(),
-                    $@"Microsoft Visual Studio\18\{edition}\MSBuild\Current\Bin\amd64\MSBuild.exe");
-
-                if (File.Exists(msBuildPath))
-                {
-                    MSBuildPath = msBuildPath;
-                    return;
-                }
-            }
-        });
-
     Target CompileNativeDependenciesForManagedTestsWindows => _ => _
         .Unlisted()
-        .After(SupportVs2026IfAvailable)
         .After(CompileManagedSrc)
         .After(GenerateAssemblyRedirectionSource)
         .OnlyWhenStatic(() => IsWin)
@@ -94,7 +69,6 @@ partial class Build
 
     Target CompileNativeTestsWindows => _ => _
         .Unlisted()
-        .After(SupportVs2026IfAvailable)
         .After(CompileNativeSrc)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
