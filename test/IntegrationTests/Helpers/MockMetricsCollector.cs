@@ -82,7 +82,7 @@ internal sealed class MockMetricsCollector : IDisposable
             cts.CancelAfter(timeout.Value);
             foreach (var collectedMetricsSnapshot in _metricsSnapshots.GetConsumingEnumerable(cts.Token))
             {
-                missingExpectations = new List<Expectation>(_expectations);
+                missingExpectations = [.. _expectations];
                 expectationsMet = new List<Collected>();
                 additionalEntries = new List<Collected>();
 

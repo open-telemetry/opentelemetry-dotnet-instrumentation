@@ -657,8 +657,7 @@ exit 1
     {
         return string.Join(
             "\n",
-            new[]
-            {
+            [
                 "#!/usr/bin/env bash",
                 "set -euo pipefail",
                 string.Empty,
@@ -680,7 +679,7 @@ exit 1
                 string.Empty,
                 "exec /u01/scripts/entrypoint.sh",
                 string.Empty,
-            });
+            ]);
     }
 
     private static async Task WaitForOracleDatabaseAsync(IContainer container, string password, CancellationToken cancellationToken)

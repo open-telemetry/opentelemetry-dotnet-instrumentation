@@ -23,11 +23,7 @@ internal static class ActivityTraceFlagsExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static string Fallback(byte flags)
         {
-            Span<char> buffer = stackalloc char[2];
-
-            buffer[0] = GetHexChar(flags >> 4);
-            buffer[1] = GetHexChar(flags & 0xF);
-
+            Span<char> buffer = [GetHexChar(flags >> 4), GetHexChar(flags & 0xF)];
             return buffer.ToString();
         }
     }

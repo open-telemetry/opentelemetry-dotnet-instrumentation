@@ -189,7 +189,7 @@ public class NpqsqlTests : TestHelper
             Assert.Single(tracedCopyBackendProcessIds);
             Assert.Equal(tracedCopyBackendProcessIds, untracedCopyBackendProcessIds);
             Assert.Equal(tracedBackendProcessIds, tracedCopyBackendProcessIds);
-            tracedApplicationNames = tracedApplicationNames.Concat(tracedCopyApplicationNames).ToList();
+            tracedApplicationNames = [.. tracedApplicationNames, .. tracedCopyApplicationNames];
         }
 
         foreach (var applicationName in tracedApplicationNames)

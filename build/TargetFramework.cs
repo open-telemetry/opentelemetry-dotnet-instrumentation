@@ -58,12 +58,14 @@ public class TargetFramework : Enumeration
 
     public class TargetFrameworkTypeConverter : TypeConverter<TargetFramework>
     {
-        private static readonly TargetFramework[] AllTargetFrameworks = typeof(TargetFramework)
-            .GetFields(BindingFlags.Static | BindingFlags.Public)
-            .Where(x => x.FieldType == typeof(TargetFramework))
-            .Select(x => x.GetValue(null))
-            .Cast<TargetFramework>()
-            .ToArray();
+        private static readonly TargetFramework[] AllTargetFrameworks =
+        [
+            .. typeof(TargetFramework)
+                .GetFields(BindingFlags.Static | BindingFlags.Public)
+                .Where(x => x.FieldType == typeof(TargetFramework))
+                .Select(x => x.GetValue(null))
+                .Cast<TargetFramework>()
+        ];
 
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {

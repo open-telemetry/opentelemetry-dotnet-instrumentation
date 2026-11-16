@@ -541,7 +541,7 @@ partial class Build
                     return;
                 }
 
-                targetFrameworks = new[] { TestTargetFramework };
+                targetFrameworks = [TestTargetFramework];
             }
 
             DotNetPublish(s => s
@@ -585,9 +585,7 @@ partial class Build
 
             if (!string.IsNullOrWhiteSpace(TestProject))
             {
-                unitTestProjects = unitTestProjects
-                    .Where(p => p.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))
-                    .ToArray();
+                unitTestProjects = [.. unitTestProjects.Where(p => p.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))];
                 if (unitTestProjects.Length == 0)
                 {
                     return;
@@ -596,11 +594,12 @@ partial class Build
 
             if (TestTargetFramework != TargetFramework.NOT_SPECIFIED)
             {
-                unitTestProjects = unitTestProjects
-                    .Where(p =>
+                unitTestProjects =
+                [
+                    .. unitTestProjects.Where(p =>
                         p.GetTargetFrameworks().Contains(TestTargetFramework) &&
                         (p.Name != Projects.Tests.AutoInstrumentationLoaderTests || TargetFrameworks.Contains(TestTargetFramework)))
-                    .ToArray();
+                ];
             }
 
             for (var i = 0; i < TestCount; i++)

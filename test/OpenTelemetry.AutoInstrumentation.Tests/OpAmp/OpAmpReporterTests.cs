@@ -46,7 +46,7 @@ public sealed class OpAmpReporterTests : IDisposable
         _reporter.NotifyEffectiveConfigChanged();
         RunDueTimers();
 
-        _plugin.ReadConfig = () => Array.Empty<EffectiveConfigFile>();
+        _plugin.ReadConfig = () => [];
         _reporter.NotifyEffectiveConfigChanged();
         RunDueTimers();
 
