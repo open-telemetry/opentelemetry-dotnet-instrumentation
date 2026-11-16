@@ -134,6 +134,7 @@ internal static class EnvironmentTools
 
     private static string? GetClrProfilerOSDirectoryName()
     {
+        // If OS_TYPE is null, then fallback to default value.
         var clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
         {
             "windows" => "win",
@@ -141,20 +142,13 @@ internal static class EnvironmentTools
             "linux-musl" => "linux-musl",
             "macos" => "osx",
             _ => null
-        };
-
-        // If OS_TYPE is null, then fallback to default value.
-        if (clrProfilerDirectoryName == null)
+        } ?? GetOS() switch
         {
-            clrProfilerDirectoryName = GetOS() switch
-            {
-                "win" => "win",
-                "linux" => "linux",
-                "osx" => "osx",
-                _ => null
-            };
-        }
-
+            "win" => "win",
+            "linux" => "linux",
+            "osx" => "osx",
+            _ => null
+        };
         return clrProfilerDirectoryName;
     }
 }
