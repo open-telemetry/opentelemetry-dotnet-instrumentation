@@ -70,7 +70,7 @@ public class GraphQLTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ASPNETCORE_INSTRUMENTATION_ENABLED", "true"); // AspNetCore Instrumentation enables propagation used in this test
         SetEnvironmentVariable("OTEL_TRACES_SAMPLER", "always_on");
 
-        int aspNetCorePort = TcpPortProvider.GetOpenPort();
+        var aspNetCorePort = TcpPortProvider.GetOpenPort();
         SetEnvironmentVariable("ASPNETCORE_URLS", $"http://127.0.0.1:{aspNetCorePort}/");
         using var process = StartTestApplication(new TestSettings { PackageVersion = packageVersion });
         using var helper = new ProcessHelper(process);

@@ -24,12 +24,7 @@ internal partial class AssemblyBindingUpdater(IOtelLogger logger, AssemblyCatalo
     {
         static XElement ResolveOrAddAssemblyBinding(XDocument config)
         {
-            var configuration = config.Element(Names.Configuration);
-            if (configuration == null)
-            {
-                throw new InvalidOperationException();
-            }
-
+            var configuration = config.Element(Names.Configuration) ?? throw new InvalidOperationException();
             var runtime = configuration.Element(Names.Runtime);
             if (runtime == null)
             {

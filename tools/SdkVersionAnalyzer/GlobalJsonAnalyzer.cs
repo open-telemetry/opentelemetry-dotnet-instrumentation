@@ -44,12 +44,7 @@ internal static class GlobalJsonAnalyzer
     private static string ModifySdkVersion(string content, DotnetSdkVersion requestedDotnetSdkVersion)
     {
         var rootNode = GetRootNode(content);
-        var sdkVersion = ExtractSdkVersion(rootNode);
-        if (sdkVersion is null)
-        {
-            throw new InvalidOperationException("Unable to extract SDK version from global.json.");
-        }
-
+        var sdkVersion = ExtractSdkVersion(rootNode) ?? throw new InvalidOperationException("Unable to extract SDK version from global.json.");
         var newSdkVersion = GetNewVersion(sdkVersion, requestedDotnetSdkVersion);
         var sdkNode = rootNode["sdk"]!.AsObject();
         sdkNode["version"] = newSdkVersion;

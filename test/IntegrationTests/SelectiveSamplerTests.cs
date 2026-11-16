@@ -134,7 +134,7 @@ public class SelectiveSamplerTests : TestHelper
             {
                 Assert.True(IsSelectiveSamplingSamplesBatch(group));
 
-                AssertExpectedSelectedSamples(group.ToList());
+                AssertExpectedSelectedSamples([.. group]);
                 selectiveSinceLastContinuous++;
             }
         }

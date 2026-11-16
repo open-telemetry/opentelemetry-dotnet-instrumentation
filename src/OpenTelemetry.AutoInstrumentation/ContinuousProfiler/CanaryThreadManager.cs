@@ -49,7 +49,7 @@ internal sealed class CanaryThreadManager : IDisposable
         _canaryThread.Start();
 
         // Wait for the thread to be registered with the native profiler
-        bool started = _threadStarted.Wait(timeout);
+        var started = _threadStarted.Wait(timeout);
 
         if (started)
         {

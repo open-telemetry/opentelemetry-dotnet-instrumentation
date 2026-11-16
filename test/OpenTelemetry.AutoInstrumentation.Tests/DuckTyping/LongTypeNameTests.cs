@@ -15,7 +15,7 @@ public class LongTypeNameTests
     [Fact]
     public void CanDuckTypeLongGenericName()
     {
-        Type targetType = new LongNamedGenericTarget<string>().GetType();
+        var targetType = new LongNamedGenericTarget<string>().GetType();
         for (var i = 0; i < 20; i++)
         {
             targetType = typeof(LongNamedGenericTarget<>).MakeGenericType(targetType);

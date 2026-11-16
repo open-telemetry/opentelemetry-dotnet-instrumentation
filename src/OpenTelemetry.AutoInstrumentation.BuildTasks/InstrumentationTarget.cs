@@ -84,7 +84,7 @@ internal struct InstrumentationTarget
     private T ReadAndParseMetadata<T>(string metadataName, TryParser<T> tryParser)
     {
         var value = _taskItem.GetMetadata(metadataName);
-        if (string.IsNullOrWhiteSpace(value) || !tryParser(value, out T parsedValue))
+        if (string.IsNullOrWhiteSpace(value) || !tryParser(value, out var parsedValue))
         {
             throw new ArgumentException(
                 $"An '{ItemName}' item must have a valid '{metadataName}' metadata attribute");

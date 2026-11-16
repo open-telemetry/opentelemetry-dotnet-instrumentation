@@ -94,7 +94,7 @@ internal sealed class EnvironmentHelper
 
     public static string GetNukeBuildOutput()
     {
-        string nukeOutputPath = Path.Combine(
+        var nukeOutputPath = Path.Combine(
             EnvironmentTools.GetSolutionDirectory(),
             "bin",
             "tracer-home");
@@ -147,7 +147,7 @@ internal sealed class EnvironmentHelper
             return _profilerFileLocation;
         }
 
-        string extension = EnvironmentTools.GetOS() switch
+        var extension = EnvironmentTools.GetOS() switch
         {
             "win" => "dll",
             "linux" => "so",
@@ -155,9 +155,9 @@ internal sealed class EnvironmentHelper
             _ => throw new PlatformNotSupportedException()
         };
 
-        string fileName = $"OpenTelemetry.AutoInstrumentation.Native.{extension}";
-        string nukeOutput = GetNukeBuildOutput();
-        string profilerPath = Path.Combine(nukeOutput, EnvironmentTools.GetClrProfilerDirectoryName(), fileName);
+        var fileName = $"OpenTelemetry.AutoInstrumentation.Native.{extension}";
+        var nukeOutput = GetNukeBuildOutput();
+        var profilerPath = Path.Combine(nukeOutput, EnvironmentTools.GetClrProfilerDirectoryName(), fileName);
 
         if (File.Exists(profilerPath))
         {
@@ -274,7 +274,7 @@ internal sealed class EnvironmentHelper
 
     private string GetStartupHookOutputPath()
     {
-        string startupHookOutputPath = Path.Combine(
+        var startupHookOutputPath = Path.Combine(
             GetNukeBuildOutput(),
             "net",
             "OpenTelemetry.AutoInstrumentation.StartupHook.dll");
@@ -290,7 +290,7 @@ internal sealed class EnvironmentHelper
 
     private void SetDefaultEnvironmentVariables()
     {
-        string profilerPath = GetProfilerPath();
+        var profilerPath = GetProfilerPath();
 
         CustomEnvironmentVariables["DOTNET_STARTUP_HOOKS"] = GetStartupHookOutputPath();
 

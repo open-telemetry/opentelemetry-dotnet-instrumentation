@@ -26,7 +26,7 @@ partial class Build
             var platforms =
             Equals(Platform, MSBuildTargetPlatform.x64)
                 ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
-                : new[] { MSBuildTargetPlatform.x86 };
+                : [MSBuildTargetPlatform.x86];
 
             foreach (var project in Solution.GetNativeSrcProjects())
             {
@@ -103,7 +103,7 @@ partial class Build
             var platforms =
             Equals(Platform, MSBuildTargetPlatform.x64)
                 ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
-                : new[] { MSBuildTargetPlatform.x86 };
+                : [MSBuildTargetPlatform.x86];
 
             var nativeTestProject = Solution.GetNativeTestProject();
             PerformLegacyRestoreIfNeeded(nativeTestProject);
@@ -292,7 +292,7 @@ partial class Build
     {
         if (!NoRestore && project.Directory.ContainsFile("packages.config"))
         {
-            RestoreLegacyNuGetPackagesConfig(new[] { project });
+            RestoreLegacyNuGetPackagesConfig([project]);
         }
     }
 }
