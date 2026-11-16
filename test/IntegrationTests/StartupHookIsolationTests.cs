@@ -10,6 +10,76 @@ namespace IntegrationTests;
 
 public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("StartupHookIsolation", output)
 {
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("invalid")]
+    [InlineData("{00000000-0000-0000-0000-000000000001}")]
+    public void IsolationWhenOpenTelemetryProfilerIsNotConfigured(string? profilerId)
+    {
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("CORECLR_PROFILER", profilerId);
+
+        VerifyApplicationLoadContext(StartupHookConstants.IsolatedAssemblyLoadContextName);
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void IsolationWhenProfilerIdIsMissingAndOptionalRulesAreDisabled()
+    {
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("CORECLR_PROFILER", null);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED", "false");
+
+        VerifyApplicationLoadContext(StartupHookConstants.IsolatedAssemblyLoadContextName);
+    }
+
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [InlineData("{918728DD-259F-4A6A-AC2B-B85E1B658318}")]
+    [InlineData("{918728dd-259f-4a6a-ac2b-b85e1b658318}")]
+    public void NoIsolationWhenOpenTelemetryProfilerIsConfigured(string profilerId)
+    {
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("CORECLR_PROFILER", profilerId);
+
+        VerifyApplicationLoadContext("Default");
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void NoIsolationWhenRedirectionIsDisabledAndAnotherProfilerIsConfigured()
+    {
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("CORECLR_PROFILER", "{00000000-0000-0000-0000-000000000001}");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_REDIRECT_ENABLED", "false");
+
+        VerifyApplicationLoadContext("Default");
+    }
+
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void NoInstrumentationWhenOpenTelemetryProfilerFailsToLoad(bool failFast)
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+        EnableBytecodeInstrumentation();
+        // A lowercase CLSID must still undergo attachment validation.
+        SetEnvironmentVariable("CORECLR_PROFILER", "{918728dd-259f-4a6a-ac2b-b85e1b658318}");
+        SetEnvironmentVariable("CORECLR_PROFILER_PATH", Path.Combine(EnvironmentHelper.GetNukeBuildOutput(), "missing-profiler"));
+        SetEnvironmentVariable("CORECLR_PROFILER_PATH_32", null);
+        SetEnvironmentVariable("CORECLR_PROFILER_PATH_64", null);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", failFast ? "true" : "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "StartupHookIsolation.ActivitySource");
+
+        RunTestApplication(expectedExitCode: 0, assertExitCode: failFast ? Assert.NotEqual : Assert.Equal);
+
+        collector.AssertEmpty();
+    }
+
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void IsolationRedirectsExitCode_Success()
@@ -108,6 +178,19 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
 
         // Assert
         collector.AssertEmpty();
+    }
+
+    private void VerifyApplicationLoadContext(string expectedContext)
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "StartupHookIsolation.ActivitySource");
+        collector.Expect("StartupHookIsolation.ActivitySource", span => span.Name == expectedContext);
+
+        // The test application also detects duplicate entrypoint execution.
+        RunTestApplication(new TestSettings { Arguments = "--exit-code 42" }, expectedExitCode: 42);
+
+        collector.AssertExpectations();
     }
 }
 #endif

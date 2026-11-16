@@ -32,7 +32,7 @@ internal class NativeProfilerDiagnosticsRule : Rule
         }
 
         var profilerId = EnvironmentHelper.GetEnvironmentVariable(ProfilerIdVariable);
-        if (profilerId != ProfilerId)
+        if (!NativeProfilerHelper.IsOpenTelemetryProfiler(profilerId))
         {
             Logger.Warning("The CLR profiler is enabled, but a different profiler ID was provided '{0}'.", profilerId);
 
