@@ -11,7 +11,7 @@ SCRIPT_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 
 BUILD_PROJECT_FILE="$SCRIPT_DIR/build/_build.csproj"
 BUILD_ASSEMBLY_FILE="$SCRIPT_DIR/build/bin/Debug/_build.dll"
-TEMP_DIRECTORY="$SCRIPT_DIR//.nuke/temp"
+TEMP_DIRECTORY="$SCRIPT_DIR//.fallout/temp"
 
 DOTNET_GLOBAL_FILE="$SCRIPT_DIR//global.json"
 DOTNET_INSTALL_FILE_DEFAULT="$SCRIPT_DIR/scripts/dotnet-install.sh"

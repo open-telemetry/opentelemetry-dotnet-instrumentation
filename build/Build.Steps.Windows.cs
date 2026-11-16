@@ -1,16 +1,16 @@
 using Extensions;
-using Nuke.Common;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
-using Nuke.Common.Tools.Docker;
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.MSBuild;
+using Fallout.Common;
+using Fallout.Common.IO;
+using Fallout.Solutions;
+using Fallout.Common.Tooling;
+using Fallout.Common.Tools.Docker;
+using Fallout.Common.Tools.DotNet;
+using Fallout.Common.Tools.MSBuild;
 using Serilog;
-using static Nuke.Common.EnvironmentInfo;
-using static Nuke.Common.Tools.Docker.DockerTasks;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
+using static Fallout.Common.EnvironmentInfo;
+using static Fallout.Common.Tools.Docker.DockerTasks;
+using static Fallout.Common.Tools.DotNet.DotNetTasks;
+using static Fallout.Common.Tools.MSBuild.MSBuildTasks;
 
 partial class Build
 {

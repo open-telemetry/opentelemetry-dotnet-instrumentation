@@ -32,7 +32,7 @@
    (not covered by CI):
 
    ```bash
-   nuke Workflow
+   fallout Workflow
    ```
 
 1. Once the pull request has been merged, create a signed tag for the merged commit.

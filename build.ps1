@@ -15,7 +15,7 @@ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 
 $BuildProjectFile = "$PSScriptRoot\build\_build.csproj"
 $BuildAssemblyFile = "$PSScriptRoot\build\bin\Debug\_build.dll"
-$TempDirectory = "$PSScriptRoot\\.nuke\temp"
+$TempDirectory = "$PSScriptRoot\\.fallout\temp"
 
 $DotNetGlobalFile = "$PSScriptRoot\\global.json"
 $DotNetInstallFileDefault = "$PSScriptRoot\scripts\dotnet-install.ps1"

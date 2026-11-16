@@ -1,5 +1,5 @@
 using Models;
-using Nuke.Common.Tools.MSBuild;
+using Fallout.Common.Tools.MSBuild;
 
 public static partial class LibraryVersion
 {

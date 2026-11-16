@@ -4,18 +4,18 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Extensions;
-using Nuke.Common;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.MSBuild;
-using Nuke.Common.Tools.Npm;
-using Nuke.Common.Tools.NuGet;
-using Nuke.Common.Utilities.Collections;
+using Fallout.Common;
+using Fallout.Common.IO;
+using Fallout.Solutions;
+using Fallout.Common.Tooling;
+using Fallout.Common.Tools.DotNet;
+using Fallout.Common.Tools.MSBuild;
+using Fallout.Common.Tools.Npm;
+using Fallout.Common.Tools.NuGet;
+using Fallout.Common.Utilities.Collections;
 using Serilog;
-using static Nuke.Common.EnvironmentInfo;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using static Fallout.Common.EnvironmentInfo;
+using static Fallout.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
 {
