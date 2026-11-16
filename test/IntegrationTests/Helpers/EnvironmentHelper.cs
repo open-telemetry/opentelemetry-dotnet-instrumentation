@@ -104,7 +104,7 @@ internal sealed class EnvironmentHelper
             return falloutOutputPath;
         }
 
-        throw new InvalidOperationException($"Unable to find Nuke output at: {falloutOutputPath}. Ensure Nuke has run first.");
+        throw new InvalidOperationException($"Unable to find Fallout output at: {falloutOutputPath}. Ensure Fallout has run first.");
     }
 
     public static bool IsRunningOnCI()
