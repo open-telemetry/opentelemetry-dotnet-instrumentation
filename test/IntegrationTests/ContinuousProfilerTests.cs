@@ -406,8 +406,8 @@ public class ContinuousProfilerTests : TestHelper
             // IO completion port threads park in NtRemoveIoCompletion with no managed frames.
             // DSS yields nothing for them; their presence proves the RTL native walk is working.
             // Security/AV DLLs (e.g. Protector64.dll) may also appear between kernel frames.
-            bool hasIoCompletion = frames.Any(f => f.Contains("NtRemoveIoCompletion", StringComparison.OrdinalIgnoreCase));
-            bool hasGetQueued = frames.Any(f => f.Contains("GetQueuedCompletionStatus", StringComparison.OrdinalIgnoreCase));
+            var hasIoCompletion = frames.Any(f => f.Contains("NtRemoveIoCompletion", StringComparison.OrdinalIgnoreCase));
+            var hasGetQueued = frames.Any(f => f.Contains("GetQueuedCompletionStatus", StringComparison.OrdinalIgnoreCase));
 
             if (hasIoCompletion && hasGetQueued)
             {
@@ -434,8 +434,8 @@ public class ContinuousProfilerTests : TestHelper
             // .NET Core ThreadPool worker threads park in NtWaitForWorkViaWorkerFactory with no managed frames.
             // DSS yields nothing for them; their presence proves the RTL native walk is working.
             // RtlSetThreadSubProcessTag appears as a trampoline; security/AV DLLs may also appear.
-            bool hasWorkerFactory = frames.Any(f => f.Contains("NtWaitForWorkViaWorkerFactory", StringComparison.OrdinalIgnoreCase));
-            bool hasThreadStart = frames.Any(f => f.Contains("RtlUserThreadStart", StringComparison.OrdinalIgnoreCase)
+            var hasWorkerFactory = frames.Any(f => f.Contains("NtWaitForWorkViaWorkerFactory", StringComparison.OrdinalIgnoreCase));
+            var hasThreadStart = frames.Any(f => f.Contains("RtlUserThreadStart", StringComparison.OrdinalIgnoreCase)
                                                  || f.Contains("BaseThreadInitThunk", StringComparison.OrdinalIgnoreCase));
 
             if (hasWorkerFactory && hasThreadStart)

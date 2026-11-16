@@ -134,7 +134,7 @@ internal static class EnvironmentTools
 
     private static string? GetClrProfilerOSDirectoryName()
     {
-        string? clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
+        var clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
         {
             "windows" => "win",
             "linux-glibc" => "linux",

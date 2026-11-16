@@ -88,8 +88,8 @@ internal sealed class MockMetricsCollector : IDisposable
 
                 foreach (var collected in collectedMetricsSnapshot)
                 {
-                    bool found = false;
-                    for (int i = missingExpectations.Count - 1; i >= 0; i--)
+                    var found = false;
+                    for (var i = missingExpectations.Count - 1; i >= 0; i--)
                     {
                         if (collected.InstrumentationScopeName != missingExpectations[i].InstrumentationScopeName)
                         {

@@ -437,7 +437,7 @@ internal class LazyILGenerator
     {
         if (_generator is not null)
         {
-            foreach (Action<ILGenerator> instruction in _instructions)
+            foreach (var instruction in _instructions)
             {
                 instruction(_generator);
             }

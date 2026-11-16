@@ -134,7 +134,7 @@ public class NugetSampleTests : TestHelper
 
         Assert.NotNull(process);
 
-        bool processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
+        var processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
         {
             process.Kill();

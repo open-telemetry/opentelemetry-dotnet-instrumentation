@@ -603,7 +603,7 @@ partial class Build
                     .ToArray();
             }
 
-            for (int i = 0; i < TestCount; i++)
+            for (var i = 0; i < TestCount; i++)
             {
                 DotNetTestSettings ConfigureUnitTest(DotNetTestSettings settings) => settings
                     .SetConfiguration(BuildConfiguration)
@@ -651,7 +651,7 @@ partial class Build
                 return;
             }
 
-            for (int i = 0; i < TestCount; i++)
+            for (var i = 0; i < TestCount; i++)
             {
                 DotNetTestSettings ConfigureIntegrationTest(DotNetTestSettings settings) => settings
                     .SetConfiguration(BuildConfiguration)
@@ -688,7 +688,7 @@ partial class Build
             var files = Directory.GetFiles(netPath);
             var fileInfoList = new List<object>(files.Length);
 
-            foreach (string file in files)
+            foreach (var file in files)
             {
                 var fileName = Path.GetFileNameWithoutExtension(file);
 
@@ -704,8 +704,8 @@ partial class Build
                 }
             }
 
-            JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonContent = JsonSerializer.Serialize(fileInfoList, options);
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            var jsonContent = JsonSerializer.Serialize(fileInfoList, options);
 
             var ruleEngineJsonFilePath = netPath / "ruleEngine.json";
             File.WriteAllText(ruleEngineJsonFilePath, jsonContent);
@@ -774,7 +774,7 @@ partial class Build
             "Initialize_WithPreviouslyCreatedTracerProvider_WorksCorrectly"
         }.Select(name => $"FullyQualifiedName~{testPrefix}.{name}");
 
-        for (int i = 0; i < TestCount; i++)
+        for (var i = 0; i < TestCount; i++)
         {
             foreach (var testName in testNames)
             {

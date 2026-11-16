@@ -311,7 +311,7 @@ internal static partial class InstrumentationDefinitions
 
     private static void GenerateIntegrations(Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>> integrationsByName, StringBuilder sb, string conditionPrefix)
     {
-        bool firstLine = true;
+        var firstLine = true;
         foreach (var group in integrationsByName)
         {
             if (!firstLine)
