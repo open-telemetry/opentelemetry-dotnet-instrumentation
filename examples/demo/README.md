@@ -37,6 +37,10 @@ make
 You can [explore](https://grafana.com/docs/grafana/v9.3/explore/)
 the telemetry in [Grafana UI](http://localhost:3000/).
 
+Grafana is bound to the host's loopback address and allows anonymous access with
+the Viewer role, including Explore. Saving dashboards and administering data
+sources require signing in with the appropriate permissions.
+
 You can also find the exported telemetry in the `log` directory.
 
 ## Cleanup

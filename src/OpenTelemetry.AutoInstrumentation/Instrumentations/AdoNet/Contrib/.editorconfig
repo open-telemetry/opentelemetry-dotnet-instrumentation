@@ -1,0 +1,3 @@
+[SqlProcessor.cs]
+# Preserve the field-based state types copied from opentelemetry-dotnet-contrib.
+dotnet_diagnostic.SA1401.severity = none

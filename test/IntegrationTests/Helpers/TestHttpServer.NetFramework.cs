@@ -23,7 +23,7 @@ internal sealed class TestHttpServer : IDisposable
 
         _listener = new HttpListener();
         _listener.Start();
-        var prefix = new UriBuilder("http", host, Port, sufix).ToString(); // See https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerprefixcollection.add?redirectedfrom=MSDN&view=net-6.0#remarks for info about the host value.
+        var prefix = new UriBuilder("http", host, Port, sufix).ToString(); // See https://docs.microsoft.com/dotnet/api/system.net.httplistenerprefixcollection.add?redirectedfrom=MSDN&view=net-6.0#remarks for info about the host value.
         _listener.Prefixes.Add(prefix);
         WriteOutput($"Listening on '{prefix}'");
 

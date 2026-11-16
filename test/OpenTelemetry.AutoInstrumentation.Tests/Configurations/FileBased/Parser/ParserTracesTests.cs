@@ -3,6 +3,7 @@
 
 using OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration;
 using OpenTelemetry.AutoInstrumentation.Tests.Util;
+using Vendors.YamlDotNet.Core;
 using YamlParser = OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguration.Parser.Parser;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parser;
@@ -10,6 +11,118 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations.FileBased.Parse
 [Collection("Non-Parallel Collection")]
 public class ParserTracesTests
 {
+    [Theory]
+    [InlineData("{}")]
+    [InlineData("{value: 0.5}")]
+    [InlineData("[]")]
+    [InlineData("[0.5]")]
+    public void Parse_TraceIdRatioWithNonScalarRatio_ThrowsYamlException(string ratio)
+    {
+        var yaml = $$"""
+            tracer_provider:
+              sampler:
+                trace_id_ratio:
+                  ratio: {{ratio}}
+            """;
+
+        Assert.Throws<YamlException>(() => YamlParser.ParseYamlContent<YamlConfiguration>(yaml));
+    }
+
+    [Theory]
+    [InlineData("0", null, 0.0)]
+    [InlineData(".5", null, 0.5)]
+    [InlineData("0.5", null, 0.5)]
+    [InlineData("5e-1", null, 0.5)]
+    [InlineData("1", null, 1.0)]
+    [InlineData(".inf", null, double.PositiveInfinity)]
+    [InlineData(".nan", null, double.NaN)]
+    [InlineData("", null, null)]
+    [InlineData("null", null, null)]
+    [InlineData("~", null, null)]
+    [InlineData("${YAMLPARSER_TESTS_RATIO:-0.5}", null, 0.5)]
+    [InlineData("${YAMLPARSER_TESTS_RATIO:-null}", null, null)]
+    [InlineData("${YAMLPARSER_TESTS_RATIO}", "0.25", 0.25)]
+    [InlineData("${YAMLPARSER_TESTS_RATIO}", "null", null)]
+    [InlineData("${YAMLPARSER_TESTS_RATIO:-}", null, null)]
+    public void Parse_TraceIdRatioWithScalarRatio_PopulatesRatio(string ratio, string? envValue, double? expected)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "YAMLPARSER_TESTS_RATIO", envValue }
+        });
+
+        var yaml = $$"""
+            tracer_provider:
+              sampler:
+                trace_id_ratio:
+                  ratio: {{ratio}}
+            """;
+
+        var config = YamlParser.ParseYamlContent<YamlConfiguration>(yaml);
+
+        Assert.NotNull(config.TracerProvider?.Sampler?.TraceIdRatio);
+        Assert.Equal(expected, config.TracerProvider.Sampler.TraceIdRatio.Ratio);
+    }
+
+    [Theory]
+    [InlineData("\"null\"")]
+    [InlineData("\"\"")]
+    [InlineData("\" \"")]
+    [InlineData("\"0.5\"")]
+    [InlineData("0,001")]
+    [InlineData("1_0.0e-2")]
+    public void Parse_TraceIdRatioWithInvalidScalar_ThrowsYamlException(string ratio)
+    {
+        var yaml = $$"""
+            tracer_provider:
+              sampler:
+                trace_id_ratio:
+                  ratio: {{ratio}}
+            """;
+
+        Assert.Throws<YamlException>(() => YamlParser.ParseYamlContent<YamlConfiguration>(yaml));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("0.5")]
+    public void Parse_TraceIdRatioWithQuotedEnvironmentFallback_ThrowsYamlException(string fallback)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "YAMLPARSER_TESTS_RATIO", null }
+        });
+
+        var yaml = $$"""
+            tracer_provider:
+              sampler:
+                trace_id_ratio:
+                  ratio: "${YAMLPARSER_TESTS_RATIO:-{{fallback}}}"
+            """;
+
+        Assert.Throws<YamlException>(() => YamlParser.ParseYamlContent<YamlConfiguration>(yaml));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("null")]
+    [InlineData("~")]
+    [InlineData("{}")]
+    public void Parse_TraceIdRatioWithoutConfiguration_PopulatesSampler(string traceIdRatio)
+    {
+        var yaml = $$"""
+            tracer_provider:
+              sampler:
+                trace_id_ratio: {{traceIdRatio}}
+            """;
+
+        var config = YamlParser.ParseYamlContent<YamlConfiguration>(yaml);
+
+        Assert.NotNull(config.TracerProvider?.Sampler?.TraceIdRatio);
+        Assert.Null(config.TracerProvider.Sampler.TraceIdRatio.Ratio);
+    }
+
     [Fact]
     public void Parse_FullConfigYaml_ShouldPopulateModelCorrectly()
     {
@@ -74,6 +187,39 @@ public class ParserTracesTests
         Assert.NotNull(sampler.ParentBased.LocalParentSampled.AlwaysOn);
         Assert.NotNull(sampler.ParentBased.LocalParentNotSampled);
         Assert.NotNull(sampler.ParentBased.LocalParentNotSampled.AlwaysOff);
+    }
+
+    [Theory]
+    [InlineData(null, "${YAMLPARSER_TESTS_TIMEOUT}", null)]
+    [InlineData("", "${YAMLPARSER_TESTS_TIMEOUT}", null)]
+    [InlineData(null, "${YAMLPARSER_TESTS_TIMEOUT:-5000}", 5000)]
+    [InlineData("", "${YAMLPARSER_TESTS_TIMEOUT:-5000}", 5000)]
+    [InlineData("7000", "${YAMLPARSER_TESTS_TIMEOUT:-5000}", 7000)]
+    public void Parse_ExporterTimeoutWithEnvVar_ShouldResolveBeforeParsing(string? envValue, string substitution, int? expected)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>()
+        {
+            { "YAMLPARSER_TESTS_TIMEOUT", envValue }
+        });
+
+        var yaml = $$"""
+            tracer_provider:
+              processors:
+                - batch:
+                    exporter:
+                      otlp_http:
+                        timeout: {{substitution}}
+            """;
+
+        var config = YamlParser.ParseYamlContent<YamlConfiguration>(yaml);
+
+        Assert.NotNull(config.TracerProvider);
+        Assert.NotNull(config.TracerProvider.Processors);
+        var processor = Assert.Single(config.TracerProvider.Processors);
+        Assert.NotNull(processor.Batch);
+        Assert.NotNull(processor.Batch.Exporter);
+        Assert.NotNull(processor.Batch.Exporter.OtlpHttp);
+        Assert.Equal(expected, processor.Batch.Exporter.OtlpHttp.Timeout);
     }
 
     [Fact]

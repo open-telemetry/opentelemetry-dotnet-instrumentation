@@ -221,7 +221,7 @@ internal class OtlpSettings
         // http/protobuf should be default for our purposes. Always set a value to avoid relying on SDK, because the default in SDK is grpc.
         var priorityVar = OtlpSpecConfigDefinitions.GetProtocolEnvVar(signalType);
         var defaultVar = OtlpSpecConfigDefinitions.DefaultProtocolEnvVarName;
-        string? usedEnvVarName = priorityVar;
+        var usedEnvVarName = priorityVar;
         var exporterOtlpProtocol = configuration.GetString(priorityVar);
         if (exporterOtlpProtocol == null)
         {

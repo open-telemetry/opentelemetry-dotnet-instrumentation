@@ -5,34 +5,6 @@ using System.Runtime.InteropServices;
 
 namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 
-internal enum RuntimeSamplerAuthority : uint
-{
-    None = 0,
-    Seed = 1,
-    ControlPlane = 2
-}
-
-internal enum RuntimeSamplerApplyResult
-{
-    Applied = 0,
-    NoChange = 1,
-    IgnoredSeedAlreadyCommitted = 2,
-    IgnoredLowerAuthority = 3,
-    RejectedInvalidArgument = 4,
-    RejectedUnsupportedLayout = 5,
-    RejectedInvalidConfiguration = 6,
-    RejectedUnsupportedRuntime = 7,
-    ActivationFailed = 8,
-    ShuttingDown = 9
-}
-
-internal enum RuntimeSamplerStateQueryResult
-{
-    Succeeded = 0,
-    InvalidArgument = 1,
-    UnsupportedLayout = 2
-}
-
 // Keep this layout in sync with continuous_profiler::RuntimeSamplerConfiguration.
 [StructLayout(LayoutKind.Sequential, Pack = 4)]
 internal struct RuntimeSamplerConfiguration

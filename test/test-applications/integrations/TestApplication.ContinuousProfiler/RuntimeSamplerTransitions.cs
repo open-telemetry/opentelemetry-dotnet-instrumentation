@@ -193,14 +193,14 @@ internal static class RuntimeSamplerTransitions
         }
 
 #if NET
-        private static IntPtr ImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+        private static nint ImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
         {
             if (libraryName is "OpenTelemetry.AutoInstrumentation.Native" or "OpenTelemetry.AutoInstrumentation.Native.dll")
             {
                 return NativeLibrary.Load(GetProfilerPath());
             }
 
-            return IntPtr.Zero;
+            return nint.Zero;
         }
 
         private static string GetProfilerPath()

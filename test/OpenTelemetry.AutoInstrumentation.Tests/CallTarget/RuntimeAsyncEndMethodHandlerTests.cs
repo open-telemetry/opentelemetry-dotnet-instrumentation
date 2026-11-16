@@ -1,0 +1,373 @@
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
+#if NET
+
+using System.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.CallTarget;
+using OpenTelemetry.AutoInstrumentation.CallTarget.Handlers;
+
+namespace OpenTelemetry.AutoInstrumentation.Tests.CallTarget;
+
+public sealed class RuntimeAsyncEndMethodHandlerTests
+{
+    [Fact]
+    public void NonGenericTaskRunsBothCallbacksWithCompletedTask()
+    {
+        var target = new Target();
+        var state = CallTargetState.GetDefault();
+
+        CallTargetInvoker.EndMethodRuntimeAsync<NonGenericTaskIntegration, Target, Task>(target, null, in state);
+
+        Assert.Equal(1, NonGenericTaskIntegration.AsyncCalls);
+        Assert.Equal(1, NonGenericTaskIntegration.EndCalls);
+        Assert.True(NonGenericTaskIntegration.ReceivedCompletedTask);
+    }
+
+    [Fact]
+    public void GenericTaskFeedsAsyncReplacementIntoOnMethodEndAndUnwrapsReplacement()
+    {
+        var target = new Target();
+        var state = CallTargetState.GetDefault();
+
+        var result = CallTargetInvoker.EndMethodRuntimeAsync<GenericTaskIntegration, Target, int, Task<int>>(
+            target, 40, null, in state);
+
+        Assert.Equal(42, GenericTaskIntegration.EndMethodValue);
+        Assert.Equal(43, result.GetReturnValue());
+    }
+
+    [Fact]
+    public void GenericValueTaskSynthesizesAndUnwrapsDeclaredReturn()
+    {
+        var target = new Target();
+        var state = CallTargetState.GetDefault();
+
+        var result = CallTargetInvoker.EndMethodRuntimeAsync<GenericValueTaskIntegration, Target, int, ValueTask<int>>(
+            target, 10, null, in state);
+
+        Assert.Equal(10, GenericValueTaskIntegration.EndMethodValue);
+        Assert.Equal(11, result.GetReturnValue());
+    }
+
+    [Fact]
+    public async Task NonGenericTaskOnExceptionReceivesFaultedTaskAndNoExceptionArgument()
+    {
+        var exception = new InvalidOperationException("boom");
+        var state = CallTargetState.GetDefault();
+
+        CallTargetInvoker.EndMethodRuntimeAsync<NonGenericTaskFailureIntegration, Target, Task>(
+            new Target(), exception, in state);
+
+        Assert.Null(NonGenericTaskFailureIntegration.ExceptionArgument);
+        var received = Assert.IsAssignableFrom<Task>(NonGenericTaskFailureIntegration.ReturnValue);
+        Assert.True(received.IsFaulted);
+        var observed = await Assert.ThrowsAsync<InvalidOperationException>(() => received);
+        Assert.Same(exception, observed);
+    }
+
+    [Fact]
+    public async Task NonGenericValueTaskOnExceptionReceivesFaultedValueTaskAndNoExceptionArgument()
+    {
+        var exception = new InvalidOperationException("boom");
+        var state = CallTargetState.GetDefault();
+
+        CallTargetInvoker.EndMethodRuntimeAsync<NonGenericValueTaskFailureIntegration, Target, ValueTask>(
+            new Target(), exception, in state);
+
+        Assert.Null(NonGenericValueTaskFailureIntegration.ExceptionArgument);
+        var received = NonGenericValueTaskFailureIntegration.ReturnValue;
+        Assert.True(received.IsFaulted);
+        var observed = await Assert.ThrowsAsync<InvalidOperationException>(() => received.AsTask());
+        Assert.Same(exception, observed);
+    }
+
+    [Fact]
+    public async Task GenericTaskOnExceptionReceivesFaultedTaskAndNoExceptionArgument()
+    {
+        var exception = new InvalidOperationException("boom");
+        var state = CallTargetState.GetDefault();
+
+        CallTargetInvoker.EndMethodRuntimeAsync<GenericTaskFailureIntegration, Target, int, Task<int>>(
+            new Target(), 0, exception, in state);
+
+        Assert.Null(GenericTaskFailureIntegration.ExceptionArgument);
+        var received = Assert.IsAssignableFrom<Task<int>>(GenericTaskFailureIntegration.ReturnValue);
+        Assert.True(received.IsFaulted);
+        var observed = await Assert.ThrowsAsync<InvalidOperationException>(() => received);
+        Assert.Same(exception, observed);
+    }
+
+    [Fact]
+    public async Task GenericValueTaskOnExceptionReceivesFaultedValueTaskAndNoExceptionArgument()
+    {
+        var exception = new InvalidOperationException("boom");
+        var state = CallTargetState.GetDefault();
+
+        CallTargetInvoker.EndMethodRuntimeAsync<GenericValueTaskFailureIntegration, Target, int, ValueTask<int>>(
+            new Target(), 0, exception, in state);
+
+        Assert.Null(GenericValueTaskFailureIntegration.ExceptionArgument);
+        var received = GenericValueTaskFailureIntegration.ReturnValue;
+        Assert.True(received.IsFaulted);
+        var observed = await Assert.ThrowsAsync<InvalidOperationException>(() => received.AsTask());
+        Assert.Same(exception, observed);
+    }
+
+    [Fact]
+    public void HelperCreatesCanceledDeclaredReturns()
+    {
+        using var source = new CancellationTokenSource();
+        source.Cancel();
+        var exception = new OperationCanceledException(source.Token);
+
+        var task = RuntimeAsyncHelper.CreateFromException<Task>(exception);
+        var taskOfT = RuntimeAsyncHelper.CreateFromException<int, Task<int>>(exception);
+        var valueTask = RuntimeAsyncHelper.CreateFromException<ValueTask>(exception);
+        var valueTaskOfT = RuntimeAsyncHelper.CreateFromException<int, ValueTask<int>>(exception);
+
+        Assert.True(task is { IsCanceled: true });
+        Assert.True(taskOfT is { IsCanceled: true });
+        Assert.True(valueTask.IsCanceled);
+        Assert.True(valueTaskOfT.IsCanceled);
+    }
+
+    [Fact]
+    public void SynchronousCallbackReturningTaskIsNotMistakenForAsyncCallback()
+    {
+        var target = new Target();
+        var state = CallTargetState.GetDefault();
+        var innerTask = Task.CompletedTask;
+
+        var result = CallTargetInvoker.EndMethodRuntimeAsync<NestedTaskIntegration, Target, Task, Task<Task>>(
+            target, innerTask, null, in state);
+
+        Assert.Same(innerTask, result.GetReturnValue());
+        Assert.Equal(1, NestedTaskIntegration.Calls);
+        Assert.True(IntegrationOptions<NestedTaskIntegration, Target>.IsIntegrationEnabled);
+    }
+
+    [Fact]
+    public void AsyncCallbackDisablesIntegrationBeforeBeginCallback()
+    {
+        var target = new Target();
+        CallTargetInvoker.EnsureRuntimeAsyncCallbacksSupported<TaskReturningAsyncIntegration, Target, int, Task<int>>();
+
+        var state = CallTargetInvoker.BeginMethod<TaskReturningAsyncIntegration, Target>(target);
+
+        var result = CallTargetInvoker.EndMethodRuntimeAsync<TaskReturningAsyncIntegration, Target, int, Task<int>>(
+            target, 7, null, in state);
+
+        Assert.Equal(7, result.GetReturnValue());
+        Assert.Equal(0, TaskReturningAsyncIntegration.BeginCalls);
+        Assert.Equal(0, TaskReturningAsyncIntegration.AsyncCalls);
+        Assert.False(IntegrationOptions<TaskReturningAsyncIntegration, Target>.IsIntegrationEnabled);
+    }
+
+    [Fact]
+    public void NonGenericAsyncCallbackDisablesIntegrationBeforeBeginCallback()
+    {
+        var target = new Target();
+        CallTargetInvoker.EnsureRuntimeAsyncCallbacksSupported<TaskReturningNonGenericAsyncIntegration, Target, Task>();
+
+        var state = CallTargetInvoker.BeginMethod<TaskReturningNonGenericAsyncIntegration, Target>(target);
+
+        CallTargetInvoker.EndMethodRuntimeAsync<TaskReturningNonGenericAsyncIntegration, Target, Task>(
+            target, null, in state);
+
+        Assert.Equal(0, TaskReturningNonGenericAsyncIntegration.BeginCalls);
+        Assert.Equal(0, TaskReturningNonGenericAsyncIntegration.AsyncCalls);
+        Assert.False(IntegrationOptions<TaskReturningNonGenericAsyncIntegration, Target>.IsIntegrationEnabled);
+    }
+
+    [Fact]
+    public void RuntimeAsyncEndDoesNotRestorePreviousActivity()
+    {
+        using var previous = new Activity("previous");
+        previous.Start();
+        using var current = new Activity("current");
+        current.Start();
+        var state = new CallTargetState(previous, CallTargetState.GetDefault());
+        var target = new Target();
+
+        CallTargetInvoker.EndMethodRuntimeAsync<NoCallbacksIntegration, Target, Task>(target, null, in state);
+
+        Assert.Same(current, Activity.Current);
+    }
+
+    [Fact]
+    public void HelperRejectsIncompleteReplacementTask()
+    {
+        var completion = new TaskCompletionSource<int>();
+
+        Assert.False(RuntimeAsyncHelper.TryGetCompletedResult<int, Task<int>>(completion.Task, out _));
+
+        var completedTask = RuntimeAsyncHelper.CreateCompletedFromResult<int, Task<int>>(12);
+        Assert.True(RuntimeAsyncHelper.TryGetCompletedResult<int, Task<int>>(completedTask, out var taskResult));
+        Assert.Equal(12, taskResult);
+
+        var completedValueTask = RuntimeAsyncHelper.CreateCompletedFromResult<int, ValueTask<int>>(13);
+        Assert.True(RuntimeAsyncHelper.TryGetCompletedResult<int, ValueTask<int>>(completedValueTask, out var valueTaskResult));
+        Assert.Equal(13, valueTaskResult);
+    }
+
+#pragma warning disable CA1812 // Types are instantiated indirectly as CallTarget generic arguments.
+    private sealed class Target;
+
+    private sealed class NonGenericTaskIntegration
+    {
+        internal static int AsyncCalls { get; private set; }
+
+        internal static int EndCalls { get; private set; }
+
+        internal static bool ReceivedCompletedTask { get; private set; }
+
+        internal static object? OnAsyncMethodEnd<TTarget>(TTarget instance, object? returnValue, Exception? exception, in CallTargetState state)
+        {
+            AsyncCalls++;
+            return returnValue;
+        }
+
+        internal static CallTargetReturn<Task> OnMethodEnd<TTarget>(TTarget instance, Task returnValue, Exception? exception, in CallTargetState state)
+        {
+            EndCalls++;
+            ReceivedCompletedTask = returnValue.IsCompletedSuccessfully;
+            return new CallTargetReturn<Task>(returnValue);
+        }
+    }
+
+    private sealed class GenericTaskIntegration
+    {
+        internal static int EndMethodValue { get; private set; }
+
+        internal static int OnAsyncMethodEnd<TTarget>(TTarget instance, int returnValue, Exception? exception, in CallTargetState state)
+            => returnValue + 2;
+
+        internal static CallTargetReturn<Task<int>> OnMethodEnd<TTarget>(TTarget instance, Task<int> returnValue, Exception? exception, in CallTargetState state)
+        {
+            EndMethodValue = returnValue.Result;
+            return new CallTargetReturn<Task<int>>(Task.FromResult(returnValue.Result + 1));
+        }
+    }
+
+    private sealed class GenericValueTaskIntegration
+    {
+        internal static int EndMethodValue { get; private set; }
+
+        internal static CallTargetReturn<ValueTask<int>> OnMethodEnd<TTarget>(TTarget instance, ValueTask<int> returnValue, Exception? exception, in CallTargetState state)
+        {
+            EndMethodValue = returnValue.Result;
+            return new CallTargetReturn<ValueTask<int>>(new ValueTask<int>(returnValue.Result + 1));
+        }
+    }
+
+    private sealed class NonGenericTaskFailureIntegration
+    {
+        internal static Task? ReturnValue { get; private set; }
+
+        internal static Exception? ExceptionArgument { get; private set; }
+
+        internal static CallTargetReturn<Task> OnMethodEnd<TTarget>(TTarget instance, Task returnValue, Exception? exception, in CallTargetState state)
+        {
+            ReturnValue = returnValue;
+            ExceptionArgument = exception;
+            return new CallTargetReturn<Task>(returnValue);
+        }
+    }
+
+    private sealed class NonGenericValueTaskFailureIntegration
+    {
+        internal static ValueTask ReturnValue { get; private set; }
+
+        internal static Exception? ExceptionArgument { get; private set; }
+
+        internal static CallTargetReturn<ValueTask> OnMethodEnd<TTarget>(TTarget instance, ValueTask returnValue, Exception? exception, in CallTargetState state)
+        {
+            ReturnValue = returnValue;
+            ExceptionArgument = exception;
+            return new CallTargetReturn<ValueTask>(returnValue);
+        }
+    }
+
+    private sealed class GenericTaskFailureIntegration
+    {
+        internal static Task<int>? ReturnValue { get; private set; }
+
+        internal static Exception? ExceptionArgument { get; private set; }
+
+        internal static CallTargetReturn<Task<int>> OnMethodEnd<TTarget>(TTarget instance, Task<int> returnValue, Exception? exception, in CallTargetState state)
+        {
+            ReturnValue = returnValue;
+            ExceptionArgument = exception;
+            return new CallTargetReturn<Task<int>>(returnValue);
+        }
+    }
+
+    private sealed class GenericValueTaskFailureIntegration
+    {
+        internal static ValueTask<int> ReturnValue { get; private set; }
+
+        internal static Exception? ExceptionArgument { get; private set; }
+
+        internal static CallTargetReturn<ValueTask<int>> OnMethodEnd<TTarget>(TTarget instance, ValueTask<int> returnValue, Exception? exception, in CallTargetState state)
+        {
+            ReturnValue = returnValue;
+            ExceptionArgument = exception;
+            return new CallTargetReturn<ValueTask<int>>(returnValue);
+        }
+    }
+
+    private sealed class NestedTaskIntegration
+    {
+        internal static int Calls { get; private set; }
+
+        internal static Task OnAsyncMethodEnd<TTarget>(TTarget instance, Task returnValue, Exception? exception, in CallTargetState state)
+        {
+            Calls++;
+            return returnValue;
+        }
+    }
+
+    private sealed class TaskReturningAsyncIntegration
+    {
+        internal static int BeginCalls { get; private set; }
+
+        internal static int AsyncCalls { get; private set; }
+
+        internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
+        {
+            BeginCalls++;
+            return CallTargetState.GetDefault();
+        }
+
+        internal static Task<int> OnAsyncMethodEnd<TTarget>(TTarget instance, int returnValue, Exception? exception, in CallTargetState state)
+        {
+            AsyncCalls++;
+            return Task.FromResult(returnValue + 1);
+        }
+    }
+
+    private sealed class TaskReturningNonGenericAsyncIntegration
+    {
+        internal static int BeginCalls { get; private set; }
+
+        internal static int AsyncCalls { get; private set; }
+
+        internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
+        {
+            BeginCalls++;
+            return CallTargetState.GetDefault();
+        }
+
+        internal static Task<object?> OnAsyncMethodEnd<TTarget>(TTarget instance, object? returnValue, Exception? exception, in CallTargetState state)
+        {
+            AsyncCalls++;
+            return Task.FromResult(returnValue);
+        }
+    }
+
+    private sealed class NoCallbacksIntegration;
+#pragma warning restore CA1812 // Types are instantiated indirectly as CallTarget generic arguments.
+}
+
+#endif

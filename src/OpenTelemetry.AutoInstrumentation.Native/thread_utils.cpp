@@ -43,7 +43,7 @@ bool Threads::SetNativeThreadName(const WCHAR* description)
 #ifdef _WIN32
     // The SetThreadDescription(..) API is only available on recent Windows versions and must be called dynamically.
     // We attempt to link to it at runtime, and if we do not succeed, this operation is a No-Op.
-    // https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setthreaddescription#remarks
+    // https://docs.microsoft.com/windows/win32/api/processthreadsapi/nf-processthreadsapi-setthreaddescription#remarks
 
     SetThreadDescriptionDelegate_t setThreadDescriptionDelegate = GetDelegate_SetThreadDescription();
     if (nullptr == setThreadDescriptionDelegate)

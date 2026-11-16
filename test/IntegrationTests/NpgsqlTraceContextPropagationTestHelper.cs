@@ -25,11 +25,13 @@ internal static class NpgsqlTraceContextPropagationTestHelper
 
     public static IReadOnlyList<string> ExtractValues(string standardOutput, string outputPrefix)
     {
-        return standardOutput
-            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
-            .Where(line => line.StartsWith(outputPrefix, StringComparison.Ordinal))
-            .Select(line => line.Substring(outputPrefix.Length))
-            .ToList();
+        return
+        [
+            .. standardOutput
+                .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+                .Where(line => line.StartsWith(outputPrefix, StringComparison.Ordinal))
+                .Select(line => line.Substring(outputPrefix.Length))
+        ];
     }
 
     public static void AssertAllTraceParents(IEnumerable<string> applicationNames)

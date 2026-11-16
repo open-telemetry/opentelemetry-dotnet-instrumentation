@@ -11,6 +11,7 @@
 #include "logger.h"
 #include "stats.h"
 #include "environment_variables_util.h"
+#include "runtime_async.h"
 
 namespace trace
 {
@@ -112,13 +113,55 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
         module_metadata.GetTracerTokens(m_corProfiler->GetBytecodeInstrumentationAssembly(), m_corProfiler->info_);
     mdToken                function_token         = caller->id;
     TypeSignature          retFuncArg             = caller->method_signature.GetReturnValue();
+    TypeSignature          declaredRetFuncArg     = retFuncArg;
+    const bool             isRuntimeAsync         = IsMiAsync(caller->method_impl_flags);
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
     bool                   is_integration_method =
         integration_definition->target_method.type.assembly.name != tracemethodintegration_assemblyname;
-    bool ignoreByRefInstrumentation               = !is_integration_method;
+    bool ignoreByRefInstrumentation = !is_integration_method;
+
+    // Runtime-async methods declare Task/ValueTask, but their bodies return the unwrapped result.
+    // Keep both views together here: the effective type drives the rewritten IL, while the
+    // declared type is passed to the managed handler so integrations keep their existing shape.
+    if (isRuntimeAsync)
+    {
+        if (!m_corProfiler->call_target_runtime_async_methods_available)
+        {
+            Logger::Warn("*** CallTarget_RewriterCallback() skipping method: the loaded managed profiler has no "
+                         "required CallTargetInvoker runtime-async methods, so runtime-async methods cannot be "
+                         "instrumented. "
+                         "token=",
+                         function_token, " caller_name=", caller->type.name, ".", caller->name, "()");
+            return S_FALSE;
+        }
+
+        TypeSignature effectiveRetFuncArg{};
+        if (!TryGetRuntimeAsyncEffectiveReturnType(retFuncArg, module_metadata.metadata_import, effectiveRetFuncArg))
+        {
+            Logger::Error("*** CallTarget_RewriterCallback() skipping method: unsupported runtime-async return type. "
+                          "token=",
+                          function_token, " caller_name=", caller->type.name, ".", caller->name,
+                          "() Signature=", caller->method_signature.str());
+            return S_FALSE;
+        }
+
+        retFuncArg = effectiveRetFuncArg;
+    }
+
     const auto [retFuncElementType, retTypeFlags] = retFuncArg.GetElementTypeAndFlags();
     bool isVoid                                   = (retTypeFlags & TypeFlagVoid) > 0;
     bool isStatic = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);
+
+    if (isRuntimeAsync && !isStatic && caller->type.valueType)
+    {
+        // The `this` argument of a value-type instance method is a byref. Runtime async does not preserve byrefs
+        // across suspension, so the end callback cannot safely reload the instance after an await.
+        Logger::Warn("*** CallTarget_RewriterCallback() skipping method: runtime-async instance methods in a "
+                     "ValueType cannot be instrumented. token=",
+                     function_token, " caller_name=", caller->type.name, ".", caller->name, "()");
+        return S_FALSE;
+    }
+
     std::vector<trace::TypeSignature> methodArguments = caller->method_signature.GetMethodArguments();
     std::vector<trace::TypeSignature> traceAnnotationArguments;
     COR_SIGNATURE                     runtimeMethodHandleBuffer[10];
@@ -140,7 +183,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     if (Logger::IsDebugEnabled())
     {
         Logger::Debug("*** CallTarget_RewriterCallback() Start: ", caller->type.name, ".", caller->name,
-                      "() [IsVoid=", isVoid, ", IsStatic=", isStatic,
+                      "() [IsVoid=", isVoid, ", IsStatic=", isStatic, ", IsRuntimeAsync=", isRuntimeAsync,
                       ", IntegrationType=", integration_definition->integration_type.name, ", Arguments=", numArgs,
                       "]");
     }
@@ -189,7 +232,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     mdToken            exceptionToken        = mdTokenNil;
     mdToken            callTargetReturnToken = mdTokenNil;
     ILInstr*           firstInstruction      = nullptr;
-    auto               returnType            = caller->method_signature.GetReturnValue();
+    auto               returnType            = retFuncArg;
     hr = tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, &returnType, &methodArguments,
                                                    &callTargetStateIndex, &exceptionIndex, &callTargetReturnIndex,
                                                    &returnValueIndex, &callTargetStateToken, &exceptionToken,
@@ -211,6 +254,22 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     // ***
     // BEGIN METHOD PART
     // ***
+
+    if (isRuntimeAsync)
+    {
+        // Initialize the runtime-async end handler before BeginMethod. An integration whose async callback returns
+        // Task cannot be completed synchronously at the end of a runtime-async body, so it must be disabled before
+        // its begin callback can create state that would never be completed.
+        ILInstr*             ensureCallbacksSupportedInstruction;
+        const TypeSignature* returnArgument = isVoid ? nullptr : &retFuncArg;
+        hr = tracerTokens->WriteEnsureRuntimeAsyncCallbacksSupported(&reWriterWrapper, integration_type_ref,
+                                                                     &caller->type, returnArgument, &declaredRetFuncArg,
+                                                                     &ensureCallbacksSupportedInstruction);
+        if (FAILED(hr))
+        {
+            return S_FALSE;
+        }
+    }
 
     // *** Load instance into the stack (if not static)
     if (isStatic)
@@ -556,16 +615,17 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
         reWriterWrapper.LoadLocal(callTargetStateIndex);
     }
 
-    ILInstr* endMethodCallInstr;
+    ILInstr*             endMethodCallInstr;
+    const TypeSignature* declaredRuntimeAsyncReturn = isRuntimeAsync ? &declaredRetFuncArg : nullptr;
     if (isVoid)
     {
         hr = tracerTokens->WriteEndVoidReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type,
-                                                       &endMethodCallInstr);
+                                                       &endMethodCallInstr, declaredRuntimeAsyncReturn);
     }
     else
     {
         hr = tracerTokens->WriteEndReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type, &retFuncArg,
-                                                   &endMethodCallInstr);
+                                                   &endMethodCallInstr, declaredRuntimeAsyncReturn);
     }
     if (FAILED(hr))
     {
@@ -730,7 +790,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule*          moduleHandler
     }
 
     Logger::Info("*** CallTarget_RewriterCallback() Finished: ", caller->type.name, ".", caller->name,
-                 "() [IsVoid=", isVoid, ", IsStatic=", isStatic,
+                 "() [IsVoid=", isVoid, ", IsStatic=", isStatic, ", IsRuntimeAsync=", isRuntimeAsync,
                  ", IntegrationType=", integration_definition->integration_type.name, ", Arguments=", numArgs, "]");
     return S_OK;
 }

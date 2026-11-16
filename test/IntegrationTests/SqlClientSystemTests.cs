@@ -56,6 +56,8 @@ public class SqlClientSystemTests : TestHelper
         // Skip the test if fixture does not support current platform
         _sqlServerFixture.SkipIfUnsupportedPlatform();
 
+        SetEnvironmentVariable("TEST_DATABASE_PASSWORD", _sqlServerFixture.Password);
+
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
@@ -63,7 +65,7 @@ public class SqlClientSystemTests : TestHelper
 
         RunTestApplication(new()
         {
-            Arguments = $"--password {_sqlServerFixture.Password} --port {_sqlServerFixture.Port}",
+            Arguments = $"--port {_sqlServerFixture.Port}",
             PackageVersion = packageVersion
         });
 
@@ -80,6 +82,7 @@ public class SqlClientSystemTests : TestHelper
         // Skip the test if fixture does not support current platform
         _sqlServerFixture.SkipIfUnsupportedPlatform();
 
+        SetEnvironmentVariable("TEST_DATABASE_PASSWORD", _sqlServerFixture.Password);
         SetEnvironmentVariable(SqlClientTraceContextPropagationTestHelper.ContextPropagationEnvVar, bool.TrueString);
 
         using var collector = new MockSpansCollector(Output);
@@ -87,7 +90,7 @@ public class SqlClientSystemTests : TestHelper
 
         var (standardOutput, _, _) = RunTestApplication(new()
         {
-            Arguments = $"--password {_sqlServerFixture.Password} --port {_sqlServerFixture.Port} {SqlClientTraceContextPropagationTestHelper.GetContextInfoCommandArguments(enableTransaction)}",
+            Arguments = $"--port {_sqlServerFixture.Port} {SqlClientTraceContextPropagationTestHelper.GetContextInfoCommandArguments(enableTransaction)}",
             PackageVersion = packageVersion
         });
 
@@ -111,6 +114,7 @@ public class SqlClientSystemTests : TestHelper
         // Skip the test if fixture does not support current platform
         _sqlServerFixture.SkipIfUnsupportedPlatform();
 
+        SetEnvironmentVariable("TEST_DATABASE_PASSWORD", _sqlServerFixture.Password);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_SQLCLIENT_NETFX_ILREWRITE_ENABLED", enableIlRewrite.ToString());
         using var collector = new MockSpansCollector(Output);
         if (isFileBased)
@@ -134,7 +138,7 @@ public class SqlClientSystemTests : TestHelper
 
         RunTestApplication(new()
         {
-            Arguments = $"--password {_sqlServerFixture.Password} --port {_sqlServerFixture.Port}",
+            Arguments = $"--port {_sqlServerFixture.Port}",
             PackageVersion = packageVersion
         });
 
@@ -156,13 +160,14 @@ public class SqlClientSystemTests : TestHelper
 
         collector.Expect("OpenTelemetry.Instrumentation.SqlClient");
 
+        SetEnvironmentVariable("TEST_DATABASE_PASSWORD", _sqlServerFixture.Password);
         SetEnvironmentVariable("LONG_RUNNING", "true");
         SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "100");
         SetEnvironmentVariable(ConfigurationKeys.Traces.TracesEnabled, bool.FalseString); // make sure that traces instrumentation is not needed
 
         using var process = StartTestApplication(new TestSettings
         {
-            Arguments = $"--password {_sqlServerFixture.Password} --port {_sqlServerFixture.Port}",
+            Arguments = $"--port {_sqlServerFixture.Port}",
             PackageVersion = packageVersion
         });
 

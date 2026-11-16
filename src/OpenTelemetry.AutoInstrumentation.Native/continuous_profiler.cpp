@@ -114,6 +114,31 @@ static std::atomic<ICorProfilerInfo7*> profiler_info{nullptr}; // After feature 
                                                                // be refactored and have a single static instance of
                                                                // ThreadSampler
 
+#ifdef _WIN32
+HANDLE STDAPICALLTYPE GetContinuousProfilerReaderMutex()
+{
+    // The native module is shared by all AppDomains. An unnamed mutex cannot be pre-created or opened by name
+    // in another process, and each AppDomain owns a duplicate so unloading one cannot close another's handle.
+    static const std::unique_ptr<void, decltype(&::CloseHandle)> readerMutex(::CreateMutexW(nullptr, FALSE, nullptr),
+                                                                             &::CloseHandle);
+    if (readerMutex == nullptr)
+    {
+        trace::Logger::Error("Failed to create the continuous profiler reader mutex.");
+        return nullptr;
+    }
+
+    HANDLE duplicate = nullptr;
+    if (!::DuplicateHandle(::GetCurrentProcess(), readerMutex.get(), ::GetCurrentProcess(), &duplicate, 0, FALSE,
+                           DUPLICATE_SAME_ACCESS))
+    {
+        trace::Logger::Error("Failed to duplicate the continuous profiler reader mutex. Error: ", ::GetLastError());
+        return nullptr;
+    }
+
+    return duplicate;
+}
+#endif
+
 // Dirt-simple back pressure system to save overhead if managed code is not reading fast enough
 bool ThreadSamplingShouldProduceThreadSample()
 {
@@ -856,9 +881,163 @@ FunctionIdentifier NamingHelper::LookupManagedFunction(const FunctionID function
     return resolvedIdentifier;
 }
 
-// This is slightly messy since we an only pass one parameter to the FrameCallback
-// but we have some slightly different use cases (but want to use the same stack capture
-// code for allocations and paused thread samples)
+constexpr size_t kInitialStackFrameCapacity = 80;
+
+static bool TryReserveStackFrame(std::vector<FunctionIdentifier>& buffer, const size_t maximumCapacity)
+{
+    if (buffer.size() >= ThreadStacksBuffer::MaximumFramesPerStack)
+    {
+        return false;
+    }
+    if (buffer.size() < buffer.capacity())
+    {
+        return true;
+    }
+
+    const auto boundedCapacity = std::min(ThreadStacksBuffer::MaximumFramesPerStack, maximumCapacity);
+    const auto nextCapacity    = std::min(boundedCapacity, std::max(kInitialStackFrameCapacity, buffer.capacity() * 2));
+    if (nextCapacity <= buffer.capacity())
+    {
+        return false;
+    }
+
+    // Growth temporarily owns both buffers; the extra storage is bounded by one stack.
+    std::vector<FunctionIdentifier> expanded;
+    expanded.reserve(nextCapacity);
+    // reserve() may provide more capacity than requested. Charge actual capacity before accepting the buffer.
+    if (expanded.capacity() > boundedCapacity)
+    {
+        return false;
+    }
+    expanded.insert(expanded.end(), buffer.begin(), buffer.end());
+    buffer.swap(expanded);
+    return true;
+}
+
+ThreadStacksBuffer::ThreadStacksBuffer()
+{
+    stacks_.reserve(50);
+}
+
+std::vector<FunctionIdentifier>* ThreadStacksBuffer::TryPrepareFrame(const ThreadID threadId)
+{
+    // Stack walkers normally deliver one thread's frames together. Cache the vector object,
+    // whose address remains stable when its frame storage grows.
+    if (cachedStack_ == nullptr || cachedThread_ != threadId)
+    {
+        const auto found = stacks_.find(threadId);
+        if (found == stacks_.end())
+        {
+            return nullptr;
+        }
+        cachedThread_ = threadId;
+        cachedStack_  = &found->second;
+    }
+
+    auto& buffer = *cachedStack_;
+    // All accepted capacities are bounded by MaximumFramesPerStack. Only growth needs budget accounting.
+    if (buffer.size() < buffer.capacity())
+    {
+        return cachedStack_;
+    }
+
+    const auto previousCapacity = buffer.capacity();
+    if (!TryReserveStackFrame(buffer, previousCapacity + MaximumFrameCapacity - frameCapacity_))
+    {
+        return nullptr;
+    }
+    frameCapacity_ += buffer.capacity() - previousCapacity;
+    return cachedStack_;
+}
+
+const std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& ThreadStacksBuffer::Stacks() const noexcept
+{
+    return stacks_;
+}
+
+void ThreadStacksBuffer::PrepareForCapture(const std::unordered_set<ThreadID>& activeThreads)
+{
+    cachedStack_ = nullptr;
+    for (auto entry = stacks_.begin(); entry != stacks_.end();)
+    {
+        // An interrupted reservation can leave an empty entry. Retry it as a new thread below.
+        if (entry->second.capacity() == 0 || activeThreads.find(entry->first) == activeThreads.end())
+        {
+            frameCapacity_ -= entry->second.capacity();
+            entry = stacks_.erase(entry);
+        }
+        else
+        {
+            ++entry;
+        }
+    }
+
+    const auto threadCount     = std::min(activeThreads.size(), MaximumThreads);
+    const auto initialCapacity = threadCount == 0
+                                     ? kInitialStackFrameCapacity
+                                     : std::min(kInitialStackFrameCapacity, MaximumFrameCapacity / threadCount);
+    const auto missingThreads  = threadCount - stacks_.size();
+    if (missingThreads * initialCapacity > MaximumFrameCapacity - frameCapacity_)
+    {
+        // Reclaim oversized cached storage only when it would prevent admitting more threads.
+        // No sample is being read here; Reset has already cleared the preceding capture.
+        for (auto& [_, buffer] : stacks_)
+        {
+            if (buffer.capacity() > initialCapacity)
+            {
+                frameCapacity_ -= buffer.capacity();
+                std::vector<FunctionIdentifier>().swap(buffer);
+            }
+        }
+    }
+
+    // Reserve fairly across the cohort, outside suspension. A large thread set must not
+    // exhaust the budget through a fixed 80-frame reservation for each thread.
+    for (const auto threadId : activeThreads)
+    {
+        auto found = stacks_.find(threadId);
+        if (found == stacks_.end())
+        {
+            if (stacks_.size() >= MaximumThreads || frameCapacity_ >= MaximumFrameCapacity)
+            {
+                continue;
+            }
+            found = stacks_.try_emplace(threadId).first;
+        }
+
+        auto& buffer = found->second;
+        if (buffer.capacity() == 0 &&
+            TryReserveStackFrame(buffer, std::min(initialCapacity, MaximumFrameCapacity - frameCapacity_)))
+        {
+            frameCapacity_ += buffer.capacity();
+        }
+    }
+}
+
+void ThreadStacksBuffer::Reset()
+{
+    for (auto& [_, buffer] : stacks_)
+    {
+        buffer.clear();
+    }
+}
+
+void ThreadStacksBuffer::Clear() noexcept
+{
+    stacks_.clear();
+    frameCapacity_ = 0;
+    cachedStack_   = nullptr;
+}
+
+static void RecordManagedFrame(ContinuousProfiler*              prof,
+                               const FunctionID                 functionId,
+                               std::vector<FunctionIdentifier>& buffer)
+{
+    prof->stats_.total_frames++;
+    buffer.push_back(prof->helper.LookupManagedFunction(functionId, 0));
+}
+
+// Allocation snapshots pass one context pointer through the CLR callback.
 struct DoStackSnapshotParams
 {
     ContinuousProfiler*              prof;
@@ -883,10 +1062,13 @@ static HRESULT __stdcall HandleStackFrame(_In_ FunctionID         func_id,
         return S_FALSE;
     }
 
-    params->prof->stats_.total_frames++;
+    // A full buffer truncates the sample. S_FALSE would cancel and discard the whole capture.
+    if (!TryReserveStackFrame(*params->buffer, ThreadStacksBuffer::MaximumFramesPerStack))
+    {
+        return S_OK;
+    }
 
-    const auto identifier = params->prof->helper.LookupManagedFunction(func_id, 0);
-    params->buffer->push_back(identifier);
+    RecordManagedFrame(params->prof, func_id, *params->buffer);
     return S_OK;
 }
 
@@ -918,20 +1100,22 @@ static HRESULT __stdcall HandleStackFrame(_In_ FunctionID         func_id,
     return SamplingType::Continuous;
 }
 
-bool CaptureFunctionIdentifiersForThreads(
-    ContinuousProfiler*                                            prof,
-    ICorProfilerInfo7*                                             info7,
-    const std::unordered_set<ThreadID>&                            selectedThreads,
-    std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
+bool CaptureFunctionIdentifiersForThreads(ContinuousProfiler*                 prof,
+                                          ICorProfilerInfo7*                  info7,
+                                          const std::unordered_set<ThreadID>& selectedThreads,
+                                          ThreadStacksBuffer&                 threadStacksBuffer)
 {
     const auto shutdownToken = prof->GetShutdownToken();
     prof->helper.ClearFunctionIdentifierCache();
 
     if (shutdownToken.IsCancellationRequested())
     {
-        threadStacksBuffer.clear();
+        threadStacksBuffer.Clear();
         return false;
     }
+
+    // Evict stale caches and prepare bounded initial storage before suspension.
+    threadStacksBuffer.PrepareForCapture(selectedThreads);
 
     if (auto stackWalker = prof->GetStackWalker())
     {
@@ -943,26 +1127,30 @@ bool CaptureFunctionIdentifiersForThreads(
                 return S_FALSE;
             }
 
-            auto                  thread = frame->threadId;
-            DoStackSnapshotParams doStackSnapshotParams{prof, &threadStacksBuffer[thread], shutdownToken};
-
+            auto* buffer = threadStacksBuffer.TryPrepareFrame(frame->threadId);
+            if (buffer == nullptr)
+            {
+                return S_OK;
+            }
             if (frame->isUnmanagedFrame && frame->functionId == 0 && frame->instructionPointer != 0)
             {
                 // Record IP for symbol resolution
-                doStackSnapshotParams.prof->stats_.total_frames++;
-                doStackSnapshotParams.buffer->push_back(FunctionIdentifier::Native(frame->instructionPointer));
-                return shutdownToken.IsCancellationRequested() ? S_FALSE : S_OK;
+                prof->stats_.total_frames++;
+                buffer->push_back(FunctionIdentifier::Native(frame->instructionPointer));
             }
-
-            return HandleStackFrame(frame->functionId, frame->instructionPointer, frame->frameInfo, frame->contextSize,
-                                    frame->context, &doStackSnapshotParams);
+            else
+            {
+                // TryPrepareFrame already checked both limits; allocation snapshots use the CLR callback above.
+                RecordManagedFrame(prof, frame->functionId, *buffer);
+            }
+            return shutdownToken.IsCancellationRequested() ? S_FALSE : S_OK;
         };
 
         continuous_profiler::StackCaptureRequest request{frameProcessor};
         const auto                               captureResult = stackWalker->CaptureStacks(selectedThreads, &request);
         if (captureResult == S_FALSE || shutdownToken.IsCancellationRequested())
         {
-            threadStacksBuffer.clear();
+            threadStacksBuffer.Clear();
             return false;
         }
     }
@@ -1162,12 +1350,12 @@ bool TryPrepareSelectedThreadSampling(ContinuousProfiler* prof, const std::chron
 
 // The implementation will suspend CLR for
 // .net and use thread suspension for netfx
-static void CaptureSamples(ContinuousProfiler*                                            prof,
-                           ICorProfilerInfo7*                                             info7,
-                           const SamplingType                                             samplingType,
-                           std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer,
-                           const bool                                                     selectiveSamplingEnabled,
-                           const uint32_t                                                 cpuSamplingInterval)
+static void CaptureSamples(ContinuousProfiler* prof,
+                           ICorProfilerInfo7*  info7,
+                           const SamplingType  samplingType,
+                           ThreadStacksBuffer& threadStacksBuffer,
+                           const bool          selectiveSamplingEnabled,
+                           const uint32_t      cpuSamplingInterval)
 {
     if (samplingType == SamplingType::SelectedThreads &&
         !TryPrepareSelectedThreadSampling(prof, std::chrono::steady_clock::now()))
@@ -1265,7 +1453,8 @@ static void CaptureSamples(ContinuousProfiler*                                  
 
     prof->stats_.micros_suspended = static_cast<int>(elapsed_micros);
 
-    const size_t nonEmptyCount = std::count_if(threadStacksBuffer.begin(), threadStacksBuffer.end(),
+    const auto&  threadStacks  = threadStacksBuffer.Stacks();
+    const size_t nonEmptyCount = std::count_if(threadStacks.begin(), threadStacks.end(),
                                                [](const std::pair<const ThreadID, std::vector<FunctionIdentifier>>& v)
                                                { return !v.second.empty(); });
 
@@ -1279,36 +1468,18 @@ static void CaptureSamples(ContinuousProfiler*                                  
 
     if (prof->IsShutdownRequested())
     {
-        threadStacksBuffer.clear();
+        threadStacksBuffer.Clear();
         return;
     }
 
     if (samplingType == SamplingType::Continuous)
     {
-        ResolveSymbolsAndPublishBufferForAllThreads(prof, threadStacksBuffer, selectiveSamplingEnabled,
-                                                    cpuSamplingInterval);
+        ResolveSymbolsAndPublishBufferForAllThreads(prof, threadStacks, selectiveSamplingEnabled, cpuSamplingInterval);
     }
     else if (samplingType == SamplingType::SelectedThreads)
     {
-        ResolveSymbolsAndPublishBufferForSelectedThreads(prof, threadStacksBuffer);
+        ResolveSymbolsAndPublishBufferForSelectedThreads(prof, threadStacks);
     }
-}
-
-static void ReserveCapacity(ContinuousProfiler* const                                      prof,
-                            std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer)
-{
-    threadStacksBuffer.reserve(50);
-    std::lock_guard<std::mutex> thread_state_guard(prof->thread_state_lock_);
-    for (auto& [threadId, _] : prof->managed_tid_to_state_)
-    {
-        threadStacksBuffer[threadId].reserve(80);
-    }
-}
-
-static std::chrono::steady_clock::time_point GetNextRefreshTime(
-    const std::chrono::time_point<std::chrono::steady_clock> now)
-{
-    return now + std::chrono::minutes(5);
 }
 
 static bool ShouldTrackIterations(const ThreadSamplingConfiguration& configuration)
@@ -1343,18 +1514,12 @@ static void SamplingThreadMainCore(ContinuousProfiler*    prof,
         return;
     }
 
-    std::unordered_map<ThreadID, std::vector<FunctionIdentifier>> threadStacksBuffer;
-    unsigned int                                                  iteration = 0;
-    ThreadSamplingConfiguration configuration                               = prof->PullThreadSamplingConfiguration();
-    // The activation handshake covers every fallible bootstrap operation. In particular, ReserveCapacity may
-    // allocate; publishing readiness before it succeeds would let Apply commit a worker that immediately exits.
-    ReserveCapacity(prof, threadStacksBuffer);
-
+    // Construct the bounded cache before publishing readiness; its initial bucket reservation may allocate.
+    ThreadStacksBuffer          threadStacksBuffer;
+    unsigned int                iteration     = 0;
+    ThreadSamplingConfiguration configuration = prof->PullThreadSamplingConfiguration();
     initializationResult.set_value(initializeCurrentThreadResult);
     initializationResultPublished = true;
-
-    const auto startTime    = std::chrono::steady_clock::now();
-    auto       next_refresh = GetNextRefreshTime(startTime);
 
     while (!shutdownToken.IsCancellationRequested())
     {
@@ -1394,22 +1559,7 @@ static void SamplingThreadMainCore(ContinuousProfiler*    prof,
             return;
         }
 
-        const auto now = std::chrono::steady_clock::now();
-        // In order to avoid the need to recreate the vectors each iteration,
-        // for the most of the iterations, instead of clearing the map, clear only the vectors.
-        if (now > next_refresh)
-        {
-            threadStacksBuffer.clear();
-            ReserveCapacity(prof, threadStacksBuffer);
-            next_refresh = GetNextRefreshTime(now);
-        }
-        else
-        {
-            for (auto& [_, threadBuffer] : threadStacksBuffer)
-            {
-                threadBuffer.clear();
-            }
-        }
+        threadStacksBuffer.Reset();
     }
 }
 
@@ -1723,7 +1873,7 @@ ThreadState* ContinuousProfiler::GetCurrentThreadState(ThreadID tid)
 }
 
 // You can read about the ETW event format for AllocationTick at
-// https://docs.microsoft.com/en-us/dotnet/framework/performance/garbage-collection-etw-events#gcallocationtick_v3-event
+// https://docs.microsoft.com/dotnet/framework/performance/garbage-collection-etw-events#gcallocationtick_v3-event
 // or, if that is not working, a search for "GCAllocationTick ETW" will get you there.
 // As of this comment, the above link only documents v3 of the event, with v4 undocumented but
 // by source traversal differs only by the addition of the actual size of the just-allocated object
@@ -1767,9 +1917,9 @@ bool FinalizeAllocationStackCapture(const ShutdownToken&             shutdownTok
     return true;
 }
 
-static bool CaptureAllocationStack(ContinuousProfiler*              prof,
-                                   const ShutdownToken&             shutdownToken,
-                                   std::vector<FunctionIdentifier>& threadStack)
+bool CaptureAllocationStack(ContinuousProfiler*              prof,
+                            const ShutdownToken&             shutdownToken,
+                            std::vector<FunctionIdentifier>& threadStack)
 {
     DoStackSnapshotParams doStackSnapshotParams(prof, &threadStack, shutdownToken);
     const HRESULT         hr = prof->info7->DoStackSnapshot((ThreadID)NULL, &HandleStackFrame, COR_PRF_SNAPSHOT_DEFAULT,

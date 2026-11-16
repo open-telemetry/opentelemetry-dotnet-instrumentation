@@ -26,15 +26,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - machine: windows-2022
-            containers: windows
           - machine: windows-2025
             containers: windows
           - machine: ubuntu-22.04
             containers: linux
           - machine: ubuntu-22.04-arm
             containers: linux
-          - machine: macos-14
+          - machine: macos-15
             containers: none
     runs-on: ${{ matrix.machine }}
     steps:

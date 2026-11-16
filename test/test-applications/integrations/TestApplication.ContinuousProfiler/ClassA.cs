@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Globalization;
+#if NET11_0_OR_GREATER
+using System.Numerics;
+#endif
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -69,13 +72,19 @@ internal static class ClassA
         nint nint,
         nuint nuint)
     {
+#if NET11_0_OR_GREATER
+        MethodAFloats(float.MaxValue, double.MaxValue, BFloat16.MaxValue);
+#else
         MethodAFloats(float.MaxValue, double.MaxValue);
+#endif
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static unsafe void MethodAFloats(
-        float fl,
-        double db)
+#if NET11_0_OR_GREATER
+    public static unsafe void MethodAFloats(float fl, double db, BFloat16 bfl16)
+#else
+    public static unsafe void MethodAFloats(float fl, double db)
+#endif
     {
         var a = 1;
         var pointer = &a;

@@ -48,6 +48,7 @@ public class OracleMdaTests : TestHelper
         // Skip the test if fixture does not support current platform
         _oracle.SkipIfUnsupportedPlatform();
 
+        SetEnvironmentVariable("TEST_DATABASE_PASSWORD", _oracle.Password);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_ORACLEMDA_SET_DBSTATEMENT_FOR_TEXT", dbStatementForText.ToString());
         SetEnvironmentVariable("TNS_ADMIN", _oracle.WalletDirectory);
         EnableBytecodeInstrumentation();
@@ -118,7 +119,7 @@ public class OracleMdaTests : TestHelper
 #if NET462
             Framework = "net472",
 #endif
-            Arguments = $"--user {_oracle.User} --password {_oracle.Password} --data-source {_oracle.DataSource}",
+            Arguments = $"--user {_oracle.User} --data-source {_oracle.DataSource}",
             PackageVersion = packageVersion
         };
 

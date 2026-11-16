@@ -13,6 +13,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka;
 
 internal static class KafkaInstrumentation
 {
+    private const int MaxMessageKeyLength = 256;
+
     private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.Kafka", AutoInstrumentationVersion.Version);
 
     public static Activity? StartConsumerActivity(object consumer)
@@ -110,10 +112,29 @@ internal static class KafkaInstrumentation
     {
         return key switch
         {
-            string s => s,
+            string s => TruncateMessageKey(s),
             int or uint or long or ulong or float or double or decimal => Convert.ToString(key, CultureInfo.InvariantCulture),
             _ => null
         };
+    }
+
+    private static string TruncateMessageKey(string value)
+    {
+        if (value.Length <= MaxMessageKeyLength)
+        {
+            return value;
+        }
+
+        var length = MaxMessageKeyLength;
+
+        // Do not split a surrogate pair at the cut.
+        if (char.IsHighSurrogate(value[length - 1]))
+        {
+            length--;
+        }
+
+        // Copy the truncated value so the span does not retain the original string.
+        return value.Substring(0, length);
     }
 
     private static ActivityLink[] GetActivityLinks(IConsumeResult consumeResult)

@@ -841,7 +841,7 @@ internal class IntegrationMapper
             integrationType.FullName,
             targetType.FullName,
             returnType.FullName);
-        return new CreateAsyncEndMethodResult(callMethod, preserveContext);
+        return new CreateAsyncEndMethodResult(callMethod, preserveContext, isTaskReturn);
     }
 
     private static MethodInfo? GetOnMethodEndMethodInfo(Type integrationType, string returnTypeName)

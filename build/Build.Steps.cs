@@ -46,7 +46,7 @@ partial class Build
 
     private static readonly IEnumerable<TargetFramework> TargetFrameworks =
     [
-       TargetFramework.NET8_0,
+       TargetFramework.NET10_0,
        TargetFramework.NET462,
     ];
 
@@ -56,16 +56,14 @@ partial class Build
         TargetFramework.NET47,
         TargetFramework.NET471,
         TargetFramework.NET472,
-        TargetFramework.NET8_0,
-        TargetFramework.NET9_0,
-        TargetFramework.NET10_0
+        TargetFramework.NET10_0,
+        TargetFramework.NET11_0
     ];
 
     private static readonly IEnumerable<TargetFramework> TestFrameworks =
     [
         ..TargetFrameworks,
-        TargetFramework.NET9_0,
-        TargetFramework.NET10_0
+        TargetFramework.NET11_0
     ];
 
     Target CreateRequiredDirectories => _ => _
@@ -433,7 +431,7 @@ partial class Build
 
             // Generate .NET (Core) redirects
             // .NET Core version normalization:
-            // net8.0 -> 80, net9.0 -> 90, net10.0 -> 100
+            // net10.0 -> 100, net11.0 -> 110
             AssemblyRedirectionSourceGenerator.Generate(
                 TracerHomeDirectory / TargetFramework.OutputFolderNet,
                 SourceDirectory / Projects.AutoInstrumentationNative / $"assembly_redirection_{TargetFramework.OutputFolderNet}.h",
@@ -543,7 +541,7 @@ partial class Build
                     return;
                 }
 
-                targetFrameworks = new[] { TestTargetFramework };
+                targetFrameworks = [TestTargetFramework];
             }
 
             DotNetPublish(s => s
@@ -587,9 +585,7 @@ partial class Build
 
             if (!string.IsNullOrWhiteSpace(TestProject))
             {
-                unitTestProjects = unitTestProjects
-                    .Where(p => p.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))
-                    .ToArray();
+                unitTestProjects = [.. unitTestProjects.Where(p => p.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))];
                 if (unitTestProjects.Length == 0)
                 {
                     return;
@@ -598,14 +594,15 @@ partial class Build
 
             if (TestTargetFramework != TargetFramework.NOT_SPECIFIED)
             {
-                unitTestProjects = unitTestProjects
-                    .Where(p =>
+                unitTestProjects =
+                [
+                    .. unitTestProjects.Where(p =>
                         p.GetTargetFrameworks().Contains(TestTargetFramework) &&
                         (p.Name != Projects.Tests.AutoInstrumentationLoaderTests || TargetFrameworks.Contains(TestTargetFramework)))
-                    .ToArray();
+                ];
             }
 
-            for (int i = 0; i < TestCount; i++)
+            for (var i = 0; i < TestCount; i++)
             {
                 DotNetTestSettings ConfigureUnitTest(DotNetTestSettings settings) => settings
                     .SetConfiguration(BuildConfiguration)
@@ -653,7 +650,7 @@ partial class Build
                 return;
             }
 
-            for (int i = 0; i < TestCount; i++)
+            for (var i = 0; i < TestCount; i++)
             {
                 DotNetTestSettings ConfigureIntegrationTest(DotNetTestSettings settings) => settings
                     .SetConfiguration(BuildConfiguration)
@@ -690,7 +687,7 @@ partial class Build
             var files = Directory.GetFiles(netPath);
             var fileInfoList = new List<object>(files.Length);
 
-            foreach (string file in files)
+            foreach (var file in files)
             {
                 var fileName = Path.GetFileNameWithoutExtension(file);
 
@@ -706,8 +703,8 @@ partial class Build
                 }
             }
 
-            JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonContent = JsonSerializer.Serialize(fileInfoList, options);
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            var jsonContent = JsonSerializer.Serialize(fileInfoList, options);
 
             var ruleEngineJsonFilePath = netPath / "ruleEngine.json";
             File.WriteAllText(ruleEngineJsonFilePath, jsonContent);
@@ -776,7 +773,7 @@ partial class Build
             "Initialize_WithPreviouslyCreatedTracerProvider_WorksCorrectly"
         }.Select(name => $"FullyQualifiedName~{testPrefix}.{name}");
 
-        for (int i = 0; i < TestCount; i++)
+        for (var i = 0; i < TestCount; i++)
         {
             foreach (var testName in testNames)
             {

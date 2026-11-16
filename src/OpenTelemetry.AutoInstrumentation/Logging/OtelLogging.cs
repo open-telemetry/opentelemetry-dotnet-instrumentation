@@ -251,13 +251,7 @@ internal static class OtelLogging
 
         try
         {
-            logDirectory = Environment.GetEnvironmentVariable(OtelDotnetAutoLogDirectory);
-
-            if (logDirectory == null)
-            {
-                logDirectory = GetDefaultLogDirectory(Environment.OSVersion.Platform == PlatformID.Win32NT);
-            }
-
+            logDirectory = Environment.GetEnvironmentVariable(OtelDotnetAutoLogDirectory) ?? GetDefaultLogDirectory(Environment.OSVersion.Platform == PlatformID.Win32NT);
             logDirectory = CreateDirectoryIfMissing(logDirectory) ?? Path.GetTempPath();
         }
 #pragma warning disable CA1031 // Do not catch general exception

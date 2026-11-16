@@ -60,6 +60,73 @@ public class SdkSelfDiagnosticsEventListenerTests
 #endif
     }
 
+    [Fact]
+    public void InternalLoggerMessages_AreNotLoggedTwice()
+    {
+        var testSink = new TestSink();
+        var logger = new InternalLogger(testSink, LogLevel.Debug);
+        using var listener = new SdkSelfDiagnosticsEventListener(logger);
+
+        // Writes to the sink and mirrors the message to AutoInstrumentationEventSource.
+        logger.Information("auto-instrumentation message", writeToEventLog: true);
+
+        var message = Assert.Single(testSink.Messages);
+        Assert.Contains("[Information] auto-instrumentation message", message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void InternalLoggerMessages_AreForwardedToExternalListeners()
+    {
+        var testSink = new TestSink();
+        var logger = new InternalLogger(testSink, LogLevel.Debug);
+        using var externalListener = new RecordingEventListener();
+        externalListener.EnableEvents(AutoInstrumentationEventSource.Log, EventLevel.Verbose, EventKeywords.All);
+        using var listener = new SdkSelfDiagnosticsEventListener(logger);
+
+        logger.Information("auto-instrumentation message", writeToEventLog: true);
+
+        var message = Assert.Single(testSink.Messages);
+        Assert.Contains("[Information] auto-instrumentation message", message, StringComparison.Ordinal);
+
+        var eventData = Assert.Single(externalListener.Events);
+        Assert.Same(AutoInstrumentationEventSource.Log, eventData.EventSource);
+        Assert.Equal("OpenTelemetry-AutoInstrumentation", eventData.EventSource.Name);
+        Assert.Equal(4, eventData.EventId);
+        Assert.Equal("Information", eventData.EventName);
+        Assert.Equal(EventLevel.Informational, eventData.Level);
+        Assert.Equal("{0}", eventData.Message);
+        Assert.NotNull(eventData.Payload);
+        Assert.Equal("auto-instrumentation message", Assert.Single(eventData.Payload));
+    }
+
+    [Fact]
+    public void AutoInstrumentationEventSources_AreIgnored()
+    {
+        var testSink = new TestSink();
+        var logger = new InternalLogger(testSink, LogLevel.Debug);
+        using var listener = new SdkSelfDiagnosticsEventListener(logger);
+
+        AutoInstrumentationEventSourceForTests.Log.Information();
+
+        Assert.Empty(testSink.Messages);
+    }
+
+    [EventSource(Name = "OpenTelemetry-AutoInstrumentation-For-Tests")]
+    internal sealed class AutoInstrumentationEventSourceForTests : EventSource
+    {
+        public static readonly AutoInstrumentationEventSourceForTests Log = new();
+
+        private AutoInstrumentationEventSourceForTests()
+        {
+        }
+
+        [Event(4, Message = "Auto-instrumentation info.", Level = EventLevel.Informational)]
+        public void Information()
+        {
+            WriteEvent(4);
+        }
+    }
+
     [EventSource(Name = "OpenTelemetry-Instrumentation-AspNet-Telemetry-For-Tests")]
     internal sealed class AspNetTelemetryEventSourceForTests : EventSource
     {
@@ -107,6 +174,16 @@ public class SdkSelfDiagnosticsEventListenerTests
         public void Critical()
         {
             WriteEvent(26);
+        }
+    }
+
+    private sealed class RecordingEventListener : EventListener
+    {
+        public List<EventWrittenEventArgs> Events { get; } = [];
+
+        protected override void OnEventWritten(EventWrittenEventArgs eventData)
+        {
+            Events.Add(eventData);
         }
     }
 }

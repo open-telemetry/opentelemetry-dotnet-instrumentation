@@ -24,7 +24,8 @@ public interface IProvideEffectiveConfig : IOpAmpPlugin
     /// may overlap plugin lifecycle callbacks and configuration updates. Publish configuration
     /// safely across threads and return a stable snapshot, including its buffers.
     /// Do not issue reporting notifications or synchronously wait for OpAMP callbacks from this getter.
-    /// A running callback may overlap plugin cleanup.
+    /// A running callback may overlap plugin cleanup. If this callback throws, a later
+    /// effective-configuration notification or server-requested full-state report can retry the read.
     /// </remarks>
     IReadOnlyCollection<EffectiveConfigFile> GetEffectiveConfig();
 }

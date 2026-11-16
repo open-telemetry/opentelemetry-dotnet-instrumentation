@@ -44,7 +44,7 @@ public static class ProjectsHelper
     public static IEnumerable<Project> GetManagedTestProjects(this Solution solution)
     {
         return solution.GetManagedUnitTestProjects()
-            .Concat(new[] { solution.GetManagedIntegrationTestProject() });
+            .Concat([solution.GetManagedIntegrationTestProject()]);
     }
 
     public static IEnumerable<Project> GetManagedUnitTestProjects(this Solution solution)
@@ -117,13 +117,13 @@ public static class ProjectsHelper
         return solution.GetManagedSrcProjects()
             .Concat(solution.GetManagedTestProjects())
             .Concat(solution.GetCrossPlatformTestApplications())
-            .Concat(new[] { solution.GetTestMock() });
+            .Concat([solution.GetTestMock()]);
     }
 
     public static IEnumerable<Project> GetNativeProjects(this Solution solution)
     {
         return solution.GetNativeSrcProjects()
-            .Concat(new[] { solution.GetNativeTestProject() });
+            .Concat([solution.GetNativeTestProject()]);
     }
 
     public static Project GetProjectByName(this Solution solution, string projectName)

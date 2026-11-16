@@ -1,6 +1,4 @@
-﻿@model List<KeyValuePair<string, string>>
-
-@{
+﻿@{
     ViewData["Title"] = "Home Page";
     ViewData["Description"] = "The home page of my website";
 }
@@ -17,43 +15,13 @@
                 <td>@(System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture)</td>
             </tr>
             <tr>
-                <th scope="row">OpenTelemetry.Api.dll path</th>
-                <td>@(ViewBag.TracerAssemblyLocation ?? "(not found)")</td>
+                <th scope="row">OpenTelemetry.Api.dll loaded</th>
+                <td>@ViewBag.TracerAssemblyLoaded</td>
             </tr>
             <tr>
-                <th scope="row">OpenTelemetry.AutoInstrumentation.dll path</th>
-                <td>@(ViewBag.ClrProfilerAssemblyLocation ?? "(not found)")</td>
+                <th scope="row">OpenTelemetry.AutoInstrumentation.dll loaded</th>
+                <td>@ViewBag.ClrProfilerAssemblyLoaded</td>
             </tr>
-        </tbody>
-    </table>
-</div>
-
-<div class="container">
-    <div>Environment Variables:</div>
-    <table class="table table-striped table-hover">
-        <thead>
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Any())
-            {
-                foreach (var envVar in Model)
-                {
-                    <tr>
-                        <th scope="row">@envVar.Key</th>
-                        <td>@envVar.Value</td>
-                    </tr>
-                }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="2">(empty)</td>
-                </tr>
-            }
         </tbody>
     </table>
 </div>

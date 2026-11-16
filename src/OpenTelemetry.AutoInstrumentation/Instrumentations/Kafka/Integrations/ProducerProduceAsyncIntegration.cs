@@ -66,7 +66,7 @@ public static class ProducerProduceAsyncIntegration
             deliveryResult = returnValue;
         }
 
-        if (deliveryResult is not null)
+        if (deliveryResult is IDuckType duckType && duckType.Instance is not null)
         {
             KafkaInstrumentation.SetDeliveryResults(activity, deliveryResult);
         }

@@ -25,6 +25,8 @@ instead of a fixed value.
 
 You can also use `${ENVIRONMENT_VARIABLE:-value}`, where `value` is the fallback
 if the environment variable is empty or not set.
+Without a fallback, an empty or unset environment variable is replaced with an
+empty value.
 
 For more details, see: [OpenTelemetry YAML File Format Specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.49.0/specification/configuration/data-model.md#yaml-file-format).
 
@@ -405,6 +407,7 @@ logger_provider:
            # Configure sampler to be always_on.
            trace_id_ratio:
              # Configure ratio between 0.0 and 1.0.
+             # If omitted or null, 1.0 is used.
              ratio: 0.25
    ```
 
@@ -652,7 +655,8 @@ opamp/development:
   # Maximum number of custom messages that may wait to be sent.
   # If omitted, 2048 is used. The value must be positive.
   max_pending_custom_messages: 2048
-  # Maximum aggregate size, in bytes, of pending custom message payloads.
+  # Maximum aggregate size, in bytes, of pending custom messages,
+  # including state reports queued with them.
   # If omitted, 67108864 (64 MiB) is used. The value must be positive.
   max_pending_custom_message_bytes: 67108864
 ```

@@ -4,6 +4,9 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+#if NETFRAMEWORK
+using Microsoft.Win32.SafeHandles;
+#endif
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 
 namespace OpenTelemetry.AutoInstrumentation;
@@ -76,6 +79,29 @@ internal static class NativeMethods
     }
 
 #if NETFRAMEWORK
+    public static Mutex CreateContinuousProfilerReaderMutex()
+    {
+        var mutex = new Mutex(false);
+        try
+        {
+            var handle = Windows.GetContinuousProfilerReaderMutex();
+            if (handle.IsInvalid)
+            {
+                handle.Dispose();
+                throw new InvalidOperationException("Failed to obtain the process-private continuous profiler reader mutex.");
+            }
+
+            mutex.SafeWaitHandle.Dispose();
+            mutex.SafeWaitHandle = handle;
+            return mutex;
+        }
+        catch
+        {
+            mutex.Dispose();
+            throw;
+        }
+    }
+
     public static void SetSqlClientNetFxILRewriteEnabled(bool enabled)
     {
         if (IsWindows)
@@ -269,6 +295,10 @@ internal static class NativeMethods
         public static extern void AddInterfaceInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
 
 #if NETFRAMEWORK
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll", CallingConvention = CallingConvention.Winapi)]
+        public static extern SafeWaitHandle GetContinuousProfilerReaderMutex();
+
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void SetSqlClientNetFxILRewriteEnabled(bool enabled);

@@ -28,7 +28,7 @@ can parse thread sampling data and export it.
 ## How does the thread sampler work?
 
 The profiler uses the
-[.NET profiler](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
+[.NET profiler](https://docs.microsoft.com/dotnet/framework/unmanaged-api/profiling/)
 to perform periodic call stack sampling.
 
 The native-side sampling thread, and managed-side exporter thread
@@ -38,7 +38,7 @@ Continuous profiling and selective sampling can be enabled independently.
 
 ## Requirements
 
-* .NET 8.0 or higher (`ICorProfilerInfo12` available in runtime).
+* .NET 10.0 or higher (`ICorProfilerInfo12` available in runtime).
 * .NET Framework is not supported, as `ICorProfiler10` and `ICorProfiler12`
   are not available in .NET Fx.
 

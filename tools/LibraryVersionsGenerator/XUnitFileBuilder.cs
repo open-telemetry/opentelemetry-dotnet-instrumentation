@@ -25,7 +25,7 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
 
     public CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks)
     {
-        return AddVersion(version, supportedFrameworks, Array.Empty<string>());
+        return AddVersion(version, supportedFrameworks, []);
     }
 
     public override CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks, string[] supportedPlatforms)
@@ -47,9 +47,9 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
         return this;
     }
 
-    public override CSharpFileBuilder AddVersionWithDependencies(string version, Dictionary<string, string> dependencies, string[] supportedFrameworks, string[] supportedPlatforms)
+    public override CSharpFileBuilder AddVersionWithMetadata(string version, Dictionary<string, string> metadata, string[] supportedFrameworks, string[] supportedPlatforms)
     {
-        // Dependencies info is currently not usable here. Build is located based on main package version string.
+        // Build metadata is not needed here. The application build is located by its main version string.
         return AddVersion(version, supportedFrameworks, supportedPlatforms);
     }
 

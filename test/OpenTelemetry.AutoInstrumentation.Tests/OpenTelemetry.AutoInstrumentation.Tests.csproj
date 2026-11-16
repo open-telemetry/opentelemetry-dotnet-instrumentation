@@ -5,12 +5,12 @@
     <PackageReference Include="Xunit.SkippableFact" />
     <PackageReference Include="log4net" />
     <PackageReference Include="System.Data.SqlClient" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " />
-    <PackageReference Include="Microsoft.Build" Condition=" '$(TargetFramework)' == 'net10.0' " />
+    <PackageReference Include="Microsoft.Build" Condition=" '$(TargetFramework)' == 'net11.0' " />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />
-    <ProjectReference Include="..\..\tools\DependencyListGenerator\DependencyListGenerator.csproj" Condition=" '$(TargetFramework)' == 'net10.0' " />
+    <ProjectReference Include="..\..\tools\DependencyListGenerator\DependencyListGenerator.csproj" Condition=" '$(TargetFramework)' == 'net11.0' " />
   </ItemGroup>
 
   <ItemGroup>

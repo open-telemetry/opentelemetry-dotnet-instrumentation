@@ -7,12 +7,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Configurations.Otlp;
+using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Logs;
 
 namespace OpenTelemetry.AutoInstrumentation.Logger;
 
 internal static class LoggerInitializer
 {
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+
     private static volatile bool _initializedAtLeastOnce;
     private static Type? _loggingProviderSdkType;
 
@@ -39,7 +42,7 @@ internal static class LoggerInitializer
         {
             if (builder.Services == null)
             {
-                AutoInstrumentationEventSource.Log.Verbose("Logs: The builder.Services property is not of the IServiceCollection type, so we're skipping the integration of logs with ServiceCollection.");
+                Logger.Debug("Logs: The builder.Services property is not of the IServiceCollection type, so we're skipping the integration of logs with ServiceCollection.");
                 return;
             }
 
@@ -47,7 +50,7 @@ internal static class LoggerInitializer
             var openTelemetryLoggerProviderDescriptor = builder.Services.FirstOrDefault(descriptor => descriptor.ImplementationType == _loggingProviderSdkType);
             if (openTelemetryLoggerProviderDescriptor != null)
             {
-                AutoInstrumentationEventSource.Log.Verbose("Logs: AddOpenTelemetry already called on logging builder instance.");
+                Logger.Debug("Logs: AddOpenTelemetry already called on logging builder instance.");
                 return;
             }
 
@@ -64,11 +67,11 @@ internal static class LoggerInitializer
 
                 if (settings.LogExporters.Count == 0)
                 {
-                    AutoInstrumentationEventSource.Log.Information("Logs: Using file-based configuration for exporters.");
+                    Logger.Information("Logs: Using file-based configuration for exporters.");
 
                     if (settings.Processors == null)
                     {
-                        AutoInstrumentationEventSource.Log.Verbose("Logs: No processors found in file-based configuration.");
+                        Logger.Debug("Logs: No processors found in file-based configuration.");
                         return;
                     }
 
@@ -76,13 +79,13 @@ internal static class LoggerInitializer
                     {
                         if (processor.Batch != null && processor.Simple != null)
                         {
-                            AutoInstrumentationEventSource.Log.Verbose("Logs: Both batch and simple processors are configured. Skipping unsupported combination.");
+                            Logger.Debug("Logs: Both batch and simple processors are configured. Skipping unsupported combination.");
                             continue;
                         }
 
                         if (processor.Batch == null && processor.Simple == null)
                         {
-                            AutoInstrumentationEventSource.Log.Verbose("Logs: No valid processor configuration found, skipping.");
+                            Logger.Debug("Logs: No valid processor configuration found, skipping.");
                             continue;
                         }
 
@@ -91,25 +94,25 @@ internal static class LoggerInitializer
                             var exporter = processor.Batch.Exporter;
                             if (exporter == null)
                             {
-                                AutoInstrumentationEventSource.Log.Verbose("Logs: No exporter defined for batch processor, skipping.");
+                                Logger.Debug("Logs: No exporter defined for batch processor, skipping.");
                                 continue;
                             }
 
                             if (exporter.OtlpHttp == null && exporter.OtlpGrpc == null)
                             {
-                                AutoInstrumentationEventSource.Log.Verbose("Logs: No valid exporter found for batch processor, skipping.");
+                                Logger.Debug("Logs: No valid exporter found for batch processor, skipping.");
                                 continue;
                             }
 
                             if (exporter.OtlpHttp != null && exporter.OtlpGrpc != null)
                             {
-                                AutoInstrumentationEventSource.Log.Verbose("Logs: Multiple exporters configured for batch processor, only one supported. Skipping.");
+                                Logger.Debug("Logs: Multiple exporters configured for batch processor, only one supported. Skipping.");
                                 continue;
                             }
 
                             if (exporter.OtlpHttp != null)
                             {
-                                AutoInstrumentationEventSource.Log.Verbose("Logs: Adding OTLP HTTP batch exporter.");
+                                Logger.Debug("Logs: Adding OTLP HTTP batch exporter.");
                                 var otlpSettings = new OtlpSettings(OtlpSignalType.Logs, exporter.OtlpHttp);
                                 loggerBuilder.AddOtlpExporter(opt =>
                                 {
@@ -120,7 +123,7 @@ internal static class LoggerInitializer
                             }
                             else if (exporter.OtlpGrpc != null)
                             {
-                                AutoInstrumentationEventSource.Log.Verbose("Logs: Adding OTLP gRPC batch exporter.");
+                                Logger.Debug("Logs: Adding OTLP gRPC batch exporter.");
                                 var otlpSettings = new OtlpSettings(exporter.OtlpGrpc);
                                 loggerBuilder.AddOtlpExporter(opt =>
                                 {
@@ -135,7 +138,7 @@ internal static class LoggerInitializer
                             var exporter = processor.Simple.Exporter;
                             if (exporter == null)
                             {
-                                AutoInstrumentationEventSource.Log.Verbose("Logs: No exporter defined for simple processor, skipping.");
+                                Logger.Debug("Logs: No exporter defined for simple processor, skipping.");
                                 continue;
                             }
 
@@ -159,16 +162,16 @@ internal static class LoggerInitializer
                             switch (exportersCount)
                             {
                                 case 0:
-                                    AutoInstrumentationEventSource.Log.Verbose("Logs: No valid exporter found for simple processor, skipping.");
+                                    Logger.Debug("Logs: No valid exporter found for simple processor, skipping.");
                                     continue;
                                 case > 1:
-                                    AutoInstrumentationEventSource.Log.Verbose("Logs: Multiple exporters configured for simple processor, only one supported. Skipping.");
+                                    Logger.Debug("Logs: Multiple exporters configured for simple processor, only one supported. Skipping.");
                                     continue;
                             }
 
                             if (exporter.OtlpHttp != null)
                             {
-                                AutoInstrumentationEventSource.Log.Verbose("Logs: Adding OTLP HTTP simple exporter.");
+                                Logger.Debug("Logs: Adding OTLP HTTP simple exporter.");
                                 var otlpSettings = new OtlpSettings(OtlpSignalType.Logs, exporter.OtlpHttp);
                                 loggerBuilder.AddOtlpExporter(opt =>
                                 {
@@ -179,7 +182,7 @@ internal static class LoggerInitializer
                             }
                             else if (exporter.OtlpGrpc != null)
                             {
-                                AutoInstrumentationEventSource.Log.Verbose("Logs: Adding OTLP gRPC simple exporter.");
+                                Logger.Debug("Logs: Adding OTLP gRPC simple exporter.");
                                 var otlpSettings = new OtlpSettings(exporter.OtlpGrpc);
                                 loggerBuilder.AddOtlpExporter(opt =>
                                 {
@@ -190,7 +193,7 @@ internal static class LoggerInitializer
                             }
                             else if (exporter.Console != null)
                             {
-                                AutoInstrumentationEventSource.Log.Verbose("Logs: Adding Console simple exporter.");
+                                Logger.Debug("Logs: Adding Console simple exporter.");
                                 if (pluginManager != null)
                                 {
                                     loggerBuilder.AddConsoleExporter(pluginManager.ConfigureLogsOptions);
@@ -227,11 +230,11 @@ internal static class LoggerInitializer
             });
             _initializedAtLeastOnce = true;
 
-            AutoInstrumentationEventSource.Log.Information($"Logs: Loaded AddOpenTelemetry from LoggingBuilder.");
+            Logger.Information($"Logs: Loaded AddOpenTelemetry from LoggingBuilder.");
         }
         catch (Exception ex)
         {
-            AutoInstrumentationEventSource.Log.Error($"Error in AddOpenTelemetryLogs: {ex}");
+            Logger.Error(ex, "Error in AddOpenTelemetryLogs.");
             throw;
         }
     }

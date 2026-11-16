@@ -159,11 +159,11 @@ internal class SampleExporter : IDisposable
     }
 
 #if NETFRAMEWORK
-    internal void Start(Func<bool> deferredInitializer, TimeSpan retryInterval, string readerMutexName, Func<bool>? canRead = null)
+    internal void Start(Func<bool> deferredInitializer, TimeSpan retryInterval, Func<Mutex> createReaderMutex, Func<bool>? canRead = null)
     {
-        if (string.IsNullOrWhiteSpace(readerMutexName))
+        if (createReaderMutex == null)
         {
-            throw new ArgumentException("A reader mutex name is required.", nameof(readerMutexName));
+            throw new ArgumentNullException(nameof(createReaderMutex));
         }
 
         if (deferredInitializer == null)
@@ -176,7 +176,7 @@ internal class SampleExporter : IDisposable
             throw new ArgumentOutOfRangeException(nameof(retryInterval));
         }
 
-        StartCore(deferredInitializer, retryInterval, readerMutexName, canRead);
+        StartCore(deferredInitializer, retryInterval, createReaderMutex, canRead);
     }
 #endif
 
@@ -260,7 +260,7 @@ internal class SampleExporter : IDisposable
     }
 
 #if NETFRAMEWORK
-    private void StartCore(Func<bool>? deferredInitializer, TimeSpan retryInterval, string? readerMutexName = null, Func<bool>? canRead = null)
+    private void StartCore(Func<bool>? deferredInitializer, TimeSpan retryInterval, Func<Mutex>? createReaderMutex = null, Func<bool>? canRead = null)
 #else
     private void StartCore(Func<bool>? deferredInitializer, TimeSpan retryInterval)
 #endif
@@ -286,7 +286,7 @@ internal class SampleExporter : IDisposable
             try
             {
 #if NETFRAMEWORK
-                _readerMutex = readerMutexName == null ? null : new Mutex(false, readerMutexName);
+                _readerMutex = createReaderMutex?.Invoke();
                 _canRead = canRead;
 #endif
                 Logger.Debug("Initializing Continuous Profiler export thread.");

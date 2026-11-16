@@ -16,7 +16,7 @@ internal static class HeaderConfigurationExtensions
             return [];
         }
 
-        return headers.Select(stringToHeaderCacheConverter).ToArray();
+        return [.. headers.Select(stringToHeaderCacheConverter)];
     }
 
     public static IReadOnlyList<AdditionalTag> ParseHeaders(string? headersList, Func<string, AdditionalTag> stringToHeaderCacheConverter)
@@ -33,6 +33,6 @@ internal static class HeaderConfigurationExtensions
             return [];
         }
 
-        return headers.Select(stringToHeaderCacheConverter).ToArray();
+        return [.. headers.Select(stringToHeaderCacheConverter)];
     }
 }

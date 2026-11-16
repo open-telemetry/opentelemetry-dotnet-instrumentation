@@ -20,19 +20,18 @@ internal static class SqlClientTraceContextPropagator
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
     private static readonly Lazy<bool> IsEnabled = new(() => Instrumentation.TracerSettings.Value.InstrumentationOptions.SqlClientNetFxExperimentalContextPropagation);
 
-    public static void Propagate<TTarget>(TTarget instance)
+    [ThreadStatic]
+    private static ActivityCapture? currentCapture;
+
+    internal static bool IsPropagationEnabled => IsEnabled.Value;
+
+    public static void Propagate<TTarget>(TTarget instance, ActivityContext context)
     {
-        if (!IsEnabled.Value ||
+        if (context.TraceId == default || context.SpanId == default ||
             instance is not IDbCommand command ||
             command.CommandType != CommandType.Text ||
             string.Equals(command.CommandText, SetContextSql, StringComparison.OrdinalIgnoreCase) ||
             command.Connection is not { State: ConnectionState.Open } connection)
-        {
-            return;
-        }
-
-        var sqlActivity = Activity.Current;
-        if (sqlActivity is null || sqlActivity.Source.Name != SqlClientActivitySourceName)
         {
             return;
         }
@@ -47,7 +46,7 @@ internal static class SqlClientTraceContextPropagator
             var traceparentParameter = setContextCommand.CreateParameter();
             traceparentParameter.ParameterName = ContextInfoParameterName;
             traceparentParameter.DbType = DbType.Binary;
-            traceparentParameter.Value = Encoding.UTF8.GetBytes(FormatTraceParent(sqlActivity));
+            traceparentParameter.Value = Encoding.UTF8.GetBytes(FormatTraceParent(context));
             _ = setContextCommand.Parameters.Add(traceparentParameter);
 
             var previousActivity = Activity.Current;
@@ -68,14 +67,51 @@ internal static class SqlClientTraceContextPropagator
         }
     }
 
-    private static string FormatTraceParent(Activity activity)
+    internal static ActivityListener CreateActivityListener()
+    {
+        // SqlClient restores Activity.Current before WriteBeginExecuteEvent returns.
+        // Observe SDK-created activities without changing sampling or retaining the activity.
+        var listener = new ActivityListener
+        {
+            ShouldListenTo = static source => source.Name == SqlClientActivitySourceName,
+            ActivityStarted = static activity =>
+            {
+                if (currentCapture is { } capture)
+                {
+                    capture.Context = activity.Context;
+                }
+            }
+        };
+        ActivitySource.AddActivityListener(listener);
+        return listener;
+    }
+
+    internal static ActivityCapture BeginCapture()
+    {
+        // WriteBeginExecuteEvent and its EventSource callbacks execute synchronously on the same thread.
+        return currentCapture = new ActivityCapture(currentCapture);
+    }
+
+    internal static void EndCapture(ActivityCapture capture)
+    {
+        currentCapture = capture.Previous;
+    }
+
+    private static string FormatTraceParent(ActivityContext context)
     {
         return string.Format(
             CultureInfo.InvariantCulture,
             "00-{0}-{1}-{2}",
-            activity.TraceId,
-            activity.SpanId,
-            activity.ActivityTraceFlags.W3CFormatActivityTraceFlags());
+            context.TraceId,
+            context.SpanId,
+            context.TraceFlags.W3CFormatActivityTraceFlags());
+    }
+
+    internal sealed class ActivityCapture(ActivityCapture? previous)
+    {
+        internal ActivityCapture? Previous { get; } = previous;
+
+        internal ActivityContext Context { get; set; }
     }
 }
 #endif

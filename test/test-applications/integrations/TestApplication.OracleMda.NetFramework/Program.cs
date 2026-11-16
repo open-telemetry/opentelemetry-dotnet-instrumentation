@@ -8,7 +8,7 @@ ConsoleHelper.WriteSplashScreen(args);
 
 var oraclePort = ArgumentHelper.GetArgument(args, "--port", "1521");
 var oracleUser = ArgumentHelper.GetArgument(args, "--user", "appuser");
-var oraclePassword = ArgumentHelper.GetRequiredArgument(args, "--password");
+var oraclePassword = EnvironmentHelper.GetRequiredEnvironmentVariable("TEST_DATABASE_PASSWORD");
 var oracleDataSource = ArgumentHelper.GetArgument(args, "--data-source", $"localhost:{oraclePort}/FREEPDB1");
 
 using var connection = new OracleConnection($"User Id={oracleUser};Password={oraclePassword};Data Source={oracleDataSource};");

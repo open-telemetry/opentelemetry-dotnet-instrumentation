@@ -15,4 +15,11 @@ if (string.Equals(Environment.GetEnvironmentVariable("OTEL_TEST_RUNTIME_SAMPLER_
     return;
 }
 
-ClassA.MethodA();
+if (string.Equals(Environment.GetEnvironmentVariable("OTEL_TEST_DEEP_STACK"), "true", StringComparison.Ordinal))
+{
+    _ = DeepStack.Capture(600);
+}
+else
+{
+    ClassA.MethodA();
+}

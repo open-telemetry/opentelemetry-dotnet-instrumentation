@@ -2,16 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Globalization;
-using System.Net;
 using System.Text;
 #if NET
 using System.Formats.Asn1;
+using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 #endif
 using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
 using static IntegrationTests.Helpers.DockerFileHelper;
@@ -32,9 +31,7 @@ public sealed class OracleFixture : IAsyncLifetime, IDisposable
     private const string OracleDatabaseServiceName = "myatp_low";
     private const string OracleClientServiceName = "myatp_low";
     private const string OracleWalletDirectory = "/u01/app/oracle/wallets/tls_wallet";
-    private const string OracleEntrypointPath = "/u01/scripts/entrypoint-with-kstrc.sh";
     private const string OracleOpenTelemetryTraceHost = "host.docker.internal";
-    private const UnixFileModes ExecutableFileMode = UnixFileModes.UserRead | UnixFileModes.UserWrite | UnixFileModes.UserExecute | UnixFileModes.GroupRead | UnixFileModes.GroupExecute | UnixFileModes.OtherRead | UnixFileModes.OtherExecute;
 
     // Overall budget for making the Oracle container ready (container start + DB accepting
     // SQL*Plus). Kept safely below the integration tests' `--blame-hang 10m` timeout so that a
@@ -621,8 +618,9 @@ exit 1
                 .WithName($"oracle-adb-{port}-{attempt}")
                 .WithPrivileged(true)
                 .WithExtraHost(OracleOpenTelemetryTraceHost, "host-gateway")
-                .WithResourceMapping(Encoding.UTF8.GetBytes(CreateOracleEntrypointScript()), OracleEntrypointPath, 0, 0, ExecutableFileMode)
-                .WithEntrypoint(OracleEntrypointPath)
+                // Resource mapping can truncate the final tar block on .NET Framework, so pass the script directly to Bash.
+                .WithEntrypoint("bash")
+                .WithCommand("-c", CreateOracleEntrypointScript())
                 .WithPortBinding(port, OraclePort)
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(OraclePort));
 
@@ -659,8 +657,7 @@ exit 1
     {
         return string.Join(
             "\n",
-            new[]
-            {
+            [
                 "#!/usr/bin/env bash",
                 "set -euo pipefail",
                 string.Empty,
@@ -682,7 +679,7 @@ exit 1
                 string.Empty,
                 "exec /u01/scripts/entrypoint.sh",
                 string.Empty,
-            });
+            ]);
     }
 
     private static async Task WaitForOracleDatabaseAsync(IContainer container, string password, CancellationToken cancellationToken)
@@ -727,7 +724,14 @@ exit
 
         foreach (var fileName in WalletFiles)
         {
-            var bytes = await container.ReadFileAsync($"{OracleWalletDirectory}/{fileName}").ConfigureAwait(false);
+            // Transfer binary wallet files without the TAR reader's exact buffer-size requirement on .NET Framework.
+            var result = await container.ExecAsync(["base64", "-w", "0", $"{OracleWalletDirectory}/{fileName}"]).ConfigureAwait(false);
+            if (result.ExitCode != 0)
+            {
+                throw new InvalidOperationException($"Failed to read Oracle wallet file {fileName}. Exit code: {result.ExitCode}. Stderr: {result.Stderr}");
+            }
+
+            var bytes = Convert.FromBase64String(result.Stdout);
             await WriteAllBytesAsync(Path.Combine(walletDirectory, fileName), bytes).ConfigureAwait(false);
         }
 
@@ -929,7 +933,7 @@ internal sealed class OracleDatabaseOpenTelemetryCertificate : IDisposable
         {
             // Schannel cannot use the ephemeral key returned by CopyWithPrivateKey for TLS.
             var certificateBytes = certificate.Export(X509ContentType.Pkcs12);
-#if NET9_0_OR_GREATER
+#if NET
             return X509CertificateLoader.LoadPkcs12(
                 certificateBytes,
                 password: null,

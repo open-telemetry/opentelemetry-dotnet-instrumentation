@@ -28,11 +28,14 @@ public class WeatherForecastController : ControllerBase
     public IEnumerable<WeatherForecast> Get()
     {
         Thread.Sleep(1000);
-        return [.. Enumerable.Range(1, 5).Select(static index => new WeatherForecast
-        {
-            Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            TemperatureC = RandomNumberGenerator.GetInt32(-20, 55),
-            Summary = Summaries[RandomNumberGenerator.GetInt32(Summaries.Length)]
-        })];
+        return
+        [
+            .. Enumerable.Range(1, 5).Select(static index => new WeatherForecast
+            {
+                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+                TemperatureC = RandomNumberGenerator.GetInt32(-20, 55),
+                Summary = Summaries[RandomNumberGenerator.GetInt32(Summaries.Length)]
+            })
+        ];
     }
 }

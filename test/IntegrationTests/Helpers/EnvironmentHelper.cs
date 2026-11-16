@@ -94,7 +94,7 @@ internal sealed class EnvironmentHelper
 
     public static string GetNukeBuildOutput()
     {
-        string nukeOutputPath = Path.Combine(
+        var nukeOutputPath = Path.Combine(
             EnvironmentTools.GetSolutionDirectory(),
             "bin",
             "tracer-home");
@@ -122,6 +122,22 @@ internal sealed class EnvironmentHelper
         {
             environmentVariables[key] = CustomEnvironmentVariables[key];
         }
+
+#if NET10_0 && !NUGET_PACKAGE_TESTS
+        // .NET 10 keeps DiagnosticSource in the Default ALC, so StartupHook-only tests need
+        // the host to select the distribution's version before initialization (see issue #4924).
+        // Explicit settings, including null, let assembly-redirection tests control this setup.
+        if (!CustomEnvironmentVariables.ContainsKey("DOTNET_ADDITIONAL_DEPS") &&
+            !CustomEnvironmentVariables.ContainsKey("DOTNET_SHARED_STORE") &&
+            environmentVariables.ContainsKey("DOTNET_STARTUP_HOOKS") &&
+            !string.IsNullOrEmpty(environmentVariables["DOTNET_STARTUP_HOOKS"]) &&
+            (!environmentVariables.ContainsKey("CORECLR_ENABLE_PROFILING") || environmentVariables["CORECLR_ENABLE_PROFILING"] != "1"))
+        {
+            var generatedDirectory = AdditionalDepsHelper.OutputDirectory;
+            environmentVariables["DOTNET_ADDITIONAL_DEPS"] = Path.Combine(generatedDirectory, "AdditionalDeps");
+            environmentVariables["DOTNET_SHARED_STORE"] = Path.Combine(generatedDirectory, "store");
+        }
+#endif
     }
 
     public string GetProfilerPath()
@@ -131,7 +147,7 @@ internal sealed class EnvironmentHelper
             return _profilerFileLocation;
         }
 
-        string extension = EnvironmentTools.GetOS() switch
+        var extension = EnvironmentTools.GetOS() switch
         {
             "win" => "dll",
             "linux" => "so",
@@ -139,9 +155,9 @@ internal sealed class EnvironmentHelper
             _ => throw new PlatformNotSupportedException()
         };
 
-        string fileName = $"OpenTelemetry.AutoInstrumentation.Native.{extension}";
-        string nukeOutput = GetNukeBuildOutput();
-        string profilerPath = Path.Combine(nukeOutput, EnvironmentTools.GetClrProfilerDirectoryName(), fileName);
+        var fileName = $"OpenTelemetry.AutoInstrumentation.Native.{extension}";
+        var nukeOutput = GetNukeBuildOutput();
+        var profilerPath = Path.Combine(nukeOutput, EnvironmentTools.GetClrProfilerDirectoryName(), fileName);
 
         if (File.Exists(profilerPath))
         {
@@ -159,11 +175,12 @@ internal sealed class EnvironmentHelper
         {
             TestAppStartupMode.Auto => IsCoreClr() ||
 #if NET
-            _testApplicationDirectory.Contains("aspnet", StringComparison.Ordinal)
+                _testApplicationDirectory.Contains("aspnet", StringComparison.Ordinal)
 #else
-            _testApplicationDirectory.Contains("aspnet")
+                _testApplicationDirectory.Contains("aspnet")
 #endif
-            ? ".dll" : GetExecutableExtension(),
+                    ? ".dll"
+                    : GetExecutableExtension(),
             TestAppStartupMode.DotnetCLI => ".dll",
             TestAppStartupMode.Exe => GetExecutableExtension(),
             _ => throw new InvalidOperationException($"Unknown startup mode '{startupMode}'")
@@ -257,7 +274,7 @@ internal sealed class EnvironmentHelper
 
     private string GetStartupHookOutputPath()
     {
-        string startupHookOutputPath = Path.Combine(
+        var startupHookOutputPath = Path.Combine(
             GetNukeBuildOutput(),
             "net",
             "OpenTelemetry.AutoInstrumentation.StartupHook.dll");
@@ -273,7 +290,7 @@ internal sealed class EnvironmentHelper
 
     private void SetDefaultEnvironmentVariables()
     {
-        string profilerPath = GetProfilerPath();
+        var profilerPath = GetProfilerPath();
 
         CustomEnvironmentVariables["DOTNET_STARTUP_HOOKS"] = GetStartupHookOutputPath();
 

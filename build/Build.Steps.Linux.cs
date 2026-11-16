@@ -60,7 +60,7 @@ partial class Build
             var sourceLib = source / $"{NativeProfilerProject.Name}.so";
             var sourceDebug = source / $"{NativeProfilerProject.Name}.so.debug";
             var platform = Platform.ToString().ToLowerInvariant();
-            string clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
+            var clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
             {
                 "linux-musl" => $"linux-musl-{platform}",
                 _ => $"linux-{platform}"

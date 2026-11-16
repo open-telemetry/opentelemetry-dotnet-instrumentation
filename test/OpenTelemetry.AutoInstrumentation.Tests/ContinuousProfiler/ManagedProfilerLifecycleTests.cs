@@ -1,6 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NETFRAMEWORK
+using Microsoft.Win32.SafeHandles;
+#endif
 using NSubstitute;
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 using OpenTelemetry.AutoInstrumentation.PluginApi.ContinuousProfiling;
@@ -125,11 +128,13 @@ public class ManagedProfilerLifecycleTests
     [Fact]
     public void ReaderTransfersWhenCommittedConfigurationChanges()
     {
-        var mutexName = $"OpenTelemetry.AutoInstrumentation.Tests.Reader.{Guid.NewGuid():N}";
-        var firstReadEventName = $"{mutexName}.FirstRead";
-        var secondReadEventName = $"{mutexName}.SecondRead";
-        var firstEligibilityEventName = $"{mutexName}.FirstEligible";
-        var secondEligibilityEventName = $"{mutexName}.SecondEligible";
+        using var readerMutex = new Mutex(false);
+        var readerMutexHandle = readerMutex.SafeWaitHandle.DangerousGetHandle();
+        var eventPrefix = $"OpenTelemetry.AutoInstrumentation.Tests.Reader.{Guid.NewGuid():N}";
+        var firstReadEventName = $"{eventPrefix}.FirstRead";
+        var secondReadEventName = $"{eventPrefix}.SecondRead";
+        var firstEligibilityEventName = $"{eventPrefix}.FirstEligible";
+        var secondEligibilityEventName = $"{eventPrefix}.SecondEligible";
         using var firstRead = new EventWaitHandle(false, EventResetMode.ManualReset, firstReadEventName);
         using var secondRead = new EventWaitHandle(false, EventResetMode.ManualReset, secondReadEventName);
         using var firstEligible = new EventWaitHandle(true, EventResetMode.ManualReset, firstEligibilityEventName);
@@ -146,12 +151,12 @@ public class ManagedProfilerLifecycleTests
         {
             secondDomain = AppDomain.CreateDomain("Continuous profiler second reader", null, domainSetup);
             var second = CreateExporterInDomain(secondDomain);
-            second.Start(mutexName, secondReadEventName, secondEligibilityEventName);
+            second.Start(readerMutexHandle, secondReadEventName, secondEligibilityEventName);
             Assert.False(secondRead.WaitOne(TimeSpan.FromMilliseconds(100)));
 
             firstDomain = AppDomain.CreateDomain("Continuous profiler first reader", null, domainSetup);
             var first = CreateExporterInDomain(firstDomain);
-            first.Start(mutexName, firstReadEventName, firstEligibilityEventName);
+            first.Start(readerMutexHandle, firstReadEventName, firstEligibilityEventName);
             Assert.True(firstRead.WaitOne(TimeSpan.FromSeconds(2)));
 
             firstEligible.Reset();
@@ -176,9 +181,11 @@ public class ManagedProfilerLifecycleTests
     [Fact]
     public void ReaderMovesToAnotherAppDomainAfterOwnerUnload()
     {
-        var mutexName = $"OpenTelemetry.AutoInstrumentation.Tests.Reader.{Guid.NewGuid():N}";
-        var firstReadEventName = $"{mutexName}.FirstRead";
-        var secondReadEventName = $"{mutexName}.SecondRead";
+        using var readerMutex = new Mutex(false);
+        var readerMutexHandle = readerMutex.SafeWaitHandle.DangerousGetHandle();
+        var eventPrefix = $"OpenTelemetry.AutoInstrumentation.Tests.Reader.{Guid.NewGuid():N}";
+        var firstReadEventName = $"{eventPrefix}.FirstRead";
+        var secondReadEventName = $"{eventPrefix}.SecondRead";
         using var firstRead = new EventWaitHandle(false, EventResetMode.ManualReset, firstReadEventName);
         using var secondRead = new EventWaitHandle(false, EventResetMode.ManualReset, secondReadEventName);
         var domainSetup = new AppDomainSetup
@@ -194,11 +201,11 @@ public class ManagedProfilerLifecycleTests
             firstDomain = AppDomain.CreateDomain("Continuous profiler first reader", null, domainSetup);
             secondDomain = AppDomain.CreateDomain("Continuous profiler second reader", null, domainSetup);
             var first = CreateExporterInDomain(firstDomain);
-            first.Start(mutexName, firstReadEventName);
+            first.Start(readerMutexHandle, firstReadEventName);
             Assert.True(firstRead.WaitOne(TimeSpan.FromSeconds(2)));
 
             var second = CreateExporterInDomain(secondDomain);
-            second.Start(mutexName, secondReadEventName);
+            second.Start(readerMutexHandle, secondReadEventName);
             Assert.False(secondRead.WaitOne(TimeSpan.FromMilliseconds(250)));
 
             AppDomain.Unload(firstDomain);
@@ -350,7 +357,7 @@ public sealed class CrossAppDomainSampleExporter : MarshalByRefObject, IDisposab
     private EventWaitHandle? _readEvent;
     private EventWaitHandle? _eligibilityEvent;
 
-    public void Start(string mutexName, string readEventName, string? eligibilityEventName = null)
+    public void Start(IntPtr readerMutexHandle, string readEventName, string? eligibilityEventName = null)
     {
         var readEvent = EventWaitHandle.OpenExisting(readEventName);
         _readEvent = readEvent;
@@ -370,7 +377,7 @@ public sealed class CrossAppDomainSampleExporter : MarshalByRefObject, IDisposab
 
         _exporter = new SampleExporter(processor, TimeSpan.FromMilliseconds(10), TimeSpan.FromSeconds(1));
         AppDomain.CurrentDomain.DomainUnload += OnDomainUnload;
-        _exporter.Start(() => true, TimeSpan.FromMilliseconds(10), mutexName, () => _eligibilityEvent?.WaitOne(0) ?? true);
+        _exporter.Start(() => true, TimeSpan.FromMilliseconds(10), () => CreateReaderMutex(readerMutexHandle), () => _eligibilityEvent?.WaitOne(0) ?? true);
         if (!_exporter.WaitForReaderThreadStart(TimeSpan.FromSeconds(2)))
         {
             throw new InvalidOperationException("Continuous profiler reader thread did not start.");
@@ -388,6 +395,15 @@ public sealed class CrossAppDomainSampleExporter : MarshalByRefObject, IDisposab
         _readEvent = null;
         _eligibilityEvent?.Dispose();
         _eligibilityEvent = null;
+    }
+
+    private static Mutex CreateReaderMutex(IntPtr handle)
+    {
+        var mutex = new Mutex(false);
+        mutex.SafeWaitHandle.Dispose();
+        // The parent test keeps the original handle alive until both child AppDomains have unloaded.
+        mutex.SafeWaitHandle = new SafeWaitHandle(handle, ownsHandle: false);
+        return mutex;
     }
 
     private void OnDomainUnload(object sender, EventArgs e) => Dispose();

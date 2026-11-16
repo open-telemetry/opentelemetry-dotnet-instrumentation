@@ -9,6 +9,7 @@
 #include <corhlpr.h>
 #include <corprof.h>
 #include <functional>
+#include <unordered_map>
 #include <utility>
 
 #include "com_ptr.h"
@@ -63,6 +64,10 @@ const auto SystemTypeName = WStr("System.Type");
 const auto GetTypeFromHandleMethodName = WStr("GetTypeFromHandle");
 const auto RuntimeTypeHandleTypeName = WStr("System.RuntimeTypeHandle");
 const auto RuntimeMethodHandleTypeName = WStr("System.RuntimeMethodHandle");
+const WSTRING SystemThreadingTasksTask = WStr("System.Threading.Tasks.Task");
+const WSTRING SystemThreadingTasksTaskGeneric = WStr("System.Threading.Tasks.Task`1");
+const WSTRING SystemThreadingTasksValueTask = WStr("System.Threading.Tasks.ValueTask");
+const WSTRING SystemThreadingTasksValueTaskGeneric = WStr("System.Threading.Tasks.ValueTask`1");
 
 template <typename T>
 class EnumeratorIterator;
@@ -171,11 +176,41 @@ static Enumerator<mdTypeDef> EnumTypeDefs(const ComPtr<IMetaDataImport2>& metada
         [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
 }
 
+static Enumerator<mdMethodDef> EnumMethods(const ComPtr<IMetaDataImport2>& metadata_import, mdTypeDef type)
+{
+    return Enumerator<mdMethodDef>(
+        [metadata_import, type](HCORENUM* ptr, mdMethodDef arr[], ULONG max, ULONG* cnt) -> HRESULT {
+            return metadata_import->EnumMethods(ptr, type, arr, max, cnt);
+        },
+        [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
+}
+
 static Enumerator<mdTypeRef> EnumTypeRefs(const ComPtr<IMetaDataImport2>& metadata_import)
 {
     return Enumerator<mdTypeRef>(
         [metadata_import](HCORENUM* ptr, mdTypeRef arr[], ULONG max, ULONG* cnt) -> HRESULT {
             return metadata_import->EnumTypeRefs(ptr, arr, max, cnt);
+        },
+        [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
+}
+
+static Enumerator<mdMemberRef> EnumMemberRefs(const ComPtr<IMetaDataImport2>& metadata_import, mdToken parent)
+{
+    return Enumerator<mdMemberRef>(
+        [metadata_import, parent](HCORENUM* ptr, mdMemberRef arr[], ULONG max, ULONG* cnt) -> HRESULT {
+            return metadata_import->EnumMemberRefs(ptr, parent, arr, max, cnt);
+        },
+        [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
+}
+
+static Enumerator<mdCustomAttribute> EnumCustomAttributes(const ComPtr<IMetaDataImport2>& metadata_import,
+                                                          mdToken parent      = mdTokenNil,
+                                                          mdToken constructor = mdTokenNil)
+{
+    return Enumerator<mdCustomAttribute>(
+        [metadata_import, parent, constructor](HCORENUM* ptr, mdCustomAttribute arr[], ULONG max,
+                                               ULONG* cnt) -> HRESULT {
+            return metadata_import->EnumCustomAttributes(ptr, parent, constructor, arr, max, cnt);
         },
         [metadata_import](HCORENUM ptr) -> void { metadata_import->CloseEnum(ptr); });
 }
@@ -564,13 +599,18 @@ struct FunctionInfo
     const mdToken method_def_id;
     FunctionMethodSignature method_signature;
 
+    // CorMethodImpl flags reported by IMetaDataImport::GetMemberProps. MethodSpecs inherit the
+    // flags from their MethodDef; MemberRefs leave this at zero because their bodies are not
+    // rewritten in the current module.
+    DWORD method_impl_flags = 0;
+
     FunctionInfo() : id(0), name(EmptyWStr), type({}), is_generic(false), method_def_id(0), method_signature({})
     {
     }
 
     FunctionInfo(mdToken id, const WSTRING& name, const TypeInfo& type, const MethodSignature& signature,
                  const MethodSignature& function_spec_signature, mdToken method_def_id,
-                 const FunctionMethodSignature& method_signature) :
+                 const FunctionMethodSignature& method_signature, DWORD method_impl_flags) :
         id(id),
         name(name),
         type(type),
@@ -578,19 +618,21 @@ struct FunctionInfo
         signature(signature),
         function_spec_signature(function_spec_signature),
         method_def_id(method_def_id),
-        method_signature(method_signature)
+        method_signature(method_signature),
+        method_impl_flags(method_impl_flags)
     {
     }
 
     FunctionInfo(mdToken id, const WSTRING& name, const TypeInfo& type, const MethodSignature& signature,
-                 const FunctionMethodSignature& method_signature) :
+                 const FunctionMethodSignature& method_signature, DWORD method_impl_flags) :
         id(id),
         name(name),
         type(type),
         is_generic(false),
         signature(signature),
         method_def_id(0),
-        method_signature(method_signature)
+        method_signature(method_signature),
+        method_impl_flags(method_impl_flags)
     {
     }
 
@@ -663,6 +705,10 @@ TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdTo
 
 mdAssemblyRef FindAssemblyRef(const ComPtr<IMetaDataAssemblyImport>& assembly_import,
                               const WSTRING& assembly_name, const Version& version);
+
+void RedirectAssemblyReferences(const ComPtr<IMetaDataAssemblyImport>&                   assembly_import,
+                                const ComPtr<IMetaDataAssemblyEmit>&                     assembly_emit,
+                                std::unordered_map<WSTRING, AssemblyVersionRedirection>& redirects);
 
 HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit, const AssemblyProperty& corAssemblyProperty,
                              mdAssemblyRef* corlib_ref);

@@ -189,15 +189,6 @@ internal sealed class ContinuousProfilerManager : IDisposable
             selectiveSamplingConfig);
     }
 
-#if NETFRAMEWORK
-    private static string CreateReaderMutexName()
-    {
-        using var process = System.Diagnostics.Process.GetCurrentProcess();
-        return @"Local\OpenTelemetry.AutoInstrumentation.ContinuousProfiler.Reader." +
-               process.Id.ToString(System.Globalization.CultureInfo.InvariantCulture);
-    }
-#endif
-
     private static void AddSelectiveHandler(SampleExporterBuilder builder, SamplingStartupPlan plan)
     {
         builder.SetExportTimeout(plan.SelectiveExportTimeout);
@@ -248,12 +239,12 @@ internal sealed class ContinuousProfilerManager : IDisposable
             candidateExporter = builder.Build();
 #pragma warning restore CA2000
 #if NETFRAMEWORK
-            // Apply enables native thread callbacks. Create the canary afterwards, including when a later
+            // Apply enables native thread callbacks. Create the canary afterward, including when a later
             // ControlPlane update enables thread sampling after an all-disabled Seed.
             candidateExporter.Start(
                 EnsureNetFrameworkCanaryThread,
                 CanaryStatePollingInterval,
-                CreateReaderMutexName(),
+                NativeMethods.CreateContinuousProfilerReaderMutex,
                 () => CanReadCurrentConfiguration(plan));
 #else
             candidateExporter.Start();

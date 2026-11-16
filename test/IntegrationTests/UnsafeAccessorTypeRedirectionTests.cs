@@ -1,0 +1,65 @@
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
+// UnsafeAccessorTypeAttribute overrides should work starting from net10.0
+#if NET
+
+using IntegrationTests.Helpers;
+
+namespace IntegrationTests;
+
+/// <summary>
+/// Verifies that the native profiler rewrites assembly versions in UnsafeAccessorTypeAttribute metadata without
+/// resolving or loading the assembly named by the attribute. It also verifies that incomplete unsafe-accessor
+/// declarations are ignored.
+/// </summary>
+/// <param name="output">The test output helper.</param>
+public class UnsafeAccessorTypeRedirectionTests(ITestOutputHelper output)
+    : TestHelper("UnsafeAccessorTypeRedirection", output)
+{
+#if NET11_0
+    private const string DependencyInjectionVersion = "11.0.0.0";
+#else
+    private const string DependencyInjectionVersion = "10.0.0.0";
+#endif
+
+    /// <summary>
+    /// Verifies that the native profiler adds a missing version, rewrites a lower version, and preserves equal or
+    /// higher versions in complete unsafe-accessor declarations.
+    /// </summary>
+    /// <param name="assemblyName">The assembly name embedded in the attribute.</param>
+    /// <param name="compiledVersion">The assembly version embedded at build time, or <see langword="null"/> to omit it.</param>
+    /// <param name="expectedVersion">The assembly version expected after the profiler processes the module.</param>
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [InlineData("Microsoft.Extensions.DependencyInjection", null, DependencyInjectionVersion)]
+    [InlineData("Microsoft.Extensions.DependencyInjection", "9.0.0.0", DependencyInjectionVersion)]
+    [InlineData("Microsoft.Extensions.DependencyInjection", "10.0.0.0", DependencyInjectionVersion)]
+    [InlineData("Microsoft.Extensions.DependencyInjection", "11.0.0.0", "11.0.0.0")]
+    public void NativeRewriteAttributeMetadata(string assemblyName, string? compiledVersion, string expectedVersion)
+    {
+        EnableBytecodeInstrumentation();
+
+        var packageVersion = compiledVersion ?? "null";
+        var arguments = $"--assembly-name {assemblyName} --expected-version {expectedVersion}";
+
+        RunTestApplication(new TestSettings { PackageVersion = packageVersion, Arguments = arguments });
+    }
+
+    /// <summary>
+    /// Verifies that UnsafeAccessorTypeAttribute metadata is not rewritten when the declaring method does not also
+    /// have UnsafeAccessorAttribute.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void NoNativeRewriteOnIncompleteAttribute()
+    {
+        EnableBytecodeInstrumentation();
+
+        var packageVersion = "1.0.0.0-incomplete";
+        var arguments = $"--assembly-name Microsoft.Extensions.DependencyInjection --expected-version 1.0.0.0";
+
+        RunTestApplication(new TestSettings { PackageVersion = packageVersion, Arguments = arguments });
+    }
+}
+#endif

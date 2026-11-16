@@ -46,7 +46,11 @@ internal class IntegrationVersionRange
     /// </summary>
     public string MinimumVersion
     {
-        get => $"{MinimumMajor}.{MinimumMinor}.{MinimumPatch}";
+        get
+        {
+            return $"{MinimumMajor}.{MinimumMinor}.{MinimumPatch}";
+        }
+
         internal set
         {
             MinimumMajor = MinimumMinor = MinimumPatch = ushort.MinValue;
@@ -74,7 +78,11 @@ internal class IntegrationVersionRange
     /// </summary>
     public string MaximumVersion
     {
-        get => $"{MaximumMajor}.{MaximumMinor}.{MaximumPatch}";
+        get
+        {
+            return $"{MaximumMajor}.{MaximumMinor}.{MaximumPatch}";
+        }
+
         internal set
         {
             MaximumMajor = MaximumMinor = MaximumPatch = ushort.MaxValue;

@@ -22,7 +22,7 @@ public class ParserOpAmpTests
         Assert.NotNull(config.OpAmp);
         Assert.Equal("wss://localhost:4320/v1/opamp", config.OpAmp?.ServerUrl);
         Assert.Equal(4096, config.OpAmp?.MaxPendingCustomMessages);
-        Assert.Equal(134217728, config.OpAmp?.MaxPendingCustomMessageBytes);
+        Assert.Equal(134217728, config.OpAmp?.MaxPendingMessageBytes);
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class ParserOpAmpTests
         Assert.NotNull(config.OpAmp);
         Assert.Null(config.OpAmp.ServerUrl);
         Assert.Null(config.OpAmp.MaxPendingCustomMessages);
-        Assert.Null(config.OpAmp.MaxPendingCustomMessageBytes);
+        Assert.Null(config.OpAmp.MaxPendingMessageBytes);
     }
 
     [Theory]
@@ -82,6 +82,6 @@ public class ParserOpAmpTests
         Assert.NotNull(config.OpAmp);
         Assert.Equal("wss://localhost:4320/v1/opamp", config.OpAmp?.ServerUrl);
         Assert.Equal(4096, config.OpAmp?.MaxPendingCustomMessages);
-        Assert.Equal(134217728, config.OpAmp?.MaxPendingCustomMessageBytes);
+        Assert.Equal(134217728, config.OpAmp?.MaxPendingMessageBytes);
     }
 }

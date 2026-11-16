@@ -22,7 +22,7 @@ internal static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        var (databasePassword, databasePort) = ParseArgs(args);
+        var (databasePassword, databasePort) = GetDatabaseConfiguration(args);
         var connectionString = GetConnectionString(databasePassword, databasePort);
 
         using (var scalarCommandConnection = new SqlConnection(connectionString))
@@ -156,10 +156,10 @@ internal static class Program
         return $"Server=127.0.0.1,{databasePort};User=sa;Password={databasePassword};TrustServerCertificate=True;";
     }
 
-    private static (string DatabasePassword, string Port) ParseArgs(string[] args)
+    private static (string DatabasePassword, string Port) GetDatabaseConfiguration(string[] args)
     {
         return (
-            DatabasePassword: ArgumentHelper.GetRequiredArgument(args, "--password"),
+            DatabasePassword: EnvironmentHelper.GetRequiredEnvironmentVariable("TEST_DATABASE_PASSWORD"),
             Port: ArgumentHelper.GetRequiredArgument(args, "--port"));
     }
 }

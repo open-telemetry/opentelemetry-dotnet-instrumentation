@@ -30,6 +30,10 @@
 
 extern "C"
 {
+#ifdef _WIN32
+    // Returns an owned, non-inheritable handle to the process-private reader mutex.
+    EXPORTTHIS HANDLE STDAPICALLTYPE GetContinuousProfilerReaderMutex();
+#endif
     EXPORTTHIS int32_t                ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf);
     EXPORTTHIS int32_t STDAPICALLTYPE ContinuousProfilerReadThreadSamplesV2(int32_t        len,
                                                                             unsigned char* buf,
@@ -75,6 +79,33 @@ struct FunctionIdentifier
             return false;
         return function_token == p.function_token && module_id == p.module_id && native_ip == p.native_ip;
     }
+};
+
+// Limits apply to reserved frame storage, including reusable buffers from earlier captures.
+// FunctionIdentifier contains pointer-sized fields, so use frame counts on every architecture.
+class ThreadStacksBuffer
+{
+public:
+    static constexpr size_t MaximumFramesPerStack = 512;
+    static constexpr size_t MaximumFrameCapacity  = 32 * 1024;
+    static constexpr size_t MaximumThreads        = 1024;
+
+    ThreadStacksBuffer();
+    ThreadStacksBuffer(const ThreadStacksBuffer&)            = delete;
+    ThreadStacksBuffer& operator=(const ThreadStacksBuffer&) = delete;
+
+    std::vector<FunctionIdentifier>*                                     TryPrepareFrame(ThreadID threadId);
+    const std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& Stacks() const noexcept;
+    void PrepareForCapture(const std::unordered_set<ThreadID>& activeThreads);
+    // Called after symbol resolution. Reuses bounded storage for the next capture.
+    void Reset();
+    void Clear() noexcept;
+
+private:
+    std::unordered_map<ThreadID, std::vector<FunctionIdentifier>> stacks_;
+    size_t                                                        frameCapacity_ = 0;
+    ThreadID                                                      cachedThread_  = 0;
+    std::vector<FunctionIdentifier>*                              cachedStack_   = nullptr;
 };
 
 struct FunctionIdentifierResolveArgs
@@ -491,11 +522,14 @@ private:
 };
 
 // Captures one complete set of thread stacks for the current sampling cohort.
-bool CaptureFunctionIdentifiersForThreads(
-    ContinuousProfiler*                                            profiler,
-    ICorProfilerInfo7*                                             info7,
-    const std::unordered_set<ThreadID>&                            selectedThreads,
-    std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacksBuffer);
+bool CaptureFunctionIdentifiersForThreads(ContinuousProfiler*                 profiler,
+                                          ICorProfilerInfo7*                  info7,
+                                          const std::unordered_set<ThreadID>& selectedThreads,
+                                          ThreadStacksBuffer&                 threadStacksBuffer);
+
+bool CaptureAllocationStack(ContinuousProfiler*              profiler,
+                            const ShutdownToken&             shutdownToken,
+                            std::vector<FunctionIdentifier>& threadStack);
 
 // Normalizes allocation stack-capture completion and discards aborted work.
 bool FinalizeAllocationStackCapture(const ShutdownToken&             shutdownToken,
