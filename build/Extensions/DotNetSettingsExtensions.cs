@@ -1,7 +1,7 @@
-using Models;
 using Fallout.Common.Tooling;
 using Fallout.Common.Tools.DotNet;
 using Fallout.Common.Tools.MSBuild;
+using Models;
 
 namespace Extensions;
 

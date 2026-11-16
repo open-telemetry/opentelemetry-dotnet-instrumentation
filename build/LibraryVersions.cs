@@ -1,5 +1,5 @@
-using Models;
 using Fallout.Common.Tools.MSBuild;
+using Models;
 
 public static partial class LibraryVersion
 {

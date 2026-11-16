@@ -2,10 +2,10 @@ using System.Runtime.InteropServices;
 using Extensions;
 using Fallout.Common;
 using Fallout.Common.IO;
-using Fallout.Solutions;
 using Fallout.Common.Tools.DotNet;
 using Fallout.Common.Tools.NuGet;
 using Fallout.Common.Utilities.Collections;
+using Fallout.Solutions;
 using static Fallout.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build

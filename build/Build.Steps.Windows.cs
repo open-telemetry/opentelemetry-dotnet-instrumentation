@@ -1,11 +1,11 @@
 using Extensions;
 using Fallout.Common;
 using Fallout.Common.IO;
-using Fallout.Solutions;
 using Fallout.Common.Tooling;
 using Fallout.Common.Tools.Docker;
 using Fallout.Common.Tools.DotNet;
 using Fallout.Common.Tools.MSBuild;
+using Fallout.Solutions;
 using Serilog;
 using static Fallout.Common.EnvironmentInfo;
 using static Fallout.Common.Tools.Docker.DockerTasks;
