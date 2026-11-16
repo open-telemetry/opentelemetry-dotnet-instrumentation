@@ -6,13 +6,13 @@ using System.Text.RegularExpressions;
 using Extensions;
 using Fallout.Common;
 using Fallout.Common.IO;
-using Fallout.Solutions;
 using Fallout.Common.Tooling;
 using Fallout.Common.Tools.DotNet;
 using Fallout.Common.Tools.MSBuild;
 using Fallout.Common.Tools.Npm;
 using Fallout.Common.Tools.NuGet;
 using Fallout.Common.Utilities.Collections;
+using Fallout.Solutions;
 using Serilog;
 using static Fallout.Common.EnvironmentInfo;
 using static Fallout.Common.Tools.DotNet.DotNetTasks;
@@ -130,6 +130,8 @@ partial class Build
             var targetProject = Solution.GetProjectByName(Projects.AutoInstrumentationAssemblies);
             DotNetRestore(s => s.SetProjectFile(targetProject));
 
+            // Initialize Fallout's MSBuild resolver before loading the generator's MSBuild types.
+            ProjectModelTasks.Initialize();
             TransientDependenciesGenerator.Run(targetProject);
         });
 
