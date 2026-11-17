@@ -11,16 +11,20 @@ internal sealed class AppSettingsConfigurationSource(
     NameValueCollection appSettings)
     : StringConfigurationSource(failFast)
 {
-    public override string? GetString(string key)
+    public static bool IsProcessWide(string key)
     {
         // These settings affect native, process-wide behavior.
-        if (key == ConfigurationKeys.FailFast
-            || key == ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled)
+        return key switch
         {
-            return null;
-        }
+            ConfigurationKeys.FailFast => true,
+            ConfigurationKeys.Traces.InstrumentationOptions.SqlClientNetFxILRewriteEnabled => true,
+            _ => false
+        };
+    }
 
-        return appSettings[key];
+    public override string? GetString(string key)
+    {
+        return IsProcessWide(key) ? null : appSettings[key];
     }
 }
 #endif

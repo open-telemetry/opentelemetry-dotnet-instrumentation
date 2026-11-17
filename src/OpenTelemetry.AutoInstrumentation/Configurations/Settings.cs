@@ -15,7 +15,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 /// </summary>
 internal abstract class Settings
 {
-    private static readonly bool IsYamlConfigEnabled = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.Enabled) == "true";
+    internal static readonly bool IsYamlConfigEnabled = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.Enabled) == "true";
     private static readonly Lazy<YamlConfiguration> YamlConfiguration = new(ReadYamlConfiguration);
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
 

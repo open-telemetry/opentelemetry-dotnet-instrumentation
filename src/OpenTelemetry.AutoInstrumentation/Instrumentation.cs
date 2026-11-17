@@ -138,6 +138,7 @@ internal static class Instrumentation
                 {
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
+                        .UseAppSettingsForSdk()
                         .InvokePluginsBefore(_pluginManager)
                         .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings.Value, _pluginManager)
@@ -160,6 +161,7 @@ internal static class Instrumentation
                 {
                     var builder = Sdk
                         .CreateMeterProviderBuilder()
+                        .UseAppSettingsForSdk()
                         .InvokePluginsBefore(_pluginManager)
                         .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings.Value, _pluginManager)
@@ -257,6 +259,7 @@ internal static class Instrumentation
             // TODO: plugins support
             var loggerProvider = loggerProviderBuilder!
                 .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
+                .UseAppSettingsForSdk()
                 .UseEnvironmentVariables(LazyInstrumentationLoader, LogSettings.Value, _pluginManager!)
                 .Build();
             Logger.Information("OpenTelemetry logger provider initialized.");
