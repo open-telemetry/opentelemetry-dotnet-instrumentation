@@ -40,4 +40,4 @@ jobs:
       shell: pwsh
 
     - name: dotnet format
-      run: dotnet format .\OpenTelemetry.AutoInstrumentation.sln --verify-no-changes
+      run: dotnet format .\OpenTelemetry.AutoInstrumentation.slnx --verify-no-changes
