@@ -23,7 +23,7 @@ partial class Build
     private const string AdditionalDepsSh = "generate-additional-deps.sh";
     private const string AdditionalDepsPs1 = "generate-additional-deps.ps1";
 
-    [Solution("OpenTelemetry.AutoInstrumentation.sln")] readonly Solution Solution;
+    [Solution("OpenTelemetry.AutoInstrumentation.slnx")] readonly Solution Solution;
 
     AbsolutePath OutputDirectory => RootDirectory / "bin";
     AbsolutePath SourceDirectory => RootDirectory / "src";
