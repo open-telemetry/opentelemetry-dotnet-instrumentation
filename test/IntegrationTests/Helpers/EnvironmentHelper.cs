@@ -92,19 +92,19 @@ internal sealed class EnvironmentHelper
             || Environment.Version.Major >= 5;
     }
 
-    public static string GetNukeBuildOutput()
+    public static string GetFalloutBuildOutput()
     {
-        var nukeOutputPath = Path.Combine(
+        var falloutOutputPath = Path.Combine(
             EnvironmentTools.GetSolutionDirectory(),
             "bin",
             "tracer-home");
 
-        if (Directory.Exists(nukeOutputPath))
+        if (Directory.Exists(falloutOutputPath))
         {
-            return nukeOutputPath;
+            return falloutOutputPath;
         }
 
-        throw new InvalidOperationException($"Unable to find Nuke output at: {nukeOutputPath}. Ensure Nuke has run first.");
+        throw new InvalidOperationException($"Unable to find Fallout output at: {falloutOutputPath}. Ensure Fallout has run first.");
     }
 
     public static bool IsRunningOnCI()
@@ -157,8 +157,8 @@ internal sealed class EnvironmentHelper
         };
 
         var fileName = $"OpenTelemetry.AutoInstrumentation.Native.{extension}";
-        var nukeOutput = GetNukeBuildOutput();
-        var profilerPath = Path.Combine(nukeOutput, EnvironmentTools.GetClrProfilerDirectoryName(), fileName);
+        var falloutOutput = GetFalloutBuildOutput();
+        var profilerPath = Path.Combine(falloutOutput, EnvironmentTools.GetClrProfilerDirectoryName(), fileName);
 
         if (File.Exists(profilerPath))
         {
@@ -276,7 +276,7 @@ internal sealed class EnvironmentHelper
     private string GetStartupHookOutputPath()
     {
         var startupHookOutputPath = Path.Combine(
-            GetNukeBuildOutput(),
+            GetFalloutBuildOutput(),
             "net",
             "OpenTelemetry.AutoInstrumentation.StartupHook.dll");
 
@@ -305,7 +305,7 @@ internal sealed class EnvironmentHelper
         CustomEnvironmentVariables["COR_PROFILER_PATH"] = profilerPath;
 
         SetDefaultLogEnvironmentVariables();
-        CustomEnvironmentVariables["OTEL_DOTNET_AUTO_HOME"] = GetNukeBuildOutput();
+        CustomEnvironmentVariables["OTEL_DOTNET_AUTO_HOME"] = GetFalloutBuildOutput();
         CustomEnvironmentVariables["OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES"] = "TestApplication.*";
 
         // exporters are disabled by default in order not to have errors in the logs

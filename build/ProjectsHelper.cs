@@ -1,6 +1,6 @@
-using Nuke.Common;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
+using Fallout.Common;
+using Fallout.Common.IO;
+using Fallout.Solutions;
 
 public static class ProjectsHelper
 {
@@ -13,8 +13,8 @@ public static class ProjectsHelper
     private const string TestApplicationSelector = "TestApplication.*";
     private const string TestLibrarySelector = "TestLibrary.*";
 
-    private static readonly AbsolutePath SrcDirectory = NukeBuild.RootDirectory / "src";
-    private static readonly AbsolutePath TestDirectory = NukeBuild.RootDirectory / "test";
+    private static readonly AbsolutePath SrcDirectory = FalloutBuild.RootDirectory / "src";
+    private static readonly AbsolutePath TestDirectory = FalloutBuild.RootDirectory / "test";
     private static readonly AbsolutePath TestIntegrationApps = TestDirectory / "test-applications" / "integrations";
     private static readonly AbsolutePath TestNuGetPackagesApps = TestDirectory / "test-applications" / "nuget-packages";
 

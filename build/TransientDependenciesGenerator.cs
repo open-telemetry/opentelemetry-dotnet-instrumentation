@@ -1,6 +1,6 @@
 using DependencyListGenerator;
+using Fallout.Solutions;
 using Microsoft.Build.Construction;
-using Nuke.Common.ProjectModel;
 using Serilog;
 
 internal static class TransientDependenciesGenerator

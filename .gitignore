@@ -285,8 +285,8 @@ deploy/AzureAppServices/
 # ignore blog folder from upstream
 blog/
 
-# ignore nuke config
-.nuke/*
+# ignore fallout config
+.fallout/*
 
 # exception to the ignore rule
 !/**/.gitkeep

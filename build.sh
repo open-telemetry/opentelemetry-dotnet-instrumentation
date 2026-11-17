@@ -11,9 +11,9 @@ SCRIPT_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 
 BUILD_PROJECT_FILE="$SCRIPT_DIR/build/_build.csproj"
 BUILD_ASSEMBLY_FILE="$SCRIPT_DIR/build/bin/Debug/_build.dll"
-TEMP_DIRECTORY="$SCRIPT_DIR//.nuke/temp"
+TEMP_DIRECTORY="$SCRIPT_DIR/.fallout/temp"
 
-DOTNET_GLOBAL_FILE="$SCRIPT_DIR//global.json"
+DOTNET_GLOBAL_FILE="$SCRIPT_DIR/global.json"
 DOTNET_INSTALL_FILE_DEFAULT="$SCRIPT_DIR/scripts/dotnet-install.sh"
 DOTNET_INSTALL_URL="https://dot.net/v1/dotnet-install.sh"
 DOTNET_CHANNEL="STS"
@@ -66,6 +66,5 @@ fi
 echo "Microsoft (R) .NET SDK version $("$DOTNET_EXE" --version)"
 
 "$DOTNET_EXE" build "$BUILD_PROJECT_FILE" /nodeReuse:false /p:UseSharedCompilation=false -nologo -clp:NoSummary --verbosity quiet
-# Invoke the build DLL through dotnet so Environment.GetCommandLineArgs()[0]
-# remains aligned with the assembly path used by Nuke's build-assembly check.
-"$DOTNET_EXE" "$BUILD_ASSEMBLY_FILE" "$@"
+# Run the compiled Fallout build assembly.
+exec "$DOTNET_EXE" "$BUILD_ASSEMBLY_FILE" "$@"

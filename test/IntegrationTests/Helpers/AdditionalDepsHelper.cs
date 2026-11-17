@@ -46,7 +46,7 @@ internal static class AdditionalDepsHelper
 
     public static void Generate(string outputDirectory, ITestOutputHelper? output = null)
     {
-        var tracerHome = EnvironmentHelper.GetNukeBuildOutput();
+        var tracerHome = EnvironmentHelper.GetFalloutBuildOutput();
         var startInfo = new ProcessStartInfo
         {
             RedirectStandardOutput = true,
