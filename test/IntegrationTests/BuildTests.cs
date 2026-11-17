@@ -15,7 +15,7 @@ public class BuildTests
     [Fact]
     public void NativeAndManagedLibrariesHaveSameProductVersion()
     {
-        var distributionFolder = EnvironmentHelper.GetNukeBuildOutput();
+        var distributionFolder = EnvironmentHelper.GetFalloutBuildOutput();
         var nativePath = Path.Combine(
             distributionFolder,
             EnvironmentTools.GetClrProfilerDirectoryName(),
@@ -35,7 +35,7 @@ public class BuildTests
     [Fact]
     public Task DistributionStructure()
     {
-        var distributionFolder = EnvironmentHelper.GetNukeBuildOutput();
+        var distributionFolder = EnvironmentHelper.GetFalloutBuildOutput();
         var files = Directory.GetFiles(distributionFolder, "*", SearchOption.AllDirectories);
 
         var relativesPaths = new List<string>(files.Length);

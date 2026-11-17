@@ -13,12 +13,12 @@ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 # CONFIGURATION
 ###########################################################################
 
-$BuildProjectFile = "$PSScriptRoot\build\_build.csproj"
-$BuildAssemblyFile = "$PSScriptRoot\build\bin\Debug\_build.dll"
-$TempDirectory = "$PSScriptRoot\\.nuke\temp"
+$BuildProjectFile = Join-Path $PSScriptRoot "build\_build.csproj"
+$BuildAssemblyFile = Join-Path $PSScriptRoot "build\bin\Debug\_build.dll"
+$TempDirectory = Join-Path $PSScriptRoot ".fallout\temp"
 
-$DotNetGlobalFile = "$PSScriptRoot\\global.json"
-$DotNetInstallFileDefault = "$PSScriptRoot\scripts\dotnet-install.ps1"
+$DotNetGlobalFile = Join-Path $PSScriptRoot "global.json"
+$DotNetInstallFileDefault = Join-Path $PSScriptRoot "scripts\dotnet-install.ps1"
 $DotNetInstallUrl = "https://dot.net/v1/dotnet-install.ps1"
 $DotNetChannel = "STS"
 
@@ -55,19 +55,18 @@ else {
     }
 
     # Install by channel or version
-    $DotNetDirectory = "$TempDirectory\dotnet-win"
+    $DotNetDirectory = Join-Path $TempDirectory "dotnet-win"
     if (!(Test-Path variable:DotNetVersion)) {
         ExecSafe { & powershell $DotNetInstallFile -InstallDir $DotNetDirectory -Channel $DotNetChannel -NoPath }
     } else {
         ExecSafe { & powershell $DotNetInstallFile -InstallDir $DotNetDirectory -Version $DotNetVersion -NoPath }
     }
-    $env:DOTNET_EXE = "$DotNetDirectory\dotnet.exe"
+    $env:DOTNET_EXE = Join-Path $DotNetDirectory "dotnet.exe"
     $env:PATH = "$DotNetDirectory;$env:PATH"
 }
 
 Write-Output "Microsoft (R) .NET SDK version $(& $env:DOTNET_EXE --version)"
 
 ExecSafe { & $env:DOTNET_EXE build $BuildProjectFile /nodeReuse:false /p:UseSharedCompilation=false -nologo -clp:NoSummary --verbosity quiet }
-# Invoke the build DLL through dotnet so Environment.GetCommandLineArgs()[0]
-# remains aligned with the assembly path used by Nuke's build-assembly check.
+# Run the compiled Fallout build assembly.
 ExecSafe { & $env:DOTNET_EXE $BuildAssemblyFile $BuildArguments }
