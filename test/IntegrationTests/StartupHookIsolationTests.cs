@@ -87,8 +87,11 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
     public void NoIsolationWhenOpenTelemetryProfilerIsChained(bool useRawProfilerHookPath)
     {
         var nativeProfilerPath = EnvironmentHelper.GetProfilerPath();
+        var proxySourcePath = ProfilerProxyHelper.GetPath();
         var customDirectory = Path.Combine(EnvironmentTools.GetSolutionDirectory(), "test-artifacts", "profiler-proxy", Guid.NewGuid().ToString("N"));
         var customPath = Path.Combine(customDirectory, Path.GetFileName(nativeProfilerPath));
+        var proxyDirectory = useRawProfilerHookPath ? customDirectory : Path.GetDirectoryName(nativeProfilerPath)!;
+        var proxyPath = Path.Combine(proxyDirectory, $"profiler-proxy-{Guid.NewGuid():N}{Path.GetExtension(proxySourcePath)}");
         Directory.CreateDirectory(customDirectory);
 
         try
@@ -103,12 +106,13 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
                 SetEnvironmentVariable($"MicrosoftInstrumentationEngine_RawProfilerHookPath_{architectureSuffix}", nativeProfilerPath);
             }
 
+            // The proxy loads the fixed OTel library filename beside itself.
+            File.Copy(proxySourcePath, proxyPath);
             EnableBytecodeInstrumentation();
             SetEnvironmentVariable("CORECLR_PROFILER", ProfilerProxyHelper.ProfilerClsId);
-            SetEnvironmentVariable("CORECLR_PROFILER_PATH", ProfilerProxyHelper.GetPath());
+            SetEnvironmentVariable("CORECLR_PROFILER_PATH", proxyPath);
             SetEnvironmentVariable("CORECLR_PROFILER_PATH_32", null);
             SetEnvironmentVariable("CORECLR_PROFILER_PATH_64", null);
-            SetEnvironmentVariable("OTEL_TEST_CHAINED_PROFILER_PATH", nativeProfilerPath);
             // Native assembly redirection must work without the .NET 10 StartupHook-only test workaround.
             SetEnvironmentVariable("DOTNET_ADDITIONAL_DEPS", null);
             SetEnvironmentVariable("DOTNET_SHARED_STORE", null);
@@ -127,6 +131,7 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
         }
         finally
         {
+            File.Delete(proxyPath);
             if (useRawProfilerHookPath)
             {
                 File.Delete(customPath);

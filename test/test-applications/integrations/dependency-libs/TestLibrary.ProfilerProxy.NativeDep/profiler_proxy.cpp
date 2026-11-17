@@ -1,8 +1,10 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#include <algorithm>
 #include <cstdint>
-#include <cstdlib>
+#include <iterator>
+#include <string_view>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -35,27 +37,71 @@ using GetClassObject = ProfilerResult(PROXY_CALL*)(const ProfilerGuid&, const Pr
 
 static GetClassObject LoadProfiler()
 {
+    // Resolve the fixed sibling library from this proxy's location, independently of the environment.
+    // Retain the module reference for the lifetime of the delegated profiler.
 #ifdef _WIN32
-    wchar_t path[32768]{};
-    auto    length = GetEnvironmentVariableW(WStr("OTEL_TEST_CHAINED_PROFILER_PATH"), path, 32768);
-    if (length == 0 || length >= 32768)
+    HMODULE proxyModule = nullptr;
+    if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                            reinterpret_cast<LPCWSTR>(&LoadProfiler), &proxyModule))
     {
         return nullptr;
     }
 
+    wchar_t path[32768]{};
+    auto    length = GetModuleFileNameW(proxyModule, path, static_cast<DWORD>(std::size(path)));
+    if (length == 0 || length >= std::size(path))
+    {
+        return nullptr;
+    }
+
+    const auto separator = std::wstring_view(path, length).find_last_of(WStr("\\/"));
+    if (separator == std::wstring_view::npos)
+    {
+        return nullptr;
+    }
+
+    constexpr wchar_t profilerFileName[] = WStr("OpenTelemetry.AutoInstrumentation.Native.dll");
+    const auto        directoryLength    = separator + 1;
+    // Bounds are in characters, including the filename's terminator, rather than bytes.
+    if (std::size(profilerFileName) > std::size(path) - directoryLength)
+    {
+        return nullptr;
+    }
+
+    std::copy(std::begin(profilerFileName), std::end(profilerFileName), path + directoryLength);
     auto module = LoadLibraryW(path);
     return module == nullptr ? nullptr : reinterpret_cast<GetClassObject>(GetProcAddress(module, "DllGetClassObject"));
 #else
-    auto path = std::getenv("OTEL_TEST_CHAINED_PROFILER_PATH");
-    if (path == nullptr)
+    Dl_info proxyInfo{};
+    if (dladdr(reinterpret_cast<const void*>(&LoadProfiler), &proxyInfo) == 0 || proxyInfo.dli_fname == nullptr)
     {
         return nullptr;
     }
 
+    const std::string_view proxyPath(proxyInfo.dli_fname);
+    const auto             separator = proxyPath.find_last_of('/');
+    if (separator == std::string_view::npos)
+    {
+        return nullptr;
+    }
+
+#ifdef __APPLE__
+    constexpr char profilerFileName[] = "OpenTelemetry.AutoInstrumentation.Native.dylib";
+#else
+    constexpr char profilerFileName[] = "OpenTelemetry.AutoInstrumentation.Native.so";
+#endif
+    char       path[32768]{};
+    const auto directoryLength = separator + 1;
+    if (directoryLength > std::size(path) - std::size(profilerFileName))
+    {
+        return nullptr;
+    }
+
+    std::copy_n(proxyPath.data(), directoryLength, path);
+    std::copy(std::begin(profilerFileName), std::end(profilerFileName), path + directoryLength);
     auto module = dlopen(path, RTLD_NOW | RTLD_LOCAL);
     return module == nullptr ? nullptr : reinterpret_cast<GetClassObject>(dlsym(module, "DllGetClassObject"));
 #endif
-    // Retain the module reference for the lifetime of the delegated profiler.
 }
 
 PROXY_EXPORT ProfilerResult PROXY_CALL DllGetClassObject(const ProfilerGuid&, const ProfilerGuid& iid, void** result)
