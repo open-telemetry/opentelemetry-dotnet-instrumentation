@@ -159,13 +159,13 @@ The .NET code formatting is based on the
 Verify formatting using the same solution and options as CI:
 
 ```cmd
-dotnet format OpenTelemetry.AutoInstrumentation.sln --verify-no-changes
+dotnet format OpenTelemetry.AutoInstrumentation.slnx --verify-no-changes
 ```
 
 To apply formatting changes, omit `--verify-no-changes`:
 
 ```cmd
-dotnet format OpenTelemetry.AutoInstrumentation.sln
+dotnet format OpenTelemetry.AutoInstrumentation.slnx
 ```
 
 ### Native code formatting

@@ -53,7 +53,7 @@ Test logs and profiler logs land in `test-artifacts/`.
 
 ### Lint and format
 
-- `dotnet format .\OpenTelemetry.AutoInstrumentation.sln --verify-no-changes` -
+- `dotnet format .\OpenTelemetry.AutoInstrumentation.slnx --verify-no-changes` -
   exactly what the `dotnet format` CI check runs. Warnings are errors
   (`TreatWarningsAsErrors`), analysis level is `latest-All`, StyleCop is on
   solution-wide, nullable + implicit usings are enabled.
