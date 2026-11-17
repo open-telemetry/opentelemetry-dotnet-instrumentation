@@ -3,6 +3,7 @@
 
 using OpenTelemetry.AutoInstrumentation.Helpers;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 using static OpenTelemetry.AutoInstrumentation.Constants.EnvironmentVariables;
 
@@ -24,6 +25,11 @@ internal class NativeProfilerDiagnosticsRule : Rule
 
     internal override bool Evaluate()
     {
+        if (NativeProfilerHelper.IsProfilerAttached())
+        {
+            return true;
+        }
+
         var isProfilerEnabled = EnvironmentHelper.GetEnvironmentVariable(ProfilerEnabledVariable) == "1";
         if (!isProfilerEnabled)
         {
@@ -40,20 +46,7 @@ internal class NativeProfilerDiagnosticsRule : Rule
             return true;
         }
 
-        try
-        {
-            if (NativeMethods.IsProfilerAttached())
-            {
-                return true;
-            }
-
-            Logger.Error("IsProfilerAttached returned false, the native log should describe the root cause.");
-        }
-        catch (Exception ex)
-        {
-            /* Native profiler is not attached. Continue with diagnosis */
-            Logger.Debug(ex, "Error checking if native profiler is attached.");
-        }
+        Logger.Error("IsProfilerAttached returned false, the native log should describe the root cause.");
 
         if (Environment.Is64BitProcess)
         {

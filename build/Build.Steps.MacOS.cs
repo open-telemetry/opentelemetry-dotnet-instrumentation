@@ -30,13 +30,16 @@ partial class Build
         .OnlyWhenStatic(() => IsOsx)
         .Executes(() =>
         {
-            var buildDirectory = Solution.GetContinuousProfilerNativeDep().Directory.ToString();
-            CMake.Value(
-                arguments: "-S .",
-                workingDirectory: buildDirectory);
-            Make.Value(
-                arguments: $"",
-                workingDirectory: buildDirectory);
+            foreach (var project in Solution.GetNativeDependenciesForManagedTests())
+            {
+                var buildDirectory = project.Directory.ToString();
+                CMake.Value(
+                    arguments: "-S .",
+                    workingDirectory: buildDirectory);
+                Make.Value(
+                    arguments: $"",
+                    workingDirectory: buildDirectory);
+            }
         });
 
     Target PublishNativeProfilerMacOs => _ => _

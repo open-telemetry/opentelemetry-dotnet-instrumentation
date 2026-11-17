@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation;
 using OpenTelemetry.AutoInstrumentation.Configurations;
-using OpenTelemetry.AutoInstrumentation.Helpers;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 /// <summary>
 /// Dotnet StartupHook
@@ -93,9 +93,8 @@ internal class StartupHook
 
     private static bool IsStartupHookOnlyMode()
     {
-        // Another profiler cannot provide the assembly redirection required by normal initialization.
-        return Environment.GetEnvironmentVariable(Constants.EnvironmentVariables.ProfilerEnabledVariable) != "1" ||
-            !NativeProfilerHelper.IsOpenTelemetryProfiler(Environment.GetEnvironmentVariable(Constants.EnvironmentVariables.ProfilerIdVariable));
+        // A proxy can attach OTel while exposing its own CLSID to the CLR.
+        return !NativeProfilerHelper.IsProfilerAttached();
     }
 
     private static bool IsRedirectEnabled()

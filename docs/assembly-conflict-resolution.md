@@ -258,6 +258,11 @@ binding redirects prevent redirection to the versions listed in
 When the native profiler is not attached, the instrumentation relies
 solely on the .NET
 [startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md).
+The startup hook checks attachment in the OpenTelemetry native module, because
+the CLR-visible profiler CLSID may identify a proxy that loads OpenTelemetry.
+It locates the module using the OpenTelemetry profiler path, the raw profiler
+hook path exposed by the CLR Instrumentation Engine, or the native assets under
+`OTEL_DOTNET_AUTO_HOME`.
 Without the native profiler there is no IL rewriting, and without a
 NuGet package there is no build-time version resolution.
 

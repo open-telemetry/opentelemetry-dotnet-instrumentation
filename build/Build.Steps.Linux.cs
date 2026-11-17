@@ -30,13 +30,16 @@ partial class Build
         .OnlyWhenStatic(() => IsLinux)
         .Executes(() =>
         {
-            var buildDirectory = Solution.GetContinuousProfilerNativeDep().Directory.ToString();
-            CMake.Value(
-                arguments: "-DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -S .",
-                workingDirectory: buildDirectory);
-            CMake.Value(
-                arguments: "--build . --parallel",
-                workingDirectory: buildDirectory);
+            foreach (var project in Solution.GetNativeDependenciesForManagedTests())
+            {
+                var buildDirectory = project.Directory.ToString();
+                CMake.Value(
+                    arguments: "-DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -S .",
+                    workingDirectory: buildDirectory);
+                CMake.Value(
+                    arguments: "--build . --parallel",
+                    workingDirectory: buildDirectory);
+            }
         });
 
     Target CompileNativeTestsLinux => _ => _

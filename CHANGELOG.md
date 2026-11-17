@@ -91,8 +91,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
-- Fixed StartupHook initialization selecting native-profiler mode when profiling
-  is enabled without the OpenTelemetry profiler CLSID.
+- Fixed StartupHook mode selection and native interop to check whether the
+  OpenTelemetry native profiler is attached.
 - Fixed `ORACLEMDA` bytecode instrumentation logging an
   `AmbiguousMatchException` on every `OracleConnection.Open` and
   `OracleConnection.OpenAsync` call, which prevented the integration from

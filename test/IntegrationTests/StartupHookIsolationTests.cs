@@ -44,7 +44,7 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("CORECLR_PROFILER", profilerId);
 
-        VerifyApplicationLoadContext("Default");
+        VerifyApplicationLoadContext("Default", nativeProfilerExpected: true);
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
         EnableBytecodeInstrumentation();
         // A lowercase CLSID must still undergo attachment validation.
         SetEnvironmentVariable("CORECLR_PROFILER", "{918728dd-259f-4a6a-ac2b-b85e1b658318}");
-        SetEnvironmentVariable("CORECLR_PROFILER_PATH", Path.Combine(EnvironmentHelper.GetNukeBuildOutput(), "missing-profiler"));
+        SetEnvironmentVariable("CORECLR_PROFILER_PATH", Path.Combine(EnvironmentHelper.GetFalloutBuildOutput(), "missing-profiler"));
         SetEnvironmentVariable("CORECLR_PROFILER_PATH_32", null);
         SetEnvironmentVariable("CORECLR_PROFILER_PATH_64", null);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", failFast ? "true" : "false");
@@ -78,6 +78,75 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
         RunTestApplication(expectedExitCode: 0, assertExitCode: failFast ? Assert.NotEqual : Assert.Equal);
 
         collector.AssertEmpty();
+    }
+
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void NoIsolationWhenOpenTelemetryProfilerIsChained(bool useRawProfilerHookPath)
+    {
+        var nativeProfilerPath = EnvironmentHelper.GetProfilerPath();
+        var customDirectory = Path.Combine(EnvironmentTools.GetSolutionDirectory(), "test-artifacts", "profiler-proxy", Guid.NewGuid().ToString("N"));
+        var customPath = Path.Combine(customDirectory, Path.GetFileName(nativeProfilerPath));
+        Directory.CreateDirectory(customDirectory);
+
+        try
+        {
+            if (useRawProfilerHookPath)
+            {
+                // A second, unattached native copy still exists under HOME. Probe the copy actually used by the proxy.
+                File.Copy(nativeProfilerPath, customPath);
+                nativeProfilerPath = customPath;
+                SetEnvironmentVariable("MicrosoftInstrumentationEngine_RawProfilerHook", EnvironmentTools.ProfilerClsId);
+                var architectureSuffix = EnvironmentTools.IsArm64() ? "ARM64" : Environment.Is64BitProcess ? "64" : "32";
+                SetEnvironmentVariable($"MicrosoftInstrumentationEngine_RawProfilerHookPath_{architectureSuffix}", nativeProfilerPath);
+            }
+
+            EnableBytecodeInstrumentation();
+            SetEnvironmentVariable("CORECLR_PROFILER", ProfilerProxyHelper.ProfilerClsId);
+            SetEnvironmentVariable("CORECLR_PROFILER_PATH", ProfilerProxyHelper.GetPath());
+            SetEnvironmentVariable("CORECLR_PROFILER_PATH_32", null);
+            SetEnvironmentVariable("CORECLR_PROFILER_PATH_64", null);
+            SetEnvironmentVariable("OTEL_TEST_CHAINED_PROFILER_PATH", nativeProfilerPath);
+            // Native assembly redirection must work without the .NET 10 StartupHook-only test workaround.
+            SetEnvironmentVariable("DOTNET_ADDITIONAL_DEPS", null);
+            SetEnvironmentVariable("DOTNET_SHARED_STORE", null);
+
+            using var collector = new MockSpansCollector(Output);
+            SetFileBasedExporter(collector);
+            EnableFileBasedConfig("profiler-proxy.yaml");
+            collector.Expect("StartupHookIsolation.ActivitySource", span => span.Name == "Default");
+            collector.Expect("OpenTelemetry.AutoInstrumentation.NoCode", span => span.Name == "ProfilerProxy.Bytecode");
+
+            var (standardOutput, _, _) = RunTestApplication(new TestSettings { Arguments = "--exit-code 42" }, expectedExitCode: 42);
+
+            Assert.Contains("[ALC] Default", standardOutput, StringComparison.Ordinal);
+
+            collector.AssertExpectations();
+        }
+        finally
+        {
+            if (useRawProfilerHookPath)
+            {
+                File.Delete(customPath);
+            }
+
+            Directory.Delete(customDirectory);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void IsolationWhenNativeModuleDoesNotExportAttachmentProbe()
+    {
+        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "0");
+        SetEnvironmentVariable("MicrosoftInstrumentationEngine_RawProfilerHook", EnvironmentTools.ProfilerClsId);
+        var architectureSuffix = EnvironmentTools.IsArm64() ? "ARM64" : Environment.Is64BitProcess ? "64" : "32";
+        // The proxy is a valid native module but deliberately does not expose IsProfilerAttached.
+        SetEnvironmentVariable($"MicrosoftInstrumentationEngine_RawProfilerHookPath_{architectureSuffix}", ProfilerProxyHelper.GetPath());
+
+        VerifyApplicationLoadContext(StartupHookConstants.IsolatedAssemblyLoadContextName);
     }
 
     [Fact]
@@ -180,15 +249,22 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
         collector.AssertEmpty();
     }
 
-    private void VerifyApplicationLoadContext(string expectedContext)
+    private void VerifyApplicationLoadContext(string expectedContext, bool nativeProfilerExpected = false)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "StartupHookIsolation.ActivitySource");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
         collector.Expect("StartupHookIsolation.ActivitySource", span => span.Name == expectedContext);
 
         // The test application also detects duplicate entrypoint execution.
-        RunTestApplication(new TestSettings { Arguments = "--exit-code 42" }, expectedExitCode: 42);
+        var (standardOutput, _, _) = RunTestApplication(new TestSettings { Arguments = "--exit-code 42" }, expectedExitCode: 42);
+
+        Assert.Contains($"[ALC] {expectedContext}", standardOutput, StringComparison.Ordinal);
+        if (!nativeProfilerExpected)
+        {
+            Assert.DoesNotContain("Sending shared CallTarget integration definitions to native library.", standardOutput, StringComparison.Ordinal);
+        }
 
         collector.AssertExpectations();
     }

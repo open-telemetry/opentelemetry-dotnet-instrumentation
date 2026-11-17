@@ -56,15 +56,17 @@ partial class Build
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
-            var continuousProfilerNativeDepProject = Solution.GetContinuousProfilerNativeDep();
-            PerformLegacyRestoreIfNeeded(continuousProfilerNativeDepProject);
-            // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
-            MSBuild(s => s
-                .SetProjectFile(continuousProfilerNativeDepProject)
-                .SetConfiguration(BuildConfiguration)
-                .SetRestore(!NoRestore)
-                .SetTargetPlatform(Platform)
-                .SetRestore(false));
+            foreach (var project in Solution.GetNativeDependenciesForManagedTests())
+            {
+                PerformLegacyRestoreIfNeeded(project);
+                // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
+                MSBuild(s => s
+                    .SetProjectFile(project)
+                    .SetConfiguration(BuildConfiguration)
+                    .SetRestore(!NoRestore)
+                    .SetTargetPlatform(Platform)
+                    .SetRestore(false));
+            }
         });
 
     Target CompileNativeTestsWindows => _ => _
