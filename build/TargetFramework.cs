@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
-using Nuke.Common.Tooling;
+using Fallout.Common.Tooling;
 using Serilog;
 
 [TypeConverter(typeof(TargetFrameworkTypeConverter))]

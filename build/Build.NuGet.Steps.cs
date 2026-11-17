@@ -1,12 +1,12 @@
 using System.Runtime.InteropServices;
 using Extensions;
-using Nuke.Common;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.NuGet;
-using Nuke.Common.Utilities.Collections;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using Fallout.Common;
+using Fallout.Common.IO;
+using Fallout.Common.Tools.DotNet;
+using Fallout.Common.Tools.NuGet;
+using Fallout.Common.Utilities.Collections;
+using Fallout.Solutions;
+using static Fallout.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
 {

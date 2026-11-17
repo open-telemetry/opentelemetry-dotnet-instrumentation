@@ -4,18 +4,18 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Extensions;
-using Nuke.Common;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.MSBuild;
-using Nuke.Common.Tools.Npm;
-using Nuke.Common.Tools.NuGet;
-using Nuke.Common.Utilities.Collections;
+using Fallout.Common;
+using Fallout.Common.IO;
+using Fallout.Common.Tooling;
+using Fallout.Common.Tools.DotNet;
+using Fallout.Common.Tools.MSBuild;
+using Fallout.Common.Tools.Npm;
+using Fallout.Common.Tools.NuGet;
+using Fallout.Common.Utilities.Collections;
+using Fallout.Solutions;
 using Serilog;
-using static Nuke.Common.EnvironmentInfo;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using static Fallout.Common.EnvironmentInfo;
+using static Fallout.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
 {
@@ -130,6 +130,8 @@ partial class Build
             var targetProject = Solution.GetProjectByName(Projects.AutoInstrumentationAssemblies);
             DotNetRestore(s => s.SetProjectFile(targetProject));
 
+            // Initialize Fallout's MSBuild resolver before loading the generator's MSBuild types.
+            ProjectModelTasks.Initialize();
             TransientDependenciesGenerator.Run(targetProject);
         });
 
@@ -260,21 +262,18 @@ partial class Build
 
     Target CompileNativeDependenciesForManagedTests => _ => _
         .Description("Compiles the native dependencies for testing applications")
-        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeDependenciesForManagedTestsWindows)
         .DependsOn(CompileNativeDependenciesForManagedTestsLinux)
         .DependsOn(CompileNativeDependenciesForManagedTestsMacOs);
 
     Target CompileNativeSrc => _ => _
         .Description("Compiles the native loader")
-        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeSrcWindows)
         .DependsOn(CompileNativeSrcLinux)
         .DependsOn(CompileNativeSrcMacOs);
 
     Target CompileNativeTests => _ => _
         .Description("Compiles the native loader unit tests")
-        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeTestsWindows)
         .DependsOn(CompileNativeTestsLinux);
 

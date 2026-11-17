@@ -1,5 +1,5 @@
 using System.Runtime.InteropServices;
-using Nuke.Common.Tools.MSBuild;
+using Fallout.Common.Tools.MSBuild;
 
 partial class Build
 {

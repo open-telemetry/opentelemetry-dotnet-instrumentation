@@ -1,7 +1,7 @@
-using Nuke.Common;
-using Nuke.Common.IO;
+using Fallout.Common;
+using Fallout.Common.IO;
 using Serilog;
-using static Nuke.Common.EnvironmentInfo;
+using static Fallout.Common.EnvironmentInfo;
 
 partial class Build
 {
