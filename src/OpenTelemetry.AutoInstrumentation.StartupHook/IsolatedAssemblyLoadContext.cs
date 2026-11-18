@@ -16,120 +16,106 @@ internal class IsolatedAssemblyLoadContext : AssemblyLoadContext
 {
     // TODO in future we may want to have a configuration for this list which will give flexibility for the customer if they know what they are doing;
 
-    // Assemblies that must be loaded in Default ALC to avoid type identity issues.
-    // This minimal set contains only core runtime assemblies that are unavoidable
-    // during StartupHook bootstrap before setting up isolation.
-    private static readonly string[] MustUseDefaultAlc = GetRuntimeMajorVersion() switch
-    {
-        // for .Net 8 and 9 we can allow more aggressive isolation
-        < 10 => [
-            "System.Private.CoreLib",
-            "System.Private.Uri",
-            "System.Runtime",
-            "System.Runtime.Extensions", // <- TrustedPlatformAssembliesHelper needs Path to look through TPA
-            "System.Runtime.InteropServices", // <- native attachment is probed before isolation
-            "System.Runtime.InteropServices.RuntimeInformation", // <- native attachment is probed before isolation
-            "System.Runtime.Loader" // <- required to instantiate AssemblyLoadContext
-        ],
-        // for .net 10 we have to let System.Diagnostics.DiagnosticSource v10 from TPA to be loaded to Default ALC,
-        // and therefore the list is larger. More on the issue:
-        // https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4924
-        >= 10 => [
-            // some assemblies has been resolved only on specific platforms
-            // but it's not gonna harm to include them, since we don't expect them to exist on other platforms
-            "Accessibility", // [only in: win-arm64; win-x64; win-x86]
-            "Microsoft.Win32.Primitives",
-            "Microsoft.Win32.Registry",
-            "Microsoft.Win32.SystemEvents", // [only in: win-arm64; win-x64; win-x86]
-            "System.Collections",
-            "System.Collections.Concurrent",
-            "System.Collections.Immutable",
-            "System.Collections.NonGeneric",
-            "System.Collections.Specialized",
-            "System.ComponentModel",
-            "System.ComponentModel.Annotations",
-            "System.ComponentModel.EventBasedAsync",
-            "System.ComponentModel.Primitives",
-            "System.ComponentModel.TypeConverter",
-            "System.Configuration.ConfigurationManager", // [only in: win-arm64; win-x64; win-x86]
-            "System.Console",
-            "System.Diagnostics.DiagnosticSource",
-            "System.Diagnostics.EventLog", // [only in: win-arm64; win-x64; win-x86]
-            "System.Diagnostics.FileVersionInfo",
-            "System.Diagnostics.Process",
-            "System.Diagnostics.StackTrace",
-            "System.Diagnostics.TextWriterTraceListener",
-            "System.Diagnostics.TraceSource",
-            "System.Diagnostics.Tracing",
-            "System.Drawing.Common", // [only in: win-arm64; win-x64; win-x86]
-            "System.Drawing.Primitives",
-            "System.Formats.Asn1",
-            "System.Formats.Nrbf", // [only in: win-arm64; win-x64; win-x86]
-            "System.IO.Compression",
-            "System.IO.Compression.Brotli",
-            "System.IO.MemoryMappedFiles",
-            "System.IO.Pipelines",
-            "System.IO.Pipes",
-            "System.Linq",
-            "System.Linq.Expressions",
-            "System.Memory",
-            "System.Net.Http",
-            "System.Net.NameResolution",
-            "System.Net.NetworkInformation",
-            "System.Net.Primitives",
-            "System.Net.Quic",
-            "System.Net.Requests",
-            "System.Net.Security",
-            "System.Net.Sockets",
-            "System.Net.WebClient",
-            "System.Net.WebHeaderCollection",
-            "System.Numerics.Vectors",
-            "System.ObjectModel",
-            "System.Private.CoreLib",
-            "System.Private.Uri",
-            "System.Private.Windows.Core", // [only in: win-arm64; win-x64; win-x86]
-            "System.Private.Windows.GdiPlus", // [only in: win-arm64; win-x64; win-x86]
-            "System.Private.Xml",
-            "System.Private.Xml.Linq",
-            "System.Reflection.Emit",
-            "System.Reflection.Emit.ILGeneration",
-            "System.Reflection.Emit.Lightweight",
-            "System.Reflection.Metadata",
-            "System.Reflection.Primitives",
-            "System.Resources.Writer",
-            "System.Runtime",
-            "System.Runtime.Extensions", // <- TrustedPlatformAssembliesHelper needs Path.PathSeparator to look through TPA
-            "System.Runtime.InteropServices",
-            "System.Runtime.InteropServices.RuntimeInformation", // <- native attachment is probed before isolation
-            "System.Runtime.Intrinsics",
-            "System.Runtime.Loader", // <- required to instantiate AssemblyLoadContext
-            "System.Runtime.Numerics",
-            "System.Runtime.Serialization.Formatters",
-            "System.Security.AccessControl",
-            "System.Security.Claims",
-            "System.Security.Cryptography",
-            "System.Security.Cryptography.ProtectedData", // [only in: win-arm64; win-x64; win-x86]
-            "System.Security.Principal.Windows",
-            "System.Text.Encoding.CodePages",
-            "System.Text.Encoding.Extensions",
-            "System.Text.Encodings.Web",
-            "System.Text.Json",
-            "System.Text.RegularExpressions",
-            "System.Threading",
-            "System.Threading.AccessControl",
-            "System.Threading.Channels",
-            "System.Threading.Overlapped",
-            "System.Threading.Thread",
-            "System.Threading.ThreadPool",
-            "System.Web.HttpUtility",
-            "System.Windows.Extensions", // [only in: win-arm64; win-x64; win-x86]
-            "System.Windows.Forms", // [only in: win-arm64; win-x64; win-x86]
-            "System.Windows.Forms.Primitives", // [only in: win-arm64; win-x64; win-x86]
-            "System.Xml.ReaderWriter",
-            "System.Xml.XDocument",
-            "System.Xml.XmlSerializer"
-        ]
-    };
+    // Runtime assemblies shared with Default ALC to preserve type identity and shared state during bootstrap.
+    // On .NET 10+, CoreLib can load DiagnosticSource into Default ALC through UnsafeAccessorType,
+    // so DiagnosticSource and its runtime dependencies must be shared as well.
+    // https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/4924
+    private static readonly string[] MustUseDefaultAlc =
+    [
+        // some assemblies has been resolved only on specific platforms
+        // but it's not gonna harm to include them, since we don't expect them to exist on other platforms
+        "Accessibility", // [only in: win-arm64; win-x64; win-x86]
+        "Microsoft.Win32.Primitives",
+        "Microsoft.Win32.Registry",
+        "Microsoft.Win32.SystemEvents", // [only in: win-arm64; win-x64; win-x86]
+        "System.Collections",
+        "System.Collections.Concurrent",
+        "System.Collections.Immutable",
+        "System.Collections.NonGeneric",
+        "System.Collections.Specialized",
+        "System.ComponentModel",
+        "System.ComponentModel.Annotations",
+        "System.ComponentModel.EventBasedAsync",
+        "System.ComponentModel.Primitives",
+        "System.ComponentModel.TypeConverter",
+        "System.Configuration.ConfigurationManager", // [only in: win-arm64; win-x64; win-x86]
+        "System.Console",
+        "System.Diagnostics.DiagnosticSource",
+        "System.Diagnostics.EventLog", // [only in: win-arm64; win-x64; win-x86]
+        "System.Diagnostics.FileVersionInfo",
+        "System.Diagnostics.Process",
+        "System.Diagnostics.StackTrace",
+        "System.Diagnostics.TextWriterTraceListener",
+        "System.Diagnostics.TraceSource",
+        "System.Diagnostics.Tracing",
+        "System.Drawing.Common", // [only in: win-arm64; win-x64; win-x86]
+        "System.Drawing.Primitives",
+        "System.Formats.Asn1",
+        "System.Formats.Nrbf", // [only in: win-arm64; win-x64; win-x86]
+        "System.IO.Compression",
+        "System.IO.Compression.Brotli",
+        "System.IO.MemoryMappedFiles",
+        "System.IO.Pipelines",
+        "System.IO.Pipes",
+        "System.Linq",
+        "System.Linq.Expressions",
+        "System.Memory",
+        "System.Net.Http",
+        "System.Net.NameResolution",
+        "System.Net.NetworkInformation",
+        "System.Net.Primitives",
+        "System.Net.Quic",
+        "System.Net.Requests",
+        "System.Net.Security",
+        "System.Net.Sockets",
+        "System.Net.WebClient",
+        "System.Net.WebHeaderCollection",
+        "System.Numerics.Vectors",
+        "System.ObjectModel",
+        "System.Private.CoreLib",
+        "System.Private.Uri",
+        "System.Private.Windows.Core", // [only in: win-arm64; win-x64; win-x86]
+        "System.Private.Windows.GdiPlus", // [only in: win-arm64; win-x64; win-x86]
+        "System.Private.Xml",
+        "System.Private.Xml.Linq",
+        "System.Reflection.Emit",
+        "System.Reflection.Emit.ILGeneration",
+        "System.Reflection.Emit.Lightweight",
+        "System.Reflection.Metadata",
+        "System.Reflection.Primitives",
+        "System.Resources.Writer",
+        "System.Runtime",
+        "System.Runtime.Extensions", // <- TrustedPlatformAssembliesHelper needs Path.PathSeparator to look through TPA
+        "System.Runtime.InteropServices",
+        "System.Runtime.InteropServices.RuntimeInformation", // <- native attachment is probed before isolation
+        "System.Runtime.Intrinsics",
+        "System.Runtime.Loader", // <- required to instantiate AssemblyLoadContext
+        "System.Runtime.Numerics",
+        "System.Runtime.Serialization.Formatters",
+        "System.Security.AccessControl",
+        "System.Security.Claims",
+        "System.Security.Cryptography",
+        "System.Security.Cryptography.ProtectedData", // [only in: win-arm64; win-x64; win-x86]
+        "System.Security.Principal.Windows",
+        "System.Text.Encoding.CodePages",
+        "System.Text.Encoding.Extensions",
+        "System.Text.Encodings.Web",
+        "System.Text.Json",
+        "System.Text.RegularExpressions",
+        "System.Threading",
+        "System.Threading.AccessControl",
+        "System.Threading.Channels",
+        "System.Threading.Overlapped",
+        "System.Threading.Thread",
+        "System.Threading.ThreadPool",
+        "System.Web.HttpUtility",
+        "System.Windows.Extensions", // [only in: win-arm64; win-x64; win-x86]
+        "System.Windows.Forms", // [only in: win-arm64; win-x64; win-x86]
+        "System.Windows.Forms.Primitives", // [only in: win-arm64; win-x64; win-x86]
+        "System.Xml.ReaderWriter",
+        "System.Xml.XDocument",
+        "System.Xml.XmlSerializer"
+    ];
 
     [ThreadStatic]
     private static AssemblyName? _isLoadingAssemblyName;
@@ -202,13 +188,5 @@ internal class IsolatedAssemblyLoadContext : AssemblyLoadContext
         }
 
         return null;
-    }
-
-    private static int GetRuntimeMajorVersion()
-    {
-        var coreLibAssembly = typeof(object).Assembly;
-        var runtimeVersion = coreLibAssembly.GetName().Version
-            ?? throw new InvalidOperationException("Unable to determine runtime version");
-        return runtimeVersion.Major;
     }
 }
