@@ -25,6 +25,8 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     - `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`
     - `OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED`
     - `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
+    - `OTEL_DOTNET_AUTO_LOG_FILE_SIZE`
+    - `OTEL_DOTNET_AUTO_LOGGER`
     - `OTEL_LOG_LEVEL`
     - `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED` (Deprecated)
     - `OTEL_DOTNET_AUTO_REDIRECT_ENABLED`
@@ -43,9 +45,11 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     > [!NOTE]
     > Managed settings from `Web.config` or `App.config` apply only to their
     > AppDomain. YAML selection (`OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED`
-    > and `OTEL_CONFIG_FILE`) remains process-level; YAML environment substitution
-    > reads process environment variables. Native profiler, AppDomain loading,
-    > and internal logging settings also require process environment variables.
+    > and `OTEL_CONFIG_FILE`) is process-wide. If either variable is unset, an
+    > AppDomain can set it for the process using `appSettings`. YAML environment
+    > substitution reads process environment variables. Set native profiler,
+    > AppDomain loading, and internal logging settings via process environment
+    > variables.
     > Applications sharing one process may still share native profiler and
     > continuous profiling behavior. Use a separate process for each logical
     > application when possible.
