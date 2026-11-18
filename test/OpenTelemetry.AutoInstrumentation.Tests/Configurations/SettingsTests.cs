@@ -466,6 +466,31 @@ public sealed class SettingsTests
     }
 
     [Theory]
+    [InlineData(OtlpSignalType.Traces, "http://collector:4318/base", "http://collector:4318/base/v1/traces")]
+    [InlineData(OtlpSignalType.Traces, "http://collector:4318/base/", "http://collector:4318/base/v1/traces")]
+    [InlineData(OtlpSignalType.Traces, "http://collector:4318/base/v1/traces", "http://collector:4318/base/v1/traces")]
+    [InlineData(OtlpSignalType.Metrics, "http://collector:4318/base/v1/metrics/", "http://collector:4318/base/v1/metrics/")]
+    [InlineData(OtlpSignalType.Logs, "http://collector:4318/base/V1/LOGS", "http://collector:4318/base/V1/LOGS")]
+    internal void OtlpSettings_GenericHttpEndpoint_IncludesSignalPathOnce(OtlpSignalType signalType, string endpoint, string expectedEndpoint)
+    {
+        using var envScope = new EnvironmentScope(new Dictionary<string, string?>
+        {
+            { AutoOtlpDefinitions.DefaultProtocolEnvVarName, "http/protobuf" },
+            { AutoOtlpDefinitions.DefaultEndpointEnvVarName, endpoint },
+            { AutoOtlpDefinitions.GetProtocolEnvVar(signalType), null },
+            { AutoOtlpDefinitions.GetEndpointEnvVar(signalType), null },
+        });
+
+        var configuration = new Configuration(false, new EnvironmentConfigurationSource(false));
+        var settings = new OtlpSettings(signalType, configuration);
+        var options = new OtlpExporterOptions();
+
+        settings.CopyTo(options);
+
+        Assert.Equal(expectedEndpoint, options.Endpoint.AbsoluteUri);
+    }
+
+    [Theory]
     [InlineData("http/protobuf", true)]
 #if NETFRAMEWORK
     [InlineData("grpc", true)]

@@ -34,15 +34,8 @@ internal class OtlpSettings
             var defaultEndpoint = configuration.GetUri(OtlpSpecConfigDefinitions.DefaultEndpointEnvVarName);
             if (defaultEndpoint is not null)
             {
-                var signalPath = signalType switch
-                {
-                    OtlpSignalType.Traces => "traces",
-                    OtlpSignalType.Metrics => "metrics",
-                    OtlpSignalType.Logs => "logs",
-                    _ => throw new ArgumentOutOfRangeException(nameof(signalType))
-                };
                 Endpoint = Protocol == OtlpExportProtocol.HttpProtobuf
-                    ? new Uri($"{defaultEndpoint.AbsoluteUri.TrimEnd('/')}/v1/{signalPath}")
+                    ? AppendOtlpHttpSignalPath(defaultEndpoint, signalType)
                     : defaultEndpoint;
             }
         }
@@ -136,6 +129,28 @@ internal class OtlpSettings
             // services after the application IServiceProvider has been disposed.
             options.HttpClientFactory = DefaultHttpClientFactory;
         }
+    }
+
+    private static Uri AppendOtlpHttpSignalPath(Uri endpoint, OtlpSignalType signalType)
+    {
+        var signalPath = signalType switch
+        {
+            OtlpSignalType.Traces => "v1/traces",
+            OtlpSignalType.Metrics => "v1/metrics",
+            OtlpSignalType.Logs => "v1/logs",
+            _ => throw new ArgumentOutOfRangeException(nameof(signalType))
+        };
+
+        // Matches how the SDK handles generic endpoints that already include the signal path.
+        var absoluteUri = endpoint.AbsoluteUri;
+        var hasTrailingSlash = absoluteUri[absoluteUri.Length - 1] == '/';
+        if (absoluteUri.EndsWith(hasTrailingSlash ? $"{signalPath}/" : signalPath, StringComparison.OrdinalIgnoreCase))
+        {
+            return endpoint;
+        }
+
+        var separator = hasTrailingSlash ? string.Empty : "/";
+        return new Uri($"{absoluteUri}{separator}{signalPath}");
     }
 
     private static Uri GetOtlpHttpEndpoint(string? endpoint, OtlpSignalType signalType)
