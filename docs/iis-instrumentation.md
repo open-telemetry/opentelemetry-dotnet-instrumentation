@@ -33,36 +33,31 @@ for further details.
 > Remember to restart IIS after making configuration changes.
 > You can do it by executing `iisreset.exe`.
 
-For ASP.NET application you can configure the most common `OTEL_` settings
-(like `OTEL_SERVICE_NAME`) via `appSettings` in `Web.config`.
-Each application reads its managed `appSettings` within its own AppDomain.
-Process environment variables take precedence over entries with the same key.
+For an ASP.NET application on .NET Framework, configure managed `OTEL_*` settings
+such as `OTEL_SERVICE_NAME` via `appSettings` in `Web.config`.
 
 If a service name is not explicitly configured, one will be generated for you.
 If the application is hosted on IIS in .NET Framework this will use
 `SiteName\VirtualDirectoryPath` ex: `MySite\MyApp`
 
 For ASP.NET Core application you can use
-the [`<environmentVariable>`](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/web-config#set-environment-variables)
+the [`<environmentVariable>`](https://docs.microsoft.com/aspnet/core/host-and-deploy/iis/web-config#set-environment-variables)
 elements inside the `<aspNetCore>` block of your `Web.config` file
 to set configuration via environment variables.
 
 > [!WARNING]
 > When multiple ASP.NET (.NET Framework) applications share the same
-> Application Pool, they run inside a single `w3wp.exe` process. `OTEL_*`
-> settings read from each application's `Web.config` are promoted to
-> **process-level** environment variables at startup. Because process-level
-> variables can only be set once, the first application to initialize in the
-> pool establishes the configuration for **all** applications in that pool.
-> Any `Web.config` `OTEL_*` overrides in applications that start later will
-> be silently ignored. This includes the automatic service name detection
-> (`SiteName\VirtualPath`): because the OTel SDK is initialized only once
-> per process, all applications in the pool share the service name of the
-> first application to start.
+> Application Pool, they run inside a single `w3wp.exe` process. Managed
+> `OTEL_*` settings in each application's `Web.config`, including service name
+> and resource attributes, are read within that application's AppDomain.
+> Process environment variables take precedence and are shared by all
+> applications in the pool. YAML configuration selection, native profiler,
+> AppDomain loading, and internal logging settings are also process-wide.
+> See [Configuration methods](config.md#configuration-methods) for details.
 
 ### Advanced configuration
 
-You can add the [`<environmentVariables>`](https://docs.microsoft.com/en-us/iis/configuration/system.applicationhost/applicationpools/add/environmentvariables/)
+You can add the [`<environmentVariables>`](https://docs.microsoft.com/iis/configuration/system.applicationhost/applicationpools/add/environmentvariables/)
 in `applicationHost.config`
 to set environment variables for given application pools.
 
