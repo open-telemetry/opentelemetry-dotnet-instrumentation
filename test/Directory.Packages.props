@@ -45,7 +45,7 @@
     <PackageVersion Include="NuGet.Versioning" Version="6.14.3" />
     <PackageVersion Include="OpenTracing" Version="0.12.1" />
     <PackageVersion Include="Oracle.ManagedDataAccess" Version="23.26.400" />
-    <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.26.400" />
+    <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.26.401" />
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
     <PackageVersion Include="Quartz" Version="4.7.3" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.22.10" />
@@ -68,7 +68,7 @@
     <PackageVersion Include="System.ServiceModel.Primitives" Version="10.1.0" />
     <PackageVersion Include="System.Text.Json" Version="11.0.0" />
     <PackageVersion Include="System.ValueTuple" Version="4.6.2" />
-    <PackageVersion Include="Testcontainers" Version="4.16.0" />
+    <PackageVersion Include="Testcontainers" Version="4.17.0" />
     <PackageVersion Include="Verify.Xunit" Version="31.12.5" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />

@@ -41,17 +41,23 @@ Run:
 
 ## Build
 
-This repository uses [Nuke](https://github.com/nuke-build/nuke) for build automation.
+This repository uses
+[Fallout](https://github.com/Fallout-build/Fallout) for build automation.
 
-Support plugins are available for:
+See Fallout's IDE documentation for:
 
-- JetBrains ReSharper        <https://github.com/nuke-build/nuke/blob/develop/docs/07-ide/resharper.md>
-- JetBrains Rider            <https://github.com/nuke-build/nuke/blob/develop/docs/07-ide/rider.md>
-- Microsoft VisualStudio     <https://github.com/nuke-build/nuke/blob/develop/docs/07-ide/visual-studio.md>
-- Microsoft VSCode           <https://github.com/nuke-build/nuke/blob/develop/docs/07-ide/vscode.md>
+- [JetBrains ReSharper][fallout-resharper]
+- [JetBrains Rider][fallout-rider]
+- [Microsoft VisualStudio][fallout-visual-studio]
+- [Microsoft VSCode][fallout-vscode]
+
+[fallout-resharper]: https://github.com/Fallout-build/Fallout/blob/develop/docs/website/07-ide/resharper.md
+[fallout-rider]: https://github.com/Fallout-build/Fallout/blob/develop/docs/website/07-ide/rider.md
+[fallout-visual-studio]: https://github.com/Fallout-build/Fallout/blob/develop/docs/website/07-ide/visual-studio.md
+[fallout-vscode]: https://github.com/Fallout-build/Fallout/blob/develop/docs/website/07-ide/vscode.md
 
 Restore dotnet tools to prepare build tools for solution.
-This installs the dotnet `nuke` tool locally.
+This installs the dotnet `fallout` tool locally.
 
 ```cmd
 dotnet tool restore
@@ -60,13 +66,13 @@ dotnet tool restore
 To see a list of possible targets and configurations run:
 
 ```cmd
-dotnet nuke --help
+dotnet fallout --help
 ```
 
 To build, run:
 
 ```cmd
-dotnet nuke
+dotnet fallout
 ```
 
 The main build artifacts are in `bin/tracer-home`.
@@ -109,13 +115,13 @@ $artifacts | % { $dest = $(Join-Path $destFolder $_); $zip = $(Join-Path $zipFil
 Now you are ready to build the packages locally:
 
 ```cmd
-dotnet nuke BuildNuGetPackages
+dotnet fallout BuildNuGetPackages
 ```
 
 to run the tests locally use:
 
 ```cmd
-dotnet nuke TestNuGetPackages
+dotnet fallout TestNuGetPackages
 ```
 
 To use the locally built NuGet packages in other projects on the local machine ensure
@@ -134,13 +140,13 @@ If you made changes to the Markdown documents (`*.md` files), ensure that lint
 tool and spellcheck passed without any issues by executing:
 
 ```cmd
-dotnet nuke InstallDocumentationTools ValidateDocumentation
+dotnet fallout InstallDocumentationTools ValidateDocumentation
 ```
 
 Some issues can be automatically fixed by:
 
 ```cmd
-dotnet nuke MarkdownLintFix
+dotnet fallout MarkdownLintFix
 ```
 
 All MarkdownLint tasks require [Node.js](https://nodejs.org/) installed locally.
@@ -153,13 +159,13 @@ The .NET code formatting is based on the
 Verify formatting using the same solution and options as CI:
 
 ```cmd
-dotnet format OpenTelemetry.AutoInstrumentation.sln --verify-no-changes
+dotnet format OpenTelemetry.AutoInstrumentation.slnx --verify-no-changes
 ```
 
 To apply formatting changes, omit `--verify-no-changes`:
 
 ```cmd
-dotnet format OpenTelemetry.AutoInstrumentation.sln
+dotnet format OpenTelemetry.AutoInstrumentation.slnx
 ```
 
 ### Native code formatting
@@ -249,7 +255,8 @@ against following versions:
 - the latest supported version (defined in [`test/Directory.Packages.props`](../test/Directory.Packages.props)),
 - other specific versions, eg. containing breaking changes for our instrumentations.
 
-Tests against these versions are executed when you are using `nuke` commands.
+Tests against these versions are executed when you are using `dotnet fallout`
+commands.
 In case of execution from Visual Studio, only test against the latest supported
 are executed.
 

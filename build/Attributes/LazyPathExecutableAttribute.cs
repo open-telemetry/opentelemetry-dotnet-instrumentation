@@ -1,6 +1,6 @@
 using System.Reflection;
-using Nuke.Common.Tooling;
-using Nuke.Common.ValueInjection;
+using Fallout.Common.Tooling;
+using Fallout.Common.ValueInjection;
 
 /// <summary>
 ///     Injects a delegate for process execution. The executable name is derived from the member name or can be
