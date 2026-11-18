@@ -27,6 +27,8 @@ internal class IsolatedAssemblyLoadContext : AssemblyLoadContext
             "System.Private.Uri",
             "System.Runtime",
             "System.Runtime.Extensions", // <- TrustedPlatformAssembliesHelper needs Path to look through TPA
+            "System.Runtime.InteropServices", // <- native attachment is probed before isolation
+            "System.Runtime.InteropServices.RuntimeInformation", // <- native attachment is probed before isolation
             "System.Runtime.Loader" // <- required to instantiate AssemblyLoadContext
         ],
         // for .net 10 we have to let System.Diagnostics.DiagnosticSource v10 from TPA to be loaded to Default ALC,
@@ -98,6 +100,7 @@ internal class IsolatedAssemblyLoadContext : AssemblyLoadContext
             "System.Runtime",
             "System.Runtime.Extensions", // <- TrustedPlatformAssembliesHelper needs Path.PathSeparator to look through TPA
             "System.Runtime.InteropServices",
+            "System.Runtime.InteropServices.RuntimeInformation", // <- native attachment is probed before isolation
             "System.Runtime.Intrinsics",
             "System.Runtime.Loader", // <- required to instantiate AssemblyLoadContext
             "System.Runtime.Numerics",
