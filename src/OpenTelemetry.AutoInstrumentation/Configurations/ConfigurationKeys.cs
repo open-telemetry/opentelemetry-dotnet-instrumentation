@@ -16,15 +16,6 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 internal partial class ConfigurationKeys
 {
     /// <summary>
-    /// Configuration key for enabling profiler.
-    /// </summary>
-#if NETFRAMEWORK
-    public const string ProfilingEnabled = "COR_ENABLE_PROFILING";
-#else
-    public const string ProfilingEnabled = "CORECLR_ENABLE_PROFILING";
-#endif
-
-    /// <summary>
     /// Configuration key for enabling the flushing of telemetry data when an unhandled exception occurs.
     /// </summary>
     public const string FlushOnUnhandledException = "OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION";

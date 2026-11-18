@@ -95,7 +95,9 @@ internal static class Instrumentation
         }
 #endif
 
+#if !NETFRAMEWORK
         bool profilerAvailable;
+#endif
         try
         {
             // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
@@ -109,10 +111,10 @@ internal static class Instrumentation
             AppDomain.CurrentDomain.DomainUnload += OnExit;
 
 #if NETFRAMEWORK
-            profilerAvailable = GeneralSettings.Value.ProfilerEnabled;
+            // The native profiler has already injected the Loader to reach managed initialization.
+            ContinuousProfiler.Initialize(_pluginManager!);
 #else
             profilerAvailable = NativeProfilerHelper.IsProfilerAttached();
-#endif
 
             if (profilerAvailable)
             {
@@ -122,6 +124,7 @@ internal static class Instrumentation
             {
                 Logger.Information("OpenTelemetry native profiler is unavailable. Continuous Profiler will not be started even if configured correctly.");
             }
+#endif
 
             if (TracerSettings.Value.TracesEnabled || MetricSettings.Value.MetricsEnabled)
             {
@@ -190,7 +193,9 @@ internal static class Instrumentation
             throw;
         }
 
+#if !NETFRAMEWORK
         if (profilerAvailable)
+#endif
         {
             RegisterSharedBytecodeInstrumentations(InstrumentationDefinitions.GetSharedDefinitions());
 
@@ -212,10 +217,12 @@ internal static class Instrumentation
                 Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
             }
         }
+#if !NETFRAMEWORK
         else
         {
             Logger.Debug("Skipping bytecode instrumentation registration because the OpenTelemetry native profiler is unavailable.");
         }
+#endif
 
         if (TracerSettings.Value.OpenTracingEnabled)
         {
