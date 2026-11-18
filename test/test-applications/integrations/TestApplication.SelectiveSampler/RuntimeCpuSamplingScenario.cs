@@ -19,7 +19,7 @@ internal static class RuntimeCpuSamplingScenario
         {
             if (name != "OpenTelemetry.AutoInstrumentation.Native")
             {
-                return IntPtr.Zero;
+                return nint.Zero;
             }
 
             var bitnessSpecificPath = Environment.Is64BitProcess ? "CORECLR_PROFILER_PATH_64" : "CORECLR_PROFILER_PATH_32";

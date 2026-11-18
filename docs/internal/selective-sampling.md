@@ -83,7 +83,7 @@ Thread sampling supported by the continuous profiler, and selective sampling
 share native-side sampling thread, and managed-side exporter thread.
 
 Each type of profiling uses its own export interval and timeout on the shared
-managed exporter thread. Their native buffers apply backpressure independently.
+managed exporter thread. Their native buffers apply back pressure independently.
 
 Additional restrictions apply to sampling intervals:
 

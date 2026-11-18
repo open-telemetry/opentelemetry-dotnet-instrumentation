@@ -380,7 +380,7 @@ intervals. Exporters must use each batch's interval for its snapshot samples.
 When CPU and selective sampling coincide, one stack capture produces both a full
 CPU batch and a separate selected-thread batch. All snapshot samples are
 delivered through `ExportSelectedThreadSamples`, independently of CPU buffer
-backpressure.
+back pressure.
 
 ## Continuous profiling
 

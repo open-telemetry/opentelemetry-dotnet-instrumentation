@@ -366,7 +366,7 @@ TEST_F(SamplingCohortDeathTest, CpuRuntimeTransitionsKeepEverySelectiveOutputOnT
                             Capture(cpuInterval == 0 ? SamplingType::SelectedThreads : SamplingType::Continuous,
                                     cpuInterval);
                             EXPECT_EQ((std::vector<uint64_t>{kSpanId}), ReadSpanIds(Read(false), false));
-                            EXPECT_EQ(cpuInterval != 0, !Read(true).empty());
+                            EXPECT_TRUE(Read(true).empty() == (cpuInterval == 0));
                         }
                         EXPECT_EQ(3u, walker_.captures);
                     }),
