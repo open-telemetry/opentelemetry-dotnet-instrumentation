@@ -104,6 +104,7 @@ public class SelectiveSamplerTests : TestHelper
         var cpuBatches = samples
             .Where(sample => sample.Source == "continuous-profiler" && sample.SelectedForFrequentSampling)
             .GroupBy(sample => sample.TimestampNanoseconds)
+            .OrderBy(batch => batch.Key)
             .ToList();
         Assert.True(cpuBatches.Count >= 2, "Expected at least two CPU captures with selected threads.");
         foreach (var batch in cpuBatches)
@@ -113,6 +114,27 @@ public class SelectiveSamplerTests : TestHelper
             Assert.Equal(
                 batch.Select(SampleIdentity).OrderBy(identity => identity),
                 selectiveBatches[batch.Key].Select(SampleIdentity).OrderBy(identity => identity));
+        }
+
+        // The 200 ms CPU interval and 50 ms selective interval leave three selective-only captures
+        // between adjacent CPU captures. Allow one missed selective capture per test run.
+        var missedSelectiveBetweenCpuCaptures = false;
+        for (var i = 1; i < cpuBatches.Count; i++)
+        {
+            var selectiveBetweenCpuCaptures = selectiveBatches
+                .Where(batch => batch.Key > cpuBatches[i - 1].Key && batch.Key < cpuBatches[i].Key)
+                .ToList();
+            if (selectiveBetweenCpuCaptures.Count == 2)
+            {
+                Assert.False(missedSelectiveBetweenCpuCaptures, "Missing selective capture between CPU captures allowed only once per test run.");
+                missedSelectiveBetweenCpuCaptures = true;
+            }
+            else
+            {
+                Assert.Equal(3, selectiveBetweenCpuCaptures.Count);
+            }
+
+            Assert.All(selectiveBetweenCpuCaptures, batch => AssertExpectedSelectedSamples(batch.ToList()));
         }
     }
 

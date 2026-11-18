@@ -3,6 +3,8 @@
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/continuous_profiler.h"
 
 #include <cstdint>
+#include <cstdlib>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -37,6 +39,33 @@ protected:
     {
         ThreadSamplingRecordProducedThreadSample(new std::vector<unsigned char>(values), interval);
     }
+};
+
+class ContinuousProfilerBatchDeathTest : public ContinuousProfilerBatchTest
+{
+protected:
+    void SetUp() override
+    {
+        ContinuousProfilerBatchTest::SetUp();
+        // Shutdown permanently closes admission, so publication must be tested in a fresh process.
+        previousDeathTestStyle_                 = ::testing::FLAGS_gtest_death_test_style;
+        ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+    }
+
+    void TearDown() override
+    {
+        ::testing::FLAGS_gtest_death_test_style = previousDeathTestStyle_;
+        ContinuousProfilerBatchTest::TearDown();
+    }
+
+    template <typename Action>
+    static void RunInChild(Action action)
+    {
+        action();
+        std::exit(::testing::Test::HasFailure() ? EXIT_FAILURE : EXIT_SUCCESS);
+    }
+
+    std::string previousDeathTestStyle_;
 };
 
 } // namespace
@@ -146,30 +175,37 @@ TEST_F(ContinuousProfilerBatchTest, SelectiveBatchesRetainTheirOwnIntervalsInACo
     EXPECT_EQ(expected, output);
 }
 
-TEST_F(ContinuousProfilerBatchTest, CpuBatchRetainsBothIntervalsFromItsConfigurationSnapshot)
+TEST_F(ContinuousProfilerBatchDeathTest, CpuBatchRetainsBothIntervalsFromItsConfigurationSnapshot)
 {
-    continuous_profiler::ClrAllocationSamplingSessionProvider allocationSessions(nullptr);
-    continuous_profiler::ContinuousProfiler                   profiler(allocationSessions);
-    profiler.StageThreadSamplingConfiguration(400, 40);
-    const auto configuration = profiler.PullThreadSamplingConfiguration();
+    EXPECT_EXIT(RunInChild(
+                    []
+                    {
+                        continuous_profiler::ClrAllocationSamplingSessionProvider allocationSessions(nullptr);
+                        continuous_profiler::ContinuousProfiler                   profiler(allocationSessions);
+                        profiler.StageThreadSamplingConfiguration(400, 40);
+                        const auto configuration = profiler.PullThreadSamplingConfiguration();
 
-    // A committed update must not change the intervals of an already admitted capture cycle.
-    profiler.StageThreadSamplingConfiguration(800, 80);
-    profiler.AllocateBuffer();
-    profiler.cur_cpu_writer_->StartBatch(configuration.selectiveSamplingIntervalMilliseconds);
-    profiler.cur_cpu_writer_->EndBatch();
-    profiler.PublishBuffer(configuration.cpuSamplingIntervalMilliseconds);
+                        // A committed update must not change the intervals of an already admitted capture cycle.
+                        profiler.StageThreadSamplingConfiguration(800, 80);
+                        profiler.AllocateBuffer();
+                        profiler.cur_cpu_writer_->StartBatch(configuration.selectiveSamplingIntervalMilliseconds);
+                        profiler.cur_cpu_writer_->EndBatch();
+                        profiler.PublishBuffer(configuration.cpuSamplingIntervalMilliseconds);
 
-    std::vector<unsigned char> output(18);
-    uint32_t                   cpuInterval = 0;
-    ASSERT_EQ(output.size(),
-              ContinuousProfilerReadThreadSamplesV2(static_cast<int32_t>(output.size()), output.data(), &cpuInterval));
-    EXPECT_EQ(400u, cpuInterval);
-    EXPECT_EQ((std::vector<unsigned char>{0x01, 0, 0, 0, 1}),
-              (std::vector<unsigned char>(output.begin(), output.begin() + 5)));
-    // The 8-byte timestamp precedes the selective interval, independently of the platform's long width.
-    EXPECT_EQ((std::vector<unsigned char>{0, 0, 0, 40, 0x06}),
-              (std::vector<unsigned char>(output.begin() + 13, output.end())));
+                        std::vector<unsigned char> output(18);
+                        uint32_t                   cpuInterval = 0;
+                        ASSERT_EQ(output.size(),
+                                  ContinuousProfilerReadThreadSamplesV2(static_cast<int32_t>(output.size()),
+                                                                        output.data(), &cpuInterval));
+                        EXPECT_EQ(400u, cpuInterval);
+                        EXPECT_EQ((std::vector<unsigned char>{0x01, 0, 0, 0, 1}),
+                                  (std::vector<unsigned char>(output.begin(), output.begin() + 5)));
+                        // The 8-byte timestamp precedes the selective interval, independently of the platform's long
+                        // width.
+                        EXPECT_EQ((std::vector<unsigned char>{0, 0, 0, 40, 0x06}),
+                                  (std::vector<unsigned char>(output.begin() + 13, output.end())));
+                    }),
+                ::testing::ExitedWithCode(EXIT_SUCCESS), "");
 }
 
 TEST_F(ContinuousProfilerBatchTest, CpuBatchRecordsZeroWhenSelectiveSamplingIsDisabled)
