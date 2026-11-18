@@ -10,9 +10,9 @@ using OpenTelemetry.OpAmp.Client.Settings;
 namespace TestApplication.Plugins;
 
 #pragma warning disable CA1515 // Consider making public types internal. Needed for AutoInstrumentation plugin loading.
-/// <summary>
+/// <content>
 /// OpAMP extensions of the plugin.
-/// </summary>
+/// </content>
 public partial class Plugin : IPlugin, IProvideEffectiveConfig, IProvideRemoteConfigStatus
 #pragma warning restore CA1515 // Consider making public types internal. Needed for AutoInstrumentation plugin loading.
 {
@@ -25,7 +25,7 @@ public partial class Plugin : IPlugin, IProvideEffectiveConfig, IProvideRemoteCo
         ThrowIfMissing(settings);
         Console.WriteLine($"{nameof(Plugin)}.{nameof(ConfigureOpAmpOptions)}() invoked.");
         Console.WriteLine($"{nameof(settings.MaxPendingCustomMessages)}: {settings.MaxPendingCustomMessages}");
-        Console.WriteLine($"{nameof(settings.MaxPendingCustomMessageBytes)}: {settings.MaxPendingCustomMessageBytes}");
+        Console.WriteLine($"{nameof(settings.MaxPendingMessageBytes)}: {settings.MaxPendingMessageBytes}");
         settings.EffectiveConfigurationReporting.EnableReporting = true;
         settings.RemoteConfiguration.AcceptsRemoteConfig = true;
         settings.RemoteConfiguration.ReportsRemoteConfigStatus = true;

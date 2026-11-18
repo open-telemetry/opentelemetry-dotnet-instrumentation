@@ -146,7 +146,16 @@ The following properties are injected when an active `Activity` exists:
 
 - `TraceId`: The W3C trace ID
 - `SpanId`: The W3C span ID  
-- `TraceFlags`: The W3C trace flags ("01" if recorded, "00" otherwise)
+- `TraceFlags`: The W3C trace flags as a two-digit hexadecimal value
+
+The known `TraceFlags` combinations are:
+
+| Value | Recorded | Trace ID marked as random |
+| --- | --- | --- |
+| `00` | No | No |
+| `01` | Yes | No |
+| `02` | No | Yes |
+| `03` | Yes | Yes |
 
 #### OpenTelemetry Bridge
 

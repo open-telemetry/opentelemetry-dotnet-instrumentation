@@ -269,7 +269,7 @@ public class PluginsTests : TestHelper
     private void AssertOpAmpPluginConfigurationAndShutdown(Action configureOpAmp)
     {
         const int maxPendingCustomMessages = 123;
-        const int maxPendingCustomMessageBytes = 456;
+        const int maxPendingMessageBytes = 456;
         using var server = new MockOpAmpServer(
             Output,
             capabilities: ServerCapabilities.AcceptsStatus | ServerCapabilities.AcceptsEffectiveConfig);
@@ -296,7 +296,7 @@ public class PluginsTests : TestHelper
 
         Assert.Contains("Plugin.ConfigureOpAmpOptions() invoked.", standardOutput, StringComparison.Ordinal);
         Assert.Contains($"MaxPendingCustomMessages: {maxPendingCustomMessages}", standardOutput, StringComparison.Ordinal);
-        Assert.Contains($"MaxPendingCustomMessageBytes: {maxPendingCustomMessageBytes}", standardOutput, StringComparison.Ordinal);
+        Assert.Contains($"MaxPendingMessageBytes: {maxPendingMessageBytes}", standardOutput, StringComparison.Ordinal);
         Assert.Contains("Plugin.ConfigureOpAmpClient() invoked.", standardOutput, StringComparison.Ordinal);
         Assert.Contains("Plugin.BeforeOpAmpClientStopped() invoked.", standardOutput, StringComparison.Ordinal);
 

@@ -12,9 +12,9 @@ using TestApplication.Smoke;
 namespace TestApplication.Plugins;
 
 #pragma warning disable CA1515 // Consider making public types internal. Needed for AutoInstrumentation plugin loading.
-/// <summary>
+/// <content>
 /// Telemetry extensions of the plugin.
-/// </summary>
+/// </content>
 public partial class Plugin : IPlugin, ITelemetryPlugin
 #pragma warning restore CA1515 // Consider making public types internal. Needed for AutoInstrumentation plugin loading.
 {

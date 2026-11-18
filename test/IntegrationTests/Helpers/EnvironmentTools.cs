@@ -19,13 +19,13 @@ internal static class EnvironmentTools
     {
         var startDirectory = Environment.CurrentDirectory;
         var currentDirectory = Directory.GetParent(startDirectory);
-        const string searchItem = @"OpenTelemetry.AutoInstrumentation.sln";
+        const string searchItem = @"OpenTelemetry.AutoInstrumentation.slnx";
 
         while (true)
         {
-            var slnFile = currentDirectory?.GetFiles(searchItem).SingleOrDefault();
+            var solutionFile = currentDirectory?.GetFiles(searchItem).SingleOrDefault();
 
-            if (slnFile != null)
+            if (solutionFile != null)
             {
                 break;
             }
@@ -53,9 +53,9 @@ internal static class EnvironmentTools
     public static string GetOS()
     {
         return IsWindows() ? "win" :
-            RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "linux" :
-            RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx" :
-            string.Empty;
+               RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "linux" :
+               RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx" :
+               string.Empty;
     }
 
     public static bool IsLinux()
@@ -134,27 +134,21 @@ internal static class EnvironmentTools
 
     private static string? GetClrProfilerOSDirectoryName()
     {
-        string? clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
+        // If OS_TYPE is null, then fallback to default value.
+        var clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
         {
             "windows" => "win",
             "linux-glibc" => "linux",
             "linux-musl" => "linux-musl",
             "macos" => "osx",
             _ => null
-        };
-
-        // If OS_TYPE is null, then fallback to default value.
-        if (clrProfilerDirectoryName == null)
+        } ?? GetOS() switch
         {
-            clrProfilerDirectoryName = GetOS() switch
-            {
-                "win" => "win",
-                "linux" => "linux",
-                "osx" => "osx",
-                _ => null
-            };
-        }
-
+            "win" => "win",
+            "linux" => "linux",
+            "osx" => "osx",
+            _ => null
+        };
         return clrProfilerDirectoryName;
     }
 }

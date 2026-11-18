@@ -31,14 +31,14 @@ internal static class AdoNetInstrumentation
             return null;
         }
 
-        var (enabled, systemName) = AdoNetDbSystemMapper.GetInstrumentationDetails(instance.GetType());
+        var (enabled, systemName, dialect) = AdoNetDbSystemMapper.GetInstrumentationDetails(instance.GetType());
 
         if (!enabled)
         {
             return null;
         }
 
-        var sqlStatementInfo = SqlProcessor.GetSanitizedSql(iDbCommand.CommandText);
+        var sqlStatementInfo = SqlProcessor.GetSanitizedSql(iDbCommand.CommandText, dialect);
 
         TagList tags = new()
         {

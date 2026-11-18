@@ -109,7 +109,7 @@ public class SelectiveSamplerTests : TestHelper
         Assert.True(cpuBatches.Count >= 2, "Expected at least two CPU captures with selected threads.");
         foreach (var batch in cpuBatches)
         {
-            AssertExpectedSelectedSamples(batch.ToList());
+            AssertExpectedSelectedSamples([.. batch]);
             // Both outputs must describe the same selected subset, exactly once per capture.
             Assert.Equal(
                 batch.Select(SampleIdentity).OrderBy(identity => identity),
@@ -134,7 +134,7 @@ public class SelectiveSamplerTests : TestHelper
                 Assert.Equal(3, selectiveBetweenCpuCaptures.Count);
             }
 
-            Assert.All(selectiveBetweenCpuCaptures, batch => AssertExpectedSelectedSamples(batch.ToList()));
+            Assert.All(selectiveBetweenCpuCaptures, batch => AssertExpectedSelectedSamples([.. batch]));
         }
     }
 

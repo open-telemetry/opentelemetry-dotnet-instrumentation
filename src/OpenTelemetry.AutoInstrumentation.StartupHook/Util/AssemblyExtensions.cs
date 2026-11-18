@@ -14,6 +14,14 @@ namespace OpenTelemetry.AutoInstrumentation.Util;
 /// </summary>
 internal static class AssemblyExtensions
 {
+    // Note: Before .NET 9 SetEntryAssembly was non-public but we search for both
+    // NonPublic and Public because this project still compiles only for targets
+    // lower than .NET 9 so it will be executed even on later runtimes.
+    private static readonly Action<Assembly>? SetEntryAssemblyDelegate =
+        typeof(Assembly)
+            .GetMethod("SetEntryAssembly", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, [typeof(Assembly)], null)
+            ?.CreateDelegate<Action<Assembly>>();
+
     extension(Assembly)
     {
         public static void SetEntryAssembly(Assembly assembly)
@@ -21,17 +29,6 @@ internal static class AssemblyExtensions
             SetEntryAssemblyDelegate?.Invoke(assembly);
         }
     }
-
-    // Note: Before .NET 9 SetEntryAssembly was non-public but we search for both
-    // NonPublic and Public because this project still compiles only for targets
-    // lower than .NET 9 so it will be executed even on later runtimes.
-    // Note 2: Keep this field below extension method to satisfy StyleCop SA1201
-    // that doesn't yet recognize C# 14 extension blocks after field declaration.
-    // It's an easier solution than to trying to suppress SA1201.
-    private static readonly Action<Assembly>? SetEntryAssemblyDelegate =
-        typeof(Assembly)
-            .GetMethod("SetEntryAssembly", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, [typeof(Assembly)], null)
-            ?.CreateDelegate<Action<Assembly>>();
 }
 
 #endif

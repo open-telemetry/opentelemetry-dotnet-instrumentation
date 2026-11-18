@@ -53,11 +53,11 @@ public class Class1
 
     public Class1?[][] ToJaggedArray()
     {
-        return new Class1?[][]
-        {
+        return
+        [
             [this],
             [null, null]
-        };
+        ];
     }
 
 #pragma warning disable CA1002 // Do not expose generic lists

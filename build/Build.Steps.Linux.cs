@@ -1,7 +1,7 @@
-using Nuke.Common;
-using Nuke.Common.IO;
+using Fallout.Common;
+using Fallout.Common.IO;
 using Serilog;
-using static Nuke.Common.EnvironmentInfo;
+using static Fallout.Common.EnvironmentInfo;
 
 partial class Build
 {
@@ -60,7 +60,7 @@ partial class Build
             var sourceLib = source / $"{NativeProfilerProject.Name}.so";
             var sourceDebug = source / $"{NativeProfilerProject.Name}.so.debug";
             var platform = Platform.ToString().ToLowerInvariant();
-            string clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
+            var clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
             {
                 "linux-musl" => $"linux-musl-{platform}",
                 _ => $"linux-{platform}"

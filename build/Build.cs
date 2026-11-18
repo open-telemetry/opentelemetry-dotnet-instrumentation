@@ -1,10 +1,10 @@
-using Nuke.Common;
-using Nuke.Common.IO;
-using Nuke.Common.Tools.MSBuild;
-using Nuke.Common.Utilities.Collections;
-using static Nuke.Common.EnvironmentInfo;
+using Fallout.Common;
+using Fallout.Common.IO;
+using Fallout.Common.Tools.MSBuild;
+using Fallout.Common.Utilities.Collections;
+using static Fallout.Common.EnvironmentInfo;
 
-partial class Build : NukeBuild
+partial class Build : FalloutBuild
 {
     public static int Main() => Execute<Build>(x => x.BuildTracer);
 

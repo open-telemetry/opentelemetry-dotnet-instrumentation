@@ -789,7 +789,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess.Client.OracleConnection"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Open"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void"), 1, 4, 122, 23, 23, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionOpenIntegration"), 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess.Client.OracleConnection"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task", "System.Threading.CancellationToken"), 2, 4, 122, 23, 23, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionOpenAsyncIntegration"), 0, categories));
             }
         }
         {
@@ -800,7 +800,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess.Client.OracleConnection"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenAsync"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Threading.Tasks.Task", "System.Threading.CancellationToken"), 2, 4, 122, 23, 23, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionOpenIntegration"), 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Oracle.ManagedDataAccess.Client.OracleConnection"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Open"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void"), 1, 4, 122, 23, 23, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionOpenIntegration"), 0, categories));
             }
         }
         {

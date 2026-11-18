@@ -22,8 +22,9 @@ internal class OpAmpConfiguration
     public int? MaxPendingCustomMessages { get; set; }
 
     /// <summary>
-    /// Gets or sets the maximum aggregate size, in bytes, of pending custom message payloads.
+    /// Gets or sets the maximum aggregate size, in bytes, of pending custom messages,
+    /// including any state reports queued with them.
     /// </summary>
     [YamlMember(Alias = "max_pending_custom_message_bytes")]
-    public int? MaxPendingCustomMessageBytes { get; set; }
+    public int? MaxPendingMessageBytes { get; set; }
 }

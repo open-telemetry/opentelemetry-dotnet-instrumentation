@@ -10,13 +10,13 @@ startup hook and/or a native CLR Profiler that rewrites IL at runtime.
 
 ## Build and test
 
-Builds are driven by [Nuke](https://github.com/nuke-build/nuke). `./build.cmd`
-(Windows) / `./build.sh` (Linux, macOS) bootstrap `dotnet nuke`; run
-`dotnet tool restore` first if using `dotnet nuke` directly. The default target
-is `BuildTracer`; main artifact is `bin/tracer-home`.
+Builds are driven by [Fallout](https://github.com/Fallout-build/Fallout).
+`./build.cmd` (Windows) / `./build.sh` (Linux, macOS) compile and run
+`build/_build.csproj`. Run `dotnet tool restore` first if using `dotnet fallout`
+directly. The default target is `BuildTracer`; main artifact is `bin/tracer-home`.
 
 ```cmd
-dotnet nuke --help                 :: list all targets and parameters
+dotnet fallout --help              :: list all targets and parameters
 ./build.cmd                        :: BuildTracer - native + managed src -> bin/tracer-home
 ./build.cmd BuildNativeWorkflow    :: native only
 ./build.cmd Workflow               :: full build + all tests (what CI approximates)
@@ -30,7 +30,7 @@ Useful parameters (apply to the test targets):
 
 - `--test-project <substring>` - select test projects by name substring.
 - `--test-name <substring>` - becomes an xunit `FullyQualifiedName~` filter.
-- `--test-target-framework net8.0|net9.0|net10.0|net462|net472|...` - otherwise
+- `--test-target-framework net10.0|net11.0|net462|net472|...` - otherwise
   every TFM the project supports is run.
 - `--containers linux|windows|windows-only|none` - integration tests are
   tagged `[Trait("Containers", "Linux"|"Windows|Any")]`; use `none` to skip every
@@ -42,25 +42,26 @@ Running one integration test:
 
 ```cmd
 ./build.cmd BuildTracer
-./build.cmd --target ManagedTests --test-project IntegrationTests --test-name MongoDBTests --test-target-framework net8.0
+./build.cmd --target ManagedTests --test-project IntegrationTests --test-name MongoDBTests --test-target-framework net10.0
 ```
 
 Integration tests can also be run straight from an IDE / `dotnet test` once
 `bin/tracer-home` exists, but then only the latest library version of each
-instrumented package is exercised (Nuke runs the full version matrix).
+instrumented package is exercised (Fallout runs the full version matrix).
 
 Test logs and profiler logs land in `test-artifacts/`.
 
 ### Lint and format
 
-- `dotnet format .\OpenTelemetry.AutoInstrumentation.sln --verify-no-changes` -
+- `dotnet format .\OpenTelemetry.AutoInstrumentation.slnx --verify-no-changes` -
   exactly what the `dotnet format` CI check runs. Warnings are errors
   (`TreatWarningsAsErrors`), analysis level is `latest-All`, StyleCop is on
   solution-wide, nullable + implicit usings are enabled.
 - `./scripts/format-native.sh` (after `./scripts/download-clang-tools.sh`) for
   C++.
-- `dotnet nuke InstallDocumentationTools ValidateDocumentation` for markdownlint
-  & cspell; `nuke MarkdownLintFix` auto-fixes. Requires Node.js.
+- `dotnet fallout InstallDocumentationTools ValidateDocumentation` for
+  markdownlint & cspell; `dotnet fallout MarkdownLintFix` auto-fixes.
+  Requires Node.js.
 
 ### Local telemetry backend
 
@@ -101,7 +102,7 @@ Read `docs/design.md` for the full picture. The moving parts:
 - `src/OpenTelemetry.AutoInstrumentation.PluginApi`, `nuget/` - public plugin
   API and the NuGet package layouts (`OpenTelemetry.AutoInstrumentation`,
   `...Runtime.Native`).
-- `build/` - the Nuke project (`Build.cs` + `Build.Steps*.cs` per platform,
+- `build/` - the Fallout project (`Build.cs` + `Build.Steps*.cs` per platform,
   `Projects.cs` names all projects, `TargetFramework.cs` the TFM matrix).
 - `tools/LibraryVersionsGenerator` - generates the tested-library version
   matrix.
@@ -147,8 +148,8 @@ it in `docs/config.md`.
 Library version coverage strategy (lowest non-vulnerable, one per major, latest,
 plus versions with breaking changes) lives in
 `tools/LibraryVersionsGenerator/PackageVersionDefinitions.cs`; edit it, run the
-generator (or `nuke GenerateLibraryVersionFiles`), and commit the generated
-`LibraryVersions.g.cs` files. Latest supported versions are pinned in
+generator (or `dotnet fallout GenerateLibraryVersionFiles`), and commit the
+generated `LibraryVersions.g.cs` files. Latest supported versions are pinned in
 `test/Directory.Packages.props`.
 
 To check whether a test is flaky, trigger the `verify-test.yml` workflow
@@ -172,7 +173,8 @@ manually rather than looping locally.
 - Instrumentation must never crash the host application: runtime errors are
   logged (`AutoInstrumentationEventSource`, `Logging/`) and swallowed;
   only invalid configuration at init may fail (see `FailFastSettings`).
-- Clean with `git clean -fXd` (the Nuke `Clean` target covers the common cases).
+- Clean with `git clean -fXd` (the Fallout `Clean` target covers the common
+  cases).
 
 ## What maintainers actually push back on
 

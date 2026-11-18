@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net10.0</TargetFrameworks>
+    <TargetFrameworks>net11.0;net10.0</TargetFrameworks>
     <UnsafeAccessorAssemblyName Condition="'$(UnsafeAccessorAssemblyName)' == ''">Some.Assembly.Name</UnsafeAccessorAssemblyName>
     <UnsafeAccessorComplete Condition="'$(UnsafeAccessorComplete)' == ''">true</UnsafeAccessorComplete>
     <DefineConstants Condition="'$(UnsafeAccessorComplete)' == 'true'">$(DefineConstants);COMPLETE_UNSAFE_ACCESSOR</DefineConstants>
@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection">
       <VersionOverride Condition="'$(UnsafeAccessorPackageVersion)' != ''">$(UnsafeAccessorPackageVersion)</VersionOverride>
     </PackageReference>
   </ItemGroup>
@@ -24,7 +24,7 @@
       <_UnsafeAccessorBuildSettingsLine Include="// &lt;auto-generated /&gt;" />
       <_UnsafeAccessorBuildSettingsLine Include="internal static class UnsafeAccessorBuildSettings" />
       <_UnsafeAccessorBuildSettingsLine Include="{" />
-      <_UnsafeAccessorBuildSettingsLine Include="    internal const string TypeName = &quot;Microsoft.Extensions.DependencyInjection.ServiceCollection, $(UnsafeAccessorAssemblyName)$(_UnsafeAccessorVersionSuffix)&quot;%3B" />
+      <_UnsafeAccessorBuildSettingsLine Include="    internal const string TypeName = &quot;Microsoft.Extensions.DependencyInjection.ServiceProviderOptions, $(UnsafeAccessorAssemblyName)$(_UnsafeAccessorVersionSuffix)&quot;%3B" />
       <_UnsafeAccessorBuildSettingsLine Include="}" />
       <Compile Include="$(_UnsafeAccessorBuildSettingsFile)" />
     </ItemGroup>

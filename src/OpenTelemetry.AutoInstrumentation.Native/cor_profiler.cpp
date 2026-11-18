@@ -141,9 +141,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         }
     }
 
-    if (runtime_information_.is_core() && runtime_information_.major_version < 8)
+    if (runtime_information_.is_core() && runtime_information_.major_version < 10)
     {
-        FailProfiler(Warn, "Failed to attach profiler: Not supported .NET version (lower than 8.0).")
+        FailProfiler(Warn, "Failed to attach profiler: Not supported .NET version (lower than 10.0).")
     }
 
     if (runtime_information_.is_core())
@@ -4197,11 +4197,11 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
 #endif
     {
         // .NET (Core) detection
-        // Map major.minor version to framework version key to match generator: net8.0 -> 80, net9.0 -> 90, etc
+        // Map major.minor version to framework version key to match generator: net10.0 -> 100, net11.0 -> 110, etc
         int majorVersion = runtime_information_.major_version;
         int minorVersion = runtime_information_.minor_version;
 
-        if (majorVersion >= 6)
+        if (majorVersion >= 10)
         {
             // Calculate key the same way as AssemblyRedirectionSourceGenerator:
             frameworkVersion = (majorVersion * 10 + minorVersion);
@@ -4211,10 +4211,10 @@ void CorProfiler::DetectFrameworkVersionTableForRedirectsMap()
         }
         else
         {
-            // Default to .NET 8.0 if version detection fails or unsupported version
-            frameworkVersion = 80;
+            // Default to .NET 10.0 if version detection fails or unsupported version
+            frameworkVersion = 100;
             Logger::Warn("DetectFrameworkVersionTableForRedirectsMap: Unsupported or undetected .NET (Core) version ",
-                         majorVersion, ".", minorVersion, ", using default version 80");
+                         majorVersion, ".", minorVersion, ", using default version 100");
         }
     }
 

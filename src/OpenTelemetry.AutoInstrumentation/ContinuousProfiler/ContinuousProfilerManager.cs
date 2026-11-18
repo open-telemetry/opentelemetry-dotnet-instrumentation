@@ -239,7 +239,7 @@ internal sealed class ContinuousProfilerManager : IDisposable
             candidateExporter = builder.Build();
 #pragma warning restore CA2000
 #if NETFRAMEWORK
-            // Apply enables native thread callbacks. Create the canary afterwards, including when a later
+            // Apply enables native thread callbacks. Create the canary afterward, including when a later
             // ControlPlane update enables thread sampling after an all-disabled Seed.
             candidateExporter.Start(
                 EnsureNetFrameworkCanaryThread,
