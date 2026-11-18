@@ -35,7 +35,7 @@ internal sealed class JsonConsoleExporter : ISelectiveSamplerExporter, IContinuo
     {
     }
 
-    private static void WriteToConsole(List<ThreadSample> samples)
+    internal static void WriteToConsole(List<ThreadSample> samples)
     {
         if (samples.Count <= 0)
         {

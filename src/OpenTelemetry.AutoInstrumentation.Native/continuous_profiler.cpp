@@ -414,12 +414,19 @@ ThreadSamplesBuffer::~ThreadSamplesBuffer()
         }                                                                                                              \
     }
 
-void ThreadSamplesBuffer::StartBatch(const uint32_t selectiveSamplingIntervalMilliseconds) const
+static uint64_t CurrentTimeMillis()
+{
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+        .count();
+}
+
+void ThreadSamplesBuffer::StartBatch(const uint32_t selectiveSamplingIntervalMilliseconds,
+                                     const uint64_t timestampMilliseconds) const
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteByte(kThreadSamplesStartBatch);
     WriteInt(kCurrentThreadSamplesBufferVersion);
-    WriteCurrentTimeMillis();
+    WriteUInt64(timestampMilliseconds == 0 ? CurrentTimeMillis() : timestampMilliseconds);
     WriteInt(static_cast<int32_t>(selectiveSamplingIntervalMilliseconds));
 }
 
@@ -454,11 +461,12 @@ void ThreadSamplesBuffer::StartSample(const ThreadState* state, const thread_spa
 }
 
 void ThreadSamplesBuffer::StartSampleForSelectedThread(const ThreadState*         state,
-                                                       const thread_span_context& span_context) const
+                                                       const thread_span_context& span_context,
+                                                       const uint64_t             timestampMilliseconds) const
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteByte(kSelectedThreadSample);
-    WriteCurrentTimeMillis();
+    WriteUInt64(timestampMilliseconds == 0 ? CurrentTimeMillis() : timestampMilliseconds);
     WriteString(state->thread_name_);
     WriteSpanContext(span_context);
 }
@@ -613,9 +621,7 @@ void ThreadSamplesBuffer::WriteUInt64(uint64_t val) const
 
 void ThreadSamplesBuffer::WriteCurrentTimeMillis() const
 {
-    const auto ms =
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    WriteUInt64(ms.count());
+    WriteUInt64(CurrentTimeMillis());
 }
 
 void ThreadSpanContextMap::Remove(const thread_span_context& spanContext)
@@ -1219,10 +1225,11 @@ static void ResolveSymbolsAndPublishBufferForAllThreads(
     ContinuousProfiler*                                                  prof,
     const std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacks,
     const uint32_t                                                       samplingInterval,
-    const uint32_t                                                       selectiveSamplingInterval)
+    const uint32_t                                                       selectiveSamplingInterval,
+    const uint64_t                                                       timestampMilliseconds)
 {
     prof->AllocateBuffer();
-    prof->cur_cpu_writer_->StartBatch(selectiveSamplingInterval);
+    prof->cur_cpu_writer_->StartBatch(selectiveSamplingInterval, timestampMilliseconds);
 
     for (const auto& [threadId, threadStack] : threadStacks)
     {
@@ -1256,7 +1263,8 @@ static void ResolveSymbolsAndPublishBufferForAllThreads(
 static void ResolveSymbolsAndPublishBufferForSelectedThreads(
     ContinuousProfiler*                                                  prof,
     const std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacks,
-    const uint32_t                                                       selectiveSamplingInterval)
+    const uint32_t                                                       selectiveSamplingInterval,
+    const uint64_t                                                       timestampMilliseconds)
 {
     std::vector<unsigned char> localBytes;
     ThreadSamplesBuffer        localBuf(&localBytes);
@@ -1264,7 +1272,7 @@ static void ResolveSymbolsAndPublishBufferForSelectedThreads(
     localBuf.StartSelectedThreadsBatch(selectiveSamplingInterval);
     for (const auto& [threadId, threadStack] : threadStacks)
     {
-        if (threadStack.empty())
+        if (threadStack.empty() || selective_sampling_thread_buffer.count(threadId) == 0)
         {
             continue;
         }
@@ -1272,7 +1280,7 @@ static void ResolveSymbolsAndPublishBufferForSelectedThreads(
         thread_span_context spanContext = GetContext(threadId);
         const auto          threadState = GetThreadState(prof->managed_tid_to_state_, threadId);
 
-        localBuf.StartSampleForSelectedThread(threadState, spanContext);
+        localBuf.StartSampleForSelectedThread(threadState, spanContext, timestampMilliseconds);
         ResolveFrames(prof, threadStack, localBuf);
         localBuf.EndSample();
     }
@@ -1359,14 +1367,22 @@ bool TryPrepareSelectedThreadSampling(ContinuousProfiler* prof, const std::chron
 
 // The implementation will suspend CLR for
 // .net and use thread suspension for netfx
-static void CaptureSamples(ContinuousProfiler*                prof,
-                           ICorProfilerInfo7*                 info7,
-                           const SamplingType                 samplingType,
-                           ThreadStacksBuffer&                threadStacksBuffer,
-                           const ThreadSamplingConfiguration& configuration)
+void CaptureSamples(ContinuousProfiler*                prof,
+                    ICorProfilerInfo7*                 info7,
+                    const SamplingType                 samplingType,
+                    ThreadStacksBuffer&                threadStacksBuffer,
+                    const ThreadSamplingConfiguration& configuration)
 {
-    if (samplingType == SamplingType::SelectedThreads &&
-        !TryPrepareSelectedThreadSampling(prof, std::chrono::steady_clock::now()))
+    const bool cpuDue     = samplingType == SamplingType::Continuous && configuration.CpuEnabled();
+    const bool publishCpu = cpuDue && ThreadSamplingShouldProduceThreadSample();
+    bool       publishSelective =
+        configuration.SelectiveEnabled() && TryPrepareSelectedThreadSampling(prof, std::chrono::steady_clock::now());
+    if (cpuDue && !publishCpu)
+    {
+        trace::Logger::Warn(
+            "Skipping a CPU sample period, buffers are full. ** THIS WILL RESULT IN LOSS OF PROFILING DATA **");
+    }
+    if (!publishCpu && !publishSelective)
     {
         return;
     }
@@ -1391,13 +1407,8 @@ static void CaptureSamples(ContinuousProfiler*                prof,
         return;
     }
     // Checks to avoid unnecessary suspends.
-    if (samplingType == SamplingType::SelectedThreads)
+    if (publishSelective)
     {
-        if (selective_sampling_trace_map.empty())
-        {
-            return;
-        }
-
         selective_sampling_thread_buffer.clear();
         for (auto& [threadId, spanContext] : thread_span_context_map)
         {
@@ -1407,30 +1418,23 @@ static void CaptureSamples(ContinuousProfiler*                prof,
             }
         }
 
-        if (selective_sampling_thread_buffer.empty())
-        {
-            return;
-        }
+        publishSelective = !selective_sampling_thread_buffer.empty();
     }
-    if (samplingType == SamplingType::Continuous)
+    if (!publishCpu && !publishSelective)
     {
-        const bool shouldSample = ThreadSamplingShouldProduceThreadSample();
-        if (!shouldSample)
-        {
-            trace::Logger::Warn(
-                "Skipping a thread sample period, buffers are full. ** THIS WILL RESULT IN LOSS OF PROFILING DATA **");
-            return;
-        }
+        return;
     }
 
     prof->stats_ = SamplingStatistics();
 
     const auto start = std::chrono::steady_clock::now();
+    // Both logical outputs describe the same capture, including its timestamp and configuration snapshot.
+    const auto timestampMilliseconds = CurrentTimeMillis();
 
     try
     {
 
-        if (samplingType == SamplingType::Continuous)
+        if (publishCpu)
         {
             auto allThreads = EnumerateThreads(info7);
             if (!CaptureFunctionIdentifiersForThreads(prof, info7, allThreads, threadStacksBuffer))
@@ -1438,7 +1442,7 @@ static void CaptureSamples(ContinuousProfiler*                prof,
                 return;
             }
         }
-        else if (samplingType == SamplingType::SelectedThreads)
+        else
         {
             if (!CaptureFunctionIdentifiersForThreads(prof, info7, selective_sampling_thread_buffer,
                                                       threadStacksBuffer))
@@ -1480,15 +1484,17 @@ static void CaptureSamples(ContinuousProfiler*                prof,
         return;
     }
 
-    if (samplingType == SamplingType::Continuous)
+    if (publishCpu)
     {
         ResolveSymbolsAndPublishBufferForAllThreads(prof, threadStacks, configuration.cpuSamplingIntervalMilliseconds,
-                                                    configuration.selectiveSamplingIntervalMilliseconds);
+                                                    configuration.selectiveSamplingIntervalMilliseconds,
+                                                    timestampMilliseconds);
     }
-    else if (samplingType == SamplingType::SelectedThreads)
+    if (publishSelective)
     {
         ResolveSymbolsAndPublishBufferForSelectedThreads(prof, threadStacks,
-                                                         configuration.selectiveSamplingIntervalMilliseconds);
+                                                         configuration.selectiveSamplingIntervalMilliseconds,
+                                                         timestampMilliseconds);
     }
 }
 

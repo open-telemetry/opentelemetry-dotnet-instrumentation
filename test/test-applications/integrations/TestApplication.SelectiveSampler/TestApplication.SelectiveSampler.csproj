@@ -4,6 +4,8 @@
     <PackageReference Include="System.Text.Json" Condition="'$(TargetFramework)' == 'net462'" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\TestApplication.ContinuousProfiler\RuntimeSamplerConfiguration.cs" Link="RuntimeSamplerConfiguration.cs" />
+    <Compile Include="..\TestApplication.ContinuousProfiler\RuntimeSamplerState.cs" Link="RuntimeSamplerState.cs" />
     <Compile Include="..\TestApplication.ContinuousProfiler\Exporter\AllocationSample.cs">
       <Link>AllocationSample.cs</Link>
     </Compile>

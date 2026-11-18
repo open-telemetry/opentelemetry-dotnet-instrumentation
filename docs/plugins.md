@@ -364,6 +364,11 @@ in big-endian order. Sample records follow, ending
 with opcode `0x0B`. A returned buffer can contain several batches with different
 intervals. Exporters must use each batch's interval for its snapshot samples.
 
+When CPU and selective sampling coincide, one stack capture produces both a full
+CPU batch and a separate selected-thread batch. All snapshot samples are
+delivered through `ExportSelectedThreadSamples`, independently of CPU buffer
+backpressure.
+
 ## Continuous profiling
 
 Implement `IContinuousProfilerPlugin` to provide continuous profiler
@@ -412,8 +417,11 @@ In native CPU batches, the start opcode `0x01`, 32-bit format version (`1`),
 and 64-bit capture timestamp in milliseconds are followed by a 32-bit selective
 sampling interval in milliseconds, all in big-endian order.
 This interval comes from the same configuration snapshot as the captured samples.
-Use it for snapshot copies of samples marked `SelectedForFrequentSampling`;
-the separate `samplingInterval` argument still describes the CPU profile period.
+The separate `samplingInterval` argument describes the CPU profile period.
+The `SelectedForFrequentSampling` flag remains available as metadata. Exporters
+must obtain snapshot samples from `ExportSelectedThreadSamples`. Creating
+snapshot copies from CPU batches would duplicate the separately delivered
+selective samples.
 A zero selective interval means selective sampling was disabled for that batch
 and sample records omit the frequent-sampling flag. Exporters must update their
 native format parsers to read the selective interval from each batch header.

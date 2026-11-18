@@ -70,88 +70,54 @@ public class SelectiveSamplerTests : TestHelper
 
         Assert.All(threadSamples, sample => Assert.Equal(50u, sample.SelectiveSamplingIntervalMilliseconds));
 
-        var groupedByTimestampAscending = threadSamples.GroupBy(sample => sample.TimestampNanoseconds).OrderBy(samples => samples.Key).ToList();
+        AssertSnapshotRouting(threadSamples);
+    }
 
-        // Based on the test app, samples for all the threads should be collected at least 2 times.
-        Assert.True(groupedByTimestampAscending.Count(
-            samples =>
-                IsContinuousProfilingSamplesBatch(samples) &&
-                samples.Count() > 1 &&
-                samples.Any(sample => sample.SelectedForFrequentSampling && HasSpanContextAssociated(sample)))
-                    > 1);
+    [SkippableFact]
+    [Trait("Category", "EndToEnd")]
+    public void ExportSelectedSamplesAcrossCpuRuntimeTransitions()
+    {
+        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
 
-        var lastSpanSampleTimestamp = threadSamples
-            .Where(HasSpanContextAssociated)
-            .Max(sample => sample.TimestampNanoseconds);
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.SelectiveSampler.Plugins.RuntimeCpuSamplingPlugin, TestApplication.SelectiveSampler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.SelectiveSampler");
 
-        // Sampling starts early, at the start of instrumentation init.
-        var groupingStartingWithAllThreadSamples = groupedByTimestampAscending
-            .SkipWhile(
-                samples =>
-                    IsSelectiveSamplingSamplesBatch(samples) ||
-                    CollectedBeforeSpanStarted(samples) ||
-                    CollectedBeforeFrequentSamplingStarted(samples))
-            // Continuous profiling can keep exporting during shutdown after the activity has stopped.
-            // Verify the mixed-mode cadence only through the last sample with an active span context.
-            .TakeWhile(samples => samples.Key <= lastSpanSampleTimestamp);
+        var (output, _, _) = RunTestApplication(new TestSettings { Arguments = "runtime-cpu-transitions" });
+        var samples = ConsoleProfileExporterHelpers.ExtractSamples(output);
+        Assert.All(samples, sample => Assert.Equal(50u, sample.SelectiveSamplingIntervalMilliseconds));
+        AssertSnapshotRouting(samples);
 
-        var selectiveSinceLastContinuous = 3;
-        var missedSelectiveBetweenContinuous = false;
-        var missedSelectiveInContinuous = false;
+        var cpuSamples = samples.Where(sample => sample.Source == "continuous-profiler").ToList();
+        var firstCpu = cpuSamples.Min(sample => sample.TimestampNanoseconds);
+        var lastCpu = cpuSamples.Max(sample => sample.TimestampNanoseconds);
+        Assert.Contains(samples, sample => sample.Source == "selective-sampler" && sample.TimestampNanoseconds < firstCpu);
+        Assert.Contains(samples, sample => sample.Source == "selective-sampler" && sample.TimestampNanoseconds > lastCpu);
+    }
 
-        foreach (var group in groupingStartingWithAllThreadSamples)
+    private static void AssertSnapshotRouting(List<ConsoleThreadSample> samples)
+    {
+        var selectiveSamples = samples.Where(sample => sample.Source == "selective-sampler").ToList();
+        Assert.NotEmpty(selectiveSamples);
+        Assert.All(selectiveSamples, sample => Assert.True(sample.SelectedForFrequentSampling && HasSpanContextAssociated(sample)));
+        var selectiveBatches = selectiveSamples.ToLookup(sample => sample.TimestampNanoseconds);
+        var cpuBatches = samples
+            .Where(sample => sample.Source == "continuous-profiler" && sample.SelectedForFrequentSampling)
+            .GroupBy(sample => sample.TimestampNanoseconds)
+            .ToList();
+        Assert.True(cpuBatches.Count >= 2, "Expected at least two CPU captures with selected threads.");
+        foreach (var batch in cpuBatches)
         {
-            // Based on plugin configuration, the expectation is for every 4th
-            // batch to contain multiple samples as a result of continuous profiling.
-            if (IsContinuousProfilingSamplesBatch(group))
-            {
-                if (selectiveSinceLastContinuous == 2)
-                {
-                    Assert.False(missedSelectiveBetweenContinuous, "Missing selective sample between continuous batches allowed only once per test run.");
-                    missedSelectiveBetweenContinuous = true;
-                }
-                else
-                {
-                    Assert.Equal(3, selectiveSinceLastContinuous);
-                }
-
-                selectiveSinceLastContinuous = 0;
-#if NET
-                // on .NET Framework there is no guarantee that samples collected from all threads
-                Assert.NotEqual(1, group.Count());
-#endif
-                // Sample for thread selected for frequent sampling when collecting samples of all threads
-                // should be marked with SelectedForFrequentSampling flag.
-                var selectedForFrequentSampling = group.Where(sample => sample.SelectedForFrequentSampling).ToList();
-                if (selectedForFrequentSampling.Count > 0)
-                {
-                    AssertExpectedSelectedSamples(selectedForFrequentSampling);
-                }
-                else
-                {
-                    Assert.False(missedSelectiveInContinuous, "Missing selective sample in continuous batches allowed only once per test run.");
-                    missedSelectiveInContinuous = true;
-                }
-            }
-            else
-            {
-                Assert.True(IsSelectiveSamplingSamplesBatch(group));
-
-                AssertExpectedSelectedSamples(group.ToList());
-                selectiveSinceLastContinuous++;
-            }
+            AssertExpectedSelectedSamples(batch.ToList());
+            // Both outputs must describe the same selected subset, exactly once per capture.
+            Assert.Equal(
+                batch.Select(SampleIdentity).OrderBy(identity => identity),
+                selectiveBatches[batch.Key].Select(SampleIdentity).OrderBy(identity => identity));
         }
     }
 
-    private static bool IsContinuousProfilingSamplesBatch(IGrouping<long, ConsoleThreadSample> group)
-    {
-        return group.All(sample => sample.Source == "continuous-profiler");
-    }
-
-    private static bool IsSelectiveSamplingSamplesBatch(IGrouping<long, ConsoleThreadSample> samples)
-    {
-        return samples.All(sample => sample.Source == "selective-sampler");
-    }
+    private static (long TraceIdHigh, long TraceIdLow, long SpanId, string? ThreadName) SampleIdentity(ConsoleThreadSample sample)
+        => (sample.TraceIdHigh, sample.TraceIdLow, sample.SpanId, sample.ThreadName);
 
     private static void AssertExpectedSelectedSamples(List<ConsoleThreadSample> samples)
     {
@@ -160,16 +126,6 @@ public class SelectiveSamplerTests : TestHelper
         Assert.InRange(samples.Count, 1, 2);
         Assert.All(samples, sample => Assert.True(HasSpanContextAssociated(sample)));
         Assert.Single(samples.Select(sample => (sample.TraceIdHigh, sample.TraceIdLow, sample.SpanId)).Distinct());
-    }
-
-    private static bool CollectedBeforeSpanStarted(IGrouping<long, ConsoleThreadSample> samples)
-    {
-        return !samples.Any(HasSpanContextAssociated);
-    }
-
-    private static bool CollectedBeforeFrequentSamplingStarted(IGrouping<long, ConsoleThreadSample> samples)
-    {
-        return !samples.Any(sample => sample.SelectedForFrequentSampling);
     }
 
     private static bool HasSpanContextAssociated(ConsoleThreadSample sample)
