@@ -165,7 +165,11 @@ std::vector<uint64_t> ReadSpanIds(const std::vector<unsigned char>& bytes, const
     {
         ReadInteger(bytes, position, 8);
     }
-    const auto            selectiveInterval = ReadInteger(bytes, position, 4);
+    else
+    {
+        EXPECT_EQ(40u, ReadInteger(bytes, position, 4));
+    }
+
     std::vector<uint64_t> spans;
     while (bytes.at(position) == (cpu ? 0x02 : 0x09))
     {
@@ -179,10 +183,6 @@ std::vector<uint64_t> ReadSpanIds(const std::vector<unsigned char>& bytes, const
         ReadInteger(bytes, position, 8);
         ReadInteger(bytes, position, 8);
         spans.push_back(ReadInteger(bytes, position, 8));
-        if (cpu && selectiveInterval != 0)
-        {
-            position++; // SelectedForFrequentSampling.
-        }
         while (const auto code = static_cast<int16_t>(ReadInteger(bytes, position, 2)))
         {
             if (code < 0)
@@ -385,9 +385,8 @@ TEST_F(SamplingCohortDeathTest, ConfigurationChangeDuringCapturePreservesBothOut
                         ASSERT_FALSE(cpu.empty());
                         ASSERT_FALSE(selective.empty());
                         EXPECT_EQ(400u, cpuInterval_);
-                        size_t cpuSelectiveInterval = 13;
-                        size_t selectiveInterval    = 5;
-                        EXPECT_EQ(40u, ReadInteger(cpu, cpuSelectiveInterval, 4));
+                        EXPECT_EQ((std::vector<uint64_t>{0, kSpanId}), ReadSpanIds(cpu, true));
+                        size_t selectiveInterval = 5;
                         EXPECT_EQ(40u, ReadInteger(selective, selectiveInterval, 4));
                     }),
                 ::testing::ExitedWithCode(EXIT_SUCCESS), "");

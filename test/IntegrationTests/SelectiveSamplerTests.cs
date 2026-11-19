@@ -68,7 +68,7 @@ public class SelectiveSamplerTests : TestHelper
 
         var threadSamples = ConsoleProfileExporterHelpers.ExtractSamples(output);
 
-        Assert.All(threadSamples, sample => Assert.Equal(50u, sample.SelectiveSamplingIntervalMilliseconds));
+        Assert.All(threadSamples.Where(sample => sample.Source == "selective-sampler"), sample => Assert.Equal(50u, sample.SelectiveSamplingIntervalMilliseconds));
 
         AssertSnapshotRouting(threadSamples);
     }
@@ -85,7 +85,7 @@ public class SelectiveSamplerTests : TestHelper
 
         var (output, _, _) = RunTestApplication(new TestSettings { Arguments = "runtime-cpu-transitions" });
         var samples = ConsoleProfileExporterHelpers.ExtractSamples(output);
-        Assert.All(samples, sample => Assert.Equal(50u, sample.SelectiveSamplingIntervalMilliseconds));
+        Assert.All(samples.Where(sample => sample.Source == "selective-sampler"), sample => Assert.Equal(50u, sample.SelectiveSamplingIntervalMilliseconds));
         AssertSnapshotRouting(samples);
 
         var cpuSamples = samples.Where(sample => sample.Source == "continuous-profiler").ToList();
@@ -99,23 +99,25 @@ public class SelectiveSamplerTests : TestHelper
     {
         var selectiveSamples = samples.Where(sample => sample.Source == "selective-sampler").ToList();
         Assert.NotEmpty(selectiveSamples);
-        Assert.All(selectiveSamples, sample => Assert.True(sample.SelectedForFrequentSampling && HasSpanContextAssociated(sample)));
+        Assert.All(selectiveSamples, sample => Assert.True(HasSpanContextAssociated(sample)));
         var selectiveBatches = selectiveSamples.ToLookup(sample => sample.TimestampNanoseconds);
+        var firstSelectiveTimestamp = selectiveSamples.Min(sample => sample.TimestampNanoseconds);
+        var lastSelectiveTimestamp = selectiveSamples.Max(sample => sample.TimestampNanoseconds);
+
+        // Ignore startup and shutdown, but keep every CPU capture during the observed selective sampling period.
         var cpuBatches = samples
             .Where(sample => sample.Source == "continuous-profiler")
+            .Where(sample => sample.TimestampNanoseconds >= firstSelectiveTimestamp && sample.TimestampNanoseconds <= lastSelectiveTimestamp)
             .GroupBy(sample => sample.TimestampNanoseconds)
             .OrderBy(batch => batch.Key)
             .ToList();
-        var firstSelectedCpuBatch = cpuBatches.FindIndex(batch => batch.Any(sample => sample.SelectedForFrequentSampling));
-        var lastSelectedCpuBatch = cpuBatches.FindLastIndex(batch => batch.Any(sample => sample.SelectedForFrequentSampling));
-        Assert.True(lastSelectedCpuBatch > firstSelectedCpuBatch, "Expected at least two CPU captures with selected threads.");
+        Assert.True(cpuBatches.Count >= 2, "Expected at least two CPU captures during selective sampling.");
 
-        // Ignore startup and shutdown, but keep CPU captures that missed the selected thread between these boundaries.
-        cpuBatches = cpuBatches.GetRange(firstSelectedCpuBatch, lastSelectedCpuBatch - firstSelectedCpuBatch + 1);
         var missedSelectiveInContinuous = false;
         foreach (var batch in cpuBatches)
         {
-            var selectedSamples = batch.Where(sample => sample.SelectedForFrequentSampling).ToList();
+            // This application selects every active span, so span contexts identify the expected selective subset.
+            var selectedSamples = batch.Where(HasSpanContextAssociated).ToList();
             if (selectedSamples.Count > 0)
             {
                 AssertExpectedSelectedSamples(selectedSamples);

@@ -175,7 +175,7 @@ TEST_F(ContinuousProfilerBatchTest, SelectiveBatchesRetainTheirOwnIntervalsInACo
     EXPECT_EQ(expected, output);
 }
 
-TEST_F(ContinuousProfilerBatchDeathTest, CpuBatchRetainsBothIntervalsFromItsConfigurationSnapshot)
+TEST_F(ContinuousProfilerBatchDeathTest, CpuBatchRetainsItsIntervalFromItsConfigurationSnapshot)
 {
     EXPECT_EXIT(RunInChild(
                     []
@@ -188,11 +188,11 @@ TEST_F(ContinuousProfilerBatchDeathTest, CpuBatchRetainsBothIntervalsFromItsConf
                         // A committed update must not change the intervals of an already admitted capture cycle.
                         profiler.StageThreadSamplingConfiguration(800, 80);
                         profiler.AllocateBuffer();
-                        profiler.cur_cpu_writer_->StartBatch(configuration.selectiveSamplingIntervalMilliseconds);
+                        profiler.cur_cpu_writer_->StartBatch();
                         profiler.cur_cpu_writer_->EndBatch();
                         profiler.PublishBuffer(configuration.cpuSamplingIntervalMilliseconds);
 
-                        std::vector<unsigned char> output(18);
+                        std::vector<unsigned char> output(14);
                         uint32_t                   cpuInterval = 0;
                         ASSERT_EQ(output.size(),
                                   ContinuousProfilerReadThreadSamplesV2(static_cast<int32_t>(output.size()),
@@ -200,24 +200,22 @@ TEST_F(ContinuousProfilerBatchDeathTest, CpuBatchRetainsBothIntervalsFromItsConf
                         EXPECT_EQ(400u, cpuInterval);
                         EXPECT_EQ((std::vector<unsigned char>{0x01, 0, 0, 0, 1}),
                                   (std::vector<unsigned char>(output.begin(), output.begin() + 5)));
-                        // The 8-byte timestamp precedes the selective interval, independently of the platform's long
-                        // width.
-                        EXPECT_EQ((std::vector<unsigned char>{0, 0, 0, 40, 0x06}),
+                        // The batch ends after the 8-byte timestamp, independently of the platform's long width.
+                        EXPECT_EQ((std::vector<unsigned char>{0x06}),
                                   (std::vector<unsigned char>(output.begin() + 13, output.end())));
                     }),
                 ::testing::ExitedWithCode(EXIT_SUCCESS), "");
 }
 
-TEST_F(ContinuousProfilerBatchTest, CpuBatchRecordsZeroWhenSelectiveSamplingIsDisabled)
+TEST_F(ContinuousProfilerBatchTest, CpuBatchHeaderContainsOnlyVersionAndCaptureTimestamp)
 {
     std::vector<unsigned char>               bytes;
     continuous_profiler::ThreadSamplesBuffer writer(&bytes);
-    writer.StartBatch(0);
+    writer.StartBatch(0x0102030405060708);
     writer.EndBatch();
 
-    ASSERT_EQ(18u, bytes.size());
-    EXPECT_EQ((std::vector<unsigned char>{0, 0, 0, 0, 0x06}),
-              (std::vector<unsigned char>(bytes.begin() + 13, bytes.end())));
+    // Protocol timestamps have a fixed 8-byte width on both Windows and Unix.
+    EXPECT_EQ((std::vector<unsigned char>{0x01, 0, 0, 0, 1, 1, 2, 3, 4, 5, 6, 7, 8, 0x06}), bytes);
 }
 
 TEST_F(ContinuousProfilerBatchTest, OverflowedWriterDoesNotPublishAMalformedBatch)
@@ -227,7 +225,7 @@ TEST_F(ContinuousProfilerBatchTest, OverflowedWriterDoesNotPublishAMalformedBatc
     profiler.AllocateBuffer();
     ASSERT_NE(nullptr, profiler.cur_cpu_writer_);
 
-    profiler.cur_cpu_writer_->StartBatch(0);
+    profiler.cur_cpu_writer_->StartBatch();
     continuous_profiler::ThreadState state;
     profiler.cur_cpu_writer_->StartSample(&state, {});
 
@@ -256,7 +254,7 @@ TEST_F(ContinuousProfilerBatchTest, ShutdownDiscardsAnUnpublishedCpuBatch)
     continuous_profiler::ContinuousProfiler                   profiler(allocationSessions);
     profiler.AllocateBuffer();
     ASSERT_NE(nullptr, profiler.cur_cpu_writer_);
-    profiler.cur_cpu_writer_->StartBatch(0);
+    profiler.cur_cpu_writer_->StartBatch();
     profiler.cur_cpu_writer_->EndBatch();
 
     profiler.Shutdown();

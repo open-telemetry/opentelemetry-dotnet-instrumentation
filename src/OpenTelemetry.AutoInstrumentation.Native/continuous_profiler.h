@@ -250,7 +250,7 @@ public:
 
     explicit ThreadSamplesBuffer(std::vector<unsigned char>* buf);
     ~ThreadSamplesBuffer();
-    void StartBatch(uint32_t selectiveSamplingIntervalMilliseconds, uint64_t timestampMilliseconds = 0) const;
+    void StartBatch(uint64_t timestampMilliseconds = 0) const;
     void StartSelectedThreadsBatch(uint32_t selectiveSamplingIntervalMilliseconds) const;
     void EndSelectedThreadsBatch() const;
     void WriteSpanContext(const thread_span_context& span_context) const;
@@ -258,7 +258,6 @@ public:
     void StartSampleForSelectedThread(const ThreadState*         state,
                                       const thread_span_context& span_context,
                                       uint64_t                   timestampMilliseconds = 0) const;
-    void MarkSelectedForFrequentSampling(bool value) const;
     void RecordFrame(const FunctionIdentifier& fid, const trace::WSTRING& frame);
     void EndSample() const;
     void EndBatch() const;

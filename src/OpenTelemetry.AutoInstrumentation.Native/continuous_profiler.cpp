@@ -367,11 +367,9 @@ ContinuousProfiler::ContinuousProfiler(IAllocationSamplingSessionProvider& alloc
  * standard windows utf-16 strings
  *
  * I would write out the "spec" for this format here, but it essentially maps to the code
- * CPU batches start with 0x01, an int versionNumber, a long captureStartTimeInMillis and an int
- * selectiveSamplingIntervalMilliseconds. Selective batches start with 0x0A, an int versionNumber and an int
- * selectiveSamplingIntervalMilliseconds. The selective interval belongs to the configuration snapshot used to capture
- * that batch; it also applies to samples marked for frequent sampling in CPU batches. Zero means selective sampling
- * was disabled for that CPU batch, so its samples have no frequent-sampling flag.
+ * CPU batches start with 0x01, an int versionNumber and a long captureStartTimeInMillis. Selective batches start with
+ * 0x0A, an int versionNumber and an int selectiveSamplingIntervalMilliseconds. The selective interval belongs to the
+ * configuration snapshot used to capture that batch. CPU batches contain no selective sampling metadata.
  *
  * The bulk of the data is an (unknown length) array of frame strings, which are represented as coded strings in each
  * buffer.
@@ -420,14 +418,12 @@ static uint64_t CurrentTimeMillis()
         .count();
 }
 
-void ThreadSamplesBuffer::StartBatch(const uint32_t selectiveSamplingIntervalMilliseconds,
-                                     const uint64_t timestampMilliseconds) const
+void ThreadSamplesBuffer::StartBatch(const uint64_t timestampMilliseconds) const
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteByte(kThreadSamplesStartBatch);
     WriteInt(kCurrentThreadSamplesBufferVersion);
     WriteUInt64(timestampMilliseconds == 0 ? CurrentTimeMillis() : timestampMilliseconds);
-    WriteInt(static_cast<int32_t>(selectiveSamplingIntervalMilliseconds));
 }
 
 void ThreadSamplesBuffer::StartSelectedThreadsBatch(const uint32_t selectiveSamplingIntervalMilliseconds) const
@@ -469,12 +465,6 @@ void ThreadSamplesBuffer::StartSampleForSelectedThread(const ThreadState*       
     WriteUInt64(timestampMilliseconds == 0 ? CurrentTimeMillis() : timestampMilliseconds);
     WriteString(state->thread_name_);
     WriteSpanContext(span_context);
-}
-
-void ThreadSamplesBuffer::MarkSelectedForFrequentSampling(bool value) const
-{
-    CHECK_SAMPLES_BUFFER_LENGTH()
-    WriteByte(value ? 1 : 0);
 }
 
 void ThreadSamplesBuffer::AllocationSample(uint64_t                   allocSize,
@@ -1225,11 +1215,10 @@ static void ResolveSymbolsAndPublishBufferForAllThreads(
     ContinuousProfiler*                                                  prof,
     const std::unordered_map<ThreadID, std::vector<FunctionIdentifier>>& threadStacks,
     const uint32_t                                                       samplingInterval,
-    const uint32_t                                                       selectiveSamplingInterval,
     const uint64_t                                                       timestampMilliseconds)
 {
     prof->AllocateBuffer();
-    prof->cur_cpu_writer_->StartBatch(selectiveSamplingInterval, timestampMilliseconds);
+    prof->cur_cpu_writer_->StartBatch(timestampMilliseconds);
 
     for (const auto& [threadId, threadStack] : threadStacks)
     {
@@ -1242,13 +1231,6 @@ static void ResolveSymbolsAndPublishBufferForAllThreads(
         const auto          threadState = GetThreadState(prof->managed_tid_to_state_, threadId);
 
         prof->cur_cpu_writer_->StartSample(threadState, spanContext);
-
-        if (selectiveSamplingInterval != 0)
-        {
-            const auto threadSelectedForFrequentSampling =
-                selective_sampling_trace_map.find(spanContext.trace_context_) != selective_sampling_trace_map.end();
-            prof->cur_cpu_writer_->MarkSelectedForFrequentSampling(threadSelectedForFrequentSampling);
-        }
 
         ResolveFrames(prof, threadStack, *prof->cur_cpu_writer_);
         prof->cur_cpu_writer_->EndSample();
@@ -1487,7 +1469,6 @@ void CaptureSamples(ContinuousProfiler*                prof,
     if (publishCpu)
     {
         ResolveSymbolsAndPublishBufferForAllThreads(prof, threadStacks, configuration.cpuSamplingIntervalMilliseconds,
-                                                    configuration.selectiveSamplingIntervalMilliseconds,
                                                     timestampMilliseconds);
     }
     if (publishSelective)

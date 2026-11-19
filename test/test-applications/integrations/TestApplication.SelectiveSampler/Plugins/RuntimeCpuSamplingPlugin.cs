@@ -49,7 +49,7 @@ public class RuntimeCpuSamplingPlugin : BasePlugin, IContinuousProfilerPlugin, I
         {
             var samples = _parser.ParseThreadSamples(buffer, read) ?? [];
             JsonConsoleExporter.WriteToConsole(samples);
-            if (samples.Any(sample => sample.SelectedForFrequentSampling))
+            if (samples.Count > 0)
             {
                 RuntimeCpuSamplingScenario.CpuBatches.Release();
             }

@@ -7,51 +7,58 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.ContinuousProfiler;
 
 public class SampleNativeFormatParserTests
 {
-    [Theory]
-    [InlineData(false, false)]
-    [InlineData(false, true)]
-    [InlineData(true, false)]
-    [InlineData(true, true)]
-    public void BufferedBatchesRetainEachSamplesSelectiveInterval(bool cpu, bool frequentSamplingEnabled)
+    [Fact]
+    public void BufferedSelectiveBatchesRetainEachSamplesInterval()
     {
         var buffer = new List<byte>();
-        byte[] intervals = cpu ? [40, 80, 0] : [40, 80];
+        byte[] intervals = [40, 80];
         foreach (var interval in intervals)
         {
-            // Batch headers use version 1, big-endian integers and an 8-byte CPU timestamp.
-            buffer.AddRange(cpu ? [0x01, 0, 0, 0, 1] : [0x0A, 0, 0, 0, 1]);
-            if (cpu)
-            {
-                buffer.AddRange(new byte[8]);
-            }
-
-            buffer.AddRange([0, 0, 0, interval]);
-            buffer.Add(cpu ? (byte)0x02 : (byte)0x09);
-            if (!cpu)
-            {
-                buffer.AddRange(new byte[8]); // Selective sample timestamp.
-            }
-
+            // Selective batch headers use version 1 and a big-endian interval.
+            buffer.AddRange([0x0A, 0, 0, 0, 1, 0, 0, 0, interval, 0x09]);
+            buffer.AddRange(new byte[8]); // Selective sample timestamp.
             buffer.AddRange(new byte[26]); // Empty thread name and span context.
-            if (cpu && interval != 0)
-            {
-                buffer.Add(1); // SelectedForFrequentSampling is absent when selective sampling is disabled.
-            }
 
             // Define frame code 1 as "f", terminate the stack and end the batch.
-            buffer.AddRange([0xFF, 0xFF, 0, 1, (byte)'f', 0, 0, 0]);
-            buffer.Add(cpu ? (byte)0x06 : (byte)0x0B);
+            buffer.AddRange([0xFF, 0xFF, 0, 1, (byte)'f', 0, 0, 0, 0x0B]);
         }
 
-        var parser = new SampleNativeFormatParser(frequentSamplingEnabled);
+        var parser = new SampleNativeFormatParser();
         var bytes = buffer.ToArray();
-        var samples = cpu
-            ? parser.ParseThreadSamples(bytes, bytes.Length)
-            : parser.ParseSelectiveSamplerSamples(bytes, bytes.Length);
+        var samples = parser.ParseSelectiveSamplerSamples(bytes, bytes.Length);
+
+        Assert.Equal(intervals.Select(interval => (uint)interval), samples.Select(sample => sample.SelectiveSamplingIntervalMilliseconds));
+        Assert.All(samples, sample => Assert.Equal("f", Assert.Single(sample.Frames)));
+    }
+
+    [Fact]
+    public void CpuBatchesContainNoSelectiveSamplingFields()
+    {
+        var buffer = new List<byte>();
+        byte[] timestamps = [40, 80];
+        foreach (var timestamp in timestamps)
+        {
+            // CPU batch headers contain only version 1 and a big-endian 8-byte timestamp.
+            buffer.AddRange([0x01, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, timestamp]);
+            buffer.Add(0x02);
+            buffer.AddRange(new byte[26]); // Empty thread name and span context, followed immediately by the stack.
+            buffer.AddRange([0xFF, 0xFF, 0, 1, (byte)'f', 0, 0, 0]);
+            buffer.Add(0x02);
+            buffer.AddRange(new byte[26]);
+            buffer.AddRange([0, 1, 0, 0, 0x06]); // Reuse frame code 1, terminate the stack and end the batch.
+        }
+
+        var parser = new SampleNativeFormatParser();
+        var bytes = buffer.ToArray();
+        var samples = parser.ParseThreadSamples(bytes, bytes.Length);
 
         Assert.NotNull(samples);
-        Assert.Equal(intervals.Select(interval => (uint)interval), samples.Select(sample => sample.SelectiveSamplingIntervalMilliseconds));
-        Assert.Equal(intervals.Select(interval => interval != 0), samples.Select(sample => sample.SelectedForFrequentSampling));
-        Assert.All(samples, sample => Assert.Equal("f", Assert.Single(sample.Frames)));
+        Assert.Equal(timestamps.SelectMany(timestamp => Enumerable.Repeat(timestamp * 1_000_000L, 2)), samples.Select(sample => sample.TimestampNanoseconds));
+        Assert.All(samples, sample =>
+        {
+            Assert.Equal("continuous-profiler", sample.Source);
+            Assert.Equal(0u, sample.SelectiveSamplingIntervalMilliseconds);
+            Assert.Equal("f", Assert.Single(sample.Frames));
+        });
     }
 }

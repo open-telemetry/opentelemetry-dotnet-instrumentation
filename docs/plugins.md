@@ -426,18 +426,15 @@ the CPU sampling interval in milliseconds for each native batch. Use that
 interval to set the exported profile period. Existing exporters must update
 their `ExportThreadSamples` implementation to accept the interval.
 
-In native CPU batches, the start opcode `0x01`, 32-bit format version (`1`),
-and 64-bit capture timestamp in milliseconds are followed by a 32-bit selective
-sampling interval in milliseconds, all in big-endian order.
-This interval comes from the same configuration snapshot as the captured samples.
+Native CPU batches start with opcode `0x01`, a 32-bit format version (`1`),
+and a 64-bit capture timestamp in milliseconds, all in big-endian order.
+The header is followed by thread samples with their span contexts and stacks.
 The separate `samplingInterval` argument describes the CPU profile period.
-The `SelectedForFrequentSampling` flag remains available as metadata. Exporters
-must obtain snapshot samples from `ExportSelectedThreadSamples`. Creating
+CPU batches contain no selective sampling metadata. Exporters obtain snapshot
+samples and their selective sampling interval from `ExportSelectedThreadSamples`.
+When both outputs reuse one stack capture, their timestamps match. Creating
 snapshot copies from CPU batches would duplicate the separately delivered
 selective samples.
-A zero selective interval means selective sampling was disabled for that batch
-and sample records omit the frequent-sampling flag. Exporters must update their
-native format parsers to read the selective interval from each batch header.
 
 An exporter and a nonzero CPU interval or allocation limit prepare the
 corresponding managed handler even when its `Enabled` setting is false. Native

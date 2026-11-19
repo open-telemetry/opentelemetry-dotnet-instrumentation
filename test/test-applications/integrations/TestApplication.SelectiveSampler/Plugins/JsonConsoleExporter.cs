@@ -17,7 +17,7 @@ internal sealed class JsonConsoleExporter : ISelectiveSamplerExporter, IContinuo
         _sampleNativeFormatParser = sampleNativeFormatParser;
     }
 
-    public static JsonConsoleExporter Instance { get; } = new(new SampleNativeFormatParser(true));
+    public static JsonConsoleExporter Instance { get; } = new(new SampleNativeFormatParser());
 
     public void ExportSelectedThreadSamples(byte[] buffer, int read, CancellationToken cancellationToken)
     {

@@ -98,9 +98,10 @@ the selected subset to the selective buffer. Both outputs share the capture
 timestamp and configuration snapshot. If the CPU buffers are full, the worker
 still captures selected threads when the selective buffer has capacity.
 
-CPU samples retain the `SelectedForFrequentSampling` metadata flag. Exporters
-must consume snapshot samples through `ExportSelectedThreadSamples` and avoid
-creating additional snapshot copies from CPU batches.
+CPU batches contain no selective sampling metadata. The selective sampling
+interval and selected thread stacks are delivered through
+`ExportSelectedThreadSamples`. Exporters can correlate coincident samples using
+their capture timestamp, span context, and thread identity.
 
 See [`SampleNativeFormatParser`](../../test/test-applications/integrations/TestApplication.ContinuousProfiler/Exporter/SampleNativeFormatParser.cs)
 for sample implementation.

@@ -13,7 +13,6 @@ internal sealed class ThreadSample
         string? threadName,
         string source,
         uint threadIndex = 0,
-        bool selectedForFrequentSampling = false,
         uint selectiveSamplingIntervalMilliseconds = 0)
     {
         TimestampNanoseconds = timestampMilliseconds * 1_000_000;
@@ -23,7 +22,6 @@ internal sealed class ThreadSample
         ThreadName = threadName;
         Source = source;
         ThreadIndex = threadIndex;
-        SelectedForFrequentSampling = selectedForFrequentSampling;
         SelectiveSamplingIntervalMilliseconds = selectiveSamplingIntervalMilliseconds;
     }
 
@@ -38,8 +36,6 @@ internal sealed class ThreadSample
     public string? ThreadName { get; }
 
     public uint ThreadIndex { get; }
-
-    public bool SelectedForFrequentSampling { get; }
 
     public uint SelectiveSamplingIntervalMilliseconds { get; }
 
