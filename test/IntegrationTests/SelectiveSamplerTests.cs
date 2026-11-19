@@ -102,17 +102,33 @@ public class SelectiveSamplerTests : TestHelper
         Assert.All(selectiveSamples, sample => Assert.True(sample.SelectedForFrequentSampling && HasSpanContextAssociated(sample)));
         var selectiveBatches = selectiveSamples.ToLookup(sample => sample.TimestampNanoseconds);
         var cpuBatches = samples
-            .Where(sample => sample.Source == "continuous-profiler" && sample.SelectedForFrequentSampling)
+            .Where(sample => sample.Source == "continuous-profiler")
             .GroupBy(sample => sample.TimestampNanoseconds)
             .OrderBy(batch => batch.Key)
             .ToList();
-        Assert.True(cpuBatches.Count >= 2, "Expected at least two CPU captures with selected threads.");
+        var firstSelectedCpuBatch = cpuBatches.FindIndex(batch => batch.Any(sample => sample.SelectedForFrequentSampling));
+        var lastSelectedCpuBatch = cpuBatches.FindLastIndex(batch => batch.Any(sample => sample.SelectedForFrequentSampling));
+        Assert.True(lastSelectedCpuBatch > firstSelectedCpuBatch, "Expected at least two CPU captures with selected threads.");
+
+        // Ignore startup and shutdown, but keep CPU captures that missed the selected thread between these boundaries.
+        cpuBatches = cpuBatches.GetRange(firstSelectedCpuBatch, lastSelectedCpuBatch - firstSelectedCpuBatch + 1);
+        var missedSelectiveInContinuous = false;
         foreach (var batch in cpuBatches)
         {
-            AssertExpectedSelectedSamples([.. batch]);
+            var selectedSamples = batch.Where(sample => sample.SelectedForFrequentSampling).ToList();
+            if (selectedSamples.Count > 0)
+            {
+                AssertExpectedSelectedSamples(selectedSamples);
+            }
+            else
+            {
+                Assert.False(missedSelectiveInContinuous, "Missing selective sample in continuous batches allowed only once per test run.");
+                missedSelectiveInContinuous = true;
+            }
+
             // Both outputs must describe the same selected subset, exactly once per capture.
             Assert.Equal(
-                batch.Select(SampleIdentity).OrderBy(identity => identity),
+                selectedSamples.Select(SampleIdentity).OrderBy(identity => identity),
                 selectiveBatches[batch.Key].Select(SampleIdentity).OrderBy(identity => identity));
         }
 
