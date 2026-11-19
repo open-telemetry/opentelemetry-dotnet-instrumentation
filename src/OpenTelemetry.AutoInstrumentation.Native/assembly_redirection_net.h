@@ -35,7 +35,7 @@
         { _W("OpenTelemetry.Exporter.Zipkin"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Extensions.Propagators"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Instrumentation.AspNetCore"), {1, 21, 0, 1593} }, \
-        { _W("OpenTelemetry.Instrumentation.EntityFrameworkCore"), {1, 21, 0, 1597} }, \
+        { _W("OpenTelemetry.Instrumentation.EntityFrameworkCore"), {1, 21, 0, 1633} }, \
         { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 21, 0, 1599} }, \
         { _W("OpenTelemetry.Instrumentation.Http"), {1, 21, 0, 1601} }, \
         { _W("OpenTelemetry.Instrumentation.Process"), {1, 21, 0, 1603} }, \
@@ -81,7 +81,7 @@
         { _W("OpenTelemetry.Exporter.Zipkin"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Extensions.Propagators"), {1, 0, 0, 0} }, \
         { _W("OpenTelemetry.Instrumentation.AspNetCore"), {1, 21, 0, 1593} }, \
-        { _W("OpenTelemetry.Instrumentation.EntityFrameworkCore"), {1, 21, 0, 1597} }, \
+        { _W("OpenTelemetry.Instrumentation.EntityFrameworkCore"), {1, 21, 0, 1633} }, \
         { _W("OpenTelemetry.Instrumentation.GrpcNetClient"), {1, 21, 0, 1599} }, \
         { _W("OpenTelemetry.Instrumentation.Http"), {1, 21, 0, 1601} }, \
         { _W("OpenTelemetry.Instrumentation.Process"), {1, 21, 0, 1603} }, \

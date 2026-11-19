@@ -41,7 +41,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - .NET only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNetCore` from `1.20.2` to `1.21.0`,
   - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
-    from `1.20.2-beta.1` to `1.21.0-beta.1`,
+    from `1.20.2-beta.1` to `1.21.0-beta.2`,
   - `OpenTelemetry.Resources.Container` from `1.20.1-beta.1` to `1.21.0-beta.1`.
 - .NET 10 only, added `System.Diagnostics.DiagnosticSource` version `11.0.0`.
 - .NET 11 only, following packages updated
