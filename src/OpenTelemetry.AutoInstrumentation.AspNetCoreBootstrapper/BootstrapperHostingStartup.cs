@@ -20,16 +20,6 @@ internal sealed class BootstrapperHostingStartup : IHostingStartup
     private const string BootstrapperLoggerSuffix = "AspNetCoreBootstrapper";
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger(BootstrapperLoggerSuffix);
 
-    private readonly LogSettings _logSettings;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="BootstrapperHostingStartup"/> class.
-    /// </summary>
-    public BootstrapperHostingStartup()
-    {
-        _logSettings = Instrumentation.LogSettings.Value;
-    }
-
     /// <summary>
     /// This method gets called by the runtime to light up ASP.NET Core OpenTelemetry Logs Collection.
     /// </summary>
@@ -38,13 +28,20 @@ internal sealed class BootstrapperHostingStartup : IHostingStartup
     {
         try
         {
-            if (!_logSettings.LogsEnabled)
+            if (Instrumentation.IsDisabled)
+            {
+                Logger.Information("BootstrapperHostingStartup loaded, but OpenTelemetry Automatic Instrumentation is disabled. Skipping.");
+                return;
+            }
+
+            var logSettings = Instrumentation.LogSettings.Value;
+            if (!logSettings.LogsEnabled)
             {
                 Logger.Information("BootstrapperHostingStartup loaded, but OpenTelemetry Logs disabled. Skipping.");
                 return;
             }
 
-            if (!_logSettings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger))
+            if (!logSettings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger))
             {
                 Logger.Information($"BootstrapperHostingStartup loaded, but {nameof(LogInstrumentation.ILogger)} instrumentation is disabled. Skipping.");
                 return;

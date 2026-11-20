@@ -38,6 +38,11 @@ internal static class LoggerInitializer
 
     private static void AddOpenTelemetryLogs(ILoggingBuilder builder)
     {
+        if (Instrumentation.IsDisabled)
+        {
+            return;
+        }
+
         try
         {
             if (builder.Services == null)

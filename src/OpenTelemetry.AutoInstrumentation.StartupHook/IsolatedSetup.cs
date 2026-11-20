@@ -16,6 +16,9 @@ namespace OpenTelemetry.AutoInstrumentation;
 /// </summary>
 internal sealed class IsolatedSetup(AssemblyLoadContext isolatedContext, AssemblyLoadContext.ContextualReflectionScope contextualReflectionScope) : InitializationSetup
 {
+    private const string HostingStartupAssembliesVariable = "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES";
+    private const string BootstrapperAssemblyName = "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper";
+
     private Assembly? _originalEntryAssembly;
     private MethodInfo? _entryPoint;
     private object[]? _entryPointParameters;
@@ -52,10 +55,10 @@ internal sealed class IsolatedSetup(AssemblyLoadContext isolatedContext, Assembl
     }
 
     /// <summary>
-    /// Reverts the isolation setup. Called if initialization fails,
+    /// Reverts the isolation setup. Called if initialization is aborted,
     /// allowing the runtime to fall back to normal execution.
     /// </summary>
-    protected override void OnError(Exception ex)
+    protected override void OnInitializationAborted()
     {
         // Revert contextual reflection
         contextualReflectionScope.Dispose();
@@ -72,6 +75,18 @@ internal sealed class IsolatedSetup(AssemblyLoadContext isolatedContext, Assembl
                 // Best effort - may fail if runtime state has changed
             }
         }
+
+        if (InstrumentationBootstrapState.IsDisabled)
+        {
+            try
+            {
+                RemoveAspNetCoreBootstrapper();
+            }
+            catch (Exception ex)
+            {
+                Logger.Warning(ex, "Failed to remove the OpenTelemetry ASP.NET Core hosting startup registration.");
+            }
+        }
     }
 
     /// <summary>
@@ -85,6 +100,39 @@ internal sealed class IsolatedSetup(AssemblyLoadContext isolatedContext, Assembl
         // propagate as unhandled exceptions, terminating the process naturally.
         var exitCode = _entryPoint!.Invoke(null, BindingFlags.DoNotWrapExceptions, null, _entryPointParameters, null) as int? ?? 0;
         Environment.Exit(exitCode);
+    }
+
+    private static void RemoveAspNetCoreBootstrapper()
+    {
+        var configuredAssemblies = Environment.GetEnvironmentVariable(HostingStartupAssembliesVariable);
+        if (string.IsNullOrEmpty(configuredAssemblies))
+        {
+            return;
+        }
+
+        // The default load context may not be able to resolve the bootstrapper
+        // after isolation is reverted.
+        var assemblies = configuredAssemblies.Split(';', StringSplitOptions.RemoveEmptyEntries);
+        var remainingAssemblies = assemblies.Where(static name => !IsBootstrapperAssembly(name)).ToArray();
+        if (remainingAssemblies.Length != assemblies.Length)
+        {
+            Environment.SetEnvironmentVariable(
+                HostingStartupAssembliesVariable,
+                remainingAssemblies.Length == 0 ? null : string.Join(';', remainingAssemblies));
+        }
+
+        static bool IsBootstrapperAssembly(string name)
+        {
+            try
+            {
+                return string.Equals(new AssemblyName(name.Trim()).Name, BootstrapperAssemblyName, StringComparison.OrdinalIgnoreCase);
+            }
+            catch (Exception ex) when (ex is ArgumentException or FileLoadException)
+            {
+                // Leave invalid application-provided entries for the host to handle.
+                return false;
+            }
+        }
     }
 
     private static void GetTargetApp(out string appPath, out Assembly? entryAssembly)

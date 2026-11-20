@@ -769,7 +769,11 @@ partial class Build
             "Initialize_WithDisabledFlag_DoesNotCreateTracerProvider",
             "Initialize_WithDefaultFlag_CreatesTracerProvider",
             "Initialize_WithEnabledFlag_CreatesTracerProvider",
-            "Initialize_WithPreviouslyCreatedTracerProvider_WorksCorrectly"
+            "Initialize_WithPreviouslyCreatedTracerProvider_WorksCorrectly",
+            "Initialize_WithIncompatibleFileConfigurationShape_DisablesInstrumentation",
+            "Initialize_WithIncompatibleFileConfigurationShapeAndFailFast_Throws",
+            "Initialize_WhenAppDomainIsDisabled_DoesNotReparseFileConfiguration",
+            "Shutdown_WhenInstrumentationIsDisabled_DisposesCreatedLoggerProvider"
         }.Select(name => $"FullyQualifiedName~{testPrefix}.{name}");
 
         for (var i = 0; i < TestCount; i++)

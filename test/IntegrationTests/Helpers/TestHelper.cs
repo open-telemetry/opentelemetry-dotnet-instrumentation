@@ -10,6 +10,9 @@ namespace IntegrationTests.Helpers;
 public abstract class TestHelper
 #pragma warning restore CA1515 //  // Consider making public types internal. Needed for xunit tests.
 {
+    internal const string ApplicationEntrypointMarker = "[TEST_APPLICATION_ENTRYPOINT]";
+    internal const string HttpRequestSucceededMarker = "[HTTP_REQUEST_SUCCEEDED]";
+
     protected TestHelper(string testApplicationName, ITestOutputHelper output, string testApplicationType = "integrations")
     {
         Output = output ?? throw new ArgumentNullException(nameof(output));
@@ -52,6 +55,14 @@ public abstract class TestHelper
     public void RemoveEnvironmentVariable(string key)
     {
         EnvironmentHelper.CustomEnvironmentVariables.Remove(key);
+    }
+
+    internal static void AssertInvalidFileConfigurationError(string standardOutput, string configFile)
+    {
+        var outputRecords = standardOutput.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries);
+        Assert.Contains(outputRecords, record =>
+            record.Contains("File-based configuration", StringComparison.Ordinal) &&
+            record.Contains(configFile, StringComparison.Ordinal));
     }
 
     internal void SetExporter(MockSpansCollector collector)
@@ -106,10 +117,12 @@ public abstract class TestHelper
         RemoveEnvironmentVariable("OTEL_LOGS_EXPORTER");
     }
 
-    internal void EnableFileBasedConfig(string configFileName = "config.yaml", string packageVersion = "")
+    internal string EnableFileBasedConfig(string configFileName = "config.yaml", string packageVersion = "")
     {
+        var configFile = Path.Combine(EnvironmentHelper.GetTestApplicationApplicationOutputDirectory(packageVersion), configFileName);
         SetEnvironmentVariable("OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED", "true");
-        SetEnvironmentVariable("OTEL_CONFIG_FILE", Path.Combine(EnvironmentHelper.GetTestApplicationApplicationOutputDirectory(packageVersion), configFileName));
+        SetEnvironmentVariable("OTEL_CONFIG_FILE", configFile);
+        return configFile;
     }
 
     internal (string StandardOutput, string ErrorOutput, int ProcessId) RunTestApplication(

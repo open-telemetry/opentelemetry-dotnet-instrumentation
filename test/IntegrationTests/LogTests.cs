@@ -79,6 +79,39 @@ public class LogTests : TestHelper
         collector.AssertExpectations();
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    [Trait("Category", "EndToEnd")]
+    public void MalformedFileConfigurationDoesNotCrashHostingStartup(bool enableClrProfiler)
+    {
+        const string bootstrapper = "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper";
+        const string applicationAssembly = "TestApplication.Logs";
+        var configFile = EnableFileBasedConfig("config-invalid.yaml");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "false");
+        SetEnvironmentVariable(
+            "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES",
+            enableClrProfiler ? bootstrapper : $"{applicationAssembly}; {bootstrapper}, Culture=neutral;{bootstrapper.ToUpperInvariant()}");
+        if (enableClrProfiler)
+        {
+            EnableBytecodeInstrumentation();
+        }
+
+        var (standardOutput, _, _) = RunTestApplication(new()
+        {
+            Arguments = enableClrProfiler ? null : $"--expected-hosting-startup-assemblies {applicationAssembly}"
+        });
+
+        AssertInvalidFileConfigurationError(standardOutput, configFile);
+        Assert.Contains(ApplicationEntrypointMarker, standardOutput, StringComparison.Ordinal);
+        Assert.Contains(HttpRequestSucceededMarker, standardOutput, StringComparison.Ordinal);
+        if (enableClrProfiler)
+        {
+            Assert.Contains("BootstrapperHostingStartup loaded, but OpenTelemetry Automatic Instrumentation is disabled. Skipping.", standardOutput, StringComparison.Ordinal);
+        }
+    }
+
     [Fact]
     public async Task EnableLogsWithCLRAndHostingStartup()
     {
