@@ -97,7 +97,8 @@ Check out a new branch, make modifications and push the branch to your fork:
 $ git checkout -b feature
 # change files
 # Test your changes locally.
-$ nuke Workflow
+$ dotnet tool restore
+$ dotnet fallout Workflow
 $ git add my/changed/files
 $ git commit -m "short description of the change"
 $ git push fork feature

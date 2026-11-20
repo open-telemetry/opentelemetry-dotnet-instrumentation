@@ -10,9 +10,6 @@ using System.Runtime.CompilerServices;
 
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 
-/// <summary>
-/// Duck Type
-/// </summary>
 internal static partial class DuckType
 {
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]

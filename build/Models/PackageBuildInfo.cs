@@ -5,8 +5,8 @@ public class PackageBuildInfo
     public PackageBuildInfo(string libraryVersion, string[] supportedFrameworks = null, string[] supportedPlatforms = null, Dictionary<string, string> additionalMetaData = null)
     {
         LibraryVersion = libraryVersion;
-        SupportedFrameworks = supportedFrameworks ?? Array.Empty<string>();
-        SupportedPlatforms = supportedPlatforms ?? Array.Empty<string>();
+        SupportedFrameworks = supportedFrameworks ?? [];
+        SupportedPlatforms = supportedPlatforms ?? [];
         AdditionalMetaData = additionalMetaData ?? new Dictionary<string, string>();
     }
 

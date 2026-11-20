@@ -1,14 +1,12 @@
 using System.Runtime.InteropServices;
 using Extensions;
-using Nuke.Common;
-using Nuke.Common.IO;
-#if NET10_0
-using Nuke.Common.ProjectModel;
-#endif
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.NuGet;
-using Nuke.Common.Utilities.Collections;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using Fallout.Common;
+using Fallout.Common.IO;
+using Fallout.Common.Tools.DotNet;
+using Fallout.Common.Tools.NuGet;
+using Fallout.Common.Utilities.Collections;
+using Fallout.Solutions;
+using static Fallout.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
 {
@@ -57,8 +55,8 @@ partial class Build
                 "bin-ubuntu-22.04/linux-x64",
                 "bin-ubuntu-22.04-arm/linux-arm64",
                 "bin-macos-15/osx-arm64",
-                "bin-windows-2022/win-x64",
-                "bin-windows-2022/win-x86"
+                "bin-windows-2025/win-x64",
+                "bin-windows-2025/win-x86"
             };
 
             foreach (var artifactFolder in requiredArtifacts)
@@ -141,9 +139,6 @@ partial class Build
             var nuspecSolutionFolder = Solution.GetSolutionFolder("nuget")
                 ?? throw new InvalidOperationException("Couldn't find the expected \"nuget\" solution folder.");
 
-#if NET9_0
-            throw new InvalidOperationException("NuSpec packaging requires .NET 10 or greater to run.");
-#else
             var nuspecProjects = nuspecSolutionFolder.GetModel().Files!;
 
             foreach (var nuspecProject in nuspecProjects)
@@ -154,8 +149,6 @@ partial class Build
                     .SetProperties(nuspecCommonProperties)
                     .SetOutputDirectory(NuGetArtifactsDirectory));
             }
-#endif
-
         });
 
     Target BuildNuGetPackagesTests => _ => _

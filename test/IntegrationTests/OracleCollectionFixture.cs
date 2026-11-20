@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Globalization;
-using System.Net;
 using System.Text;
 #if NET
 using System.Formats.Asn1;
+using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -657,8 +657,7 @@ exit 1
     {
         return string.Join(
             "\n",
-            new[]
-            {
+            [
                 "#!/usr/bin/env bash",
                 "set -euo pipefail",
                 string.Empty,
@@ -680,7 +679,7 @@ exit 1
                 string.Empty,
                 "exec /u01/scripts/entrypoint.sh",
                 string.Empty,
-            });
+            ]);
     }
 
     private static async Task WaitForOracleDatabaseAsync(IContainer container, string password, CancellationToken cancellationToken)
@@ -934,7 +933,7 @@ internal sealed class OracleDatabaseOpenTelemetryCertificate : IDisposable
         {
             // Schannel cannot use the ephemeral key returned by CopyWithPrivateKey for TLS.
             var certificateBytes = certificate.Export(X509ContentType.Pkcs12);
-#if NET9_0_OR_GREATER
+#if NET
             return X509CertificateLoader.LoadPkcs12(
                 certificateBytes,
                 password: null,

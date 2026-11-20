@@ -13,9 +13,9 @@ internal class PackageVersion
         IReadOnlyDictionary<string, string>? buildProperties = null)
     {
         Version = version;
-        SupportedTargetFrameworks = supportedTargetFrameworks ?? Array.Empty<string>();
-        SupportedExecutionFrameworks = supportedExecutionFrameworks ?? Array.Empty<string>();
-        SupportedPlatforms = supportedPlatforms ?? Array.Empty<string>();
+        SupportedTargetFrameworks = supportedTargetFrameworks ?? [];
+        SupportedExecutionFrameworks = supportedExecutionFrameworks ?? [];
+        SupportedPlatforms = supportedPlatforms ?? [];
         BuildProperties = buildProperties ?? new Dictionary<string, string>();
     }
 

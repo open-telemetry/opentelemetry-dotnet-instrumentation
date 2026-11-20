@@ -21,7 +21,7 @@ public class ModuleTests : TestHelper
         EnableDefaultExporters();
         EnableBytecodeInstrumentation();
 
-        string verifyTestName =
+        var verifyTestName =
 #if NETFRAMEWORK
         $"{nameof(ModuleTests)}.{nameof(Default)}.NetFx";
 #else
@@ -41,7 +41,7 @@ public class ModuleTests : TestHelper
         SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, Constants.ConfigurationValues.None);
         SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, Constants.ConfigurationValues.None);
 
-        string verifyTestName =
+        var verifyTestName =
 #if NETFRAMEWORK
         $"{nameof(ModuleTests)}.{nameof(DefaultNoExporters)}.NetFx";
 #else
@@ -61,7 +61,7 @@ public class ModuleTests : TestHelper
         SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, Constants.ConfigurationValues.None);
         SetEnvironmentVariable(ConfigurationKeys.Traces.OpenTracingEnabled, bool.FalseString);
 
-        string verifyTestName =
+        var verifyTestName =
 #if NETFRAMEWORK
         $"{nameof(ModuleTests)}.{nameof(Minimal)}.NetFx";
 #else

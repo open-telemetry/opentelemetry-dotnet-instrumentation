@@ -33,7 +33,7 @@ public class QuartzTests : TestHelper
         collector.AssertExpectations();
     }
 
-#if NET10_0_OR_GREATER
+#if NET
     [SkippableTheory]
     [Trait("Category", "EndToEnd")]
     [MemberData(nameof(LibraryVersion.Quartz), MemberType = typeof(LibraryVersion))]
@@ -68,7 +68,7 @@ public class QuartzTests : TestHelper
 
     private static bool Quartz4Plus(string packageVersion)
     {
-#if NET10_0_OR_GREATER
+#if NET
         return string.IsNullOrEmpty(packageVersion) || new Version(packageVersion) >= new Version(4, 0, 0);
 #else
         return false;

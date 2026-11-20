@@ -191,7 +191,7 @@ internal sealed class CelParser
                 }
 
                 Consume(CelTokenType.RightParen);
-                expr = new CelFunctionCallNode(identNode.RawExpression, args.ToArray());
+                expr = new CelFunctionCallNode(identNode.RawExpression, [.. args]);
             }
             else
             {

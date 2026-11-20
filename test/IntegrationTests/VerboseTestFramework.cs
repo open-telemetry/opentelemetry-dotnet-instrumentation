@@ -45,6 +45,15 @@ public class VerboseTestFramework : XunitTestFramework
         {
         }
 
+        protected override async Task BeforeTestAssemblyFinishedAsync()
+        {
+            await base.BeforeTestAssemblyFinishedAsync().ConfigureAwait(false);
+#if NET
+            // Complete cleanup before the test host receives the assembly-finished message and can exit.
+            AdditionalDepsHelper.Cleanup();
+#endif
+        }
+
         protected override Task<RunSummary> RunTestCollectionAsync(IMessageBus messageBus, ITestCollection testCollection, IEnumerable<IXunitTestCase> testCases, CancellationTokenSource cancellationTokenSource)
         {
             return new VerboseTestCollectionRunner(testCollection, testCases, DiagnosticMessageSink, messageBus, TestCaseOrderer, new ExceptionAggregator(Aggregator), cancellationTokenSource).RunAsync();

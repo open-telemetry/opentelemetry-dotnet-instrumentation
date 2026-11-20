@@ -2,10 +2,10 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Extensions;
-using Nuke.Common;
-using Nuke.Common.IO;
-using Nuke.Common.Tools.MSBuild;
-using static Nuke.Common.EnvironmentInfo;
+using Fallout.Common;
+using Fallout.Common.IO;
+using Fallout.Common.Tools.MSBuild;
+using static Fallout.Common.EnvironmentInfo;
 
 /// <summary>
 /// Prepares the optional AdditionalDeps fallback for framework-dependent standalone .NET deployments.

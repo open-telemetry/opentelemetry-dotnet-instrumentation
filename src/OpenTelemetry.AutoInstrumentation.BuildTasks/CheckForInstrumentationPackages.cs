@@ -126,7 +126,7 @@ public class CheckForInstrumentationPackages : Microsoft.Build.Utilities.Task
         // Now check for the instrumentation package.
         if (runtimeCopyLocalItemsDictionary.TryGetValue(
             item.InstrumentationNuGetPackageId,
-            out ITaskItem? runtimeInstrumentationNuGetPackage))
+            out var runtimeInstrumentationNuGetPackage))
         {
             // Check if the instrumentation package version is in the expected one.
             var runtimeInstrumentationNuGetPackageVersion = NuGetVersion.Parse(

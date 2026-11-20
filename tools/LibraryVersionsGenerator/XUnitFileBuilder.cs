@@ -25,7 +25,7 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
 
     public CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks)
     {
-        return AddVersion(version, supportedFrameworks, Array.Empty<string>());
+        return AddVersion(version, supportedFrameworks, []);
     }
 
     public override CSharpFileBuilder AddVersion(string version, string[] supportedFrameworks, string[] supportedPlatforms)

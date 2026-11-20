@@ -38,12 +38,12 @@ public class CheckForInstrumentationPackagesTests
     {
         var sut = new TaskWithMockBuildEngine();
 
-        sut.Task.InstrumentationTargetItems = Array.Empty<ITaskItem>();
+        sut.Task.InstrumentationTargetItems = [];
 
-        sut.Task.RuntimeCopyLocalItems = BuildMockRuntimeCopyLocalItems(new (string, string)[]
-        {
+        sut.Task.RuntimeCopyLocalItems = BuildMockRuntimeCopyLocalItems(
+        [
             ("Test.Package.A", "1.2.0")
-        });
+        ]);
 
         Assert.True(sut.Task.Execute());
 
@@ -55,23 +55,23 @@ public class CheckForInstrumentationPackagesTests
     {
         var sut = new TaskWithMockBuildEngine();
 
-        sut.Task.RuntimeCopyLocalItems = BuildMockRuntimeCopyLocalItems(new (string, string)[]
-            {
+        sut.Task.RuntimeCopyLocalItems = BuildMockRuntimeCopyLocalItems(
+            [
                 ("Test.Package.A", "1.2.0"),
                 ("Test.Package.A.Instrumentation", "1.1.0"),
                 ("Test.Package.B", "2.2.0"),
                 ("Test.Package.D", "3.3.0")
-            });
+            ]);
 
-        sut.Task.InstrumentationTargetItems = BuildMockInstrumentationTargetItems(new (string, string, string, string)[]
-            {
+        sut.Task.InstrumentationTargetItems = BuildMockInstrumentationTargetItems(
+            [
                 // Matches A package Id but already has instrumentation package.
                 ("Test.Package.A", "[1.1.0, 2.0.0)", "Test.Package.A.Instrumentation", "1.1.0"),
                 // Matches B package Id but not range.
                 ("Test.Package.B", "[1.0.0, 2.0.0)", "Test.Package.B.Instrumentation", "1.0.0"),
                 // Doesn't match any package Id.
                 ("Test.Package.C", "[1.0.0, 2.0.0)", "Test.Package.C.Instrumentation", "1.0.0")
-            });
+            ]);
 
         Assert.True(sut.Task.Execute());
 
@@ -93,17 +93,17 @@ public class CheckForInstrumentationPackagesTests
     public void MissingInstrumentationPackageTest()
     {
         var sut = new TaskWithMockBuildEngine();
-        sut.Task.RuntimeCopyLocalItems = BuildMockRuntimeCopyLocalItems(new (string, string)[]
-            {
+        sut.Task.RuntimeCopyLocalItems = BuildMockRuntimeCopyLocalItems(
+            [
                     ("Test.Package.A", "1.2.0"),
                     ("Test.Package.D", "3.3.0")
-            });
+            ]);
 
-        sut.Task.InstrumentationTargetItems = BuildMockInstrumentationTargetItems(new (string, string, string, string)[]
-            {
+        sut.Task.InstrumentationTargetItems = BuildMockInstrumentationTargetItems(
+            [
                 // Matches A package Id and range, but is not in the project references.
                 ("Test.Package.A", "[1.1.0, 2.0.0)", "Test.Package.A.Instrumentation", "1.1.0")
-            });
+            ]);
 
         Assert.False(sut.Task.Execute());
 

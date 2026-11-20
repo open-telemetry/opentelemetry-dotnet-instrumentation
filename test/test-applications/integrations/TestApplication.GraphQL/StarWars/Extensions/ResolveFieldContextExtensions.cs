@@ -19,21 +19,25 @@ internal static class ResolveFieldContextExtensions
         {
             if (context.After != null)
             {
-                idList = ids
-                    .SkipWhile(x => !Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(x)).Equals(context.After, StringComparison.Ordinal))
-                    .Take(context.First ?? pageSize).ToList();
+                idList =
+                [
+                    .. ids.SkipWhile(x => !Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(x)).Equals(context.After, StringComparison.Ordinal))
+                        .Take(context.First ?? pageSize)
+                ];
             }
             else
             {
-                idList = ids
-                    .Take(context.First ?? pageSize).ToList();
+                idList = [.. ids.Take(context.First ?? pageSize)];
             }
         }
         else
         {
-            idList = ids.Reverse()
-                .SkipWhile(x => !Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(x)).Equals(context.Before, StringComparison.Ordinal))
-                .Take(context.Last ?? pageSize).ToList();
+            idList =
+            [
+                .. ids.Reverse()
+                    .SkipWhile(x => !Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(x)).Equals(context.Before, StringComparison.Ordinal))
+                    .Take(context.Last ?? pageSize)
+            ];
         }
 
         list = data.GetCharactersAsync(idList).Result as List<TU> ?? throw new InvalidOperationException($"GetCharactersAsync method should return list of '{typeof(TU).Name}' items.");
@@ -42,7 +46,7 @@ internal static class ResolveFieldContextExtensions
 
         return new Connection<TU>
         {
-            Edges = list.Select(x => new Edge<TU> { Cursor = x.Cursor, Node = x }).ToList(),
+            Edges = [.. list.Select(x => new Edge<TU> { Cursor = x.Cursor, Node = x })],
             TotalCount = list.Count,
             PageInfo = new PageInfo
             {

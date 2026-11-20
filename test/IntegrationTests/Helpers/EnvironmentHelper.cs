@@ -92,19 +92,19 @@ internal sealed class EnvironmentHelper
             || Environment.Version.Major >= 5;
     }
 
-    public static string GetNukeBuildOutput()
+    public static string GetFalloutBuildOutput()
     {
-        string nukeOutputPath = Path.Combine(
+        var falloutOutputPath = Path.Combine(
             EnvironmentTools.GetSolutionDirectory(),
             "bin",
             "tracer-home");
 
-        if (Directory.Exists(nukeOutputPath))
+        if (Directory.Exists(falloutOutputPath))
         {
-            return nukeOutputPath;
+            return falloutOutputPath;
         }
 
-        throw new InvalidOperationException($"Unable to find Nuke output at: {nukeOutputPath}. Ensure Nuke has run first.");
+        throw new InvalidOperationException($"Unable to find Fallout output at: {falloutOutputPath}. Ensure Fallout has run first.");
     }
 
     public static bool IsRunningOnCI()
@@ -122,6 +122,22 @@ internal sealed class EnvironmentHelper
         {
             environmentVariables[key] = CustomEnvironmentVariables[key];
         }
+
+#if NET10_0 && !NUGET_PACKAGE_TESTS
+        // .NET 10 keeps DiagnosticSource in the Default ALC, so StartupHook-only tests need
+        // the host to select the distribution's version before initialization (see issue #4924).
+        // Explicit settings, including null, let assembly-redirection tests control this setup.
+        if (!CustomEnvironmentVariables.ContainsKey("DOTNET_ADDITIONAL_DEPS") &&
+            !CustomEnvironmentVariables.ContainsKey("DOTNET_SHARED_STORE") &&
+            environmentVariables.ContainsKey("DOTNET_STARTUP_HOOKS") &&
+            !string.IsNullOrEmpty(environmentVariables["DOTNET_STARTUP_HOOKS"]) &&
+            (!environmentVariables.ContainsKey("CORECLR_ENABLE_PROFILING") || environmentVariables["CORECLR_ENABLE_PROFILING"] != "1"))
+        {
+            var generatedDirectory = AdditionalDepsHelper.OutputDirectory;
+            environmentVariables["DOTNET_ADDITIONAL_DEPS"] = Path.Combine(generatedDirectory, "AdditionalDeps");
+            environmentVariables["DOTNET_SHARED_STORE"] = Path.Combine(generatedDirectory, "store");
+        }
+#endif
     }
 
     public string GetProfilerPath()
@@ -131,7 +147,7 @@ internal sealed class EnvironmentHelper
             return _profilerFileLocation;
         }
 
-        string extension = EnvironmentTools.GetOS() switch
+        var extension = EnvironmentTools.GetOS() switch
         {
             "win" => "dll",
             "linux" => "so",
@@ -139,9 +155,9 @@ internal sealed class EnvironmentHelper
             _ => throw new PlatformNotSupportedException()
         };
 
-        string fileName = $"OpenTelemetry.AutoInstrumentation.Native.{extension}";
-        string nukeOutput = GetNukeBuildOutput();
-        string profilerPath = Path.Combine(nukeOutput, EnvironmentTools.GetClrProfilerDirectoryName(), fileName);
+        var fileName = $"OpenTelemetry.AutoInstrumentation.Native.{extension}";
+        var falloutOutput = GetFalloutBuildOutput();
+        var profilerPath = Path.Combine(falloutOutput, EnvironmentTools.GetClrProfilerDirectoryName(), fileName);
 
         if (File.Exists(profilerPath))
         {
@@ -159,11 +175,12 @@ internal sealed class EnvironmentHelper
         {
             TestAppStartupMode.Auto => IsCoreClr() ||
 #if NET
-            _testApplicationDirectory.Contains("aspnet", StringComparison.Ordinal)
+                _testApplicationDirectory.Contains("aspnet", StringComparison.Ordinal)
 #else
-            _testApplicationDirectory.Contains("aspnet")
+                _testApplicationDirectory.Contains("aspnet")
 #endif
-            ? ".dll" : GetExecutableExtension(),
+                    ? ".dll"
+                    : GetExecutableExtension(),
             TestAppStartupMode.DotnetCLI => ".dll",
             TestAppStartupMode.Exe => GetExecutableExtension(),
             _ => throw new InvalidOperationException($"Unknown startup mode '{startupMode}'")
@@ -257,8 +274,8 @@ internal sealed class EnvironmentHelper
 
     private string GetStartupHookOutputPath()
     {
-        string startupHookOutputPath = Path.Combine(
-            GetNukeBuildOutput(),
+        var startupHookOutputPath = Path.Combine(
+            GetFalloutBuildOutput(),
             "net",
             "OpenTelemetry.AutoInstrumentation.StartupHook.dll");
 
@@ -273,7 +290,7 @@ internal sealed class EnvironmentHelper
 
     private void SetDefaultEnvironmentVariables()
     {
-        string profilerPath = GetProfilerPath();
+        var profilerPath = GetProfilerPath();
 
         CustomEnvironmentVariables["DOTNET_STARTUP_HOOKS"] = GetStartupHookOutputPath();
 
@@ -287,7 +304,7 @@ internal sealed class EnvironmentHelper
         CustomEnvironmentVariables["COR_PROFILER_PATH"] = profilerPath;
 
         SetDefaultLogEnvironmentVariables();
-        CustomEnvironmentVariables["OTEL_DOTNET_AUTO_HOME"] = GetNukeBuildOutput();
+        CustomEnvironmentVariables["OTEL_DOTNET_AUTO_HOME"] = GetFalloutBuildOutput();
         CustomEnvironmentVariables["OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES"] = "TestApplication.*";
 
         // exporters are disabled by default in order not to have errors in the logs

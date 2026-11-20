@@ -6,9 +6,6 @@ using System.Reflection.Emit;
 
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 
-/// <summary>
-/// Duck Type
-/// </summary>
 internal static partial class DuckType
 {
     private static List<MethodInfo> GetMethods(Type baseType)
@@ -375,10 +372,10 @@ internal static partial class DuckType
                 DuckTypeReverseAttributeParameterNamesMismatchException.Throw(proxyMethod);
             }
 
-            Type[] parameterTypes = proxyMethodDuckAttributeParameterTypeNames
+            var parameterTypes = proxyMethodDuckAttributeParameterTypeNames
                                                             .Select(pName => Type.GetType(pName, throwOnError: false))
-                                                            .Where(type => type is not null)
-                                                            .ToArray()!;
+                                                            .OfType<Type>()
+                                                            .ToArray();
             if (parameterTypes.Length == proxyMethodDuckAttributeParameterTypeNames.Length)
             {
                 // all types were loaded

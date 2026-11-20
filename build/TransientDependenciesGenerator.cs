@@ -1,6 +1,6 @@
 using DependencyListGenerator;
+using Fallout.Solutions;
 using Microsoft.Build.Construction;
-using Nuke.Common.ProjectModel;
 using Serilog;
 
 internal static class TransientDependenciesGenerator
@@ -118,8 +118,7 @@ internal static class TransientDependenciesGenerator
 
     public static void Run(Project targetProject)
     {
-        var project = targetProject.GetMSBuildProject();
-        var deps = Generator.EnumerateDependencies(project.FullPath);
+        var deps = Generator.EnumerateDependencies(targetProject.Path);
         var packages = targetProject.Solution.Directory / "src" / Projects.AutoInstrumentationAssemblies /
                        "Directory.Packages.props";
         var packagesProject = ProjectModelTasks.ParseProject(packages);

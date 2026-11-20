@@ -99,7 +99,7 @@ public class KafkaInstrumentationTests
     [Fact]
     public void MessageKeyValueIsExtractedForDecimal()
     {
-        decimal input = decimal.MaxValue;
+        var input = decimal.MaxValue;
         Assert.Equal(Convert.ToString(input, CultureInfo.InvariantCulture), KafkaInstrumentation.ExtractMessageKeyValue(input));
     }
 
