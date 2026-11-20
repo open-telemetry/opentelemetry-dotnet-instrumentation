@@ -285,9 +285,16 @@ isolated ALC and:
    `Environment.Exit` to prevent the runtime from re-executing the
    application in the Default ALC.
 
+When managed initialization is disabled by a file-based configuration failure,
+that state is stored in AppDomain data so the startup hook and managed
+instrumentation loaded in different ALCs observe the same failure. In
+startup-hook-only mode, the startup hook reverts the isolation, removes the
+OpenTelemetry bootstrapper from `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES`, and
+preserves any other hosting startup registrations.
+
 If setup fails, the isolation is reverted and the runtime falls back to
 executing the application normally (unless fail-fast mode is enabled via
-`OTEL_DOTNET_AUTO_FAIL_FAST`).
+`OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED`).
 
 ## AdditionalDeps and shared-store workaround
 

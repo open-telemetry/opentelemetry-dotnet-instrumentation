@@ -25,6 +25,14 @@ public class ParserGeneralTests
         Assert.Contains("Scalar", exception.Message, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData("file_format: [")]
+    [InlineData("file_format: \"unterminated")]
+    public void Parse_InvalidSyntax_ShouldThrowYamlException(string yaml)
+    {
+        Assert.ThrowsAny<YamlException>(() => YamlParser.ParseYamlContent<YamlConfiguration>(yaml));
+    }
+
     [Fact]
     public void Parse_ObjectCollections_ShouldPreserveStructureAndExpandEnvVars()
     {

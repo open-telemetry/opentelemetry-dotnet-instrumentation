@@ -41,8 +41,12 @@ on the **.NET Framework** and optional for **.NET** applications, more info belo
 
 ## Error handling
 
-Initialization errors, usually caused by invalid configuration,
-are logged. If possible, default configuration is used otherwise it crash the application.
+When file-based configuration is enabled and the configured file contains
+invalid YAML or cannot be deserialized, the failure is logged and automatic
+instrumentation is disabled. The application continues unless
+`OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED` is enabled in the environment, in which
+case the failure is propagated during startup. Other initialization failures
+retain their existing behavior.
 
 Errors occurring at application runtime are logged and should never crash the application.
 

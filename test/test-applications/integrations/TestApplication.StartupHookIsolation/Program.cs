@@ -18,6 +18,8 @@ using TestApplication.Shared;
 //      3.2. With the provided exit code within range [1,99], or
 //      3.3. With 0 if application is running in Default ALC or 999 otherwise
 
+Console.WriteLine("[FIRST_EXECUTION]");
+
 var exit = ArgumentHelper.GetArgument(args, "--exit-code", string.Empty);
 var shouldThrow = ArgumentHelper.HasArgument(args, "--throw");
 var exceptionType = ArgumentHelper.GetArgument(args, "--exception-type", string.Empty);
@@ -35,7 +37,6 @@ if (Environment.GetEnvironmentVariable(EnvVarName) is not null)
     throw new InvalidOperationException("FAIL: Double execution detected!");
 }
 
-Console.WriteLine($"[FIRST_EXECUTION] Setup environment variable {EnvVarName}");
 Environment.SetEnvironmentVariable(EnvVarName, "true");
 
 // 3. Exits:
