@@ -5,7 +5,26 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.19.1..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.20.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+- Preserve the capture-time interval in selective sampling batch headers when
+  the interval changes before export. Selective and mixed-mode exporters must
+  update their parsers and read selected samples through
+  `ExportSelectedThreadSamples`.
+
+## [v1.20.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.20.0)
 
 ### Added
 
@@ -41,7 +60,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - .NET only, following packages updated
   - `OpenTelemetry.Instrumentation.AspNetCore` from `1.20.2` to `1.21.0`,
   - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
-    from `1.20.2-beta.1` to `1.21.0-beta.1`,
+    from `1.20.2-beta.1` to `1.21.0-beta.2`,
   - `OpenTelemetry.Resources.Container` from `1.20.1-beta.1` to `1.21.0-beta.1`.
 - .NET 10 only, added `System.Diagnostics.DiagnosticSource` version `11.0.0`.
 - .NET 11 only, following packages updated
@@ -82,8 +101,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `System.Text.Encodings.Web` from `10.0.14` to `11.0.0`,
   - `System.Text.Json` from `10.0.14` to `11.0.0`.
 
-### Deprecated
-
 ### Removed
 
 - Support for .NET 8 and .NET 9. Both frameworks reached end of support.
@@ -91,9 +108,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
-- Preserve the selective sampling interval from each capture cycle in native
-  selective and CPU batch headers, including when the interval changes before
-  export.
 - Fixed `ORACLEMDA` bytecode instrumentation logging an
   `AmbiguousMatchException` on every `OracleConnection.Open` and
   `OracleConnection.OpenAsync` call, which prevented the integration from
