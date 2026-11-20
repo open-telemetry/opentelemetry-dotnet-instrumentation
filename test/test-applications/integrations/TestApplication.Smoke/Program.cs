@@ -18,6 +18,11 @@ internal sealed class Program
 
     public static void Main(string[] args)
     {
+        if (ProcessContextScenario.TryRun(args))
+        {
+            return;
+        }
+
         ConsoleHelper.WriteSplashScreen(args);
         EmitTracesAndLogs();
         EmitMetrics();

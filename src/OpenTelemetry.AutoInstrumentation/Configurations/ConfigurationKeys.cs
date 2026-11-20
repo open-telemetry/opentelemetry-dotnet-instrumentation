@@ -156,6 +156,16 @@ internal partial class ConfigurationKeys
         /// </summary>
         public static class InstrumentationOptions
         {
+            /// <summary>
+            /// Configuration key for how process environment context is extracted.
+            /// </summary>
+            public const string ProcessContextExtractionMode = "OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_EXTRACTION_MODE";
+
+            /// <summary>
+            /// Configuration key for whether context is injected into child process environments.
+            /// </summary>
+            public const string ProcessContextInjectionEnabled = "OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_INJECTION_ENABLED";
+
 #if NETFRAMEWORK
             /// <summary>
             /// Configuration key for ASP.NET instrumentation to enable capturing HTTP request headers as span tags.

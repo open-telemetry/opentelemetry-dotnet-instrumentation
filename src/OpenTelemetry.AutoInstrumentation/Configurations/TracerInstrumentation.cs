@@ -150,5 +150,10 @@ internal enum TracerInstrumentation
     /// <summary>
     /// SQLite instrumentation.
     /// </summary>
-    Sqlite = 25
+    Sqlite = 25,
+
+    /// <summary>
+    /// Process environment context propagation.
+    /// </summary>
+    Process = 26
 }

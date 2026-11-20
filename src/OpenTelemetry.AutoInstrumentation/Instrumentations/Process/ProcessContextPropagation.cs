@@ -1,0 +1,110 @@
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
+using System.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.Configurations;
+using OpenTelemetry.Context.Propagation;
+
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Process;
+
+internal sealed class ProcessContextPropagation
+{
+    private readonly ProcessContextExtractionMode _mode;
+    private readonly TextMapPropagator _propagator;
+    private readonly PropagationContext _incoming;
+    private readonly IEnumerable<ActivityLink>? _incomingLinks;
+
+    internal ProcessContextPropagation(ProcessContextExtractionMode mode, TextMapPropagator propagator, IDictionary<string, string?> environment)
+    {
+        _mode = mode;
+        _propagator = propagator;
+        _incoming = mode == ProcessContextExtractionMode.None ? default : propagator.Extract(default, environment, EnvironmentCarrier.Get);
+        if (mode == ProcessContextExtractionMode.Link && HasIncomingTraceContext)
+        {
+            _incomingLinks = Array.AsReadOnly<ActivityLink>([new(_incoming.ActivityContext)]);
+        }
+    }
+
+    internal bool HasIncomingTraceContext => IsValid(_incoming.ActivityContext);
+
+    internal void InitializeBaggage()
+    {
+        if (_incoming.Baggage.Count > 0)
+        {
+            // Startup input follows the SDK's ordinary baggage inheritance thereafter.
+            var baggage = _incoming.Baggage;
+            foreach (var item in Baggage.Current.GetBaggage())
+            {
+                baggage = baggage.SetBaggage(item.Key, item.Value);
+            }
+
+            Baggage.Current = baggage;
+        }
+    }
+
+    internal void ApplyToRoot(ref ActivityContext context, string? parentId, ref IEnumerable<ActivityLink>? links)
+    {
+        if (_mode == ProcessContextExtractionMode.None || !IsValid(_incoming.ActivityContext) ||
+            context != default || parentId is not null || Activity.Current is not null)
+        {
+            return;
+        }
+
+        if (_mode == ProcessContextExtractionMode.Parent)
+        {
+            context = _incoming.ActivityContext;
+            return;
+        }
+
+        if (links is null)
+        {
+            links = _incomingLinks;
+            return;
+        }
+
+        // Preserve deferred enumeration: a sampler can drop the activity without
+        // reading links, in which case the application iterator must not run.
+        links = AppendIncomingLink(links, _incoming.ActivityContext);
+    }
+
+    internal void InjectEnvironment(IDictionary<string, string?> environment)
+    {
+        var context = Activity.Current?.Context ?? default;
+        if (!IsValid(context))
+        {
+            context = _mode == ProcessContextExtractionMode.Parent ? _incoming.ActivityContext : default;
+        }
+
+        // Clear fields that a propagator may omit (for example, empty tracestate/baggage).
+        // Otherwise an inherited startup value can disagree with the active context.
+        if (_propagator.Fields is { } fields)
+        {
+            foreach (var field in fields)
+            {
+                environment.Remove(EnvironmentCarrier.NormalizeKey(field));
+            }
+        }
+
+        _propagator.Inject(new PropagationContext(context, Baggage.Current), environment, EnvironmentCarrier.Set);
+    }
+
+    private static IEnumerable<ActivityLink> AppendIncomingLink(IEnumerable<ActivityLink> links, ActivityContext incoming)
+    {
+        var alreadyLinked = false;
+        foreach (var link in links)
+        {
+            alreadyLinked |= link.Context.TraceId == incoming.TraceId && link.Context.SpanId == incoming.SpanId;
+            yield return link;
+        }
+
+        if (!alreadyLinked)
+        {
+            yield return new ActivityLink(incoming);
+        }
+    }
+
+    private static bool IsValid(ActivityContext context)
+    {
+        return context.TraceId != default && context.SpanId != default;
+    }
+}

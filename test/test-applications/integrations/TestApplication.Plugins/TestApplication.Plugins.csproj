@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <Compile Include="..\TestApplication.Smoke\Program.cs" />
+    <Compile Include="..\TestApplication.Smoke\ProcessContextScenario.cs" />
     <Compile Include="..\TestApplication.Smoke\SmokeLoggingExtensions.cs" />
   </ItemGroup>
 
