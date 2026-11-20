@@ -85,6 +85,8 @@
              Link="Util\DeploymentDetector.Net.cs" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\AssemblyUtils.Net.cs"
              Link="Util\AssemblyUtils.Net.cs" />
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Util\NativeProfilerHelper.Net.cs"
+             Link="Util\NativeProfilerHelper.Net.cs" />
   </ItemGroup>
 
 </Project>

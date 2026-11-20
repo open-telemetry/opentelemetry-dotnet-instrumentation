@@ -1,0 +1,4 @@
+LIBRARY "TestLibrary.ProfilerProxy.NativeDep.dll"
+EXPORTS
+    DllGetClassObject PRIVATE
+    DllCanUnloadNow PRIVATE

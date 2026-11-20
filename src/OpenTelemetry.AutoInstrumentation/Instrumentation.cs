@@ -95,6 +95,9 @@ internal static class Instrumentation
         }
 #endif
 
+#if !NETFRAMEWORK
+        bool profilerAvailable;
+#endif
         try
         {
             // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
@@ -107,16 +110,21 @@ internal static class Instrumentation
             AppDomain.CurrentDomain.ProcessExit += OnExit;
             AppDomain.CurrentDomain.DomainUnload += OnExit;
 
-            var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
+#if NETFRAMEWORK
+            // The native profiler has already injected the Loader to reach managed initialization.
+            ContinuousProfiler.Initialize(_pluginManager!);
+#else
+            profilerAvailable = NativeProfilerHelper.IsProfilerAttached();
 
-            if (profilerEnabled)
+            if (profilerAvailable)
             {
                 ContinuousProfiler.Initialize(_pluginManager!);
             }
             else
             {
-                Logger.Information("CLR Profiler is not enabled. Continuous Profiler will be not started even if configured correctly.");
+                Logger.Information("OpenTelemetry native profiler is unavailable. Continuous Profiler will not be started even if configured correctly.");
             }
+#endif
 
             if (TracerSettings.Value.TracesEnabled || MetricSettings.Value.MetricsEnabled)
             {
@@ -185,7 +193,9 @@ internal static class Instrumentation
             throw;
         }
 
-        if (GeneralSettings.Value.ProfilerEnabled)
+#if !NETFRAMEWORK
+        if (profilerAvailable)
+#endif
         {
             RegisterSharedBytecodeInstrumentations(InstrumentationDefinitions.GetSharedDefinitions());
 
@@ -207,10 +217,12 @@ internal static class Instrumentation
                 Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
             }
         }
+#if !NETFRAMEWORK
         else
         {
-            Logger.Debug("Skipping CLR Profiler initialization. {0} environment variable was not set to '1'.", ConfigurationKeys.ProfilingEnabled);
+            Logger.Debug("Skipping bytecode instrumentation registration because the OpenTelemetry native profiler is unavailable.");
         }
+#endif
 
         if (TracerSettings.Value.OpenTracingEnabled)
         {

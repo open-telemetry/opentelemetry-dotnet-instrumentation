@@ -1,0 +1,26 @@
+file_format: "1.0"
+
+tracer_provider:
+  processors:
+    - batch:
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
+
+instrumentation/development:
+  dotnet:
+    traces:
+      additional_sources: [StartupHookIsolation.ActivitySource]
+    no_code:
+      targets:
+        - target:
+            assembly:
+              name: TestApplication.StartupHookIsolation
+            type: TestApplication.StartupHookIsolation.BytecodeProbe
+            method: Run
+            signature:
+              return_type: System.Void
+              parameter_types: []
+          span:
+            name: ProfilerProxy.Bytecode
+            kind: internal
