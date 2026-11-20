@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.19.1..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.20.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [v1.20.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.20.0)
 
 ### Added
 
@@ -81,8 +95,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `System.IO.Pipelines` from `10.0.14` to `11.0.0`,
   - `System.Text.Encodings.Web` from `10.0.14` to `11.0.0`,
   - `System.Text.Json` from `10.0.14` to `11.0.0`.
-
-### Deprecated
 
 ### Removed
 
