@@ -26,6 +26,7 @@ internal static class Program
         const string NoAppDomainsSwitch = "--no-app-domains";
 #if NETFRAMEWORK
         const string PartialTrustSwitch = "--partial-trust";
+        const string ConfiguredAppDomainsSwitch = "--configured-app-domains";
 #endif
 
         if (args?.Length > 0)
@@ -40,6 +41,12 @@ internal static class Program
             if (args.Length == 1 && ArgumentHelper.HasArgument(args, PartialTrustSwitch))
             {
                 RunInPartiallyTrustedAppDomain();
+                return;
+            }
+
+            if (args.Length == 1 && ArgumentHelper.HasArgument(args, ConfiguredAppDomainsSwitch))
+            {
+                RunConfiguredAppDomains(applicationCodeBase: Assembly.GetExecutingAssembly().CodeBase);
                 return;
             }
 #endif
@@ -91,6 +98,44 @@ internal static class Program
         finally
         {
             AppDomain.Unload(appDomain);
+        }
+    }
+
+    private static void RunConfiguredAppDomains(string applicationCodeBase)
+    {
+        for (var i = 1; i <= 2; i++)
+        {
+            var configFile = Path.GetTempFileName();
+            var configuration = $"""
+                <configuration><appSettings>
+                <add key="OTEL_SERVICE_NAME" value="domain-{i}" />
+                <add key="OTEL_RESOURCE_ATTRIBUTES" value="domain.number={i}" />
+                <add key="OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES" value="ByteCode.Plugin.StrongNamedValidation" />
+                </appSettings></configuration>
+                """;
+            File.WriteAllText(configFile, configuration);
+
+            try
+            {
+                var setup = new AppDomainSetup
+                {
+                    ApplicationBase = AppDomain.CurrentDomain.BaseDirectory,
+                    ConfigurationFile = configFile
+                };
+                var appDomain = AppDomain.CreateDomain($"configured-domain-{i}", null, setup);
+                try
+                {
+                    appDomain.ExecuteAssembly(applicationCodeBase, ["--no-app-domains"]);
+                }
+                finally
+                {
+                    AppDomain.Unload(appDomain);
+                }
+            }
+            finally
+            {
+                File.Delete(configFile);
+            }
         }
     }
 
