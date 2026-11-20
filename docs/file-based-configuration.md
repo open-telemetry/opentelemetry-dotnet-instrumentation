@@ -565,11 +565,12 @@ instrumentation/development:
 ## Instrumentation options
 
 For `process`, omitting the entry disables the instrumentation. An empty
-`process:` enables startup context extraction in `parent` mode and child
-environment injection. Omitting or leaving either `context_extraction:` or
+`process:` enables child environment injection and leaves startup context
+extraction disabled (`none`). Omitting or leaving either `context_extraction:` or
 `context_injection:` empty uses the same defaults. To disable injection
 explicitly, set `context_injection.enabled: false`; to disable extraction, set
-`context_extraction.mode: none`.
+`context_extraction.mode: none`. To enable extraction, set
+`context_extraction.mode: parent` or `link`.
 See [Process instrumentation](process-instrumentation.md)
 for supported .NET APIs, runtimes, and behavior. Both directions use the
 propagators selected by the [`propagator` configuration](#propagator-configuration);
@@ -596,7 +597,7 @@ instrumentation/development:
     traces:
       process:
         context_extraction:
-          # Supported values: parent, link, none. Default is parent.
+          # Explicitly enable extraction. The instrumentation default is none.
           mode: ${OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_EXTRACTION_MODE:-parent}
         context_injection:
           # Independent of extraction. Default is true.

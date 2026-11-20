@@ -34,6 +34,7 @@ public class ProcessContextPropagationTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [InlineData(null, true)]
+    [InlineData("parent", true)]
     [InlineData("parent", false)]
     [InlineData("link", true)]
     [InlineData("link", false)]
@@ -48,7 +49,7 @@ public class ProcessContextPropagationTests : TestHelper
         var (output, _, _) = RunTestApplication(new() { Arguments = "process-context-roots" });
         var activities = ReadRows(output, "PROCESS_CONTEXT|activity|").ToDictionary(row => row[0], StringComparer.Ordinal);
         var samples = ReadRows(output, "PROCESS_CONTEXT|sample|").ToDictionary(row => row[0], StringComparer.Ordinal);
-        var parentMode = mode is null or "parent";
+        var parentMode = mode == "parent";
 
         foreach (var name in new[] { "root", "repeated", "kind-first", "delayed", "task", "baggage-updated" })
         {
@@ -134,7 +135,7 @@ public class ProcessContextPropagationTests : TestHelper
         }
 
         var baggage = ReadRows(output, "PROCESS_CONTEXT|baggage|").ToDictionary(row => row[0], StringComparer.Ordinal);
-        Assert.Equal(mode == "none" ? string.Empty : "environment", baggage["startup"][1]);
+        Assert.Equal(mode is null or "none" ? string.Empty : "environment", baggage["startup"][1]);
         Assert.Equal("updated", baggage["updated"][1]);
         Assert.Contains("PROCESS_CONTEXT|unsubscribed|unchanged", output, StringComparison.Ordinal);
         Assert.Contains("PROCESS_CONTEXT|dropping-listener|unchanged", output, StringComparison.Ordinal);
@@ -183,6 +184,7 @@ public class ProcessContextPropagationTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_EXTRACTION_MODE", "parent");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_ENABLED", groupEnabled ? "true" : "false");
         SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", profilerEnabled ? "1" : "0");
         SetEnvironmentVariable("TRACEPARENT", $"00-{TraceId}-{ParentSpanId}-01");

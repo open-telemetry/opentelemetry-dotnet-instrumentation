@@ -11,7 +11,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Added experimental process environment context propagation, with `parent`,
   `link`, and `none` extraction modes for root `ActivitySource` activities,
-  startup baggage extraction, and automatic context injection into child processes.
+  opt-in startup baggage extraction (extraction defaults to `none`), and automatic
+  context injection into child processes on .NET 10, .NET 11, and .NET Framework.
 
 ### Changed
 

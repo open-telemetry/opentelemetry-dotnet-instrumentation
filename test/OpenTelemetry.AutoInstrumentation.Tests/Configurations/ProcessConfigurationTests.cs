@@ -13,8 +13,8 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 public class ProcessConfigurationTests
 {
     [Theory]
-    [InlineData(null, (int)ProcessContextExtractionMode.Parent)]
-    [InlineData("", (int)ProcessContextExtractionMode.Parent)]
+    [InlineData(null, (int)ProcessContextExtractionMode.None)]
+    [InlineData("", (int)ProcessContextExtractionMode.None)]
     [InlineData("parent", (int)ProcessContextExtractionMode.Parent)]
     [InlineData("link", (int)ProcessContextExtractionMode.Link)]
     [InlineData("none", (int)ProcessContextExtractionMode.None)]
@@ -34,14 +34,14 @@ public class ProcessConfigurationTests
     [InlineData("unsupported")]
     [InlineData("1")]
     [InlineData("off")]
-    public void LoadEnvVar_InvalidExtractionModeUsesParent(string value)
+    public void LoadEnvVar_InvalidExtractionModeUsesNone(string value)
     {
         var settings = LoadEnvironmentSettings(new NameValueCollection
         {
             { ConfigurationKeys.Traces.InstrumentationOptions.ProcessContextExtractionMode, value },
         });
 
-        Assert.Equal(ProcessContextExtractionMode.Parent, settings.InstrumentationOptions.ProcessContextExtractionMode);
+        Assert.Equal(ProcessContextExtractionMode.None, settings.InstrumentationOptions.ProcessContextExtractionMode);
     }
 
     [Theory]
@@ -72,7 +72,7 @@ public class ProcessConfigurationTests
         });
 
         Assert.Equal(expected, settings.InstrumentationOptions.ProcessContextInjectionEnabled);
-        Assert.Equal(ProcessContextExtractionMode.Parent, settings.InstrumentationOptions.ProcessContextExtractionMode);
+        Assert.Equal(ProcessContextExtractionMode.None, settings.InstrumentationOptions.ProcessContextExtractionMode);
     }
 
     [Fact]
@@ -111,7 +111,7 @@ public class ProcessConfigurationTests
         var settings = LoadYamlSettings("{}");
 
         Assert.DoesNotContain(TracerInstrumentation.Process, settings.EnabledInstrumentations);
-        Assert.Equal(ProcessContextExtractionMode.Parent, settings.InstrumentationOptions.ProcessContextExtractionMode);
+        Assert.Equal(ProcessContextExtractionMode.None, settings.InstrumentationOptions.ProcessContextExtractionMode);
         Assert.True(settings.InstrumentationOptions.ProcessContextInjectionEnabled);
     }
 
@@ -128,7 +128,7 @@ public class ProcessConfigurationTests
         var settings = LoadYamlSettings(traces);
 
         Assert.Contains(TracerInstrumentation.Process, settings.EnabledInstrumentations);
-        Assert.Equal(ProcessContextExtractionMode.Parent, settings.InstrumentationOptions.ProcessContextExtractionMode);
+        Assert.Equal(ProcessContextExtractionMode.None, settings.InstrumentationOptions.ProcessContextExtractionMode);
         Assert.True(settings.InstrumentationOptions.ProcessContextInjectionEnabled);
     }
 
@@ -151,11 +151,11 @@ public class ProcessConfigurationTests
     [InlineData("unsupported")]
     [InlineData("1")]
     [InlineData("off")]
-    public void LoadFile_InvalidExtractionModeUsesParent(string mode)
+    public void LoadFile_InvalidExtractionModeUsesNone(string mode)
     {
         var settings = LoadYamlSettings($"process: {{context_extraction: {{mode: {mode}}}}}");
 
-        Assert.Equal(ProcessContextExtractionMode.Parent, settings.InstrumentationOptions.ProcessContextExtractionMode);
+        Assert.Equal(ProcessContextExtractionMode.None, settings.InstrumentationOptions.ProcessContextExtractionMode);
     }
 
     [Theory]

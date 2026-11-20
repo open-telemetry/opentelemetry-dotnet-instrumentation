@@ -16,7 +16,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Process.Integration
     returnTypeName: "System.Diagnostics.Activity",
     parameterTypeNames: [ClrNames.String, "System.Diagnostics.ActivityKind", "System.Diagnostics.ActivityContext", ClrNames.String, "System.Collections.Generic.IEnumerable`1[System.Collections.Generic.KeyValuePair`2[System.String,System.Object]]", "System.Collections.Generic.IEnumerable`1[System.Diagnostics.ActivityLink]", "System.DateTimeOffset", ClrNames.Bool, "System.Diagnostics.ActivityIdFormat"],
     minimumVersion: "10.0.0",
-    maximumVersion: "10.65535.65535",
+    maximumVersion: "11.*.*",
     integrationName: "Process",
     type: InstrumentationType.Trace)]
 public static class ActivitySourceCreateActivityIntegration

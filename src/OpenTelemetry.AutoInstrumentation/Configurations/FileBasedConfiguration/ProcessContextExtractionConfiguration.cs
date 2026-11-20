@@ -10,7 +10,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations.FileBasedConfiguratio
 internal class ProcessContextExtractionConfiguration
 {
     /// <summary>
-    /// Gets or sets how extracted context is applied. Defaults to parent.
+    /// Gets or sets how extracted context is applied. Defaults to none.
     /// </summary>
     [YamlMember(Alias = "mode")]
     public string? Mode { get; set; }

@@ -3,8 +3,10 @@
 The `PROCESS` trace instrumentation connects telemetry across
 process boundaries. It extracts incoming context from the process environment
 and injects outgoing context into child process environments using the configured
-propagators. It implements
-[environment context propagation](https://github.com/open-telemetry/opentelemetry-specification/issues/5398).
+propagators and the standard
+[environment carrier](https://opentelemetry.io/docs/specs/otel/context/env-carriers/)
+key mapping. This experimental instrumentation can apply startup context to
+multiple root activities throughout the process, as described below.
 
 ## Configuration
 
@@ -12,21 +14,27 @@ See the [environment variable reference](config.md#process-environment-context-p
 for settings and defaults, or use the corresponding
 [YAML options](file-based-configuration.md#instrumentation-options).
 
-Extraction and injection are independent. Set the extraction mode to `none` for
-injection only, or disable injection for extraction only. Disabling `PROCESS`
+Extraction defaults to `none`: set the mode to `parent` or `link` to accept
+incoming trace context and baggage. This avoids installing the activity factory
+hook by default. Child-process injection is enabled independently; disable it
+for extraction only. Disabling `PROCESS`
 disables both directions. Existing Process metrics are configured independently.
 
-Unsupported extraction modes are logged and use `parent`, or fail initialization
+Unsupported extraction modes are logged and use `none`, or fail initialization
 when fail-fast is enabled. Use `OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED=true` for
 environment configuration, or `fail_fast: true` in YAML.
+
+Accepting launch-supplied context does not authenticate its sender. Incoming
+sampling flags can affect recording decisions, and baggage may propagate to
+downstream services through the configured propagators and instrumentations.
 
 Startup-hook-only deployments leave this instrumentation inactive and log an
 explanatory message.
 
 ## Incoming context and activities
 
-Extraction uses the process environment captured once at startup. Incoming trace
-context applies automatically to root activities created through
+When enabled, extraction uses the process environment captured once at startup.
+Incoming trace context applies automatically to root activities created through
 `System.Diagnostics.ActivitySource.StartActivity(...)` or
 `ActivitySource.CreateActivity(...)`, including the simple overload:
 
@@ -76,7 +84,7 @@ YAML configuration are required for manually created activities.
 
 ### Implementation and support boundaries
 
-The profiler intercepts DiagnosticSource 10.x's private nine-argument
+The profiler intercepts DiagnosticSource 10.x and 11.x's private nine-argument
 `ActivitySource.CreateActivity` method, the shared implementation used by the
 public `StartActivity` and `CreateActivity` overloads. The hook supplies parent
 and link arguments before sampling and ID generation, then lets the original
@@ -100,8 +108,9 @@ or .NET Framework `EnvironmentVariables` collection.
 
 `ProcessStartInfo.UseShellExecute` must be `false`. Shell-executed launches are
 skipped, including .NET Framework launches that use the default value `true`.
-The hooks intercept `Process.StartCore(ProcessStartInfo)` on .NET and
-`Process.StartWithCreateProcess(ProcessStartInfo)` on .NET Framework.
+The hooks intercept `Process.StartCore(ProcessStartInfo)` on .NET 10,
+the five-argument `Process.StartCore` overload with explicit handles on .NET 11,
+and `Process.StartWithCreateProcess(ProcessStartInfo)` on .NET Framework.
 
 Injection uses the current context at each process launch, without creating a
 process span. It replaces the configured propagator's fields in a copy of the

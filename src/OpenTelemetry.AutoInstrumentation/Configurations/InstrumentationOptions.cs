@@ -101,7 +101,7 @@ internal class InstrumentationOptions
     /// <summary>
     /// Gets how process environment context is extracted for root activities.
     /// </summary>
-    public ProcessContextExtractionMode ProcessContextExtractionMode { get; } = ProcessContextExtractionMode.Parent;
+    public ProcessContextExtractionMode ProcessContextExtractionMode { get; } = ProcessContextExtractionMode.None;
 
     /// <summary>
     /// Gets a value indicating whether context is injected into child process environments.
@@ -190,12 +190,12 @@ internal class InstrumentationOptions
         {
             case null:
             case "":
+            case "none":
+                return ProcessContextExtractionMode.None;
             case "parent":
                 return ProcessContextExtractionMode.Parent;
             case "link":
                 return ProcessContextExtractionMode.Link;
-            case "none":
-                return ProcessContextExtractionMode.None;
             default:
                 var message = $"Process context extraction mode '{value}' is not supported. Supported values are parent, link, and none.";
                 Logger.Error(message);
@@ -205,7 +205,7 @@ internal class InstrumentationOptions
                     throw new NotSupportedException(message);
                 }
 
-                return ProcessContextExtractionMode.Parent;
+                return ProcessContextExtractionMode.None;
         }
     }
 

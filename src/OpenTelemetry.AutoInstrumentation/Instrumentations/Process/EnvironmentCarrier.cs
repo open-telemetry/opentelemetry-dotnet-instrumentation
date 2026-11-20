@@ -51,7 +51,7 @@ internal static class EnvironmentCarrier
             normalized[i + prefixLength] = character switch
             {
                 >= 'a' and <= 'z' => (char)(character - ('a' - 'A')),
-                >= 'A' and <= 'Z' or >= '0' and <= '9' or '_' => character,
+                (>= 'A' and <= 'Z') or (>= '0' and <= '9') or '_' => character,
                 _ => '_'
             };
         }
