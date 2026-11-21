@@ -151,15 +151,22 @@ internal class OtlpSettings
             var pairs = headersList!.Split([','], StringSplitOptions.RemoveEmptyEntries);
             foreach (var pair in pairs)
             {
-                var parts = pair.Split('=');
-                if (parts.Length == 2)
+                // The list uses the W3C Baggage format, where '=' is a valid value character,
+                // so only the first '=' separates the key from the value. The format also allows
+                // optional whitespace around the separators, hence the trimming.
+                var keyValuePair = pair.Split(['='], 2);
+                if (keyValuePair.Length != 2)
                 {
-                    var key = parts[0];
-                    var value = parts[1];
-                    if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
-                    {
-                        headerDict[key] = value;
-                    }
+                    // The entry is not logged, it can carry a secret.
+                    Logger.Warning("Skipping an OTLP header entry in file-based configuration that is not in the 'key=value' format.");
+                    continue;
+                }
+
+                var key = keyValuePair[0].Trim();
+                var value = keyValuePair[1].Trim();
+                if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
+                {
+                    headerDict[key] = value;
                 }
             }
         }
