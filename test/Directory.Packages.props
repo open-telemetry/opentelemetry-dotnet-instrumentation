@@ -5,7 +5,7 @@
     <PackageVersion Include="Confluent.Kafka" Version="2.16.0" />
     <PackageVersion Include="CoreWCF.Http" Version="1.9.2" />
     <PackageVersion Include="CoreWCF.NetTcp" Version="1.9.2" />
-    <PackageVersion Include="CoreWCF.Primitives" Version="1.9.1" />
+    <PackageVersion Include="CoreWCF.Primitives" Version="1.9.2" />
     <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="9.5.3" />
     <PackageVersion Include="FsCheck.Xunit" Version="3.6.0" />
     <PackageVersion Include="FSharp.Core" Version="11.0.101" />
