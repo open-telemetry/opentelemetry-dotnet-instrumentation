@@ -227,7 +227,7 @@ public static partial class LibraryVersion
                 "3.7.0",
 #endif
 #if NET11_0 || NET10_0 || NET462
-                "3.14.0",
+                "3.14.1",
 #endif
 #endif
             ];
@@ -277,10 +277,13 @@ public static partial class LibraryVersion
 #else
                 "8.0.9",
 #if NET11_0 || NET10_0
-                "9.0.4",
+                "9.0.5",
 #endif
 #if NET11_0 || NET10_0
-                "10.0.3",
+                "10.0.4",
+#endif
+#if NET11_0 || NET10_0
+                "11.0.0",
 #endif
 #endif
             ];
@@ -304,7 +307,7 @@ public static partial class LibraryVersion
                 "10.1.3",
 #endif
 #if NET11_0 || NET10_0
-                "10.2.9",
+                "10.2.10",
 #endif
 #endif
             ];
@@ -357,12 +360,12 @@ public static partial class LibraryVersion
                 string.Empty,
 #else
                 "3.6.0",
-                "3.22.10",
+                "3.22.11",
 #if NET11_0 || NET10_0
                 "4.0.0",
 #endif
 #if NET11_0 || NET10_0
-                "4.7.3",
+                "4.8.1",
 #endif
 #endif
             ];
@@ -537,7 +540,7 @@ public static partial class LibraryVersion
                 "1.8.1",
 #endif
 #if NET11_0 || NET10_0
-                "1.9.1",
+                "1.9.2",
 #endif
 #endif
             ];

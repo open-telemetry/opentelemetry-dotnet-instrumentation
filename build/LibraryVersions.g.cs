@@ -109,7 +109,7 @@ public static partial class LibraryVersion
                 new("3.0.0", supportedFrameworks: [ "net11.0", "net10.0", "net472" ]),
                 new("3.5.0", supportedFrameworks: [ "net11.0", "net10.0", "net472" ]),
                 new("3.7.0", supportedFrameworks: [ "net11.0", "net10.0", "net472" ]),
-                new("3.14.0", supportedFrameworks: [ "net11.0", "net10.0", "net472" ]),
+                new("3.14.1", supportedFrameworks: [ "net11.0", "net10.0", "net472" ]),
             ]
         },
         {
@@ -130,8 +130,9 @@ public static partial class LibraryVersion
             "TestApplication.Npgsql",
             [
                 new("8.0.9"),
-                new("9.0.4", supportedFrameworks: [ "net11.0", "net10.0" ]),
-                new("10.0.3", supportedFrameworks: [ "net11.0", "net10.0" ]),
+                new("9.0.5", supportedFrameworks: [ "net11.0", "net10.0" ]),
+                new("10.0.4", supportedFrameworks: [ "net11.0", "net10.0" ]),
+                new("11.0.0", supportedFrameworks: [ "net11.0", "net10.0" ]),
             ]
         },
         {
@@ -140,7 +141,7 @@ public static partial class LibraryVersion
                 new("8.2.6"),
                 new("9.2.10", supportedFrameworks: [ "net11.0", "net10.0" ]),
                 new("10.1.3", supportedFrameworks: [ "net11.0", "net10.0" ]),
-                new("10.2.9", supportedFrameworks: [ "net11.0", "net10.0" ]),
+                new("10.2.10", supportedFrameworks: [ "net11.0", "net10.0" ]),
             ]
         },
         {
@@ -161,9 +162,9 @@ public static partial class LibraryVersion
             "TestApplication.Quartz",
             [
                 new("3.6.0"),
-                new("3.22.10"),
+                new("3.22.11"),
                 new("4.0.0", supportedFrameworks: [ "net11.0", "net10.0" ]),
-                new("4.7.3", supportedFrameworks: [ "net11.0", "net10.0" ]),
+                new("4.8.1", supportedFrameworks: [ "net11.0", "net10.0" ]),
             ]
         },
         {
@@ -234,7 +235,7 @@ public static partial class LibraryVersion
             "TestApplication.Wcf.Core",
             [
                 new("1.8.1", supportedFrameworks: [ "net11.0", "net10.0" ]),
-                new("1.9.1", supportedFrameworks: [ "net11.0", "net10.0" ]),
+                new("1.9.2", supportedFrameworks: [ "net11.0", "net10.0" ]),
             ]
         },
     };
