@@ -263,7 +263,7 @@ internal static class PackageVersionDefinitions
             [
                 // new("3.4.0"), - transitive vulnerability https://github.com/advisories/GHSA-rxg9-xrhp-64gj, <= 3.5.0
                 new("3.6.0"),
-                new("3.22.10"),
+                new("3.22.11"),
                 new("4.0.0", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"]),
                 new("*", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"])
             ]
