@@ -277,10 +277,13 @@ public static partial class LibraryVersion
 #else
                 "8.0.9",
 #if NET11_0 || NET10_0
-                "9.0.4",
+                "9.0.5",
 #endif
 #if NET11_0 || NET10_0
-                "10.0.3",
+                "10.0.4",
+#endif
+#if NET11_0 || NET10_0
+                "11.0.0",
 #endif
 #endif
             ];
