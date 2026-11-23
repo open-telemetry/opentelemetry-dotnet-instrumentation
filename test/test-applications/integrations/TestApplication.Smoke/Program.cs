@@ -18,6 +18,7 @@ internal sealed class Program
 
     public static void Main(string[] args)
     {
+        Console.WriteLine("[TEST_APPLICATION_ENTRYPOINT]");
         ConsoleHelper.WriteSplashScreen(args);
         EmitTracesAndLogs();
         EmitMetrics();

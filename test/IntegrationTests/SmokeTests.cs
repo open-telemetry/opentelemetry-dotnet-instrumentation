@@ -491,6 +491,42 @@ public class SmokeTests : TestHelper
         collector.AssertEmpty();
     }
 
+#if NETFRAMEWORK
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void MalformedFileConfigurationHonorsFailFast(bool failFast)
+    {
+        var configFile = Path.GetTempFileName();
+        File.WriteAllText(configFile, "file_format:\n  - '1.0'\n");
+        SetEnvironmentVariable("OTEL_EXPERIMENTAL_FILE_BASED_CONFIGURATION_ENABLED", "true");
+        SetEnvironmentVariable("OTEL_CONFIG_FILE", configFile);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", failFast ? "true" : "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
+
+        try
+        {
+            var (standardOutput, _, _) = RunTestApplication(
+                assertExitCode: failFast ? static (_, exitCode) => Assert.NotEqual(0, exitCode) : null);
+
+            AssertInvalidFileConfigurationError(standardOutput, configFile);
+            if (failFast)
+            {
+                Assert.DoesNotContain(ApplicationEntrypointMarker, standardOutput, StringComparison.Ordinal);
+            }
+            else
+            {
+                Assert.Contains(ApplicationEntrypointMarker, standardOutput, StringComparison.Ordinal);
+            }
+        }
+        finally
+        {
+            File.Delete(configFile);
+        }
+    }
+#endif
+
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void ApplicationFailFastDisabled()

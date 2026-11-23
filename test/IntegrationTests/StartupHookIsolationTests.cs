@@ -86,6 +86,34 @@ public class StartupHookIsolationTests(ITestOutputHelper output) : TestHelper("S
 
     [Fact]
     [Trait("Category", "EndToEnd")]
+    public void NoIsolationWhenFileConfigurationIsMalformed_NoFailFast()
+    {
+        var configFile = EnableFileBasedConfig("config-invalid.yaml");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
+
+        var (standardOutput, _, _) = RunTestApplication(expectedExitCode: 0);
+
+        AssertInvalidFileConfigurationError(standardOutput, configFile);
+        Assert.Contains("[FIRST_EXECUTION]", standardOutput, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void MalformedFileConfiguration_FailFastTerminatesApplication()
+    {
+        var configFile = EnableFileBasedConfig("config-invalid.yaml");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true");
+
+        var (standardOutput, _, _) = RunTestApplication(
+            assertExitCode: static (_, exitCode) => Assert.NotEqual(0, exitCode));
+
+        AssertInvalidFileConfigurationError(standardOutput, configFile);
+        Assert.DoesNotContain("[FIRST_EXECUTION]", standardOutput, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
     public void NoIsolationWhenRuleValidationFails_FailFast()
     {
         // Arrange

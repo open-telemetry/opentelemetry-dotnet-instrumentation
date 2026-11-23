@@ -52,10 +52,15 @@ internal abstract class InitializationSetup
             }
 
             Initialize(loaderAssemblyLocation);
+            if (InstrumentationBootstrapState.IsDisabled)
+            {
+                OnInitializationAborted();
+                return;
+            }
         }
         catch (Exception ex)
         {
-            OnError(ex);
+            OnInitializationAborted();
             Logger.Error(ex, $"Error in StartupHook initialization");
             if (failFast)
             {
@@ -79,10 +84,10 @@ internal abstract class InitializationSetup
     protected abstract void Initialize(string instrumentationHomePath);
 
     /// <summary>
-    /// Called on error before logging and fail-fast handling.
+    /// Called when initialization fails or instrumentation disables itself.
     /// IsolatedSetup uses this to revert contextual reflection and entry assembly.
     /// </summary>
-    protected virtual void OnError(Exception ex)
+    protected virtual void OnInitializationAborted()
     {
     }
 

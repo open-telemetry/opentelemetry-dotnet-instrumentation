@@ -12,14 +12,19 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 /// </summary>
 internal abstract class Settings
 {
-    private static readonly bool IsYamlConfigEnabled = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.Enabled) == "true";
     private static readonly Lazy<YamlConfiguration> YamlConfiguration = new(ReadYamlConfiguration);
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+
+    internal static bool IsFileConfigurationEnabled { get; } = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.Enabled) == "true";
+
+    internal static string FileConfigurationPath { get; } = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName) is { Length: > 0 } configFile
+        ? configFile
+        : "config.yaml";
 
     public static T FromDefaultSources<T>(bool failFast)
         where T : Settings, new()
     {
-        if (IsYamlConfigEnabled)
+        if (IsFileConfigurationEnabled)
         {
             var settings = new T();
             settings.LoadFile(YamlConfiguration.Value);
@@ -60,12 +65,7 @@ internal abstract class Settings
 
     private static YamlConfiguration ReadYamlConfiguration()
     {
-        var configFile = Environment.GetEnvironmentVariable(ConfigurationKeys.FileBasedConfiguration.FileName);
-
-        if (string.IsNullOrEmpty(configFile))
-        {
-            configFile = "config.yaml";
-        }
+        var configFile = FileConfigurationPath;
 
         if (!File.Exists(configFile))
         {

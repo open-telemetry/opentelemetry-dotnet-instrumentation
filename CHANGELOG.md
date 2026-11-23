@@ -21,6 +21,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Prevent invalid file-based YAML configuration from crashing host applications
+  by disabling automatic instrumentation unless environment fail-fast is enabled.
+
 ## [v1.20.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.20.0)
 
 ### Added

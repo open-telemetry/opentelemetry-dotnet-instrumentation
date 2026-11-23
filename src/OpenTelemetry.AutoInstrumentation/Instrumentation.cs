@@ -14,6 +14,7 @@ using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Vendors.YamlDotNet.Core;
 
 namespace OpenTelemetry.AutoInstrumentation;
 
@@ -38,10 +39,9 @@ internal static class Instrumentation
 
     private static PluginManager? _pluginManager;
 
-    internal static LoggerProvider? LoggerProvider
-    {
-        get => LoggerProviderFactory.Value;
-    }
+    internal static LoggerProvider? LoggerProvider => IsDisabled ? null : LoggerProviderFactory.Value;
+
+    internal static bool IsDisabled => InstrumentationBootstrapState.IsDisabled;
 
     internal static PluginManager? PluginManager => _pluginManager;
 
@@ -73,9 +73,10 @@ internal static class Instrumentation
     /// </summary>
     public static void Initialize()
     {
-        if (Interlocked.Exchange(ref _initialized, value: 1) != 0)
+        if (Interlocked.Exchange(ref _initialized, value: 1) != 0 || IsDisabled)
         {
-            // Initialize() was already called before
+            // Initialize() was already called in this assembly instance, or a previous
+            // bootstrap attempt in this AppDomain disabled automatic instrumentation.
             return;
         }
 
@@ -94,6 +95,11 @@ internal static class Instrumentation
             throw;
         }
 #endif
+
+        if (!TryInitializeFileConfiguration())
+        {
+            return;
+        }
 
         try
         {
@@ -231,6 +237,54 @@ internal static class Instrumentation
         if (opAmpClientEnabled)
         {
             OpAmpClientLoader.StartOpAmpClient();
+        }
+    }
+
+    private static bool TryInitializeFileConfiguration()
+    {
+        string? configFile = null;
+
+        try
+        {
+            if (!Settings.IsFileConfigurationEnabled)
+            {
+                return true;
+            }
+
+            configFile = Settings.FileConfigurationPath;
+            // Force complete YAML deserialization before SDK initialization so parsing failures are handled here.
+            _ = FailFastSettings.Value;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            InstrumentationBootstrapState.Disable();
+
+            if (ex is YamlException yamlException)
+            {
+                Logger.Error(
+                    ex,
+                    "File-based configuration '{0}' is invalid at line {1}, column {2}. OpenTelemetry Automatic Instrumentation is disabled.",
+                    configFile ?? "<unknown>",
+                    yamlException.Start.Line,
+                    yamlException.Start.Column);
+            }
+            else
+            {
+                Logger.Error(
+                    ex,
+                    "File-based configuration '{0}' could not be read or deserialized. OpenTelemetry Automatic Instrumentation is disabled.",
+                    configFile ?? "<unknown>");
+            }
+
+            OtelLogging.CloseLogger("Managed", Logger);
+
+            if (bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), out var failFast) && failFast)
+            {
+                throw;
+            }
+
+            return false;
         }
     }
 
@@ -464,7 +518,7 @@ internal static class Instrumentation
             _meterProvider?.Dispose();
             if (LoggerProviderFactory.IsValueCreated)
             {
-                LoggerProvider?.Dispose();
+                LoggerProviderFactory.Value?.Dispose();
             }
 
             _sdkEventListener?.Dispose();
