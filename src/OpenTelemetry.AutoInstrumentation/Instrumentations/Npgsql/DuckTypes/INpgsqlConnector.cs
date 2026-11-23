@@ -7,14 +7,9 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.DuckTypes;
 
 internal interface INpgsqlConnector : IDuckType
 {
-    INpgsqlConnectionSettings Settings { get; }
+    object Settings { get; }
 
     byte TransactionStatus { get; }
 
     void ExecuteInternalCommand(string query);
-}
-
-internal interface INpgsqlConnectionSettings
-{
-    bool Multiplexing { get; }
 }
