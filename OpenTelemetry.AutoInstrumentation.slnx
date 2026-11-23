@@ -50,13 +50,13 @@
     <Project Path="src/OpenTelemetry.AutoInstrumentation.Assemblies/OpenTelemetry.AutoInstrumentation.Assemblies.csproj" />
     <Project Path="src/OpenTelemetry.AutoInstrumentation.BuildTasks/OpenTelemetry.AutoInstrumentation.BuildTasks.csproj" />
     <Project Path="src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj" />
-    <Project Path="src/OpenTelemetry.AutoInstrumentation.Native/OpenTelemetry.AutoInstrumentation.Native.DLL.vcxproj">
+    <Project Path="src/OpenTelemetry.AutoInstrumentation.Native/OpenTelemetry.AutoInstrumentation.Native.DLL.vcxproj" Id="c0c8d381-d6b9-4c76-9428-f40f2fa93a9a">
       <BuildDependency Project="src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj" />
       <Platform Solution="Debug|ARM64" Project="x64" />
       <Platform Solution="Release|Any CPU" Project="Win32" />
       <Platform Solution="Release|ARM64" Project="Win32" />
     </Project>
-    <Project Path="src/OpenTelemetry.AutoInstrumentation.Native/OpenTelemetry.AutoInstrumentation.Native.vcxproj">
+    <Project Path="src/OpenTelemetry.AutoInstrumentation.Native/OpenTelemetry.AutoInstrumentation.Native.vcxproj" Id="91b6272f-5780-4c94-8071-dbba7b4f67f3">
       <BuildDependency Project="src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj" />
       <Platform Solution="Debug|ARM64" Project="x64" />
       <Platform Solution="Release|Any CPU" Project="Win32" />
@@ -79,7 +79,7 @@
     <Project Path="test/OpenTelemetry.AutoInstrumentation.BuildTasks.Tests/OpenTelemetry.AutoInstrumentation.BuildTasks.Tests.csproj" />
     <Project Path="test/OpenTelemetry.AutoInstrumentation.FuzzTests/OpenTelemetry.AutoInstrumentation.FuzzTests.csproj" />
     <Project Path="test/OpenTelemetry.AutoInstrumentation.Loader.Tests/OpenTelemetry.AutoInstrumentation.Loader.Tests.csproj" />
-    <Project Path="test/OpenTelemetry.AutoInstrumentation.Native.Tests/OpenTelemetry.AutoInstrumentation.Native.Tests.vcxproj">
+    <Project Path="test/OpenTelemetry.AutoInstrumentation.Native.Tests/OpenTelemetry.AutoInstrumentation.Native.Tests.vcxproj" Id="5728056a-51aa-4ff5-ad0c-e86e44e36102">
       <Platform Solution="Debug|ARM64" Project="x64" />
       <Platform Solution="Release|Any CPU" Project="Win32" />
       <Platform Solution="Release|ARM64" Project="Win32" />
@@ -97,7 +97,7 @@
       <Platform Solution="*|x64" Project="x64" />
       <Platform Solution="*|x86" Project="x86" />
     </Project>
-    <Project Path="test/test-applications/integrations/TestApplication.AspNet.NetFramework/TestApplication.AspNet.NetFramework.csproj">
+    <Project Path="test/test-applications/integrations/TestApplication.AspNet.NetFramework/TestApplication.AspNet.NetFramework.csproj" Id="5fdb5603-21d3-446a-8b50-36daccf7c2ff">
       <Platform Solution="*|x64" Project="x64" />
       <Platform Solution="*|x86" Project="x86" />
     </Project>
@@ -324,7 +324,7 @@
       <Platform Solution="*|x64" Project="x64" />
       <Platform Solution="*|x86" Project="x86" />
     </Project>
-    <Project Path="test/test-applications/integrations/TestApplication.Owin.IIS.NetFramework/TestApplication.Owin.IIS.NetFramework.csproj" />
+    <Project Path="test/test-applications/integrations/TestApplication.Owin.IIS.NetFramework/TestApplication.Owin.IIS.NetFramework.csproj" Id="aa3e0c5c-a4e2-46ab-bd18-2d30d3abf692" />
     <Project Path="test/test-applications/integrations/TestApplication.Plugins/TestApplication.Plugins.csproj">
       <Platform Solution="*|Any CPU" Project="x64" />
       <Platform Solution="*|x64" Project="x64" />
@@ -441,7 +441,7 @@
     <Project Path="test/test-applications/integrations/TestApplication.Wcf.Core/TestApplication.Wcf.Core.csproj">
       <Platform Solution="*|Any CPU" Project="x64" />
     </Project>
-    <Project Path="test/test-applications/integrations/TestApplication.Wcf.Server.IIS.NetFramework/TestApplication.Wcf.Server.IIS.NetFramework.csproj" />
+    <Project Path="test/test-applications/integrations/TestApplication.Wcf.Server.IIS.NetFramework/TestApplication.Wcf.Server.IIS.NetFramework.csproj" Id="65619bd1-4517-400c-8071-c1409a7d255e" />
     <Project Path="test/test-applications/integrations/TestApplication.Wcf.Server.NetFramework/TestApplication.Wcf.Server.NetFramework.csproj">
       <Platform Solution="*|Any CPU" Project="x64" />
       <Platform Solution="*|x64" Project="x64" />
@@ -461,7 +461,7 @@
     <File Path="test/test-applications/integrations/dependency-libs/Directory.Build.props" />
     <File Path="test/test-applications/integrations/dependency-libs/Directory.Build.targets" />
     <Project Path="test/test-applications/integrations/dependency-libs/TestApplication.ContinuousProfiler.Fs/TestApplication.ContinuousProfiler.Fs.fsproj" />
-    <Project Path="test/test-applications/integrations/dependency-libs/TestApplication.ContinuousProfiler.NativeDep/TestApplication.ContinuousProfiler.NativeDep.vcxproj">
+    <Project Path="test/test-applications/integrations/dependency-libs/TestApplication.ContinuousProfiler.NativeDep/TestApplication.ContinuousProfiler.NativeDep.vcxproj" Id="67084d6f-bd5b-4d5c-bc2b-e10728f05406">
       <Platform Solution="*|ARM64" Project="x64" />
     </Project>
     <Project Path="test/test-applications/integrations/dependency-libs/TestApplication.ContinuousProfiler.Vb/TestApplication.ContinuousProfiler.Vb.vbproj" />

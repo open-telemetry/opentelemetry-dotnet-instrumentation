@@ -540,7 +540,7 @@ public static partial class LibraryVersion
                 "1.8.1",
 #endif
 #if NET11_0 || NET10_0
-                "1.9.1",
+                "1.9.2",
 #endif
 #endif
             ];
