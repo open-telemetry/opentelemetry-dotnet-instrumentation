@@ -250,13 +250,14 @@ public:
 
     explicit ThreadSamplesBuffer(std::vector<unsigned char>* buf);
     ~ThreadSamplesBuffer();
-    void StartBatch() const;
-    void StartSelectedThreadsBatch() const;
+    void StartBatch(uint64_t timestampMilliseconds = 0) const;
+    void StartSelectedThreadsBatch(uint32_t selectiveSamplingIntervalMilliseconds) const;
     void EndSelectedThreadsBatch() const;
     void WriteSpanContext(const thread_span_context& span_context) const;
     void StartSample(const ThreadState* state, const thread_span_context& span_context) const;
-    void StartSampleForSelectedThread(const ThreadState* state, const thread_span_context& span_context) const;
-    void MarkSelectedForFrequentSampling(bool value) const;
+    void StartSampleForSelectedThread(const ThreadState*         state,
+                                      const thread_span_context& span_context,
+                                      uint64_t                   timestampMilliseconds = 0) const;
     void RecordFrame(const FunctionIdentifier& fid, const trace::WSTRING& frame);
     void EndSample() const;
     void EndBatch() const;
@@ -520,6 +521,13 @@ private:
 
     friend class ContinuousProfilerTestPeer;
 };
+
+// Captures one cohort and independently publishes the CPU and selective outputs.
+void CaptureSamples(ContinuousProfiler*                profiler,
+                    ICorProfilerInfo7*                 info7,
+                    SamplingType                       samplingType,
+                    ThreadStacksBuffer&                threadStacksBuffer,
+                    const ThreadSamplingConfiguration& configuration);
 
 // Captures one complete set of thread stacks for the current sampling cohort.
 bool CaptureFunctionIdentifiersForThreads(ContinuousProfiler*                 profiler,

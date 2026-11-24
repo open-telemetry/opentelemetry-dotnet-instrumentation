@@ -371,6 +371,17 @@ public class MySelectiveSamplerPlugin : IPlugin, ISelectiveSamplerPlugin
 
 `Exporter` must implement `ISelectiveSamplerExporter`.
 
+Each native selective batch starts with opcode `0x0A`, a 32-bit format version
+(`1`), and a 32-bit selective sampling interval in milliseconds, all integers
+in big-endian order. Sample records follow, ending
+with opcode `0x0B`. A returned buffer can contain several batches with different
+intervals. Exporters must use each batch's interval for its snapshot samples.
+
+When CPU and selective sampling coincide, one stack capture produces both a full
+CPU batch and a separate selected-thread batch. All snapshot samples are
+delivered through `ExportSelectedThreadSamples`, independently of CPU buffer
+back pressure.
+
 ## Continuous profiling
 
 Implement `IContinuousProfilerPlugin` to provide continuous profiler
@@ -414,6 +425,16 @@ Its `ExportThreadSamples(byte[], int, uint, CancellationToken)` method receives
 the CPU sampling interval in milliseconds for each native batch. Use that
 interval to set the exported profile period. Existing exporters must update
 their `ExportThreadSamples` implementation to accept the interval.
+
+Native CPU batches start with opcode `0x01`, a 32-bit format version (`2`),
+and a 64-bit capture timestamp in milliseconds, all in big-endian order.
+The header is followed by thread samples with their span contexts and stacks.
+The separate `samplingInterval` argument describes the CPU profile period.
+CPU batches contain no selective sampling metadata. Exporters obtain snapshot
+samples and their selective sampling interval from `ExportSelectedThreadSamples`.
+When both outputs reuse one stack capture, their timestamps match. Creating
+snapshot copies from CPU batches would duplicate the separately delivered
+selective samples.
 
 An exporter and a nonzero CPU interval or allocation limit prepare the
 corresponding managed handler even when its `Enabled` setting is false. Native

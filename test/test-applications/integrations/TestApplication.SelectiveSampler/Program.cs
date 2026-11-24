@@ -13,6 +13,12 @@ internal static class Program
     {
         Thread.CurrentThread.Name = "Main";
 
+        if (args.Length == 1 && args[0] == "runtime-cpu-transitions")
+        {
+            RuntimeCpuSamplingScenario.Run(MyActivitySource);
+            return;
+        }
+
         // Trace with nested activities
         using (MyActivitySource.StartActivity("outer"))
         {
