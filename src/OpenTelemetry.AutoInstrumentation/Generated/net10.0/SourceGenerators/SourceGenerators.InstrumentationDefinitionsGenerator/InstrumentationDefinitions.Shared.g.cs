@@ -730,7 +730,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql.NpgsqlCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("TraceCommandEnrich"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "Npgsql.Internal.NpgsqlConnector"), 2, 8, 0, 4, 10, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"), 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql.NpgsqlCommand"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("TraceCommandEnrich"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void", "Npgsql.Internal.NpgsqlConnector"), 2, 8, 0, 4, 11, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCommandTraceContextPropagationIntegration"), 0, categories));
             }
         }
         {
@@ -741,7 +741,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql.Internal.NpgsqlConnector"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("EndUserAction"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void"), 1, 6, 0, 0, 10, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlConnectorEndUserActionTraceContextPropagationIntegration"), 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql.Internal.NpgsqlConnector"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("EndUserAction"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Void"), 1, 6, 0, 0, 11, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlConnectorEndUserActionTraceContextPropagationIntegration"), 0, categories));
             }
         }
         {
@@ -752,7 +752,7 @@ internal static partial class InstrumentationDefinitions
             }
             if (categories != 0)
             {
-                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql.Internal.NpgsqlConnector"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("TraceCopyStart"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Diagnostics.Activity", "System.String", "System.String"), 3, 10, 0, 0, 10, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCopyTraceContextPropagationIntegration"), 0, categories));
+                nativeCallTargetDefinitions.Add(new(NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("Npgsql.Internal.NpgsqlConnector"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("TraceCopyStart"), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16StringArray("System.Diagnostics.Activity", "System.String", "System.String"), 3, 10, 0, 0, 11, 65535, 65535, NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String(AssemblyFullName), NativeCallTargetUnmanagedMemoryHelper.AllocateAndWriteUtf16String("OpenTelemetry.AutoInstrumentation.Instrumentations.Npgsql.Integrations.NpgsqlCopyTraceContextPropagationIntegration"), 0, categories));
             }
         }
         {

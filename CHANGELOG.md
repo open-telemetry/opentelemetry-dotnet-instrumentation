@@ -9,6 +9,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Added trace context propagation support for Npgsql 11.
+
 ### Changed
 
 #### Dependency updates
