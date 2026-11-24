@@ -1,1 +1,1 @@
-FROM ghcr.io/oracle/adb-free:26.11.3.1-26ai@sha256:334947ee95fcb9571951b9335bc2d85642795bf84b84b510456bb156f99adb66
+FROM container-registry.oracle.com/database/adb-free:26.5.4.2-26ai@sha256:1e90a6bf035188b34b0c1c1a34ad2ff118c298d85935065edbf1a7035eada424

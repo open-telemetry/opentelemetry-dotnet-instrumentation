@@ -124,7 +124,7 @@ jobs:
         if: ${{ matrix.machine == 'ubuntu-22.04' }}
         shell: bash
         run: |
-          image="$(grep -oE 'ghcr.io/oracle/adb-free[^[:space:]]+' test/IntegrationTests/docker/oracle.Dockerfile)"
+          image="$(awk '$1 == "FROM" { print $2; exit }' test/IntegrationTests/docker/oracle.Dockerfile)"
           echo "Pre-pulling Oracle image: ${image}"
           docker pull "${image}"
 
