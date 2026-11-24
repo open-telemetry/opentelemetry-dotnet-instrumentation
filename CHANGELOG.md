@@ -21,6 +21,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fixed ADO.NET bytecode instrumentation emitting a duplicate `other_sql` span
+  for Entity Framework 6 commands. EF6's `InterceptableDbCommand` wrapper is no
+  longer traced; the wrapped provider command is traced by its own
+  instrumentation.
+
 ## [v1.20.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.20.0)
 
 ### Added

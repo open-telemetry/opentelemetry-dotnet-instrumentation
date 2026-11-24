@@ -91,6 +91,12 @@
   <Folder Name="/test/test-applications/integrations/">
     <File Path="test/test-applications/integrations/Directory.Build.props" />
     <File Path="test/test-applications/integrations/Directory.Build.targets" />
+    <Project Path="test/test-applications/integrations/TestApplication.AdoNetEntityFramework6/TestApplication.AdoNetEntityFramework6.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|ARM64" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+    </Project>
     <Project Path="test/test-applications/integrations/TestApplication.AdoNetStub/TestApplication.AdoNetStub.csproj">
       <Platform Solution="*|Any CPU" Project="x64" />
       <Platform Solution="*|ARM64" Project="x64" />
