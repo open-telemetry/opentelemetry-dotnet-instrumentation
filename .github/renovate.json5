@@ -15,6 +15,7 @@
   labels: [
     'dependencies',
   ],
+  osvVulnerabilityAlerts: true,
   prConcurrentLimit: 20,
   dockerfile: {
     includePaths: [
@@ -33,6 +34,9 @@
       matchFileNames: [
         'src/OpenTelemetry.AutoInstrumentation.Assemblies/NetCoreTransientDependencies.props',
       ],
+      // Match OSV's affected version exactly and exclude GitHub's open-ended
+      // alert ranges. OSV restores NuGet versioning when selecting a fix.
+      versioning: 'loose',
       enabled: false,
     },
     {
