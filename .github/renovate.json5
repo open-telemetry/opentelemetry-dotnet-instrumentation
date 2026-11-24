@@ -10,12 +10,23 @@
     'config:best-practices',
     'customManagers:githubActionsVersions',
     'helpers:pinGitHubActionDigestsToSemver',
+    ':enableVulnerabilityAlerts',
   ],
   labels: [
     'dependencies',
   ],
   prConcurrentLimit: 20,
   packageRules: [
+    {
+      description: 'Restrict generated modern .NET dependencies to vulnerability fixes',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'src/OpenTelemetry.AutoInstrumentation.Assemblies/NetCoreTransientDependencies.props',
+      ],
+      enabled: false,
+    },
     {
       matchFileNames: [
         'docker/debian.dockerfile',

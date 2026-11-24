@@ -27,14 +27,14 @@ internal static class TransientDependenciesGenerator
     }
 
     private static ProjectItemGroupElement GetOrCreateItemGroup(
-        Microsoft.Build.Evaluation.Project packagesProject,
+        ProjectRootElement packagesProject,
         string label,
         string condition = null)
     {
-        var group = packagesProject.Xml.ItemGroups.FirstOrDefault(x => x.Label == label);
+        var group = packagesProject.ItemGroups.FirstOrDefault(x => x.Label == label);
         if (group == null)
         {
-            group = packagesProject.Xml.AddItemGroup();
+            group = packagesProject.AddItemGroup();
             group.Label = label;
             if (condition != null)
             {
@@ -47,9 +47,9 @@ internal static class TransientDependenciesGenerator
     private static void CleanUnusedDependencies(
         string label,
         IEnumerable<TransientDependency> validDependencies,
-        Microsoft.Build.Evaluation.Project packagesProject)
+        ProjectRootElement packagesProject)
     {
-        var versionGroup = packagesProject.Xml.ItemGroups.FirstOrDefault(x => x.Label == label);
+        var versionGroup = packagesProject.ItemGroups.FirstOrDefault(x => x.Label == label);
 
         if (versionGroup == null)
         {
@@ -76,21 +76,10 @@ internal static class TransientDependenciesGenerator
     }
 
     private static void MoveCommonDependenciesToGroup(
-        Microsoft.Build.Evaluation.Project packagesProject,
-        IReadOnlyCollection<string> targetFrameworks,
-        string groupLabel,
-        string groupCondition = null)
+        ProjectItemGroupElement targetGroup,
+        IEnumerable<ProjectItemGroupElement> sourceGroups)
     {
-        if (targetFrameworks.Count == 0)
-        {
-            return;
-        }
-
-        var targetGroup = GetOrCreateItemGroup(packagesProject, groupLabel, groupCondition);
-        var frameworkGroups = targetFrameworks
-            .Select(fw => packagesProject.Xml.ItemGroups.First(x => x.Label == GetLabel(fw)))
-            .ToList();
-
+        var frameworkGroups = sourceGroups.ToArray();
         var candidatePackages = frameworkGroups[0].Children
             .Select(GetPackageProperties)
             .Where(pkg => pkg.PackageName != null && pkg.PackageVersion != null)
@@ -119,9 +108,10 @@ internal static class TransientDependenciesGenerator
     public static void Run(Project targetProject)
     {
         var deps = Generator.EnumerateDependencies(targetProject.Path);
-        var packages = targetProject.Solution.Directory / "src" / Projects.AutoInstrumentationAssemblies /
-                       "Directory.Packages.props";
-        var packagesProject = ProjectModelTasks.ParseProject(packages);
+        var packagesDirectory = targetProject.Solution.Directory / "src" / Projects.AutoInstrumentationAssemblies;
+        var commonPackagesProject = ProjectModelTasks.ParseProject(packagesDirectory / "CommonTransientDependencies.props").Xml;
+        var netFrameworkPackagesProject = ProjectModelTasks.ParseProject(packagesDirectory / "NetFrameworkTransientDependencies.props").Xml;
+        var netCorePackagesProject = ProjectModelTasks.ParseProject(packagesDirectory / "NetCoreTransientDependencies.props").Xml;
 
         var projectFrameworks = targetProject.GetTargetFrameworks();
 
@@ -132,7 +122,18 @@ internal static class TransientDependenciesGenerator
             return;
         }
 
+        var netFrameworkTargets = projectFrameworks
+            .Where(target => TargetFramework.NetFramework.Any(it => it == target))
+            .ToList();
+        var netCoreTargets = projectFrameworks
+            .Where(target => TargetFramework.Net.Any(it => it == target))
+            .ToList();
+
+        // Non-Windows builds only resolve modern .NET targets.
+        var canUpdateCommonGroup = netFrameworkTargets.Count > 0 && netCoreTargets.Count > 0 && projectFrameworks.All(deps.ContainsKey);
+
         // Generate new transitive dependencies for each framework
+        var frameworkGroups = new Dictionary<string, ProjectItemGroupElement>();
         foreach (var framework in projectFrameworks)
         {
             var label = GetLabel(framework);
@@ -141,7 +142,9 @@ internal static class TransientDependenciesGenerator
                 .Items.Where(it => it.ItemType == "PackageVersion")
                 .ToDictionary(item => item.EvaluatedInclude, item => item.GetMetadata("Version"));
 
-            var versionGroup = GetOrCreateItemGroup(packagesProject, label, $" '$(TargetFramework)' == '{framework}' ");
+            var frameworkPackagesProject = netFrameworkTargets.Contains(framework) ? netFrameworkPackagesProject : netCorePackagesProject;
+            var versionGroup = GetOrCreateItemGroup(frameworkPackagesProject, label, $" '$(TargetFramework)' == '{framework}' ");
+            frameworkGroups.Add(framework, versionGroup);
 
             if (deps.TryGetValue(framework, out var frameworkDeps))
             {
@@ -155,38 +158,31 @@ internal static class TransientDependenciesGenerator
             }
         }
 
-        // Group frameworks by family
-        var netFrameworkTargets = projectFrameworks
-            .Where(target => TargetFramework.NetFramework.Any(it => it == target))
-            .ToList();
-        var netCoreTargets = projectFrameworks
-            .Where(target => TargetFramework.Net.Any(it => it == target))
-            .ToList();
-
         // Optimize dependencies in hierarchical order (general to specific):
         // 1. Common across ALL frameworks
         // 2. Common within .NET Framework family
         // 3. Common within .NET (Core) family
         // 4. Framework-specific (already in individual groups)
 
-        MoveCommonDependenciesToGroup(packagesProject, projectFrameworks, GetLabel(null));
+        if (canUpdateCommonGroup)
+        {
+            MoveCommonDependenciesToGroup(
+                GetOrCreateItemGroup(commonPackagesProject, GetLabel(null)),
+                projectFrameworks.Select(framework => frameworkGroups[framework]));
+        }
 
         if (netFrameworkTargets.Count > 1)
         {
             MoveCommonDependenciesToGroup(
-                packagesProject,
-                netFrameworkTargets,
-                GetLabel(NetFrameworkFamilyLabel),
-                NetFrameworkCondition);
+                GetOrCreateItemGroup(netFrameworkPackagesProject, GetLabel(NetFrameworkFamilyLabel), NetFrameworkCondition),
+                netFrameworkTargets.Select(framework => frameworkGroups[framework]));
         }
 
         if (netCoreTargets.Count > 1)
         {
             MoveCommonDependenciesToGroup(
-                packagesProject,
-                netCoreTargets,
-                GetLabel(NetCoreFamilyLabel),
-                NetCoreCondition);
+                GetOrCreateItemGroup(netCorePackagesProject, GetLabel(NetCoreFamilyLabel), NetCoreCondition),
+                netCoreTargets.Select(framework => frameworkGroups[framework]));
         }
 
         // Clean up unused dependencies from all groups
@@ -194,24 +190,30 @@ internal static class TransientDependenciesGenerator
         {
             if (deps.TryGetValue(framework, out var frameworkDeps))
             {
-                CleanUnusedDependencies(GetLabel(framework), frameworkDeps, packagesProject);
+                CleanUnusedDependencies(GetLabel(framework), frameworkDeps, frameworkGroups[framework].ContainingProject);
             }
         }
 
-        CleanUnusedDependencies(GetLabel(null), deps.Values.SelectMany(d => d), packagesProject);
+        if (canUpdateCommonGroup)
+        {
+            CleanUnusedDependencies(GetLabel(null), deps.Values.SelectMany(d => d), commonPackagesProject);
+        }
 
         if (netFrameworkTargets.Count > 0)
         {
             var netFrameworkDeps = netFrameworkTargets.SelectMany(it => deps.TryGetValue(it, out var value) ? value : []);
-            CleanUnusedDependencies(GetLabel(NetFrameworkFamilyLabel), netFrameworkDeps, packagesProject);
+            CleanUnusedDependencies(GetLabel(NetFrameworkFamilyLabel), netFrameworkDeps, netFrameworkPackagesProject);
         }
 
         if (netCoreTargets.Count > 0)
         {
             var netCoreDeps = netCoreTargets.SelectMany(it => deps.TryGetValue(it, out var value) ? value : []);
-            CleanUnusedDependencies(GetLabel(NetCoreFamilyLabel), netCoreDeps, packagesProject);
+            CleanUnusedDependencies(GetLabel(NetCoreFamilyLabel), netCoreDeps, netCorePackagesProject);
         }
 
-        packagesProject.Save();
+        // Save framework-specific removals before writing pins moved to the common file.
+        netCorePackagesProject.Save();
+        netFrameworkPackagesProject.Save();
+        commonPackagesProject.Save();
     }
 }
