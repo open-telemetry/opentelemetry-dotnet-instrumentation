@@ -114,6 +114,7 @@ public class SelectiveSamplerTests : TestHelper
         Assert.True(cpuBatches.Count >= 2, "Expected at least two CPU captures during selective sampling.");
 
         var missedSelectiveInContinuous = false;
+        var matchedCaptures = 0;
         foreach (var batch in cpuBatches)
         {
             // This application selects every active span, so span contexts identify the expected selective subset.
@@ -128,11 +129,20 @@ public class SelectiveSamplerTests : TestHelper
                 missedSelectiveInContinuous = true;
             }
 
-            // Both outputs must describe the same selected subset, exactly once per capture.
+            // Selective backpressure can drop the selective output of a shared capture.
+            if (!selectiveBatches.Contains(batch.Key))
+            {
+                continue;
+            }
+
+            matchedCaptures++;
+            // Both received outputs must describe the same selected subset, exactly once per capture.
             Assert.Equal(
                 selectedSamples.Select(SampleIdentity).OrderBy(identity => identity),
                 selectiveBatches[batch.Key].Select(SampleIdentity).OrderBy(identity => identity));
         }
+
+        Assert.True(matchedCaptures >= 2, $"Expected at least two matched CPU and selective captures, got {matchedCaptures}.");
 
         // The 200 ms CPU interval and 50 ms selective interval leave three selective-only captures
         // between adjacent CPU captures. Allow one missed selective capture per test run.

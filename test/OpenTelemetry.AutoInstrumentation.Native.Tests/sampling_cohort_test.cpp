@@ -160,7 +160,7 @@ std::vector<uint64_t> ReadSpanIds(const std::vector<unsigned char>& bytes, const
     }
     size_t position = 1;
     EXPECT_EQ(cpu ? 0x01 : 0x0A, bytes.at(0));
-    EXPECT_EQ(1u, ReadInteger(bytes, position, 4));
+    EXPECT_EQ(cpu ? 2u : 1u, ReadInteger(bytes, position, 4));
     if (cpu)
     {
         ReadInteger(bytes, position, 8);

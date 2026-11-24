@@ -33,9 +33,10 @@ internal static class RuntimeCpuSamplingScenario
     public static void Run(ActivitySource source)
     {
         using var activity = source.StartActivity("runtime-cpu-transitions");
-        WaitForTwoBatches(SelectiveBatches);
+        WaitForBatches(SelectiveBatches, 2);
         Apply(cpuInterval: 200);
-        WaitForTwoBatches(CpuBatches);
+        // Allow one selective batch to be dropped while still observing two shared captures.
+        WaitForBatches(CpuBatches, 3);
         Apply(cpuInterval: 0);
 
         // Discard notifications from the CPU-enabled phase, then await fresh selective exports.
@@ -43,12 +44,12 @@ internal static class RuntimeCpuSamplingScenario
         {
         }
 
-        WaitForTwoBatches(SelectiveBatches);
+        WaitForBatches(SelectiveBatches, 2);
     }
 
-    private static void WaitForTwoBatches(SemaphoreSlim batches)
+    private static void WaitForBatches(SemaphoreSlim batches, int count)
     {
-        for (var i = 0; i < 2; i++)
+        for (var i = 0; i < count; i++)
         {
             if (!batches.Wait(TimeSpan.FromSeconds(10)))
             {
