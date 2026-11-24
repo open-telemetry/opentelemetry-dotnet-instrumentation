@@ -15,6 +15,14 @@
     'dependencies',
   ],
   prConcurrentLimit: 20,
+  dockerfile: {
+    includePaths: [
+      'docker/**',
+      'test/IntegrationTests/docker/**',
+    ],
+    // Clear the inherited test-directory exclusion for these paths.
+    ignorePaths: [],
+  },
   packageRules: [
     {
       matchFileNames: [

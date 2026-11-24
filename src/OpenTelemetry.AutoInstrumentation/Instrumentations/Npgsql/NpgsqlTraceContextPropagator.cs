@@ -18,6 +18,7 @@ internal static class NpgsqlTraceContextPropagator
     private static readonly Lazy<bool> IsEnabled = new(() => Instrumentation.TracerSettings.Value.InstrumentationOptions.NpgsqlContextPropagation);
     private static readonly ConcurrentDictionary<Type, MemberInfo> CurrentActivityMembers = new();
     private static readonly ConcurrentDictionary<Type, PropertyInfo> ActivityIdProperties = new();
+    private static readonly ConcurrentDictionary<Type, Func<object, bool>> MultiplexingAccessors = new();
     private static readonly ConditionalWeakTable<object, ConnectorContextState> ConnectorStates = new();
 
     private static int _multiplexingWarningLogged;
@@ -94,7 +95,7 @@ internal static class NpgsqlTraceContextPropagator
             return;
         }
 
-        if (npgsqlConnector.Settings.Multiplexing)
+        if (IsMultiplexing(npgsqlConnector.Settings))
         {
             if (Interlocked.Exchange(ref _multiplexingWarningLogged, 1) == 0)
             {
@@ -183,6 +184,17 @@ internal static class NpgsqlTraceContextPropagator
             FieldInfo field => field.GetValue(command),
             _ => null
         };
+    }
+
+    private static bool IsMultiplexing(object settings)
+    {
+        return MultiplexingAccessors.GetOrAdd(settings.GetType(), static type =>
+        {
+            var property = type.GetProperty("Multiplexing", BindingFlags.Instance | BindingFlags.Public);
+            return property is null
+                ? static _ => false
+                : settings => property.GetValue(settings) is true;
+        })(settings);
     }
 
     private static string? GetActivityId(object? activity)

@@ -32,6 +32,6 @@ internal static class NpgsqlConstants
     public const string TraceCopyStartMethodName = "TraceCopyStart";
     public const string ActivityTypeName = "System.Diagnostics.Activity";
     public const string TraceCopyStartMinVersion = "10.0.0";
-    public const string MaxVersion = "10.*.*";
+    public const string MaxVersion = "11.*.*";
 #endif
 }

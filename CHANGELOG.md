@@ -13,6 +13,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   `link`, and `none` extraction modes for root `ActivitySource` activities,
   opt-in startup baggage extraction (extraction defaults to `none`), and automatic
   context injection into child processes on .NET 10, .NET 11, and .NET Framework.
+- Added trace context propagation support for Npgsql 11.
 
 ### Changed
 
@@ -23,6 +24,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Removed
 
 ### Fixed
+
+- Preserve the capture-time interval in selective sampling batch headers when
+  the interval changes before export. CPU exporters must accept format version
+  `2`. Selective exporters must update their parsers and read selected samples
+  through `ExportSelectedThreadSamples`.
 
 ## [v1.20.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.20.0)
 
