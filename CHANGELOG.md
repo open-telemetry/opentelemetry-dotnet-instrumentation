@@ -20,9 +20,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Fixed
 
 - Preserve the capture-time interval in selective sampling batch headers when
-  the interval changes before export. Selective and mixed-mode exporters must
-  update their parsers and read selected samples through
-  `ExportSelectedThreadSamples`.
+  the interval changes before export. CPU exporters must accept format version
+  `2`. Selective exporters must update their parsers and read selected samples
+  through `ExportSelectedThreadSamples`.
 
 ## [v1.20.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.20.0)
 

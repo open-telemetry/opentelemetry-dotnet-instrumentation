@@ -426,7 +426,7 @@ the CPU sampling interval in milliseconds for each native batch. Use that
 interval to set the exported profile period. Existing exporters must update
 their `ExportThreadSamples` implementation to accept the interval.
 
-Native CPU batches start with opcode `0x01`, a 32-bit format version (`1`),
+Native CPU batches start with opcode `0x01`, a 32-bit format version (`2`),
 and a 64-bit capture timestamp in milliseconds, all in big-endian order.
 The header is followed by thread samples with their span contexts and stacks.
 The separate `samplingInterval` argument describes the CPU profile period.

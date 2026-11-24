@@ -198,7 +198,7 @@ TEST_F(ContinuousProfilerBatchDeathTest, CpuBatchRetainsItsIntervalFromItsConfig
                                   ContinuousProfilerReadThreadSamplesV2(static_cast<int32_t>(output.size()),
                                                                         output.data(), &cpuInterval));
                         EXPECT_EQ(400u, cpuInterval);
-                        EXPECT_EQ((std::vector<unsigned char>{0x01, 0, 0, 0, 1}),
+                        EXPECT_EQ((std::vector<unsigned char>{0x01, 0, 0, 0, 2}),
                                   (std::vector<unsigned char>(output.begin(), output.begin() + 5)));
                         // The batch ends after the 8-byte timestamp, independently of the platform's long width.
                         EXPECT_EQ((std::vector<unsigned char>{0x06}),
@@ -215,7 +215,7 @@ TEST_F(ContinuousProfilerBatchTest, CpuBatchHeaderContainsOnlyVersionAndCaptureT
     writer.EndBatch();
 
     // Protocol timestamps have a fixed 8-byte width on both Windows and Unix.
-    EXPECT_EQ((std::vector<unsigned char>{0x01, 0, 0, 0, 1, 1, 2, 3, 4, 5, 6, 7, 8, 0x06}), bytes);
+    EXPECT_EQ((std::vector<unsigned char>{0x01, 0, 0, 0, 2, 1, 2, 3, 4, 5, 6, 7, 8, 0x06}), bytes);
 }
 
 TEST_F(ContinuousProfilerBatchTest, OverflowedWriterDoesNotPublishAMalformedBatch)

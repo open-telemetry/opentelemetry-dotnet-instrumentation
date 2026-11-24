@@ -394,7 +394,8 @@ constexpr auto kSelectedThreadSample      = 0x09;
 constexpr auto kSelectedThreadsStartBatch = 0x0A;
 constexpr auto kSelectedThreadsEndBatch   = 0x0B;
 
-constexpr auto kCurrentThreadSamplesBufferVersion = 1;
+constexpr auto kCpuSamplesBufferVersion       = 2;
+constexpr auto kSelectiveSamplesBufferVersion = 1;
 
 constexpr FunctionIdentifier DefaultFunctionIdentifier = {0, 0, false};
 
@@ -422,7 +423,7 @@ void ThreadSamplesBuffer::StartBatch(const uint64_t timestampMilliseconds) const
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteByte(kThreadSamplesStartBatch);
-    WriteInt(kCurrentThreadSamplesBufferVersion);
+    WriteInt(kCpuSamplesBufferVersion);
     WriteUInt64(timestampMilliseconds == 0 ? CurrentTimeMillis() : timestampMilliseconds);
 }
 
@@ -430,7 +431,7 @@ void ThreadSamplesBuffer::StartSelectedThreadsBatch(const uint32_t selectiveSamp
 {
     CHECK_SAMPLES_BUFFER_LENGTH()
     WriteByte(kSelectedThreadsStartBatch);
-    WriteInt(kCurrentThreadSamplesBufferVersion);
+    WriteInt(kSelectiveSamplesBufferVersion);
     WriteInt(static_cast<int32_t>(selectiveSamplingIntervalMilliseconds));
 }
 

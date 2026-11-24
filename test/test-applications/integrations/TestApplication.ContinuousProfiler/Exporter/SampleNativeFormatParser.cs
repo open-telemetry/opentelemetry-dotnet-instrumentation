@@ -14,6 +14,8 @@ internal sealed class SampleNativeFormatParser
 {
     // TODO use value from ContinuousProfilerProcessor.BackgroundThreadName when it will be moved to main project
     public const string BackgroundThreadName = "OpenTelemetry Continuous Profiler Thread";
+    private const int CpuSamplesBufferVersion = 2;
+    private const int SelectiveSamplesBufferVersion = 1;
     private static readonly UnicodeEncoding UnicodeEncoding = new();
 
     /// <summary>
@@ -43,7 +45,7 @@ internal sealed class SampleNativeFormatParser
                 if (operationCode == OpCodes.StartBatch)
                 {
                     var version = ReadInt(buffer, ref position);
-                    if (version != 1)
+                    if (version != CpuSamplesBufferVersion)
                     {
                         return null; // not able to parse
                     }
@@ -227,7 +229,7 @@ internal sealed class SampleNativeFormatParser
                 if (operationCode == OpCodes.SelectiveSampleBatchStart)
                 {
                     var version = ReadInt(buffer, ref position);
-                    if (version != 1)
+                    if (version != SelectiveSamplesBufferVersion)
                     {
                         return [];
                     }

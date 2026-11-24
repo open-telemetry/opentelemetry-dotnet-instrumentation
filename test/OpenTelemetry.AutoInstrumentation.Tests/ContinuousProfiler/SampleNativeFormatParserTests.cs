@@ -38,8 +38,8 @@ public class SampleNativeFormatParserTests
         byte[] timestamps = [40, 80];
         foreach (var timestamp in timestamps)
         {
-            // CPU batch headers contain only version 1 and a big-endian 8-byte timestamp.
-            buffer.AddRange([0x01, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, timestamp]);
+            // CPU batch headers contain only version 2 and a big-endian 8-byte timestamp.
+            buffer.AddRange([0x01, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, timestamp]);
             buffer.Add(0x02);
             buffer.AddRange(new byte[26]); // Empty thread name and span context, followed immediately by the stack.
             buffer.AddRange([0xFF, 0xFF, 0, 1, (byte)'f', 0, 0, 0]);
@@ -60,5 +60,16 @@ public class SampleNativeFormatParserTests
             Assert.Equal(0u, sample.SelectiveSamplingIntervalMilliseconds);
             Assert.Equal("f", Assert.Single(sample.Frames));
         });
+    }
+
+    [Theory]
+    [InlineData((byte)1)]
+    [InlineData((byte)3)]
+    public void CpuBatchesWithUnsupportedVersionsAreRejected(byte version)
+    {
+        byte[] buffer = [0x01, 0, 0, 0, version, 0, 0, 0, 0, 0, 0, 0, 40, 0x06];
+        var parser = new SampleNativeFormatParser();
+
+        Assert.Null(parser.ParseThreadSamples(buffer, buffer.Length));
     }
 }
