@@ -21,6 +21,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fixed parsing of the OTLP exporter's `headers_list` in file-based
+  configuration. Header entries with a `=` character in their value are
+  no longer silently dropped.
+
 ## [v1.20.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.20.0)
 
 ### Added
