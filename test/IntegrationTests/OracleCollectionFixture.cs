@@ -413,6 +413,7 @@ exit
 #if NET
     private static string[] CreateOpenTelemetryWalletConfigurationCommand(string password, string rootCertificatePem, string serverCertificatePem)
     {
+        // Oracle AI Database 26ai RU 23.26.3 looks for the exporter wallet in observability.
         var script = @"
 set -euo pipefail
 
@@ -488,7 +489,7 @@ configure_wallet_dir() {
   orapki wallet display -wallet ""$wallet_dir"" -summary
 }
 
-wallet_dirs=(""${wallet_root}/${pdb_guid}/disttrc"")
+wallet_dirs=(""${wallet_root}/${pdb_guid}/disttrc"" ""${wallet_root}/${sql_pdb_guid}/observability"")
 pdb_guid_lower=""$(printf '%s' ""$sql_pdb_guid"" | tr '[:upper:]' '[:lower:]')""
 if [ -n ""$pdb_guid_lower"" ] && [ ""$pdb_guid_lower"" != ""$pdb_guid"" ]; then
   wallet_dirs+=(""${wallet_root}/${pdb_guid_lower}/disttrc"")
