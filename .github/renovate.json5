@@ -134,6 +134,20 @@
       matchCurrentValue: '/^8\\./',
       allowedVersions: '/^8\\./',
     },
+    {
+      description: 'Keep NServiceBus for net472 on 8.x',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'test/test-applications/integrations/TestApplication.NServiceBus/TestApplication.NServiceBus.csproj',
+      ],
+      matchPackageNames: [
+        'NServiceBus',
+      ],
+      matchCurrentValue: '/^8\\./',
+      allowedVersions: '/^8\\./',
+    },
   ],
   customManagers: [
     {
