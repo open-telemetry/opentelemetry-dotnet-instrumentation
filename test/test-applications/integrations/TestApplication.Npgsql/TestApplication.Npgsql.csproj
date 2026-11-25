@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="Npgsql" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' != 'net462' " />
+    <!-- Npgsql 8.x is the last major compatible with .NET Framework. Renovate enforces the cap in .github/renovate.json5. -->
     <PackageReference Include="Npgsql" VersionOverride="8.0.9" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net462' " />
   </ItemGroup>
 
