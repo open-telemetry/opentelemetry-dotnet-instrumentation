@@ -120,6 +120,20 @@
       matchCurrentValue: '/^10\\./',
       allowedVersions: '/^10\\./',
     },
+    {
+      description: 'Keep Npgsql for net462 on 8.x',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'test/test-applications/integrations/TestApplication.Npgsql/TestApplication.Npgsql.csproj',
+      ],
+      matchPackageNames: [
+        'Npgsql',
+      ],
+      matchCurrentValue: '/^8\\./',
+      allowedVersions: '/^8\\./',
+    },
   ],
   customManagers: [
     {
