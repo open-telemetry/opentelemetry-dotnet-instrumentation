@@ -10,10 +10,12 @@
     'config:best-practices',
     'customManagers:githubActionsVersions',
     'helpers:pinGitHubActionDigestsToSemver',
+    ':enableVulnerabilityAlerts',
   ],
   labels: [
     'dependencies',
   ],
+  osvVulnerabilityAlerts: true,
   prConcurrentLimit: 20,
   dockerfile: {
     includePaths: [
@@ -24,6 +26,19 @@
     ignorePaths: [],
   },
   packageRules: [
+    {
+      description: 'Restrict generated modern .NET dependencies to vulnerability fixes',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'src/OpenTelemetry.AutoInstrumentation.Assemblies/NetCoreTransientDependencies.props',
+      ],
+      // Match OSV's affected version exactly and exclude GitHub's open-ended
+      // alert ranges. OSV restores NuGet versioning when selecting a fix.
+      versioning: 'loose',
+      enabled: false,
+    },
     {
       matchFileNames: [
         'docker/debian.dockerfile',

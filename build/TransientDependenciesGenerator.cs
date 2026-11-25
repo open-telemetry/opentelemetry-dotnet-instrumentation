@@ -27,14 +27,14 @@ internal static class TransientDependenciesGenerator
     }
 
     private static ProjectItemGroupElement GetOrCreateItemGroup(
-        Microsoft.Build.Evaluation.Project packagesProject,
+        ProjectRootElement packagesProject,
         string label,
         string condition = null)
     {
-        var group = packagesProject.Xml.ItemGroups.FirstOrDefault(x => x.Label == label);
+        var group = packagesProject.ItemGroups.FirstOrDefault(x => x.Label == label);
         if (group == null)
         {
-            group = packagesProject.Xml.AddItemGroup();
+            group = packagesProject.AddItemGroup();
             group.Label = label;
             if (condition != null)
             {
@@ -44,85 +44,51 @@ internal static class TransientDependenciesGenerator
         return group;
     }
 
-    private static void CleanUnusedDependencies(
-        string label,
-        IEnumerable<TransientDependency> validDependencies,
-        Microsoft.Build.Evaluation.Project packagesProject)
+    private static void RemoveStalePackageVersions(
+        ProjectItemGroupElement group,
+        Dictionary<string, string> pendingVersions)
     {
-        var versionGroup = packagesProject.Xml.ItemGroups.FirstOrDefault(x => x.Label == label);
-
-        if (versionGroup == null)
+        foreach (var pkg in group.Children.ToArray())
         {
-            return;
-        }
-
-        var validDepsSet = validDependencies
-            .Select(d => (d.Name, d.Version))
-            .ToHashSet();
-
-        foreach (var pkg in versionGroup.Children.ToArray())
-        {
-            var pkgProp = GetPackageProperties(pkg);
-            if (pkgProp.PackageName == null || pkgProp.PackageVersion == null)
+            var (name, version) = GetPackageProperties(pkg);
+            if (name == null || version == null)
             {
                 continue;
             }
 
-            if (!validDepsSet.Contains((pkgProp.PackageName, pkgProp.PackageVersion)))
+            if (pendingVersions.TryGetValue(name, out var desiredVersion) && version == desiredVersion)
             {
-                versionGroup.RemoveChild(pkg);
+                pendingVersions.Remove(name);
+            }
+            else
+            {
+                group.RemoveChild(pkg);
             }
         }
     }
 
-    private static void MoveCommonDependenciesToGroup(
-        Microsoft.Build.Evaluation.Project packagesProject,
-        IReadOnlyCollection<string> targetFrameworks,
-        string groupLabel,
-        string groupCondition = null)
+    private static Dictionary<string, string> TakeSharedPackageVersions(
+        IReadOnlyCollection<string> frameworks,
+        IReadOnlyDictionary<string, Dictionary<string, string>> versionsByFramework)
     {
-        if (targetFrameworks.Count == 0)
+        var sharedVersions = versionsByFramework[frameworks.First()]
+            .Where(package => frameworks.All(framework =>
+                versionsByFramework[framework].TryGetValue(package.Key, out var version) && version == package.Value))
+            .ToDictionary(package => package.Key, package => package.Value, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var framework in frameworks)
         {
-            return;
-        }
-
-        var targetGroup = GetOrCreateItemGroup(packagesProject, groupLabel, groupCondition);
-        var frameworkGroups = targetFrameworks
-            .Select(fw => packagesProject.Xml.ItemGroups.First(x => x.Label == GetLabel(fw)))
-            .ToList();
-
-        var candidatePackages = frameworkGroups[0].Children
-            .Select(GetPackageProperties)
-            .Where(pkg => pkg.PackageName != null && pkg.PackageVersion != null)
-            .ToArray();
-
-        foreach (var pkg in candidatePackages)
-        {
-            var existsInAllFrameworks = frameworkGroups
-                .All(group => group.Children.OfType<ProjectItemElement>()
-                    .Any(it => GetPackageProperties(it) == pkg));
-
-            if (existsInAllFrameworks)
+            foreach (var packageName in sharedVersions.Keys)
             {
-                foreach (var group in frameworkGroups)
-                {
-                    var reference = group.Children.OfType<ProjectItemElement>()
-                        .First(it => GetPackageProperties(it) == pkg);
-                    group.RemoveChild(reference);
-                }
-
-                AddPackageReference(targetGroup, pkg.PackageName, pkg.PackageVersion);
+                versionsByFramework[framework].Remove(packageName);
             }
         }
+
+        return sharedVersions;
     }
 
     public static void Run(Project targetProject)
     {
-        var deps = Generator.EnumerateDependencies(targetProject.Path);
-        var packages = targetProject.Solution.Directory / "src" / Projects.AutoInstrumentationAssemblies /
-                       "Directory.Packages.props";
-        var packagesProject = ProjectModelTasks.ParseProject(packages);
-
         var projectFrameworks = targetProject.GetTargetFrameworks();
 
         if (projectFrameworks == null || projectFrameworks.Count == 0)
@@ -132,30 +98,20 @@ internal static class TransientDependenciesGenerator
             return;
         }
 
-        // Generate new transitive dependencies for each framework
-        foreach (var framework in projectFrameworks)
+        var deps = Generator.EnumerateDependencies(targetProject.Path);
+        var unresolvedFrameworks = projectFrameworks.Where(framework => !deps.ContainsKey(framework)).ToArray();
+        if (unresolvedFrameworks.Length > 0)
         {
-            var label = GetLabel(framework);
-            var projectForTfm = targetProject.GetMSBuildProject(targetFramework: framework);
-            var definedVersions = projectForTfm
-                .Items.Where(it => it.ItemType == "PackageVersion")
-                .ToDictionary(item => item.EvaluatedInclude, item => item.GetMetadata("Version"));
-
-            var versionGroup = GetOrCreateItemGroup(packagesProject, label, $" '$(TargetFramework)' == '{framework}' ");
-
-            if (deps.TryGetValue(framework, out var frameworkDeps))
-            {
-                foreach (var item in frameworkDeps)
-                {
-                    if (!definedVersions.ContainsKey(item.Name))
-                    {
-                        AddPackageReference(versionGroup, item.Name, item.Version);
-                    }
-                }
-            }
+            Log.Warning(
+                $"Missing dependency results for {string.Join(", ", unresolvedFrameworks)}. Skipping {nameof(TransientDependenciesGenerator)} step.");
+            return;
         }
 
-        // Group frameworks by family
+        var packagesDirectory = targetProject.Solution.Directory / "src" / Projects.AutoInstrumentationAssemblies;
+        var commonPackagesProject = ProjectModelTasks.ParseProject(packagesDirectory / "CommonTransientDependencies.props").Xml;
+        var netFrameworkPackagesProject = ProjectModelTasks.ParseProject(packagesDirectory / "NetFrameworkTransientDependencies.props").Xml;
+        var netCorePackagesProject = ProjectModelTasks.ParseProject(packagesDirectory / "NetCoreTransientDependencies.props").Xml;
+
         var netFrameworkTargets = projectFrameworks
             .Where(target => TargetFramework.NetFramework.Any(it => it == target))
             .ToList();
@@ -163,55 +119,79 @@ internal static class TransientDependenciesGenerator
             .Where(target => TargetFramework.Net.Any(it => it == target))
             .ToList();
 
-        // Optimize dependencies in hierarchical order (general to specific):
-        // 1. Common across ALL frameworks
-        // 2. Common within .NET Framework family
-        // 3. Common within .NET (Core) family
-        // 4. Framework-specific (already in individual groups)
-
-        MoveCommonDependenciesToGroup(packagesProject, projectFrameworks, GetLabel(null));
+        // Assign each version to the broadest group that uses it.
+        var groups = new List<(ProjectItemGroupElement Group, IReadOnlyCollection<string> Frameworks)>();
+        if (netFrameworkTargets.Count > 0 && netCoreTargets.Count > 0)
+        {
+            groups.Add((
+                GetOrCreateItemGroup(commonPackagesProject, GetLabel(null)),
+                projectFrameworks));
+        }
 
         if (netFrameworkTargets.Count > 1)
         {
-            MoveCommonDependenciesToGroup(
-                packagesProject,
-                netFrameworkTargets,
-                GetLabel(NetFrameworkFamilyLabel),
-                NetFrameworkCondition);
+            groups.Add((
+                GetOrCreateItemGroup(netFrameworkPackagesProject, GetLabel(NetFrameworkFamilyLabel), NetFrameworkCondition),
+                netFrameworkTargets));
         }
 
         if (netCoreTargets.Count > 1)
         {
-            MoveCommonDependenciesToGroup(
-                packagesProject,
-                netCoreTargets,
-                GetLabel(NetCoreFamilyLabel),
-                NetCoreCondition);
+            groups.Add((
+                GetOrCreateItemGroup(netCorePackagesProject, GetLabel(NetCoreFamilyLabel), NetCoreCondition),
+                netCoreTargets));
         }
 
-        // Clean up unused dependencies from all groups
         foreach (var framework in projectFrameworks)
         {
-            if (deps.TryGetValue(framework, out var frameworkDeps))
+            var frameworkPackagesProject = netFrameworkTargets.Contains(framework) ? netFrameworkPackagesProject : netCorePackagesProject;
+            groups.Add((
+                GetOrCreateItemGroup(frameworkPackagesProject, GetLabel(framework), $" '$(TargetFramework)' == '{framework}' "),
+                [framework]));
+        }
+
+        // Treat pins outside the groups being regenerated as existing definitions.
+        var generatedGroups = groups.Select(group => (group.Group.ContainingProject.FullPath, group.Group.Label)).ToHashSet();
+        var versionsByFramework = new Dictionary<string, Dictionary<string, string>>();
+        foreach (var framework in projectFrameworks)
+        {
+            var projectForTfm = targetProject.GetMSBuildProject(targetFramework: framework);
+            var definedVersions = projectForTfm.Items
+                .Where(item => item.ItemType == "PackageVersion" &&
+                    !generatedGroups.Contains((item.Xml.ContainingProject.FullPath, item.Xml.Parent?.Label)))
+                .Select(item => item.EvaluatedInclude)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            versionsByFramework.Add(framework, deps[framework]
+                .Where(dependency => !definedVersions.Contains(dependency.Name))
+                .ToDictionary(dependency => dependency.Name, dependency => dependency.Version, StringComparer.OrdinalIgnoreCase));
+        }
+
+        var pendingGroups = new List<(ProjectItemGroupElement Group, Dictionary<string, string> Versions)>();
+        foreach (var (group, frameworks) in groups)
+        {
+            var pendingVersions = TakeSharedPackageVersions(frameworks, versionsByFramework);
+            RemoveStalePackageVersions(group, pendingVersions);
+            pendingGroups.Add((group, pendingVersions));
+        }
+
+        // Persist removals before adding relocated pins to avoid duplicate definitions on retry.
+        var packagesProjects = new[] { commonPackagesProject, netFrameworkPackagesProject, netCorePackagesProject };
+        foreach (var packagesProject in packagesProjects)
+        {
+            packagesProject.Save();
+        }
+
+        foreach (var (group, pendingVersions) in pendingGroups)
+        {
+            foreach (var (name, version) in pendingVersions)
             {
-                CleanUnusedDependencies(GetLabel(framework), frameworkDeps, packagesProject);
+                AddPackageReference(group, name, version);
             }
         }
 
-        CleanUnusedDependencies(GetLabel(null), deps.Values.SelectMany(d => d), packagesProject);
-
-        if (netFrameworkTargets.Count > 0)
+        foreach (var packagesProject in packagesProjects)
         {
-            var netFrameworkDeps = netFrameworkTargets.SelectMany(it => deps.TryGetValue(it, out var value) ? value : []);
-            CleanUnusedDependencies(GetLabel(NetFrameworkFamilyLabel), netFrameworkDeps, packagesProject);
+            packagesProject.Save();
         }
-
-        if (netCoreTargets.Count > 0)
-        {
-            var netCoreDeps = netCoreTargets.SelectMany(it => deps.TryGetValue(it, out var value) ? value : []);
-            CleanUnusedDependencies(GetLabel(NetCoreFamilyLabel), netCoreDeps, packagesProject);
-        }
-
-        packagesProject.Save();
     }
 }
