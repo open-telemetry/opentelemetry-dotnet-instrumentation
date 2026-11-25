@@ -106,6 +106,20 @@
         'https://ppa.launchpadcontent.net/ubuntu-toolchain-r/test/ubuntu?suite=bionic&components=main&binaryArch=amd64',
       ],
     },
+    {
+      description: 'Keep the Npgsql EF Core provider for net10.0 on 10.x',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'test/test-applications/integrations/TestApplication.EntityFrameworkCore.Npgsql/TestApplication.EntityFrameworkCore.Npgsql.csproj',
+      ],
+      matchPackageNames: [
+        'Npgsql.EntityFrameworkCore.PostgreSQL',
+      ],
+      matchCurrentValue: '/^10\\./',
+      allowedVersions: '/^10\\./',
+    },
   ],
   customManagers: [
     {
