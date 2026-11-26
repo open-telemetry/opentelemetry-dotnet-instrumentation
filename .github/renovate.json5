@@ -40,12 +40,13 @@
       enabled: false,
     },
     {
-      description: 'Skip routine updates for excluded asset pins',
+      description: 'Skip routine updates for excluded assets and BuildTasks dependencies',
       matchManagers: [
         'nuget',
       ],
       matchFileNames: [
         'src/CommonExcludedAssets.Packages.props',
+        'src/BuildTasksDependencies.Packages.props',
       ],
       enabled: false,
     },
