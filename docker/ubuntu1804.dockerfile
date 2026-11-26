@@ -3,8 +3,6 @@ FROM ubuntu:18.04@sha256:152dc042452c496007f07ca9127571cb9c29697f42acbfad72324b2
 # renovate: datasource=deb depName=clang-12
 ARG CLANG_12_VERSION=1:12.0.1~++20211102090516+fed41342a82f-1~exp1~20211102211019.11
 
-# renovate: datasource=deb depName=apt-transport-https
-ARG APT_TRANSPORT_HTTPS_VERSION=1.6.17
 # renovate: datasource=deb depName=build-essential
 ARG BUILD_ESSENTIAL_VERSION=12.4ubuntu1
 # renovate: datasource=deb depName=ca-certificates
@@ -26,7 +24,6 @@ ARG CMAKE_VERSION=3.20.5
 
 RUN apt-get update && \
     apt-get install -y \
-    apt-transport-https="${APT_TRANSPORT_HTTPS_VERSION}" \
     build-essential="${BUILD_ESSENTIAL_VERSION}" \
     ca-certificates="${CA_CERTIFICATES_VERSION}" \
     curl="${CURL_VERSION}" \
