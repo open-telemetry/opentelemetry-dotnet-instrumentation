@@ -1,2 +1,0 @@
-OpenTelemetry.AutoInstrumentation.Instrumentations.OracleMda.Integrations.OracleConnectionOpenAsyncIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.Serilog.Bridge.Integrations.LoggerConfigurationIntegration

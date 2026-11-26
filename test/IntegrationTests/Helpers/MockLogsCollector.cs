@@ -104,8 +104,8 @@ internal sealed class MockLogsCollector : IDisposable
             cts.CancelAfter(timeout.Value);
             foreach (var logRecord in _logs.GetConsumingEnumerable(cts.Token))
             {
-                bool found = false;
-                for (int i = missingExpectations.Count - 1; i >= 0; i--)
+                var found = false;
+                for (var i = missingExpectations.Count - 1; i >= 0; i--)
                 {
                     if (!missingExpectations[i].Predicate(logRecord))
                     {

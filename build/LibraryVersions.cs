@@ -1,5 +1,5 @@
+using Fallout.Common.Tools.MSBuild;
 using Models;
-using Nuke.Common.Tools.MSBuild;
 
 public static partial class LibraryVersion
 {
@@ -8,11 +8,12 @@ public static partial class LibraryVersion
         var result = Versions.TryGetValue(applicationName, out libraryVersions);
         if (result)
         {
-            libraryVersions = libraryVersions
-                .Where(x =>
+            libraryVersions =
+            [
+                .. libraryVersions.Where(x =>
                     x.SupportedPlatforms.Length == 0 ||
                     x.SupportedPlatforms.Contains(platform.ToString(), StringComparer.OrdinalIgnoreCase))
-                .ToList();
+            ];
         }
 
         return result;

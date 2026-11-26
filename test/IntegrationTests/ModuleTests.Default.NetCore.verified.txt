@@ -9,7 +9,6 @@
   OpenTelemetry.Exporter.OpenTelemetryProtocol,
   OpenTelemetry.Instrumentation.Http,
   OpenTelemetry.Instrumentation.Process,
-  OpenTelemetry.Instrumentation.Runtime,
   OpenTelemetry.Resources.Azure,
   OpenTelemetry.Resources.Container,
   OpenTelemetry.Resources.Host,

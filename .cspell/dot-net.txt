@@ -39,6 +39,7 @@ nupkg
 popq
 sbyte
 SIGUSR
+slnx
 snupkg
 stdlibc
 struct

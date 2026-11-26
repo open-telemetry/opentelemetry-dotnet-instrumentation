@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Globalization;
-using System.Net;
 using System.Text;
 #if NET
 using System.Formats.Asn1;
+using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -413,6 +413,7 @@ exit
 #if NET
     private static string[] CreateOpenTelemetryWalletConfigurationCommand(string password, string rootCertificatePem, string serverCertificatePem)
     {
+        // Oracle AI Database 26ai RU 23.26.3 looks for the exporter wallet in observability.
         var script = @"
 set -euo pipefail
 
@@ -488,7 +489,7 @@ configure_wallet_dir() {
   orapki wallet display -wallet ""$wallet_dir"" -summary
 }
 
-wallet_dirs=(""${wallet_root}/${pdb_guid}/disttrc"")
+wallet_dirs=(""${wallet_root}/${pdb_guid}/disttrc"" ""${wallet_root}/${sql_pdb_guid}/observability"")
 pdb_guid_lower=""$(printf '%s' ""$sql_pdb_guid"" | tr '[:upper:]' '[:lower:]')""
 if [ -n ""$pdb_guid_lower"" ] && [ ""$pdb_guid_lower"" != ""$pdb_guid"" ]; then
   wallet_dirs+=(""${wallet_root}/${pdb_guid_lower}/disttrc"")
@@ -657,8 +658,7 @@ exit 1
     {
         return string.Join(
             "\n",
-            new[]
-            {
+            [
                 "#!/usr/bin/env bash",
                 "set -euo pipefail",
                 string.Empty,
@@ -680,7 +680,7 @@ exit 1
                 string.Empty,
                 "exec /u01/scripts/entrypoint.sh",
                 string.Empty,
-            });
+            ]);
     }
 
     private static async Task WaitForOracleDatabaseAsync(IContainer container, string password, CancellationToken cancellationToken)
@@ -934,7 +934,7 @@ internal sealed class OracleDatabaseOpenTelemetryCertificate : IDisposable
         {
             // Schannel cannot use the ephemeral key returned by CopyWithPrivateKey for TLS.
             var certificateBytes = certificate.Export(X509ContentType.Pkcs12);
-#if NET9_0_OR_GREATER
+#if NET
             return X509CertificateLoader.LoadPkcs12(
                 certificateBytes,
                 password: null,

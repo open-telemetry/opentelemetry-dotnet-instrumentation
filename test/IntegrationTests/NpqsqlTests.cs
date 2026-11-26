@@ -189,7 +189,7 @@ public class NpqsqlTests : TestHelper
             Assert.Single(tracedCopyBackendProcessIds);
             Assert.Equal(tracedCopyBackendProcessIds, untracedCopyBackendProcessIds);
             Assert.Equal(tracedBackendProcessIds, tracedCopyBackendProcessIds);
-            tracedApplicationNames = tracedApplicationNames.Concat(tracedCopyApplicationNames).ToList();
+            tracedApplicationNames = [.. tracedApplicationNames, .. tracedCopyApplicationNames];
         }
 
         foreach (var applicationName in tracedApplicationNames)
@@ -204,12 +204,14 @@ public class NpqsqlTests : TestHelper
     }
 #endif
 
-    [Theory]
+    [SkippableTheory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.Npgsql), MemberType = typeof(LibraryVersion))]
     public void SkipsTraceContextPropagationForMultiplexing(string packageVersion)
     {
+        Skip.IfNot(SupportsMultiplexing(packageVersion), "Npgsql 11 removed connection multiplexing.");
+
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable(NpgsqlTraceContextPropagationTestHelper.ContextPropagationEnvVar, bool.TrueString);
 
@@ -247,4 +249,18 @@ public class NpqsqlTests : TestHelper
         collector.AssertExpectations();
     }
 #endif
+
+    private static bool SupportsMultiplexing(string packageVersion)
+    {
+        if (!string.IsNullOrEmpty(packageVersion))
+        {
+            return Version.Parse(packageVersion).Major < 11;
+        }
+
+#if NETFRAMEWORK
+        return true;
+#else
+        return false;
+#endif
+    }
 }

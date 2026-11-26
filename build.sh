@@ -10,9 +10,10 @@ SCRIPT_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 ###########################################################################
 
 BUILD_PROJECT_FILE="$SCRIPT_DIR/build/_build.csproj"
-TEMP_DIRECTORY="$SCRIPT_DIR//.nuke/temp"
+BUILD_ASSEMBLY_FILE="$SCRIPT_DIR/build/bin/Debug/_build.dll"
+TEMP_DIRECTORY="$SCRIPT_DIR/.fallout/temp"
 
-DOTNET_GLOBAL_FILE="$SCRIPT_DIR//global.json"
+DOTNET_GLOBAL_FILE="$SCRIPT_DIR/global.json"
 DOTNET_INSTALL_FILE_DEFAULT="$SCRIPT_DIR/scripts/dotnet-install.sh"
 DOTNET_INSTALL_URL="https://dot.net/v1/dotnet-install.sh"
 DOTNET_CHANNEL="STS"
@@ -65,4 +66,5 @@ fi
 echo "Microsoft (R) .NET SDK version $("$DOTNET_EXE" --version)"
 
 "$DOTNET_EXE" build "$BUILD_PROJECT_FILE" /nodeReuse:false /p:UseSharedCompilation=false -nologo -clp:NoSummary --verbosity quiet
-"$DOTNET_EXE" run --project "$BUILD_PROJECT_FILE" --no-build -- "$@"
+# Run the compiled Fallout build assembly.
+exec "$DOTNET_EXE" "$BUILD_ASSEMBLY_FILE" "$@"

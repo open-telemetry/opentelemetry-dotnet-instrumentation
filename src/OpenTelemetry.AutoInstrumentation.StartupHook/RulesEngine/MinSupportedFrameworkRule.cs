@@ -17,7 +17,7 @@ internal class MinSupportedFrameworkRule : Rule
 
     internal override bool Evaluate()
     {
-        Version minRequiredFrameworkVersion = new(8, 0);
+        Version minRequiredFrameworkVersion = new(10, 0);
         var frameworkVersion = Environment.Version;
         if (frameworkVersion < minRequiredFrameworkVersion)
         {

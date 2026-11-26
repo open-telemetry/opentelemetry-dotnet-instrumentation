@@ -406,9 +406,11 @@ internal sealed class OpAmpReporter : IOpAmpListener<ServerCapabilitiesMessage>,
         try
         {
             // Copy the plugin's buffers so later mutations cannot change the queued report.
-            return _effectiveConfigProvider.GetEffectiveConfig()
-                .Select(file => new EffectiveConfigFile(file.Content.ToArray(), file.ContentType, file.FileName))
-                .ToArray();
+            return
+            [
+                .. _effectiveConfigProvider.GetEffectiveConfig()
+                    .Select(file => new EffectiveConfigFile(file.Content.ToArray(), file.ContentType, file.FileName))
+            ];
         }
         catch (Exception ex)
         {

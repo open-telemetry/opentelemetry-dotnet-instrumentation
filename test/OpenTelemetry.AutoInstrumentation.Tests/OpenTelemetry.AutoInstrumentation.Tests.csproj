@@ -6,12 +6,18 @@
     <PackageReference Include="log4net" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="System.Data.SqlClient" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " />
-    <PackageReference Include="Microsoft.Build" Condition=" '$(TargetFramework)' == 'net10.0' " />
+    <PackageReference Include="Microsoft.Build" Condition=" '$(TargetFramework)' == 'net11.0' " />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />
-    <ProjectReference Include="..\..\tools\DependencyListGenerator\DependencyListGenerator.csproj" Condition=" '$(TargetFramework)' == 'net10.0' " />
+    <ProjectReference Include="..\..\tools\DependencyListGenerator\DependencyListGenerator.csproj" Condition=" '$(TargetFramework)' == 'net11.0' " />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\test-applications\integrations\TestApplication.ContinuousProfiler\Exporter\AllocationSample.cs" Link="ContinuousProfiler\AllocationSample.cs" />
+    <Compile Include="..\test-applications\integrations\TestApplication.ContinuousProfiler\Exporter\SampleNativeFormatParser.cs" Link="ContinuousProfiler\SampleNativeFormatParser.cs" />
+    <Compile Include="..\test-applications\integrations\TestApplication.ContinuousProfiler\Exporter\ThreadSample.cs" Link="ContinuousProfiler\ThreadSample.cs" />
   </ItemGroup>
 
   <ItemGroup>

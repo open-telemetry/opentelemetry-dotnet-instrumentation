@@ -4,18 +4,18 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Extensions;
-using Nuke.Common;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.MSBuild;
-using Nuke.Common.Tools.Npm;
-using Nuke.Common.Tools.NuGet;
-using Nuke.Common.Utilities.Collections;
+using Fallout.Common;
+using Fallout.Common.IO;
+using Fallout.Common.Tooling;
+using Fallout.Common.Tools.DotNet;
+using Fallout.Common.Tools.MSBuild;
+using Fallout.Common.Tools.Npm;
+using Fallout.Common.Tools.NuGet;
+using Fallout.Common.Utilities.Collections;
+using Fallout.Solutions;
 using Serilog;
-using static Nuke.Common.EnvironmentInfo;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using static Fallout.Common.EnvironmentInfo;
+using static Fallout.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
 {
@@ -23,7 +23,7 @@ partial class Build
     private const string AdditionalDepsSh = "generate-additional-deps.sh";
     private const string AdditionalDepsPs1 = "generate-additional-deps.ps1";
 
-    [Solution("OpenTelemetry.AutoInstrumentation.sln")] readonly Solution Solution;
+    [Solution("OpenTelemetry.AutoInstrumentation.slnx")] readonly Solution Solution;
 
     AbsolutePath OutputDirectory => RootDirectory / "bin";
     AbsolutePath SourceDirectory => RootDirectory / "src";
@@ -46,7 +46,7 @@ partial class Build
 
     private static readonly IEnumerable<TargetFramework> TargetFrameworks =
     [
-       TargetFramework.NET8_0,
+       TargetFramework.NET10_0,
        TargetFramework.NET462,
     ];
 
@@ -56,16 +56,14 @@ partial class Build
         TargetFramework.NET47,
         TargetFramework.NET471,
         TargetFramework.NET472,
-        TargetFramework.NET8_0,
-        TargetFramework.NET9_0,
-        TargetFramework.NET10_0
+        TargetFramework.NET10_0,
+        TargetFramework.NET11_0
     ];
 
     private static readonly IEnumerable<TargetFramework> TestFrameworks =
     [
         ..TargetFrameworks,
-        TargetFramework.NET9_0,
-        TargetFramework.NET10_0
+        TargetFramework.NET11_0
     ];
 
     Target CreateRequiredDirectories => _ => _
@@ -132,6 +130,8 @@ partial class Build
             var targetProject = Solution.GetProjectByName(Projects.AutoInstrumentationAssemblies);
             DotNetRestore(s => s.SetProjectFile(targetProject));
 
+            // Initialize Fallout's MSBuild resolver before loading the generator's MSBuild types.
+            ProjectModelTasks.Initialize();
             TransientDependenciesGenerator.Run(targetProject);
         });
 
@@ -262,21 +262,18 @@ partial class Build
 
     Target CompileNativeDependenciesForManagedTests => _ => _
         .Description("Compiles the native dependencies for testing applications")
-        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeDependenciesForManagedTestsWindows)
         .DependsOn(CompileNativeDependenciesForManagedTestsLinux)
         .DependsOn(CompileNativeDependenciesForManagedTestsMacOs);
 
     Target CompileNativeSrc => _ => _
         .Description("Compiles the native loader")
-        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeSrcWindows)
         .DependsOn(CompileNativeSrcLinux)
         .DependsOn(CompileNativeSrcMacOs);
 
     Target CompileNativeTests => _ => _
         .Description("Compiles the native loader unit tests")
-        .DependsOn(SupportVs2026IfAvailable)
         .DependsOn(CompileNativeTestsWindows)
         .DependsOn(CompileNativeTestsLinux);
 
@@ -433,7 +430,7 @@ partial class Build
 
             // Generate .NET (Core) redirects
             // .NET Core version normalization:
-            // net8.0 -> 80, net9.0 -> 90, net10.0 -> 100
+            // net10.0 -> 100, net11.0 -> 110
             AssemblyRedirectionSourceGenerator.Generate(
                 TracerHomeDirectory / TargetFramework.OutputFolderNet,
                 SourceDirectory / Projects.AutoInstrumentationNative / $"assembly_redirection_{TargetFramework.OutputFolderNet}.h",
@@ -543,7 +540,7 @@ partial class Build
                     return;
                 }
 
-                targetFrameworks = new[] { TestTargetFramework };
+                targetFrameworks = [TestTargetFramework];
             }
 
             DotNetPublish(s => s
@@ -587,9 +584,7 @@ partial class Build
 
             if (!string.IsNullOrWhiteSpace(TestProject))
             {
-                unitTestProjects = unitTestProjects
-                    .Where(p => p.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))
-                    .ToArray();
+                unitTestProjects = [.. unitTestProjects.Where(p => p.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))];
                 if (unitTestProjects.Length == 0)
                 {
                     return;
@@ -598,14 +593,15 @@ partial class Build
 
             if (TestTargetFramework != TargetFramework.NOT_SPECIFIED)
             {
-                unitTestProjects = unitTestProjects
-                    .Where(p =>
+                unitTestProjects =
+                [
+                    .. unitTestProjects.Where(p =>
                         p.GetTargetFrameworks().Contains(TestTargetFramework) &&
                         (p.Name != Projects.Tests.AutoInstrumentationLoaderTests || TargetFrameworks.Contains(TestTargetFramework)))
-                    .ToArray();
+                ];
             }
 
-            for (int i = 0; i < TestCount; i++)
+            for (var i = 0; i < TestCount; i++)
             {
                 DotNetTestSettings ConfigureUnitTest(DotNetTestSettings settings) => settings
                     .SetConfiguration(BuildConfiguration)
@@ -653,7 +649,7 @@ partial class Build
                 return;
             }
 
-            for (int i = 0; i < TestCount; i++)
+            for (var i = 0; i < TestCount; i++)
             {
                 DotNetTestSettings ConfigureIntegrationTest(DotNetTestSettings settings) => settings
                     .SetConfiguration(BuildConfiguration)
@@ -690,7 +686,7 @@ partial class Build
             var files = Directory.GetFiles(netPath);
             var fileInfoList = new List<object>(files.Length);
 
-            foreach (string file in files)
+            foreach (var file in files)
             {
                 var fileName = Path.GetFileNameWithoutExtension(file);
 
@@ -706,8 +702,8 @@ partial class Build
                 }
             }
 
-            JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonContent = JsonSerializer.Serialize(fileInfoList, options);
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            var jsonContent = JsonSerializer.Serialize(fileInfoList, options);
 
             var ruleEngineJsonFilePath = netPath / "ruleEngine.json";
             File.WriteAllText(ruleEngineJsonFilePath, jsonContent);
@@ -776,7 +772,7 @@ partial class Build
             "Initialize_WithPreviouslyCreatedTracerProvider_WorksCorrectly"
         }.Select(name => $"FullyQualifiedName~{testPrefix}.{name}");
 
-        for (int i = 0; i < TestCount; i++)
+        for (var i = 0; i < TestCount; i++)
         {
             foreach (var testName in testNames)
             {

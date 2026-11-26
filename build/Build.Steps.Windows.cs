@@ -1,22 +1,21 @@
 using Extensions;
-using Nuke.Common;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
-using Nuke.Common.Tools.Docker;
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.MSBuild;
+using Fallout.Common;
+using Fallout.Common.IO;
+using Fallout.Common.Tooling;
+using Fallout.Common.Tools.Docker;
+using Fallout.Common.Tools.DotNet;
+using Fallout.Common.Tools.MSBuild;
+using Fallout.Solutions;
 using Serilog;
-using static Nuke.Common.EnvironmentInfo;
-using static Nuke.Common.Tools.Docker.DockerTasks;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
+using static Fallout.Common.EnvironmentInfo;
+using static Fallout.Common.Tools.Docker.DockerTasks;
+using static Fallout.Common.Tools.DotNet.DotNetTasks;
+using static Fallout.Common.Tools.MSBuild.MSBuildTasks;
 
 partial class Build
 {
     Target CompileNativeSrcWindows => _ => _
         .Unlisted()
-        .After(SupportVs2026IfAvailable)
         .After(CompileManagedSrc)
         .After(GenerateAssemblyRedirectionSource)
         .OnlyWhenStatic(() => IsWin)
@@ -26,7 +25,7 @@ partial class Build
             var platforms =
             Equals(Platform, MSBuildTargetPlatform.x64)
                 ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
-                : new[] { MSBuildTargetPlatform.x86 };
+                : [MSBuildTargetPlatform.x86];
 
             foreach (var project in Solution.GetNativeSrcProjects())
             {
@@ -50,32 +49,8 @@ partial class Build
             }
         });
 
-    Target SupportVs2026IfAvailable => _ => _
-        .Unlisted()
-        .OnlyWhenStatic(() => IsWin)
-        .Executes(() =>
-        {
-            // Typical installation folder: C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\amd64
-            // Waiting for official support in Nuke package https://github.com/nuke-build/nuke/pull/1583
-
-            string[] editions = ["Enterprise", "Professional", "Community", "Preview"];
-
-            foreach (var edition in editions)
-            {
-                var msBuildPath = Path.Combine(SpecialFolder(SpecialFolders.ProgramFiles).NotNull(),
-                    $@"Microsoft Visual Studio\18\{edition}\MSBuild\Current\Bin\amd64\MSBuild.exe");
-
-                if (File.Exists(msBuildPath))
-                {
-                    MSBuildPath = msBuildPath;
-                    return;
-                }
-            }
-        });
-
     Target CompileNativeDependenciesForManagedTestsWindows => _ => _
         .Unlisted()
-        .After(SupportVs2026IfAvailable)
         .After(CompileManagedSrc)
         .After(GenerateAssemblyRedirectionSource)
         .OnlyWhenStatic(() => IsWin)
@@ -94,7 +69,6 @@ partial class Build
 
     Target CompileNativeTestsWindows => _ => _
         .Unlisted()
-        .After(SupportVs2026IfAvailable)
         .After(CompileNativeSrc)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
@@ -103,7 +77,7 @@ partial class Build
             var platforms =
             Equals(Platform, MSBuildTargetPlatform.x64)
                 ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
-                : new[] { MSBuildTargetPlatform.x86 };
+                : [MSBuildTargetPlatform.x86];
 
             var nativeTestProject = Solution.GetNativeTestProject();
             PerformLegacyRestoreIfNeeded(nativeTestProject);
@@ -292,7 +266,7 @@ partial class Build
     {
         if (!NoRestore && project.Directory.ContainsFile("packages.config"))
         {
-            RestoreLegacyNuGetPackagesConfig(new[] { project });
+            RestoreLegacyNuGetPackagesConfig([project]);
         }
     }
 }

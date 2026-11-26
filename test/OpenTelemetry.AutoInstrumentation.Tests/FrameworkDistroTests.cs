@@ -1,9 +1,9 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-// This test is setup to run on .NET because the 'DependencyListGenerator' tool is written in .NET
+// This test is set up to run on .NET because the 'DependencyListGenerator' tool is written in .NET
 // The actual test is testing both .NET and .NET Framework context.
-#if NET10_0
+#if NET11_0
 
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -46,10 +46,6 @@ public class FrameworkDistroTests
 
         var frameworkDependencies = Generator.EnumerateDependencies(projectPath);
 
-        // We use "15.0" as toolkit version, it should be replaced with "Current"
-        // when Microsoft.Build will be updated.
-        const string toolsVersion = "15.0";
-
         Assert.All(frameworkDependencies, pair =>
         {
             using var collection = new ProjectCollection();
@@ -61,7 +57,7 @@ public class FrameworkDistroTests
                 { "TargetFramework", pair.Key },
                 { "TargetFrameworkIdentifier", NuGetFramework.Parse(pair.Key).Framework }
             };
-            var project = new Project(packagesPath, properties, toolsVersion, collection);
+            var project = new Project(packagesPath, properties, toolsVersion: null, collection);
 
             var versionedDependencies = project.Items
                 .Where(it => it.ItemType == "PackageVersion")
@@ -124,7 +120,7 @@ public class FrameworkDistroTests
         var dependencies = Generator.EnumerateDependencies(projectPath).SelectMany(it => it.Value).ToHashSet();
         var packagesFolder = SettingsUtility.GetGlobalPackagesFolder(Settings.LoadDefaultSettings(root: codeDir));
 
-        string[] supportedCoreTfmPrefixes = ["netcoreapp", "netstandard", "net5", "net6", "net7", "net8", "net9", "net10"];
+        string[] supportedCoreTfmPrefixes = ["netcoreapp", "netstandard", "net5", "net6", "net7", "net8", "net9", "net10", "net11"];
 
         // We may need add new TFM in OpenTelemetry.AutoInstrumentation.Assemblies
         // (and build infrastructure, readme) if referenced dependencies has a custom build for that TFM.
@@ -135,8 +131,8 @@ public class FrameworkDistroTests
             // Check .NET Core+ TFMs (netcoreapp*, netstandard*, net5.0+)
             var netCoreAppFiles = Directory.EnumerateDirectories(packageFolder, "netcoreapp*", SearchOption.AllDirectories);
             var netStandardFiles = Directory.EnumerateDirectories(packageFolder, "netstandard*", SearchOption.AllDirectories);
-            // Range(5, 6) generates versions 5 through 10 (start=5, count=6)
-            var net5PlusFiles = Enumerable.Range(5, 6)
+            // Range(5, 7) generates versions 5 through 11 (start=5, count=7)
+            var net5PlusFiles = Enumerable.Range(5, 7)
                 .SelectMany(version => Directory.EnumerateDirectories(packageFolder, $"net{version}.*", SearchOption.AllDirectories));
 
             var netCoreFiles = netCoreAppFiles

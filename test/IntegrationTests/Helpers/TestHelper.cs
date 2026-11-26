@@ -128,7 +128,7 @@ public abstract class TestHelper
 
         var processId = process!.Id;
 
-        bool processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
+        var processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
         {
             process.Kill();

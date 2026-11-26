@@ -371,6 +371,17 @@ public class MySelectiveSamplerPlugin : IPlugin, ISelectiveSamplerPlugin
 
 `Exporter` must implement `ISelectiveSamplerExporter`.
 
+Each native selective batch starts with opcode `0x0A`, a 32-bit format version
+(`1`), and a 32-bit selective sampling interval in milliseconds, all integers
+in big-endian order. Sample records follow, ending
+with opcode `0x0B`. A returned buffer can contain several batches with different
+intervals. Exporters must use each batch's interval for its snapshot samples.
+
+When CPU and selective sampling coincide, one stack capture produces both a full
+CPU batch and a separate selected-thread batch. All snapshot samples are
+delivered through `ExportSelectedThreadSamples`, independently of CPU buffer
+back pressure.
+
 ## Continuous profiling
 
 Implement `IContinuousProfilerPlugin` to provide continuous profiler
@@ -415,6 +426,16 @@ the CPU sampling interval in milliseconds for each native batch. Use that
 interval to set the exported profile period. Existing exporters must update
 their `ExportThreadSamples` implementation to accept the interval.
 
+Native CPU batches start with opcode `0x01`, a 32-bit format version (`2`),
+and a 64-bit capture timestamp in milliseconds, all in big-endian order.
+The header is followed by thread samples with their span contexts and stacks.
+The separate `samplingInterval` argument describes the CPU profile period.
+CPU batches contain no selective sampling metadata. Exporters obtain snapshot
+samples and their selective sampling interval from `ExportSelectedThreadSamples`.
+When both outputs reuse one stack capture, their timestamps match. Creating
+snapshot copies from CPU batches would duplicate the separately delivered
+selective samples.
+
 An exporter and a nonzero CPU interval or allocation limit prepare the
 corresponding managed handler even when its `Enabled` setting is false. Native
 sampling remains disabled until a runtime configuration enables that feature.
@@ -425,42 +446,42 @@ sampling remains disabled until a runtime configuration enables that feature.
 
 | Options type                                                                              | NuGet package                                     | NuGet version |
 |-------------------------------------------------------------------------------------------|---------------------------------------------------|---------------|
-| OpenTelemetry.Exporter.ConsoleExporterOptions                                             | OpenTelemetry.Exporter.Console                    | 1.20.1        |
-| OpenTelemetry.Exporter.ZipkinExporterOptions  **Deprecated**                              | OpenTelemetry.Exporter.Zipkin                     | 1.20.1        |
-| OpenTelemetry.Exporter.OtlpExporterOptions                                                | OpenTelemetry.Exporter.OpenTelemetryProtocol      | 1.20.1        |
-| OpenTelemetry.Instrumentation.AspNet.AspNetTraceInstrumentationOptions                    | OpenTelemetry.Instrumentation.AspNet              | 1.20.3        |
-| OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreTraceInstrumentationOptions            | OpenTelemetry.Instrumentation.AspNetCore          | 1.20.2        |
-| OpenTelemetry.Instrumentation.EntityFrameworkCore.EntityFrameworkInstrumentationOptions   | OpenTelemetry.Instrumentation.EntityFrameworkCore | 1.20.2-beta.1 |
-| OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientTraceInstrumentationOptions         | OpenTelemetry.Instrumentation.GrpcNetClient       | 1.20.1-beta.1 |
-| OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions                  | OpenTelemetry.Instrumentation.Http                | 1.20.2        |
-| OpenTelemetry.Instrumentation.Quartz.QuartzInstrumentationOptions                         | OpenTelemetry.Instrumentation.Quartz              | 1.20.1-beta.1 |
-| OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions              | OpenTelemetry.Instrumentation.SqlClient           | 1.20.2        |
-| OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions | OpenTelemetry.Instrumentation.StackExchangeRedis  | 1.20.1-beta.1 |
-| OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                               | OpenTelemetry.Instrumentation.Wcf                 | 1.20.1-beta.2 |
+| OpenTelemetry.Exporter.ConsoleExporterOptions                                             | OpenTelemetry.Exporter.Console                    | 1.21.0        |
+| OpenTelemetry.Exporter.ZipkinExporterOptions  **Deprecated**                              | OpenTelemetry.Exporter.Zipkin                     | 1.21.0        |
+| OpenTelemetry.Exporter.OtlpExporterOptions                                                | OpenTelemetry.Exporter.OpenTelemetryProtocol      | 1.21.0        |
+| OpenTelemetry.Instrumentation.AspNet.AspNetTraceInstrumentationOptions                    | OpenTelemetry.Instrumentation.AspNet              | 1.21.0        |
+| OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreTraceInstrumentationOptions            | OpenTelemetry.Instrumentation.AspNetCore          | 1.21.0        |
+| OpenTelemetry.Instrumentation.EntityFrameworkCore.EntityFrameworkInstrumentationOptions   | OpenTelemetry.Instrumentation.EntityFrameworkCore | 1.21.0-beta.2 |
+| OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientTraceInstrumentationOptions         | OpenTelemetry.Instrumentation.GrpcNetClient       | 1.21.0-beta.1 |
+| OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions                  | OpenTelemetry.Instrumentation.Http                | 1.21.0        |
+| OpenTelemetry.Instrumentation.Quartz.QuartzInstrumentationOptions                         | OpenTelemetry.Instrumentation.Quartz              | 1.21.0-beta.1 |
+| OpenTelemetry.Instrumentation.SqlClient.SqlClientTraceInstrumentationOptions              | OpenTelemetry.Instrumentation.SqlClient           | 1.21.0        |
+| OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions | OpenTelemetry.Instrumentation.StackExchangeRedis  | 1.21.0-beta.1 |
+| OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                               | OpenTelemetry.Instrumentation.Wcf                 | 1.21.0-beta.1 |
 
 ### Metrics
 
 | Options type                                                             | NuGet package                                  | NuGet version |
 |--------------------------------------------------------------------------|------------------------------------------------|---------------|
-| OpenTelemetry.Metrics.MetricReaderOptions                                | OpenTelemetry                                  | 1.20.1        |
-| OpenTelemetry.Exporter.ConsoleExporterOptions                            | OpenTelemetry.Exporter.Console                 | 1.20.1        |
-| OpenTelemetry.Exporter.PrometheusExporterOptions                         | OpenTelemetry.Exporter.Prometheus.HttpListener | 1.20.1-beta.1 |
-| OpenTelemetry.Exporter.OtlpExporterOptions                               | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.20.1        |
-| OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions | OpenTelemetry.Instrumentation.AspNet           | 1.20.3        |
+| OpenTelemetry.Metrics.MetricReaderOptions                                | OpenTelemetry                                  | 1.21.0        |
+| OpenTelemetry.Exporter.ConsoleExporterOptions                            | OpenTelemetry.Exporter.Console                 | 1.21.0        |
+| OpenTelemetry.Exporter.PrometheusExporterOptions                         | OpenTelemetry.Exporter.Prometheus.HttpListener | 1.21.0-beta.1 |
+| OpenTelemetry.Exporter.OtlpExporterOptions                               | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.21.0        |
+| OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions | OpenTelemetry.Instrumentation.AspNet           | 1.21.0        |
 
 ### Logs
 
 | Options type                                  | NuGet package                                | NuGet version |
 |-----------------------------------------------|----------------------------------------------|---------------|
-| OpenTelemetry.Logs.OpenTelemetryLoggerOptions | OpenTelemetry                                | 1.20.1        |
-| OpenTelemetry.Exporter.ConsoleExporterOptions | OpenTelemetry.Exporter.Console               | 1.20.1        |
-| OpenTelemetry.Exporter.OtlpExporterOptions    | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.20.1        |
+| OpenTelemetry.Logs.OpenTelemetryLoggerOptions | OpenTelemetry                                | 1.21.0        |
+| OpenTelemetry.Exporter.ConsoleExporterOptions | OpenTelemetry.Exporter.Console               | 1.21.0        |
+| OpenTelemetry.Exporter.OtlpExporterOptions    | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.21.0        |
 
 ### OpAMP
 
 | Settings type                                           | NuGet package              | NuGet version  |
 |---------------------------------------------------------|----------------------------|----------------|
-| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.10.0-alpha.1 |
+| OpenTelemetry.OpAmp.Client.Settings.OpAmpClientSettings | OpenTelemetry.OpAmp.Client | 0.11.0-alpha.1 |
 
 ## Requirements
 

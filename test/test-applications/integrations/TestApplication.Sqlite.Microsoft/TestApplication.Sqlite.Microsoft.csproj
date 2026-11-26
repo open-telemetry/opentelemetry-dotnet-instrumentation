@@ -1,6 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite"  VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="Microsoft.Data.Sqlite" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' != 'net462' " />
+    <!-- Keep the .NET Framework fallback on 10.x. Renovate enforces the cap in .github/renovate.json5. -->
+    <PackageReference Include="Microsoft.Data.Sqlite" VersionOverride="10.0.15" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net462' " />
+
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Condition=" '$(LibraryVersion)' != '' and $([MSBuild]::VersionLessThan('$(LibraryVersion)', '10.0.11')) " />
   </ItemGroup>
 </Project>

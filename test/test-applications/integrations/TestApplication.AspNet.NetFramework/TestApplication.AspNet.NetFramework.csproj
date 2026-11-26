@@ -28,10 +28,7 @@
     </NuGetPackageImportStamp>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerLaunchUrl>http://{ServiceIPAddress}</DockerLaunchUrl>
-    <!-- 
-        LangVersion needs to be 13.0 as it is dependency on Windows 2022 without VS2026.
-    -->
-    <LangVersion>13.0</LangVersion>
+    <LangVersion>15.0</LangVersion>
     <DefineConstants>$(DefineConstants);ASPNET_NETFRAMEWORK</DefineConstants>
   </PropertyGroup>
   <ItemGroup>

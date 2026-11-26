@@ -24,7 +24,7 @@ internal static class Program
         command.WrapBubbleUpExceptions = false;
         command.IgnoreRegularIntegrationException();
 #if NET
-        Span<int> span = stackalloc int[] { 40 };
+        Span<int> span = [40];
         command.UseSpan(span);
         command.UseReadOnlySpan(span);
         command.UseByRefSpan(ref span);

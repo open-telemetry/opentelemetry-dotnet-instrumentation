@@ -31,13 +31,13 @@ namespace OpenTelemetry.AutoInstrumentation;
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 internal struct NativeCallTargetDefinition
 {
-    public readonly IntPtr TargetAssembly;
+    public readonly nint TargetAssembly;
 
-    public readonly IntPtr TargetType;
+    public readonly nint TargetType;
 
-    public readonly IntPtr TargetMethod;
+    public readonly nint TargetMethod;
 
-    public readonly IntPtr TargetSignatureTypes;
+    public readonly nint TargetSignatureTypes;
 
     public readonly ushort TargetSignatureTypesLength;
 
@@ -53,15 +53,15 @@ internal struct NativeCallTargetDefinition
 
     public readonly ushort TargetMaximumPatch;
 
-    public readonly IntPtr IntegrationAssembly;
+    public readonly nint IntegrationAssembly;
 
-    public readonly IntPtr IntegrationType;
+    public readonly nint IntegrationType;
 
     public NativeCallTargetDefinition(
-        IntPtr targetAssembly,
-        IntPtr targetType,
-        IntPtr targetMethod,
-        IntPtr targetSignatureTypes,
+        nint targetAssembly,
+        nint targetType,
+        nint targetMethod,
+        nint targetSignatureTypes,
         ushort targetSignatureTypesLength,
         ushort targetMinimumMajor,
         ushort targetMinimumMinor,
@@ -69,8 +69,8 @@ internal struct NativeCallTargetDefinition
         ushort targetMaximumMajor,
         ushort targetMaximumMinor,
         ushort targetMaximumPatch,
-        IntPtr integrationAssembly,
-        IntPtr integrationType)
+        nint integrationAssembly,
+        nint integrationType)
     {
         TargetAssembly = targetAssembly;
         TargetType = targetType;

@@ -38,7 +38,7 @@ Continuous profiling and selective sampling can be enabled independently.
 
 ## Requirements
 
-* .NET 8.0 or higher (`ICorProfilerInfo12` available in runtime).
+* .NET 10.0 or higher (`ICorProfilerInfo12` available in runtime).
 * .NET Framework is not supported, as `ICorProfiler10` and `ICorProfiler12`
   are not available in .NET Fx.
 
@@ -82,13 +82,8 @@ for sample implementation of plugin.
 Thread sampling supported by the continuous profiler, and selective sampling
 share native-side sampling thread, and managed-side exporter thread.
 
-Considering both types of profiling can configure export interval and export
-timeout, the following rules apply:
-
-* If different export intervals are configured, the higher export interval will
-  be used.
-* If different export timeouts are configured, the higher export timeout will
-  be used.
+Each type of profiling uses its own export interval and timeout on the shared
+managed exporter thread. Their native buffers apply back pressure independently.
 
 Additional restrictions apply to sampling intervals:
 
@@ -97,11 +92,16 @@ Additional restrictions apply to sampling intervals:
 * Continuous profiling interval is required to be a multiple of selective
   sampling interval.
 
-In order to avoid unnecessary overhead, if both continuous profiling and
-selective sampling are enabled, during collection of the call stacks for
-all the threads, if thread is associated with a span selected for frequent
-sampling, collected sample will have additional flag set. Exporter can use this
-flag to identify samples associated with spans selected for frequent sampling.
+When CPU and selective sampling coincide, the worker captures all thread stacks
+once and publishes two logical outputs: the full cohort to the CPU buffer and
+the selected subset to the selective buffer. Both outputs share the capture
+timestamp and configuration snapshot. If the CPU buffers are full, the worker
+still captures selected threads when the selective buffer has capacity.
+
+CPU batches contain no selective sampling metadata. The selective sampling
+interval and selected thread stacks are delivered through
+`ExportSelectedThreadSamples`. Exporters can correlate coincident samples using
+their capture timestamp, span context, and thread identity.
 
 See [`SampleNativeFormatParser`](../../test/test-applications/integrations/TestApplication.ContinuousProfiler/Exporter/SampleNativeFormatParser.cs)
 for sample implementation.
