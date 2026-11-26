@@ -78,7 +78,7 @@ internal static class Program
 
         logger.Information("Structured {@Point} and {Items}", new { X = 1, Label = "origin" }, Items);
         logger.Information("Nested {@Points} and {@Levels}", Points, new { L2 = new { L3 = new { L4 = new { X = 1 } } } });
-        logger.Warning("Logged outside of an activity");
+        logger.ForContext("serilog.rendered_message", "Application property").Warning("Logged outside of an activity");
         logger.Error(GetException(), "Exception occurred");
 
         // Serilog 3.1+ stores the trace context in the event, so a replayed event keeps the context of its first write.

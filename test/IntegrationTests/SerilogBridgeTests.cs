@@ -42,6 +42,7 @@ public class SerilogBridgeTests : TestHelper
                 records.Count(logRecord =>
                     VerifyBody(logRecord, "Logged outside of an activity") &&
                     logRecord is { SeverityText: "Warning", SeverityNumber: SeverityNumber.Warn } &&
+                    VerifyStringAttribute(logRecord, "serilog.rendered_message", "Application property") &&
                     logRecord.TraceId == ByteString.Empty &&
                     logRecord.SpanId == ByteString.Empty) == 1 &&
                 records.Count(logRecord =>
@@ -81,7 +82,7 @@ public class SerilogBridgeTests : TestHelper
                 records.Count(logRecord =>
                     VerifyBody(logRecord, "Logged outside of an activity") &&
                     VerifyStringAttribute(logRecord, "serilog.rendered_message", "Logged outside of an activity")) == 1,
-            "Expected the rendered message on records with and without properties.");
+            "Expected the rendered message, including when it replaces an application property with the same name.");
 
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLE_SERILOG_BRIDGE", "true");

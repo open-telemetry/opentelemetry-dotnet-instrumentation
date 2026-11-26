@@ -17,6 +17,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Serilog.Bridge;
 /// </summary>
 internal class OpenTelemetrySerilogSink
 {
+    private const string RenderedMessageAttribute = "serilog.rendered_message";
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
     private static readonly Lazy<Func<string?, object?>?> GetLoggerFactory = new(CreateGetLoggerDelegate, true);
     private static readonly ConcurrentDictionary<string, object> Loggers = new(StringComparer.Ordinal);
@@ -46,24 +47,31 @@ internal class OpenTelemetrySerilogSink
             }
         }
 
+        var includeFormattedMessage = Instrumentation.LogSettings.Value.IncludeFormattedMessage;
         string? sourceContext = null;
         var properties = new List<KeyValuePair<string, object?>>();
         foreach (var item in logEvent.Properties)
         {
             var property = item.DuckCast<LogEventProperty>();
+            var key = property.Key;
+            if (includeFormattedMessage && key == RenderedMessageAttribute)
+            {
+                continue;
+            }
+
             var value = ConvertValue(property.Value);
-            if (property.Key == "SourceContext")
+            if (key == "SourceContext")
             {
                 sourceContext = value as string;
                 continue;
             }
 
-            properties.Add(new KeyValuePair<string, object?>(property.Key, value));
+            properties.Add(new KeyValuePair<string, object?>(key, value));
         }
 
-        if (Instrumentation.LogSettings.Value.IncludeFormattedMessage)
+        if (includeFormattedMessage)
         {
-            properties.Add(new KeyValuePair<string, object?>("serilog.rendered_message", logEvent.RenderMessage(null)));
+            properties.Add(new KeyValuePair<string, object?>(RenderedMessageAttribute, logEvent.RenderMessage(null)));
         }
 
         var logger = GetLogger(sourceContext);

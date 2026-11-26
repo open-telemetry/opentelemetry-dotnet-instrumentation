@@ -42,7 +42,8 @@ the following way:
   Values that cannot be nested, such as an array in an array, are exported
   as Serilog text, for example `[1, 2]`.
 - If `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE` is `true`,
-  the rendered message is added as the `serilog.rendered_message` attribute
+  the rendered message takes precedence over any Serilog property named
+  `serilog.rendered_message` and is exported under that attribute name.
 - `Exception` is used to populate the following properties: `exception.type`,
   `exception.message`, `exception.stacktrace`
 - The trace context comes from the `TraceId` and `SpanId` that the event
