@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="$(LibraryVersion)" Condition=" '$(LibraryVersion)' != '' or '$(TargetFramework)' != 'net10.0' " />
+    <!-- Keep the default SQLite provider for .NET 10 on 10.x. Renovate enforces the cap in .github/renovate.json5. -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" VersionOverride="10.0.15" Condition=" '$(LibraryVersion)' == '' and '$(TargetFramework)' == 'net10.0' " />
 
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Condition=" '$(LibraryVersion)' != '' and $([MSBuild]::VersionLessThan('$(LibraryVersion)', '10.0.11')) " />

@@ -40,6 +40,47 @@
       enabled: false,
     },
     {
+      description: 'Skip routine updates for excluded assets and BuildTasks dependencies',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'src/CommonExcludedAssets.Packages.props',
+        'src/BuildTasksDependencies.Packages.props',
+      ],
+      enabled: false,
+    },
+    {
+      description: 'Keep MSBuild test dependencies for net10.0 on 18.9.x',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'test/Directory.Packages.props',
+      ],
+      matchPackageNames: [
+        'Microsoft.Build',
+        'Microsoft.Build.Utilities.Core',
+      ],
+      matchCurrentValue: '/^18\\.9\\./',
+      allowedVersions: '/^18\\.9\\./',
+    },
+    {
+      description: 'Keep MSBuild test dependencies for net462 on 15.9.x',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'test/Directory.Packages.props',
+      ],
+      matchPackageNames: [
+        'Microsoft.Build',
+        'Microsoft.Build.Utilities.Core',
+      ],
+      matchCurrentValue: '/^15\\.9\\./',
+      allowedVersions: '/^15\\.9\\./',
+    },
+    {
       matchFileNames: [
         'docker/debian.dockerfile',
       ],
@@ -121,6 +162,20 @@
       allowedVersions: '/^10\\./',
     },
     {
+      description: 'Keep the SQLite EF Core provider for net10.0 on 10.x',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'test/test-applications/integrations/TestApplication.EntityFrameworkCore/TestApplication.EntityFrameworkCore.csproj',
+      ],
+      matchPackageNames: [
+        'Microsoft.EntityFrameworkCore.Sqlite',
+      ],
+      matchCurrentValue: '/^10\\./',
+      allowedVersions: '/^10\\./',
+    },
+    {
       description: 'Keep Npgsql for net462 on 8.x',
       matchManagers: [
         'nuget',
@@ -147,6 +202,20 @@
       ],
       matchCurrentValue: '/^8\\./',
       allowedVersions: '/^8\\./',
+    },
+    {
+      description: 'Keep Microsoft.Data.Sqlite for net462 on 10.x',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'test/test-applications/integrations/TestApplication.Sqlite.Microsoft/TestApplication.Sqlite.Microsoft.csproj',
+      ],
+      matchPackageNames: [
+        'Microsoft.Data.Sqlite',
+      ],
+      matchCurrentValue: '/^10\\./',
+      allowedVersions: '/^10\\./',
     },
   ],
   customManagers: [

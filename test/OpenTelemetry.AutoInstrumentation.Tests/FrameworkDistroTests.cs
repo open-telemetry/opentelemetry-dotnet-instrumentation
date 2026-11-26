@@ -46,10 +46,6 @@ public class FrameworkDistroTests
 
         var frameworkDependencies = Generator.EnumerateDependencies(projectPath);
 
-        // We use "15.0" as toolkit version, it should be replaced with "Current"
-        // when Microsoft.Build will be updated.
-        const string toolsVersion = "15.0";
-
         Assert.All(frameworkDependencies, pair =>
         {
             using var collection = new ProjectCollection();
@@ -61,7 +57,7 @@ public class FrameworkDistroTests
                 { "TargetFramework", pair.Key },
                 { "TargetFrameworkIdentifier", NuGetFramework.Parse(pair.Key).Framework }
             };
-            var project = new Project(packagesPath, properties, toolsVersion, collection);
+            var project = new Project(packagesPath, properties, toolsVersion: null, collection);
 
             var versionedDependencies = project.Items
                 .Where(it => it.ItemType == "PackageVersion")
