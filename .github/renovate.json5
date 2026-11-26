@@ -243,7 +243,7 @@
       matchStrings: [
         '# renovate:\\s*datasource=(?<datasource>repology)\\s+depName=(?<depName>[^\\s]+)\\s*\\r?\\n\\s*ARG\\s+[A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)',
       ],
-      packageNameTemplate: 'alpine_3_23/{{{depName}}}',
+      packageNameTemplate: 'alpine_3_24/{{{depName}}}',
       versioningTemplate: 'apk',
     },
     {
