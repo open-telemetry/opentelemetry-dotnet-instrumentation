@@ -131,6 +131,20 @@
       allowedVersions: '/^10\\./',
     },
     {
+      description: 'Keep the SQLite EF Core provider for net10.0 on 10.x',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'test/test-applications/integrations/TestApplication.EntityFrameworkCore/TestApplication.EntityFrameworkCore.csproj',
+      ],
+      matchPackageNames: [
+        'Microsoft.EntityFrameworkCore.Sqlite',
+      ],
+      matchCurrentValue: '/^10\\./',
+      allowedVersions: '/^10\\./',
+    },
+    {
       description: 'Keep Npgsql for net462 on 8.x',
       matchManagers: [
         'nuget',
