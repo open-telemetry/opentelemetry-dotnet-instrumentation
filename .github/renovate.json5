@@ -51,6 +51,36 @@
       enabled: false,
     },
     {
+      description: 'Keep MSBuild test dependencies for net10.0 on 18.9.x',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'test/Directory.Packages.props',
+      ],
+      matchPackageNames: [
+        'Microsoft.Build',
+        'Microsoft.Build.Utilities.Core',
+      ],
+      matchCurrentValue: '/^18\\.9\\./',
+      allowedVersions: '/^18\\.9\\./',
+    },
+    {
+      description: 'Keep MSBuild test dependencies for net462 on 15.9.x',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'test/Directory.Packages.props',
+      ],
+      matchPackageNames: [
+        'Microsoft.Build',
+        'Microsoft.Build.Utilities.Core',
+      ],
+      matchCurrentValue: '/^15\\.9\\./',
+      allowedVersions: '/^15\\.9\\./',
+    },
+    {
       matchFileNames: [
         'docker/debian.dockerfile',
       ],
