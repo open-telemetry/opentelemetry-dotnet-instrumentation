@@ -299,12 +299,12 @@ public static partial class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
                 string.Empty,
 #else
-                "8.2.6",
+                "8.2.7",
 #if NET11_0 || NET10_0
-                "9.2.10",
+                "9.2.13",
 #endif
 #if NET11_0 || NET10_0
-                "10.1.3",
+                "10.1.4",
 #endif
 #if NET11_0 || NET10_0
                 "10.2.10",

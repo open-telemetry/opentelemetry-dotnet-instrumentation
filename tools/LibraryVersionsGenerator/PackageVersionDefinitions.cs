@@ -223,11 +223,11 @@ internal static class PackageVersionDefinitions
             Versions =
             [
                 // new("8.0.0"), - transitive vulnerabilities https://github.com/advisories/GHSA-8g4q-xg66-9fp4, <=8.2.3
-                new("8.2.6"),
+                new("8.2.7"),
                 // new("9.1.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]), // breaking change, new Meter name - transitive vulnerabilities <= 9.2.9
-                new("9.2.10", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"]),
-                // new("10.0.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]), // transitive vulnerabilities <= 10.1.2
-                new("10.1.3", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"]),
+                new("9.2.13", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"]),
+                // new("10.0.0", supportedTargetFrameworks: ["net10.0"], supportedExecutionFrameworks: ["net10.0"]), // transitive vulnerabilities <= 10.1.3
+                new("10.1.4", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"]),
                 new("*", supportedTargetFrameworks: ["net11.0", "net10.0"], supportedExecutionFrameworks: ["net11.0", "net10.0"])
             ]
         },
