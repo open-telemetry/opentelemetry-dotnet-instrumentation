@@ -40,6 +40,16 @@
       enabled: false,
     },
     {
+      description: 'Skip routine updates for excluded asset pins',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'src/CommonExcludedAssets.Packages.props',
+      ],
+      enabled: false,
+    },
+    {
       matchFileNames: [
         'docker/debian.dockerfile',
       ],
