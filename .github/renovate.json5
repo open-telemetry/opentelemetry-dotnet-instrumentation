@@ -172,6 +172,20 @@
       matchCurrentValue: '/^8\\./',
       allowedVersions: '/^8\\./',
     },
+    {
+      description: 'Keep Microsoft.Data.Sqlite for net462 on 10.x',
+      matchManagers: [
+        'nuget',
+      ],
+      matchFileNames: [
+        'test/test-applications/integrations/TestApplication.Sqlite.Microsoft/TestApplication.Sqlite.Microsoft.csproj',
+      ],
+      matchPackageNames: [
+        'Microsoft.Data.Sqlite',
+      ],
+      matchCurrentValue: '/^10\\./',
+      allowedVersions: '/^10\\./',
+    },
   ],
   customManagers: [
     {
