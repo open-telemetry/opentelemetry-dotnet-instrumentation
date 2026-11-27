@@ -82,10 +82,8 @@ internal static class Instrumentation
 #if NETFRAMEWORK
         try
         {
-            // On .NET Framework only, initialize env vars from app.config/web.config
-            // this does not override settings which where already set via env vars.
-            // We are doing so as the OTel .NET SDK only supports the env vars and we want to
-            // be able to set them via app.config/web.config.
+            // Only YAML selection is promoted from appSettings. Managed settings
+            // are read from the current AppDomain's configuration directly.
             EnvironmentInitializer.Initialize(System.Configuration.ConfigurationManager.AppSettings);
         }
         catch (Exception ex)
@@ -140,6 +138,7 @@ internal static class Instrumentation
                 {
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
+                        .UseAppSettingsForSdk()
                         .InvokePluginsBefore(_pluginManager)
                         .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings.Value, _pluginManager)
@@ -162,6 +161,7 @@ internal static class Instrumentation
                 {
                     var builder = Sdk
                         .CreateMeterProviderBuilder()
+                        .UseAppSettingsForSdk()
                         .InvokePluginsBefore(_pluginManager)
                         .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings.Value, _pluginManager)
@@ -259,6 +259,7 @@ internal static class Instrumentation
             // TODO: plugins support
             var loggerProvider = loggerProviderBuilder!
                 .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(ResourceSettings.Value))
+                .UseAppSettingsForSdk()
                 .UseEnvironmentVariables(LazyInstrumentationLoader, LogSettings.Value, _pluginManager!)
                 .Build();
             Logger.Information("OpenTelemetry logger provider initialized.");

@@ -114,6 +114,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   `AmbiguousMatchException` on every `OracleConnection.Open` and
   `OracleConnection.OpenAsync` call, which prevented the integration from
   enabling Database OpenTelemetry Tracing on connection open.
+- On .NET Framework, managed `OTEL_*` settings from `App.config`/`Web.config`
+  are read within each AppDomain instead of being promoted to process
+  environment variables. Environment variables take precedence over local
+  settings, including resource attributes.
 
 ## [v1.19.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.19.1)
 

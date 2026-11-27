@@ -22,13 +22,23 @@ internal class OtlpSettings
         Protocol = GetExporterOtlpProtocol(signalType, configuration);
 
         var priorityVar = OtlpSpecConfigDefinitions.GetHeadersEnvVar(signalType);
-        Headers = configuration.GetString(priorityVar);
+        Headers = configuration.GetString(priorityVar) ?? configuration.GetString(OtlpSpecConfigDefinitions.DefaultHeadersEnvVarName);
 
         priorityVar = OtlpSpecConfigDefinitions.GetTimeoutEnvVar(signalType);
-        TimeoutMilliseconds = configuration.GetInt32(priorityVar);
+        TimeoutMilliseconds = configuration.GetInt32(priorityVar) ?? configuration.GetInt32(OtlpSpecConfigDefinitions.DefaultTimeoutEnvVarName);
 
         priorityVar = OtlpSpecConfigDefinitions.GetEndpointEnvVar(signalType);
         Endpoint = configuration.GetUri(priorityVar);
+        if (Endpoint is null)
+        {
+            var defaultEndpoint = configuration.GetUri(OtlpSpecConfigDefinitions.DefaultEndpointEnvVarName);
+            if (defaultEndpoint is not null)
+            {
+                Endpoint = Protocol == OtlpExportProtocol.HttpProtobuf
+                    ? AppendOtlpHttpSignalPath(defaultEndpoint, signalType)
+                    : defaultEndpoint;
+            }
+        }
     }
 
     public OtlpSettings(OtlpSignalType signalType, OtlpHttpExporterConfig configuration)
@@ -119,6 +129,28 @@ internal class OtlpSettings
             // services after the application IServiceProvider has been disposed.
             options.HttpClientFactory = DefaultHttpClientFactory;
         }
+    }
+
+    private static Uri AppendOtlpHttpSignalPath(Uri endpoint, OtlpSignalType signalType)
+    {
+        var signalPath = signalType switch
+        {
+            OtlpSignalType.Traces => "v1/traces",
+            OtlpSignalType.Metrics => "v1/metrics",
+            OtlpSignalType.Logs => "v1/logs",
+            _ => throw new ArgumentOutOfRangeException(nameof(signalType))
+        };
+
+        // Matches how the SDK handles generic endpoints that already include the signal path.
+        var absoluteUri = endpoint.AbsoluteUri;
+        var hasTrailingSlash = absoluteUri[absoluteUri.Length - 1] == '/';
+        if (absoluteUri.EndsWith(hasTrailingSlash ? $"{signalPath}/" : signalPath, StringComparison.OrdinalIgnoreCase))
+        {
+            return endpoint;
+        }
+
+        var separator = hasTrailingSlash ? string.Empty : "/";
+        return new Uri($"{absoluteUri}{separator}{signalPath}");
     }
 
     private static Uri GetOtlpHttpEndpoint(string? endpoint, OtlpSignalType signalType)
