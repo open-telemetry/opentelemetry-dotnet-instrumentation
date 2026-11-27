@@ -180,18 +180,6 @@ jobs:
           name: bin-windows-2025
           path: bin/tracer-home
 
-      - name: Install GoogleTest on Linux
-        if: ${{ runner.os == 'Linux' }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtest-dev
-
-      - name: Install GoogleTest on macOS
-        if: ${{ runner.os == 'macOS' }}
-        run: |
-          brew install googletest
-          echo "GTest_ROOT=$(brew --prefix googletest)" >> "$GITHUB_ENV"
-
       - name: Run NativeTests
         run: ./build.cmd NativeTests
 
