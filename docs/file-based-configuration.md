@@ -538,6 +538,7 @@ instrumentation/development:
       npgsql:              # Npgsql
       nservicebus:         # NServiceBus
       oraclemda:           # Oracle.ManagedDataAccess
+      process:             # Process environment context propagation
       rabbitmq:            # RabbitMQ.Client
       quartz:              # Quartz
       sqlclient:           # Microsoft.Data.SqlClient & System.Data.SqlClient
@@ -562,6 +563,58 @@ instrumentation/development:
 ```
 
 ## Instrumentation options
+
+For `process`, omitting the entry disables the instrumentation. An empty
+`process:` enables child environment injection and leaves startup context
+extraction disabled (`none`). Omitting or leaving either `context_extraction:` or
+`context_injection:` empty uses the same defaults. To disable injection
+explicitly, set `context_injection.enabled: false`; to disable extraction, set
+`context_extraction.mode: none`. To enable extraction, set
+`context_extraction.mode: parent` or `link`.
+See [Process instrumentation](process-instrumentation.md)
+for supported .NET APIs, runtimes, and behavior. Both directions use the
+propagators selected by the [`propagator` configuration](#propagator-configuration);
+their fields determine the environment variables used for propagation.
+
+### Process context propagation
+
+Enable process context propagation and register an application's `ActivitySource`
+with the tracer provider:
+
+``` yaml
+file_format: "1.0"
+tracer_provider:
+  processors:
+    - simple:
+        exporter:
+          console:
+propagator:
+  composite:
+    tracecontext:
+    baggage:
+instrumentation/development:
+  dotnet:
+    traces:
+      process:
+        context_extraction:
+          # Explicitly enable extraction. The instrumentation default is none.
+          mode: ${OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_EXTRACTION_MODE:-parent}
+        context_injection:
+          # Independent of extraction. Default is true.
+          enabled: ${OTEL_DOTNET_AUTO_TRACES_PROCESS_INSTRUMENTATION_CONTEXT_INJECTION_ENABLED:-true}
+      additional_sources:
+        - MyCommand
+```
+
+With this configuration, `new ActivitySource("MyCommand").StartActivity("job")`
+receives the incoming process context when no ambient or supplied parent exists.
+No `no_code.targets` configuration is required. For applications that need spans
+created without code changes,
+[configuration based instrumentation](nocode-instrumentation.md) remains
+available independently. See [Process instrumentation](process-instrumentation.md)
+for parent precedence, sampling, supported APIs, and limitations.
+
+### Other instrumentation options
 
 ``` yaml
 instrumentation/development:

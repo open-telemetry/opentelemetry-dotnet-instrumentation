@@ -6,6 +6,7 @@ using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.NoCode;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.Process;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.OpAmp;
@@ -187,6 +188,11 @@ internal static class Instrumentation
 
         if (GeneralSettings.Value.ProfilerEnabled)
         {
+            if (TracerSettings.Value.TracesEnabled && TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.Process))
+            {
+                ProcessInstrumentation.Initialize(TracerSettings.Value.InstrumentationOptions);
+            }
+
             RegisterSharedBytecodeInstrumentations(InstrumentationDefinitions.GetSharedDefinitions());
 
             if (NoCodeSettings.Value.Enabled)
@@ -209,6 +215,11 @@ internal static class Instrumentation
         }
         else
         {
+            if (TracerSettings.Value.TracesEnabled && TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.Process))
+            {
+                Logger.Information("Process context propagation requires the CLR profiler and is disabled.");
+            }
+
             Logger.Debug("Skipping CLR Profiler initialization. {0} environment variable was not set to '1'.", ConfigurationKeys.ProfilingEnabled);
         }
 
@@ -432,6 +443,8 @@ internal static class Instrumentation
                 case TracerInstrumentation.AdoNet:
                     break;
                 case TracerInstrumentation.Sqlite:
+                    break;
+                case TracerInstrumentation.Process:
                     break;
                 default:
                     Logger.Warning($"Configured trace instrumentation type is not supported: {instrumentation}");

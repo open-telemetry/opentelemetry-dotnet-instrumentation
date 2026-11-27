@@ -147,6 +147,12 @@ internal class DotNetTraces
     public NpgsqlConfiguration? Npgsql { get; set; }
 
     /// <summary>
+    /// Gets or sets the process environment context propagation configuration.
+    /// </summary>
+    [YamlMember(Alias = "process")]
+    public ProcessConfiguration? Process { get; set; }
+
+    /// <summary>
     /// Gets or sets the NServiceBus traces instrumentation configuration.
     /// </summary>
     [YamlMember(Alias = "nservicebus")]

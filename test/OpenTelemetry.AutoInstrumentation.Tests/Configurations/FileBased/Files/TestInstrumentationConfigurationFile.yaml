@@ -21,9 +21,13 @@ instrumentation/development:
         capture_response_metadata: "X-Key,X-Custom-Header,X-Header-Example"
       npgsql:
         context_propagation: true
+      process:
+        context_extraction:
+          mode: link
+        context_injection:
+          enabled: false
       sqlclient:
         netfx_ilrewrite_enabled: true
     logs:
       log4net:
         bridge_enabled: true
-

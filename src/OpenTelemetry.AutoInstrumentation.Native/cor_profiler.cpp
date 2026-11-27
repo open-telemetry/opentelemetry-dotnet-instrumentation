@@ -1475,6 +1475,22 @@ HRESULT STDMETHODCALLTYPE CorProfiler::GetAssemblyReferences(const WCHAR*       
     {
         if (StartsWith(assembly_name, skip_assembly_pattern))
         {
+            bool is_included = false;
+            for (auto&& include_assembly : include_assemblies)
+            {
+                if (assembly_name == include_assembly)
+                {
+                    is_included = true;
+                    break;
+                }
+            }
+
+            if (is_included)
+            {
+                // Included framework assemblies need the managed profiler reference on .NET Framework too.
+                break;
+            }
+
             Logger::Debug("GetAssemblyReferences skipping module by pattern: Name=", assembly_name,
                           " Path=", wszAssemblyPath);
             return S_OK;
