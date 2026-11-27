@@ -275,7 +275,7 @@ partial class Build
     Target CompileNativeTests => _ => _
         .Description("Compiles the native loader unit tests")
         .DependsOn(CompileNativeTestsWindows)
-        .DependsOn(CompileNativeTestsLinux);
+        .DependsOn(CompileNativeTestsUnix);
 
     Target CompileExamples => _ => _
         .Description("Compiles all the example projects")
@@ -510,7 +510,7 @@ partial class Build
     Target RunNativeTests => _ => _
         .Unlisted()
         .DependsOn(RunNativeTestsWindows)
-        .DependsOn(RunNativeTestsLinux);
+        .DependsOn(RunNativeTestsUnix);
 
     Target RunManagedTests => _ => _
         .Unlisted()

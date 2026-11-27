@@ -52,7 +52,7 @@ public:
             return E_POINTER;
         }
         *result = nullptr;
-        if (iid != IID_IUnknown && iid != IID_IMetaDataAssemblyImport)
+        if (iid != __uuidof(IUnknown) && iid != IID_IMetaDataAssemblyImport)
         {
             return E_NOINTERFACE;
         }

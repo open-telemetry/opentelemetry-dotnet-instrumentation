@@ -39,16 +39,6 @@ partial class Build
                 workingDirectory: buildDirectory);
         });
 
-    Target CompileNativeTestsLinux => _ => _
-        .Unlisted()
-        .After(CompileNativeSrc)
-        .OnlyWhenStatic(() => IsLinux)
-        .Executes(() =>
-        {
-            // TODO: Compile Linux native tests
-            Log.Error("Linux native tests are currently not supported.");
-        });
-
     Target PublishNativeProfilerLinux => _ => _
         .Unlisted()
         .OnlyWhenStatic(() => IsLinux)
@@ -73,17 +63,5 @@ partial class Build
 
             Log.Information($"Copying '{sourceDebug}' to '{dest}'");
             sourceDebug.CopyToDirectory(dest, ExistsPolicy.FileOverwrite);
-        });
-
-    Target RunNativeTestsLinux => _ => _
-        .Unlisted()
-        .After(CompileNativeSrcLinux)
-        .After(CompileNativeTestsLinux)
-        .After(PublishManagedProfiler)
-        .OnlyWhenStatic(() => IsLinux)
-        .Executes(() =>
-        {
-            // TODO: Run Linux native tests
-            Log.Error("Linux native tests are currently not supported.");
         });
 }

@@ -12,7 +12,10 @@
 
 #include <corhlpr.h>
 #include <corprof.h>
+
+#ifdef _WIN32
 #include <metahost.h>
 #pragma comment(lib, "mscoree.lib")
+#endif
 
 #endif

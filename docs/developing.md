@@ -188,6 +188,16 @@ Formatting (Bash):
 
 ## Manual testing
 
+### Native unit tests
+
+On Linux and macOS, install GoogleTest with its CMake package
+(`libgtest-dev` on Ubuntu or `googletest` from Homebrew).
+The startup hook tests use the assembly built under `bin/tracer-home/net`.
+
+```sh
+./build.sh BuildTracer NativeTests
+```
+
 ### Test environment
 
 The [`dev/docker-compose.yaml`](../dev/docker-compose.yaml) contains
