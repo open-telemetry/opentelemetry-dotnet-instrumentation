@@ -31,6 +31,7 @@ inetsrv
 JIT
 LASTEXITCODE
 LINQ
+libgtest
 libstdc
 longdate
 MASSTRANSIT

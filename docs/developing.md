@@ -188,6 +188,17 @@ Formatting (Bash):
 
 ## Manual testing
 
+### Native unit tests
+
+On Linux and macOS, native unit tests require CMake 3.16 or later.
+CMake fetches the pinned GoogleTest revision when configuring a fresh
+native test build.
+The startup hook tests use the assembly built under `bin/tracer-home/net`.
+
+```sh
+./build.sh BuildTracer NativeTests
+```
+
 ### Test environment
 
 The [`dev/docker-compose.yaml`](../dev/docker-compose.yaml) contains

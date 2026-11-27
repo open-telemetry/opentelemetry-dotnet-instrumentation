@@ -6,10 +6,11 @@
 
 using namespace trace;
 
-const auto base_path = std::filesystem::path(__FILE__).parent_path();
-const auto home_path = std::filesystem::absolute(base_path / ".." / ".." / "bin" / "tracer-home").wstring();
+const auto base_path      = std::filesystem::path(__FILE__).parent_path();
+const auto home_directory = std::filesystem::absolute(base_path / ".." / ".." / "bin" / "tracer-home");
+const auto home_path      = PATH_TO_WSTRING(home_directory);
 const auto otel_startup_hook_path =
-    (std::filesystem::path(home_path) / "net" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll").wstring();
+    PATH_TO_WSTRING(home_directory / "net" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll");
 
 TEST(StartupHookTest, StartupHookIsValid)
 {
@@ -40,8 +41,7 @@ TEST(StartupHookTest, StartupHookIsInvalidWhenNoStartupHooksDefined)
 
 TEST(StartupHookTest, StartupHookIsInvalidWhenStartupHookDoesNotContainOpenTelemetryHook)
 {
-    const auto startup_hooks =
-        std::vector<WSTRING>{(std::filesystem::path(home_path) / "net" / "StartupHook.dll").wstring()};
+    const auto startup_hooks = std::vector<WSTRING>{PATH_TO_WSTRING(home_directory / "net" / "StartupHook.dll")};
 
     const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
 
@@ -51,7 +51,7 @@ TEST(StartupHookTest, StartupHookIsInvalidWhenStartupHookDoesNotContainOpenTelem
 TEST(StartupHookTest, StartupHookIsInvalidWhenNotInTheCorrectLocation)
 {
     const auto startup_hooks = std::vector<WSTRING>{
-        (base_path / "other_folder" / "net" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll").wstring()};
+        PATH_TO_WSTRING(base_path / "other_folder" / "net" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll")};
 
     const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
 
@@ -61,9 +61,9 @@ TEST(StartupHookTest, StartupHookIsInvalidWhenNotInTheCorrectLocation)
 TEST(StartupHookTest, StartupHookIsValidWhenMultipleStartupHooksDefined)
 {
     const auto startup_hooks = std::vector<WSTRING>{
-        (base_path / "folder1" / "StartupHook.dll").wstring(),
+        PATH_TO_WSTRING(base_path / "folder1" / "StartupHook.dll"),
         otel_startup_hook_path,
-        (base_path / "folder2" / "StartupHook.dll").wstring(),
+        PATH_TO_WSTRING(base_path / "folder2" / "StartupHook.dll"),
     };
 
     const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
@@ -103,26 +103,23 @@ TEST(StartupHookTest, StartupHookIsValidAltSepOnStartupHooks)
 TEST(StartupHookTest, GetStartupHookPathReturnsCorrectPath)
 {
     // Test for ZIP layout
-    auto profiler_path =
-        (std::filesystem::path(home_path) / "win-x64" / "OpenTelemetry.AutoInstrumentation.Native.dll").wstring();
+    auto profiler_path = PATH_TO_WSTRING(home_directory / "win-x64" / "OpenTelemetry.AutoInstrumentation.Native.dll");
     auto startup_hook_path = GetStartupHookPath(profiler_path, EmptyWStr);
     ASSERT_EQ(startup_hook_path, otel_startup_hook_path);
 
     // Test for NuGet platform dependent layout
-    profiler_path =
-        (std::filesystem::path(home_path) / "net" / "OpenTelemetry.AutoInstrumentation.Native.dll").wstring();
+    profiler_path     = PATH_TO_WSTRING(home_directory / "net" / "OpenTelemetry.AutoInstrumentation.Native.dll");
     startup_hook_path = GetStartupHookPath(profiler_path, EmptyWStr);
     ASSERT_EQ(startup_hook_path, otel_startup_hook_path);
 
     // Test for NuGet platform independent layout
-    profiler_path = (std::filesystem::path(home_path) / "net" / "runtimes" / "win-x64" /
-                     "OpenTelemetry.AutoInstrumentation.Native.dll")
-                        .wstring();
+    profiler_path     = PATH_TO_WSTRING(home_directory / "net" / "runtimes" / "win-x64" /
+                                        "OpenTelemetry.AutoInstrumentation.Native.dll");
     startup_hook_path = GetStartupHookPath(profiler_path, EmptyWStr);
     ASSERT_EQ(startup_hook_path, otel_startup_hook_path);
 
     // Test for OTEL_HOME set
-    profiler_path     = (std::filesystem::path(base_path) / "OpenTelemetry.AutoInstrumentation.Native.dll").wstring();
+    profiler_path     = PATH_TO_WSTRING(base_path / "OpenTelemetry.AutoInstrumentation.Native.dll");
     startup_hook_path = GetStartupHookPath(profiler_path, home_path);
     ASSERT_EQ(startup_hook_path, otel_startup_hook_path);
 }
@@ -131,7 +128,7 @@ TEST(StartupHookTest, GetStartupHookPathReturnsEmptyWhenNotFound)
 {
     // Using "home_path" here would find the DLL as we traverse up to the parent
     // directory, so use a completely unrelated path, e.g. base_path
-    auto profiler_path = (std::filesystem::path(base_path) / "OpenTelemetry.AutoInstrumentation.Native.dll").wstring();
+    auto profiler_path     = PATH_TO_WSTRING(base_path / "OpenTelemetry.AutoInstrumentation.Native.dll");
     auto startup_hook_path = GetStartupHookPath(profiler_path, EmptyWStr);
     ASSERT_EQ(startup_hook_path, EmptyWStr);
 }

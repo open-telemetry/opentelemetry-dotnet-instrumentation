@@ -355,6 +355,7 @@
     <ClCompile Include="class_factory.cpp" />
     <ClCompile Include="clr_helpers.cpp" />
     <ClCompile Include="clr_runtime_capture.cpp" />
+    <ClCompile Include="com_interface_ids.cpp" />
     <ClCompile Include="configuration.cpp" />
     <ClCompile Include="continuous_profiler_clr_helpers.cpp" />
     <ClCompile Include="continuous_profiler.cpp" />

@@ -158,7 +158,8 @@ public:
             riid == __uuidof(ICorProfilerCallback8) || riid == __uuidof(ICorProfilerCallback7) ||
             riid == __uuidof(ICorProfilerCallback6) || riid == __uuidof(ICorProfilerCallback5) ||
             riid == __uuidof(ICorProfilerCallback4) || riid == __uuidof(ICorProfilerCallback3) ||
-            riid == __uuidof(ICorProfilerCallback2) || riid == __uuidof(ICorProfilerCallback) || riid == IID_IUnknown)
+            riid == __uuidof(ICorProfilerCallback2) || riid == __uuidof(ICorProfilerCallback) ||
+            riid == __uuidof(IUnknown))
         {
             *ppvObject = this;
             this->AddRef();

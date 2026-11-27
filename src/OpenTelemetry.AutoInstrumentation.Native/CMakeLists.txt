@@ -235,6 +235,7 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         class_factory.cpp
         clr_helpers.cpp
         clr_runtime_capture.cpp
+        com_interface_ids.cpp
         configuration.cpp
         continuous_profiler_clr_helpers.cpp
         continuous_profiler.cpp
@@ -336,4 +337,9 @@ target_link_libraries(${TARGET_NAME} "OpenTelemetry.AutoInstrumentation.Native.s
 
 if (ISLINUX)
     target_link_libraries(${TARGET_NAME} -Wl,--build-id)
+endif()
+
+option(OTEL_BUILD_NATIVE_TESTS "Build the native unit tests" OFF)
+if (OTEL_BUILD_NATIVE_TESTS)
+    add_subdirectory(../../test/OpenTelemetry.AutoInstrumentation.Native.Tests native-tests)
 endif()
