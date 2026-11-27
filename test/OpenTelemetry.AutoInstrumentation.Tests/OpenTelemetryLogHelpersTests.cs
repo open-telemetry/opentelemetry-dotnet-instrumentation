@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 using OpenTelemetry.Logs;
-using Log4NetLogHelpers = OpenTelemetry.AutoInstrumentation.Instrumentations.Log4Net.Bridge.OpenTelemetryLogHelpers;
+using Log4NetLogHelpers = OpenTelemetry.AutoInstrumentation.Instrumentations.LogBridge.OpenTelemetryLogHelpers;
 using NLogLogHelpers = OpenTelemetry.AutoInstrumentation.Instrumentations.NLog.Bridge.OpenTelemetryLogHelpers;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;

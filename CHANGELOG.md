@@ -10,6 +10,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Added trace context propagation support for Npgsql 11.
+- Experimental [`Serilog`](https://www.nuget.org/packages/Serilog/) logs bridge
+  for versions `2.*` to `4.*`. To enable it, set
+  `OTEL_DOTNET_AUTO_LOGS_ENABLE_SERILOG_BRIDGE` to `true`.
 
 ### Changed
 

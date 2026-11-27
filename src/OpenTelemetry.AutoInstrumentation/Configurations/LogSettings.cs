@@ -40,6 +40,11 @@ internal class LogSettings : Settings
     public bool EnableNLogBridge { get; private set; }
 
     /// <summary>
+    /// Gets a value indicating whether the experimental Serilog bridge is enabled.
+    /// </summary>
+    public bool EnableSerilogBridge { get; private set; }
+
+    /// <summary>
     /// Gets the list of enabled instrumentations.
     /// </summary>
     public IReadOnlyList<LogInstrumentation> EnabledInstrumentations { get; private set; } = [];
@@ -66,6 +71,7 @@ internal class LogSettings : Settings
         IncludeFormattedMessage = configuration.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
         EnableLog4NetBridge = configuration.GetBool(ConfigurationKeys.Logs.EnableLog4NetBridge) ?? false;
         EnableNLogBridge = configuration.GetBool(ConfigurationKeys.Logs.EnableNLogBridge) ?? false;
+        EnableSerilogBridge = configuration.GetBool(ConfigurationKeys.Logs.EnableSerilogBridge) ?? false;
 
         var instrumentationEnabledByDefault =
             configuration.GetBool(ConfigurationKeys.Logs.LogsInstrumentationEnabled) ??
@@ -95,6 +101,11 @@ internal class LogSettings : Settings
         if (EnabledInstrumentations.Contains(LogInstrumentation.NLog))
         {
             EnableNLogBridge = logs?.NLog?.BridgeEnabled ?? false;
+        }
+
+        if (EnabledInstrumentations.Contains(LogInstrumentation.Serilog))
+        {
+            EnableSerilogBridge = logs?.Serilog?.BridgeEnabled ?? false;
         }
     }
 

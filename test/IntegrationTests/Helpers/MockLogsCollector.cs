@@ -3,6 +3,7 @@
 
 using System.Collections.Concurrent;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text;
 using OpenTelemetry.Proto.Collector.Logs.V1;
 using OpenTelemetry.Proto.Logs.V1;
@@ -20,6 +21,7 @@ internal sealed class MockLogsCollector : IDisposable
     private readonly TestHttpServer _listener;
     private readonly BlockingCollection<LogRecord> _logs = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
+    private readonly ConditionalWeakTable<LogRecord, string> _scopeNames = new();
     private int _logsReceived;
 
     private CollectedExpectation? _collectedExpectation;
@@ -42,6 +44,11 @@ internal sealed class MockLogsCollector : IDisposable
     public int Port { get => _listener.Port; }
 
     public OtlpResourceExpector ResourceExpector { get; } = new();
+
+    public string? GetScopeName(LogRecord logRecord)
+    {
+        return _scopeNames.TryGetValue(logRecord, out var scopeName) ? scopeName : null;
+    }
 
     public void Dispose()
     {
@@ -215,6 +222,7 @@ internal sealed class MockLogsCollector : IDisposable
                 foreach (var logRecord in scopeLogs.LogRecords ?? Enumerable.Empty<LogRecord>())
                 {
                     Interlocked.Increment(ref _logsReceived);
+                    _scopeNames.Add(logRecord, scopeLogs.Scope?.Name ?? string.Empty);
                     _logs.Add(logRecord);
                 }
             }
