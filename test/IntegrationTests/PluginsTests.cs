@@ -29,6 +29,22 @@ public class PluginsTests : TestHelper
         Assert.Contains(PluginInitDonePattern, standardOutput, StringComparison.Ordinal);
     }
 
+#if NETFRAMEWORK
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void RegistersBytecodeInstrumentationsAfterProfilerEnvironmentIsCleared()
+    {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.ProfilerEnvironmentPlugin, TestApplication.Plugins");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGGER", "console");
+        SetEnvironmentVariable("OTEL_LOG_LEVEL", "info");
+
+        var (standardOutput, _, _) = RunTestApplication();
+
+        Assert.Contains("COR_ENABLE_PROFILING cleared after native bootstrap.", standardOutput, StringComparison.Ordinal);
+        Assert.Matches(@"The profiler has been initialized with [1-9]\d* shared definitions", standardOutput);
+    }
+#endif
+
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void InvalidPluginDoesNotCrashApplicationWhenFailFastDisabled()

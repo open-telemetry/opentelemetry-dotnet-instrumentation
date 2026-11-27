@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
 using TestApplication.Shared;
+using TestApplication.StartupHookIsolation;
 
 // Args: [--exit-code <int>] [--throw --exception-type <type> --exception-message <message>]
 // Modes:
@@ -25,8 +26,10 @@ var exceptionMessage = ArgumentHelper.GetArgument(args, "--exception-message", s
 
 // 1. Sends a span with the name of the AssemblyLoadContext where the executing assembly is loaded
 var currentAlc = AssemblyLoadContext.GetLoadContext(Assembly.GetExecutingAssembly())!;
+Console.WriteLine($"[ALC] {currentAlc.Name}");
 using var activitySource = new ActivitySource("StartupHookIsolation.ActivitySource");
 using var activity = activitySource.StartActivity(currentAlc.Name!);
+BytecodeProbe.Run();
 
 // 2. Checks that the Main entrypoint is not running twice by using a process-wide environment variable as a marker
 const string EnvVarName = "TEST_ENTRYPOINT_CALLED";

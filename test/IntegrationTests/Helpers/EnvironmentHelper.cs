@@ -131,7 +131,8 @@ internal sealed class EnvironmentHelper
             !CustomEnvironmentVariables.ContainsKey("DOTNET_SHARED_STORE") &&
             environmentVariables.ContainsKey("DOTNET_STARTUP_HOOKS") &&
             !string.IsNullOrEmpty(environmentVariables["DOTNET_STARTUP_HOOKS"]) &&
-            (!environmentVariables.ContainsKey("CORECLR_ENABLE_PROFILING") || environmentVariables["CORECLR_ENABLE_PROFILING"] != "1"))
+            (!environmentVariables.ContainsKey("CORECLR_ENABLE_PROFILING") || environmentVariables["CORECLR_ENABLE_PROFILING"] != "1" ||
+             !string.Equals(environmentVariables["CORECLR_PROFILER"], EnvironmentTools.ProfilerClsId, StringComparison.OrdinalIgnoreCase)))
         {
             var generatedDirectory = AdditionalDepsHelper.OutputDirectory;
             environmentVariables["DOTNET_ADDITIONAL_DEPS"] = Path.Combine(generatedDirectory, "AdditionalDeps");

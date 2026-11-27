@@ -87,9 +87,13 @@ public static class ProjectsHelper
         return solution.GetProjectByName(Projects.Mocks.AutoInstrumentationMock);
     }
 
-    public static Project GetContinuousProfilerNativeDep(this Solution solution)
+    public static IEnumerable<Project> GetNativeDependenciesForManagedTests(this Solution solution)
     {
-        return solution.GetProjectByName(Projects.Tests.Applications.ContinuousProfilerNativeDep);
+        return
+        [
+            solution.GetProjectByName(Projects.Tests.Applications.ContinuousProfilerNativeDep),
+            solution.GetProjectByName(Projects.Tests.Applications.ProfilerProxyNativeDep)
+        ];
     }
 
     public static IEnumerable<Project> GetNetFrameworkOnlyTestApplications(this Solution solution)
