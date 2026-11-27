@@ -3,6 +3,9 @@
 
 find_package(GTest CONFIG REQUIRED)
 
+# clr_helper_test.cpp and metadata_builder_test.cpp require Windows CLR hosting APIs.
+# continuous_profiler_reader_mutex_test.cpp and util_test.cpp use Win32 APIs.
+# Add new portable tests here and to OpenTelemetry.AutoInstrumentation.Native.Tests.vcxproj.
 add_executable(OpenTelemetry.AutoInstrumentation.Native.Tests
     assembly_version_redirection_test.cpp
     continuous_profiler_batch_test.cpp
