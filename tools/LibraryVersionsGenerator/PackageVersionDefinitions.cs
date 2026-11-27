@@ -143,7 +143,8 @@ internal static class PackageVersionDefinitions
                 // new("3.1.7", supportedTargetFrameworks: new[] { "net10.0" }, supportedExecutionFrameworks: new[] { "net10.0" }), // 3.1.* is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243, transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
                 // new("4.0.6"), transitive vulnerabilities https://github.com/advisories/GHSA-rxg9-xrhp-64gj
                 new("5.2.3"),
-                new("6.1.5"),
+                new("6.1.8"),
+                new("7.1.2"),
                 new("*")
             ]
         },
