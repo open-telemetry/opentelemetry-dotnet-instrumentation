@@ -28,7 +28,7 @@
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="18.12.2" Condition=" '$(TargetFramework)' != 'net10.0' and '$(TargetFramework)' != 'net462' " />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="18.9.6" Condition=" '$(TargetFramework)' == 'net10.0' " />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="15.9.30" Condition=" '$(TargetFramework)' == 'net462' " />
-    <PackageVersion Include="Microsoft.Data.SqlClient" Version="7.1.2" />
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="11.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="11.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="11.0.0" />
